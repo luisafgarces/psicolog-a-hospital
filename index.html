@@ -1689,7 +1689,8 @@ window.renderIC=()=>{
   cont.innerHTML=interconsultas.map(ic=>{
     const nombre=ic.pacienteNombre||'Sin nombre';
     const titulo=ic.especialidad?`${ic.especialidad} — ${nombre}`:(ic.hab?`Hab. ${ic.hab} — ${nombre}`:nombre);
-    const desc=ic.motivo?(ic.motivo.slice(0,100)+(ic.motivo.length>100?'…':'')):(ic.dx||'—');
+    const rawDesc=ic.nota||ic.obj||ic.trat||ic.motivo||ic.dx||'—';
+    const desc=rawDesc.slice(0,120)+(rawDesc.length>120?'…':'');
     const prioridad=ic.prioridad||'normal';
     const estado=ic.estado||'pendiente';
     const estadoBadgeIC=e=>e==='subida'?'<span class="badge badge-blue">📋 Subida</span>':e==='respondida'?'<span class="badge badge-green">✅ Respondida</span>':'<span class="badge badge-yellow">⏳ Pendiente</span>';
@@ -1719,6 +1720,11 @@ window.guardarICFirebase=async()=>{
   try{
     if(icCurrentMode==='nueva')notaTexto=generarNotaIcNueva()||'';
     else if(icCurrentMode==='seg')notaTexto=generarNotaIcSeg()||'';
+    else if(icCurrentMode==='esp'){
+      generarNotaIcEsp();
+      const el=document.getElementById('ic-esp-text');
+      notaTexto=(el?.textContent||'').trim();
+    }
   }catch(e){}
   setSyncStatus('syncing');
   let sub='',obj='',resp='',trat='';
@@ -1728,6 +1734,8 @@ window.guardarICFirebase=async()=>{
       sub=gs('ic-out-sub');obj=gs('ic-out-obj');resp=gs('ic-out-resp');trat=gs('ic-out-trat');
     } else if(icCurrentMode==='seg'){
       const el=document.getElementById('ic-out-seg-texto');if(el){const v=el.textContent||'';obj=v.startsWith('Genera')?'':v;}
+    } else if(icCurrentMode==='esp'){
+      trat=notaTexto; // guardar también en trat para compatibilidad
     }
   }catch(ex){}
   try{
@@ -2281,17 +2289,20 @@ window.verHistorialIC=(pacId,pacNombre)=>{
 };
 window.mhicCerrar=()=>{document.getElementById('modal-historial-ic').style.display='none';};
 window.mhicNuevaNota=()=>{
-  window._hPacId=_hPacId;window._hPacNombre=_hPacNombre;
-  document.getElementById('mne-title').textContent='Nuevo seguimiento';
-  document.getElementById('mne-fecha').value=new Date().toISOString().split('T')[0];
-  document.getElementById('mne-tipo').value='Seguimiento';
-  document.getElementById('mne-riesgo').value='';
-  document.getElementById('mne-estado').value='respondida';
-  ['mne-sub','mne-obj','mne-resp','mne-trat','mne-nota'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('mne-del-btn').style.display='none';
-  window._mneId=null;window._mneCol='interconsultas';
-  window._mneOnSave=()=>setTimeout(mhicRender,500);
-  document.getElementById('modal-nota-edit').style.display='flex';
+  const pacId=_hPacId||window._hPacId;
+  if(!pacId)return;
+  // Cerrar modal historial
+  document.getElementById('modal-historial-ic').style.display='none';
+  // Ir al formulario IC con el paciente ya seleccionado en modo Seguimiento
+  goTo('interconsultas');
+  setTimeout(()=>{
+    const sel=document.getElementById('ic-paciente-sel');
+    if(sel){sel.value=pacId;selectICPaciente(pacId);}
+    setICMode('seg');
+    const form=document.getElementById('ic-form-view');
+    if(form)form.scrollIntoView({behavior:'smooth',block:'start'});
+    toast('📝 Formulario listo — Modo Seguimiento');
+  },200);
 };
 
 function mhicRender(){
@@ -2465,11 +2476,22 @@ window.hpacRenderNotas=()=>{
       var respondidaBtn=(e.estado||'respondida')==='pendiente'
         ?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacResponder('+ni+')">Respondida</button>':'';
       var cv=[];
-      if(e.sub)cv.push({label:'Analisis Subjetivo',text:e.sub});
-      if(e.obj)cv.push({label:'Analisis Objetivo',text:e.obj});
-      if(e.resp)cv.push({label:'Respuesta / Impresion clinica',text:e.resp});
-      if(e.trat)cv.push({label:'Tratamiento / Plan',text:e.trat});
-      if(e.nota)cv.push({label:cv.length?'Notas adicionales':'Nota clinica',text:e.nota});
+      if(modo==='Seguimiento'){
+        // Seguimiento: una sola nota en párrafo — obj tiene el texto generado, nota también
+        var segTexto=e.obj||e.nota||e.sub||'';
+        if(segTexto)cv.push({label:'Nota de seguimiento',text:segTexto});
+      } else if(modo==='Nota especial'||modo==='Anamnesis'){
+        // Nota especial: texto principal en nota o trat
+        var espTexto=e.nota||e.trat||e.obj||'';
+        if(espTexto)cv.push({label:'Nota',text:espTexto});
+      } else {
+        // IC Nueva: secciones separadas
+        if(e.sub)cv.push({label:'Análisis Subjetivo',text:e.sub});
+        if(e.obj)cv.push({label:'Análisis Objetivo',text:e.obj});
+        if(e.resp)cv.push({label:'Respuesta / Impresión clínica',text:e.resp});
+        if(e.trat)cv.push({label:'Tratamiento / Plan',text:e.trat});
+        if(e.nota&&!e.sub&&!e.obj&&!e.resp&&!e.trat)cv.push({label:'Nota clínica',text:e.nota});
+      }
       var camposHtml='';
       if(cv.length){
         for(var j=0;j<cv.length;j++){
@@ -2535,19 +2557,20 @@ window.hpacRenderNotas=()=>{
 
 window.hpacNuevaNota=()=>{
   if(!_hpacPacId)return;
-  window._hPacId=_hpacPacId;
-  const p=(window.pacientes||[]).find(x=>x.id===_hpacPacId);
-  window._hPacNombre=p?p.nombre:'';
-  document.getElementById('mne-title').textContent='Nuevo seguimiento';
-  document.getElementById('mne-fecha').value=new Date().toISOString().split('T')[0];
-  document.getElementById('mne-tipo').value='Seguimiento';
-  document.getElementById('mne-riesgo').value='';
-  document.getElementById('mne-estado').value='respondida';
-  ['mne-sub','mne-obj','mne-resp','mne-trat','mne-nota'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('mne-del-btn').style.display='none';
-  window._mneId=null;window._mneCol='interconsultas';
-  window._mneOnSave=()=>setTimeout(hpacRenderNotas,500);
-  document.getElementById('modal-nota-edit').style.display='flex';
+  // Cerrar modal historial si está abierto
+  const mh=document.getElementById('modal-historial-ic');
+  if(mh)mh.style.display='none';
+  // Ir al formulario IC con el paciente ya seleccionado en modo Seguimiento
+  goTo('interconsultas');
+  setTimeout(()=>{
+    const sel=document.getElementById('ic-paciente-sel');
+    if(sel){sel.value=_hpacPacId;selectICPaciente(_hpacPacId);}
+    setICMode('seg');
+    // Scroll al top del formulario
+    const form=document.getElementById('ic-form-view');
+    if(form)form.scrollIntoView({behavior:'smooth',block:'start'});
+    toast('📝 Formulario listo — Modo Seguimiento');
+  },200);
 };
 
 window.hpacEditar=(ni)=>{
