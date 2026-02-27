@@ -21,12 +21,30 @@
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
 
 /* SIDEBAR */
-.sidebar{width:240px;min-height:100vh;background:var(--accent);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;overflow-y:auto;transition:transform 0.25s}
+.sidebar{width:240px;min-height:100vh;background:var(--accent);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;overflow-y:auto;-webkit-overflow-scrolling:touch;transition:transform 0.25s;padding-bottom:40px}
 .sidebar.collapsed{transform:translateX(-240px)}
 .sidebar-logo{padding:22px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.1);flex-shrink:0}
 .sidebar-logo h1{font-family:'DM Serif Display',serif;font-size:1.2rem;color:#fff;line-height:1.2}
 .sidebar-logo span{font-size:0.7rem;color:rgba(255,255,255,0.5);letter-spacing:0.08em;text-transform:uppercase}
 .sidebar-nav{padding:10px 10px;flex:1}
+/* PATIENT INFO SHEET */
+.pac-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:flex-end;justify-content:center}
+.pac-sheet-overlay.open{display:flex}
+.pac-sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 32px 0;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.pac-sheet-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:12px auto 0}
+.pac-sheet-head{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.pac-sheet-nombre{font-size:1.1rem;font-weight:700;color:var(--text);line-height:1.2}
+.pac-sheet-sub{font-size:0.75rem;color:var(--text3);margin-top:3px}
+.pac-sheet-close{background:var(--surface2);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text2);font-size:1.2rem;line-height:1}
+.pac-sheet-body{padding:16px 20px}
+.pac-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.pac-info-item{background:var(--surface2);border-radius:10px;padding:10px 12px}
+.pac-info-label{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:3px}
+.pac-info-value{font-size:0.88rem;font-weight:600;color:var(--text)}
+.pac-info-full{grid-column:1/-1}
+.pac-sheet-actions{display:flex;gap:8px;flex-wrap:wrap;padding:0 20px;margin-top:4px}
+.pac-sesiones-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border-radius:20px;padding:5px 14px;font-size:0.8rem;font-weight:700;margin-bottom:12px}
 .nav-section{font-size:0.65rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.1em;padding:12px 8px 4px;font-weight:600}
 .nav-item{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:7px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:0.82rem;font-weight:500;transition:all 0.15s;margin-bottom:1px}
 .nav-item:hover{background:rgba(255,255,255,0.1);color:#fff}
@@ -324,6 +342,7 @@ input.toggle-cb{display:none}
     <div class="nav-item" onclick="goTo('pacientes')"><span class="icon">👥</span>Pacientes<span class="nav-badge" id="badge-pac">0</span></div>
     <div class="nav-item" onclick="goTo('consulta-externa')"><span class="icon">🚶</span>Consulta Externa<span class="nav-badge" id="badge-ce">0</span></div>
     <div class="nav-item" onclick="goTo('interconsultas')"><span class="icon">💬</span>Interconsultas<span class="nav-badge" id="badge-ic">0</span></div>
+    <div class="nav-item" onclick="goTo('historial-ic')" style="padding-left:28px;font-size:0.78rem"><span class="icon">📋</span>Historial IC</div>
     <div class="nav-item" onclick="goTo('anamnesis')"><span class="icon">📋</span>Anamnesis</div>
     <div class="nav-section">Tests Cognitivos</div>
     <div class="nav-item" onclick="goTo('tests');showTest('mmse')"><span class="icon">🧠</span>MMSE<span class="nav-badge">30pts</span></div>
@@ -356,9 +375,10 @@ input.toggle-cb{display:none}
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
     <div class="topbar-title" id="topbar-title">Inicio</div>
-    <div class="topbar-search">
+    <div class="topbar-search" style="position:relative">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input type="text" id="global-search" placeholder="Buscar…" oninput="globalSearch(this.value)">
+      <input type="text" id="global-search" placeholder="Buscar paciente…" oninput="globalSearch(this.value)" onfocus="globalSearch(this.value)" onblur="setTimeout(()=>closeSrDrop(),200)" autocomplete="off">
+      <div id="sr-drop" style="display:none;position:absolute;top:calc(100% + 6px);right:0;left:0;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.18);z-index:900;overflow:hidden;min-width:300px"></div>
     </div>
   </div>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -440,11 +460,6 @@ input.toggle-cb{display:none}
     <div id="page-interconsultas" class="page">
       <div class="section-header">
         <h2>Interconsultas Hospitalarias</h2>
-        <button class="btn btn-secondary btn-sm" onclick="toggleICView()">📋 Historial</button>
-      </div>
-      <div id="ic-historial-view" style="display:none;margin-bottom:18px">
-        <div id="lista-ic"><div class="loading"><div class="spinner"></div><br>Cargando…</div></div>
-        <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="toggleICView()">← Volver al formulario</button>
       </div>
       <div id="ic-form-view">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px">
@@ -483,8 +498,8 @@ input.toggle-cb{display:none}
             <div class="ic-form-body">
               <div class="ic-field"><div class="ic-sublabel">Estado emocional referido</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ansioso/a</span><span class="ic-chip" onclick="icTog(this)">Triste</span><span class="ic-chip" onclick="icTogR(this)">Desesperanzado/a</span><span class="ic-chip" onclick="icTog(this)">Irritable</span><span class="ic-chip" onclick="icTog(this)">Asustado/a</span><span class="ic-chip" onclick="icTog(this)">Confundido/a</span><span class="ic-chip" onclick="icTogG(this)">Relativamente tranquilo/a</span><span class="ic-chip" onclick="icTog(this)">Abrumado/a</span><span class="ic-chip" onclick="icTog(this)">Ambivalente</span></div></div>
               <div class="ic-g2">
-                <div class="ic-field"><div class="ic-sublabel">Principales preocupaciones</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Pronóstico incierto</span><span class="ic-chip" onclick="icTog(this)">Dolor / malestar físico</span><span class="ic-chip" onclick="icTog(this)">Familia / hijos</span><span class="ic-chip" onclick="icTog(this)">Rol laboral / económico</span><span class="ic-chip" onclick="icTog(this)">Dependencia / autonomía</span><span class="ic-chip" onclick="icTog(this)">Miedo a morir</span><span class="ic-chip" onclick="icTog(this)">Proceso diagnóstico</span><span class="ic-chip" onclick="icTog(this)">Aislamiento</span><span class="ic-chip" onclick="icTogA(this)">Demoras del alta</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Pensamientos automáticos (CC)</div><div class="ic-chips"><span class="ic-chip" onclick="icTogR(this)">No voy a mejorar</span><span class="ic-chip" onclick="icTogR(this)">Soy una carga</span><span class="ic-chip" onclick="icTogR(this)">No puedo con esto</span><span class="ic-chip" onclick="icTogR(this)">Lo peor está por venir</span><span class="ic-chip" onclick="icTogR(this)">Nunca volveré a ser el mismo/a</span><span class="ic-chip" onclick="icTogA(this)">Catastrofización</span><span class="ic-chip" onclick="icTogA(this)">Pensamiento todo-o-nada</span><span class="ic-chip" onclick="icTogA(this)">Minimización de recursos propios</span></div></div>
+                <div class="ic-field"><div class="ic-sublabel">Principales preocupaciones</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Pronóstico incierto</span><span class="ic-chip" onclick="icTog(this)">Dolor / malestar físico</span><span class="ic-chip" onclick="icTog(this)">Familia / hijos</span><span class="ic-chip" onclick="icTog(this)">Rol laboral / económico</span><span class="ic-chip" onclick="icTog(this)">Dependencia / autonomía</span><span class="ic-chip" onclick="icTog(this)">Miedo a morir</span><span class="ic-chip" onclick="icTog(this)">Proceso diagnóstico</span><span class="ic-chip" onclick="icTog(this)">Aislamiento</span><span class="ic-chip" onclick="icTogA(this)">Demoras del alta</span><span class="ic-chip" onclick="icTogA(this)">Demoras en procesos hospitalarios</span><span class="ic-chip" onclick="icTogA(this)">Inconformidad con la atención</span><span class="ic-chip" onclick="icTogA(this)">Demoras en procesos de la EPS</span><span class="ic-chip" onclick="icTogA(this)">Sensación de estancamiento</span><span class="ic-chip on-g" onclick="icTogG(this)">Ninguna</span></div></div>
+                <div class="ic-field"><div class="ic-sublabel">Pensamientos automáticos (CC)</div><div class="ic-chips"><span class="ic-chip" onclick="icTogR(this)">No voy a mejorar</span><span class="ic-chip" onclick="icTogR(this)">Soy una carga</span><span class="ic-chip" onclick="icTogR(this)">No puedo con esto</span><span class="ic-chip" onclick="icTogR(this)">Lo peor está por venir</span><span class="ic-chip" onclick="icTogR(this)">Nunca volveré a ser el mismo/a</span><span class="ic-chip" onclick="icTogA(this)">Catastrofización</span><span class="ic-chip" onclick="icTogA(this)">Pensamiento todo-o-nada</span><span class="ic-chip" onclick="icTogA(this)">Minimización de recursos propios</span><span class="ic-chip on-g" onclick="icTogG(this)">Ninguno</span></div></div>
               </div>
               <div class="ic-g2">
                 <div class="ic-field"><div class="ic-sublabel">Cita textual / narrativa relevante</div><textarea id="ic-sub-cita" placeholder="Ej: No sé cómo decirle a mis hijos..." rows="2"></textarea></div>
@@ -504,7 +519,7 @@ input.toggle-cb{display:none}
                 <div><div class="ic-sublabel">Lenguaje / Insight</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Coherente</span><span class="ic-chip on-g" onclick="icTogG(this)">Insight conservado</span><span class="ic-chip" onclick="icTog(this)">Insight parcial</span><span class="ic-chip" onclick="icTogR(this)">Sin insight</span></div></div>
               </div>
               <div class="ic-g2">
-                <div class="ic-field"><div class="ic-sublabel">Regulación emocional</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Tolera el malestar</span><span class="ic-chip" onclick="icTog(this)">Llanto contenido</span><span class="ic-chip" onclick="icTogR(this)">Llanto incontenible</span><span class="ic-chip" onclick="icTogR(this)">Ansiedad desbordada</span><span class="ic-chip" onclick="icTog(this)">Bloqueo emocional</span></div></div>
+                <div class="ic-field"><div class="ic-sublabel">Regulación emocional</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Tolera el malestar</span><span class="ic-chip" onclick="icTog(this)">Llanto contenido</span><span class="ic-chip" onclick="icTogR(this)">Llanto incontenible</span><span class="ic-chip" onclick="icTogR(this)">Ansiedad desbordada</span><span class="ic-chip" onclick="icTog(this)">Bloqueo emocional</span><span class="ic-chip on-g" onclick="icTogG(this)">Salir</span><span class="ic-chip on-g" onclick="icTogG(this)">Caminar</span></div></div>
                 <div class="ic-field"><div class="ic-sublabel">Estrategias de afrontamiento</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Hablar / verbalizar</span><span class="ic-chip on-g" onclick="icTogG(this)">Espiritualidad / fe</span><span class="ic-chip" onclick="icTog(this)">Evitación</span><span class="ic-chip" onclick="icTog(this)">Control excesivo</span><span class="ic-chip" onclick="icTogR(this)">Afrontamiento desorganizado</span><span class="ic-chip on-g" onclick="icTogG(this)">Red de apoyo activa</span></div></div>
               </div>
               <div class="ic-field"><div class="ic-sublabel">Comprensión del Dx / pronóstico</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Comprensión adecuada</span><span class="ic-chip" onclick="icTog(this)">Comprensión parcial</span><span class="ic-chip" onclick="icTogR(this)">Negación</span><span class="ic-chip" onclick="icTogA(this)">Expectativas irreales</span><span class="ic-chip" onclick="icTog(this)">Alta incertidumbre / miedo</span></div></div>
@@ -519,6 +534,18 @@ input.toggle-cb{display:none}
               </div>
               <div class="ic-field"><div class="ic-sublabel">Consumo de sustancias psicoactivas</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Niega consumo</span><span class="ic-chip" onclick="icTogA(this)">Consumo ocasional de alcohol</span><span class="ic-chip" onclick="icTogR(this)">Consumo problemático de alcohol</span><span class="ic-chip" onclick="icTogA(this)">Tabaco</span><span class="ic-chip" onclick="icTogR(this)">Marihuana</span><span class="ic-chip" onclick="icTogR(this)">Cocaína / bazuco</span><span class="ic-chip" onclick="icTogR(this)">Benzodiacepinas sin prescripción</span><span class="ic-chip" onclick="icTog(this)">Otro</span></div>
               <textarea id="ic-sustancias-notas" placeholder="Detalles sobre consumo, frecuencia, impacto..." rows="2" style="margin-top:8px;width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea></div>
+            </div>
+          </div>
+          <div class="ic-form-section">
+            <div class="ic-form-head slate"><span class="ft">🧠 Distorsiones cognitivas</span></div>
+            <div class="ic-form-body">
+              <div class="ic-field"><div class="ic-chips"><span class="ic-chip" onclick="icTogR(this)">Pensamiento todo o nada</span><span class="ic-chip" onclick="icTogR(this)">Sobregeneralización</span><span class="ic-chip" onclick="icTogR(this)">Filtro mental</span><span class="ic-chip" onclick="icTogR(this)">Descalificar lo positivo</span><span class="ic-chip" onclick="icTogR(this)">Lectura de mente</span><span class="ic-chip" onclick="icTogR(this)">Error del adivino</span><span class="ic-chip" onclick="icTogR(this)">Catastrofismo / Minimización</span><span class="ic-chip" onclick="icTogR(this)">Razonamiento emocional</span><span class="ic-chip" onclick="icTogR(this)">Deberías (Imperativos)</span><span class="ic-chip" onclick="icTogR(this)">Etiquetado</span><span class="ic-chip" onclick="icTogR(this)">Personalización</span><span class="ic-chip" onclick="icTogR(this)">Falacia de justicia</span><span class="ic-chip on-g" onclick="icTogG(this)">Ninguna</span></div></div>
+            </div>
+          </div>
+          <div class="ic-form-section">
+            <div class="ic-form-head slate"><span class="ft">💭 Ideas irracionales</span></div>
+            <div class="ic-form-body">
+              <div class="ic-field"><div class="ic-chips"><span class="ic-chip" onclick="icTogR(this)">Necesidad de aprobación</span><span class="ic-chip" onclick="icTogR(this)">Exigencia de competencia</span><span class="ic-chip" onclick="icTogR(this)">Culpar y castigar</span><span class="ic-chip" onclick="icTogR(this)">Catastrofismo</span><span class="ic-chip" onclick="icTogR(this)">Victimismo</span><span class="ic-chip" onclick="icTogR(this)">Preocupación por peligros</span><span class="ic-chip" onclick="icTogR(this)">Evitación de problemas</span><span class="ic-chip" onclick="icTogR(this)">Dependencia</span><span class="ic-chip" onclick="icTogR(this)">Determinismo</span><span class="ic-chip" onclick="icTogR(this)">Preocupación por problemas ajenos</span><span class="ic-chip" onclick="icTogR(this)">Perfeccionismo</span><span class="ic-chip" onclick="icTogR(this)">Falacia de la recompensa</span><span class="ic-chip on-g" onclick="icTogG(this)">Ninguna</span></div></div>
             </div>
           </div>
           <div class="ic-form-section">
@@ -555,7 +582,7 @@ input.toggle-cb{display:none}
           <div class="ic-form-section">
             <div class="ic-form-head slate"><span class="ft">🛠️ Tratamiento — Intervención y plan</span><span class="ic-form-badge">TRATAMIENTO</span></div>
             <div class="ic-form-body">
-              <div class="ic-field"><div class="ic-sublabel">Intervención realizada hoy</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Escucha activa y validación emocional</span><span class="ic-chip" onclick="icTog(this)">Contención emocional</span><span class="ic-chip" onclick="icTog(this)">Psicoeducación sobre respuesta emocional al Dx</span><span class="ic-chip" onclick="icTog(this)">Reestructuración cognitiva</span><span class="ic-chip" onclick="icTog(this)">Técnicas de regulación emocional</span><span class="ic-chip" onclick="icTog(this)">Activación conductual</span><span class="ic-chip" onclick="icTog(this)">Técnicas de respiración / relajación</span><span class="ic-chip" onclick="icTog(this)">Reforzamiento de red de apoyo</span><span class="ic-chip" onclick="icTog(this)">Exploración de recursos y factores protectores</span><span class="ic-chip" onclick="icTog(this)">Orientación familiar</span><span class="ic-chip" onclick="icTog(this)">Evaluación y manejo de riesgo suicida</span></div></div>
+              <div class="ic-field"><div class="ic-sublabel">Intervención realizada hoy</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Escucha activa y validación emocional</span><span class="ic-chip" onclick="icTog(this)">Contención emocional</span><span class="ic-chip" onclick="icTog(this)">Psicoeducación sobre respuesta emocional al Dx</span><span class="ic-chip" onclick="icTog(this)">Psicoeducación sobre procesos hospitalarios</span><span class="ic-chip" onclick="icTog(this)">Reestructuración cognitiva</span><span class="ic-chip" onclick="icTog(this)">Técnicas de regulación emocional</span><span class="ic-chip" onclick="icTog(this)">Activación conductual</span><span class="ic-chip" onclick="icTog(this)">Técnicas de respiración / relajación</span><span class="ic-chip" onclick="icTog(this)">Reforzamiento de red de apoyo</span><span class="ic-chip" onclick="icTog(this)">Exploración de recursos y factores protectores</span><span class="ic-chip" onclick="icTog(this)">Orientación familiar</span><span class="ic-chip" onclick="icTog(this)">Evaluación y manejo de riesgo suicida</span></div></div>
               <div class="ic-g2">
                 <div class="ic-field"><div class="ic-sublabel">Plan</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Continúa seguimiento por psicología</span><span class="ic-chip" onclick="icTogR(this)">Remisión a psiquiatría</span><span class="ic-chip" onclick="icTog(this)">Orientación a trabajo social</span><span class="ic-chip on-g" onclick="icTogG(this)">Alta de psicología</span><span class="ic-chip" onclick="icTog(this)">Reinterconsulta si hay cambios</span></div></div>
                 <div class="ic-field"><div class="ic-sublabel">Frecuencia de seguimiento</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Diario</span><span class="ic-chip" onclick="icTog(this)">Cada 2 días</span><span class="ic-chip" onclick="icTog(this)">Interdiario</span><span class="ic-chip" onclick="icTog(this)">Cada 8 días</span><span class="ic-chip" onclick="icTog(this)">Cada 15 días</span><span class="ic-chip" onclick="icTog(this)">Semanal</span><span class="ic-chip" onclick="icTog(this)">Según evolución</span></div></div>
@@ -570,7 +597,16 @@ input.toggle-cb{display:none}
             <div class="ic-form-head slate"><span class="ft">📋 Notas especiales — Selecciona la situación</span></div>
             <div class="ic-form-body">
               <div class="ic-sublabel">Tipo de nota</div>
-              <div class="ic-chips"><span class="ic-chip" onclick="setIcEsp('intubado',this)">Paciente intubado</span><span class="ic-chip" onclick="setIcEsp('dolor',this)">Dolor / no disponible para entrevista</span><span class="ic-chip" onclick="setIcEsp('nodisponible',this)">Paciente no disponible</span><span class="ic-chip" onclick="setIcEsp('fuga',this)">Fuga hospitalaria</span><span class="ic-chip" onclick="setIcEsp('repetida',this)">IC reiterada sin justificación</span></div>
+              <div class="ic-chips" style="flex-wrap:wrap">
+                <span class="ic-chip" onclick="setIcEsp('intubado',this)">🫁 Paciente intubado</span>
+                <span class="ic-chip" onclick="setIcEsp('dolor',this)">😣 Dolor / no disponible</span>
+                <span class="ic-chip" onclick="setIcEsp('nodisponible',this)">🚪 Paciente no disponible</span>
+                <span class="ic-chip" onclick="setIcEsp('fuga',this)">🏃 Fuga hospitalaria</span>
+                <span class="ic-chip" onclick="setIcEsp('repetida',this)">🔁 IC reiterada sin justificación</span>
+                <span class="ic-chip" onclick="setIcEsp('seguimiento',this)">📋 Paciente en seguimiento</span>
+                <span class="ic-chip" onclick="setIcEsp('niega',this)">🚫 Se niega a la atención</span>
+                <span class="ic-chip" onclick="setIcEsp('nocolaborativo',this)">😶 Paciente cero cooperativo</span>
+              </div>
               <div id="ic-esp-preview" style="display:none"><div class="ic-sublabel" style="margin-top:12px">Vista previa de la nota</div><div class="esp-preview" id="ic-esp-text"></div></div>
             </div>
           </div>
@@ -596,6 +632,14 @@ input.toggle-cb{display:none}
           </div>
         </div>
       </div><!-- end ic-form-view -->
+    </div>
+
+    <!-- HISTORIAL IC -->
+    <div id="page-historial-ic" class="page">
+      <div class="section-header">
+        <h2>📋 Historial de Interconsultas</h2>
+      </div>
+      <div id="lista-ic"><div class="loading"><div class="spinner"></div><br>Cargando…</div></div>
     </div>
 
     <!-- ANAMNESIS -->
@@ -699,6 +743,18 @@ input.toggle-cb{display:none}
             <div class="form-group full"><label>Pensamiento — Curso</label><div class="checkgroup"><label><input type="radio" name="an-pcurso" value="Lógico"><span>Lógico</span></label><label><input type="radio" name="an-pcurso" value="Bradipsiquia"><span>Bradipsiquia</span></label><label><input type="radio" name="an-pcurso" value="Taquipsiquia"><span>Taquipsiquia</span></label><label><input type="radio" name="an-pcurso" value="Bloqueo"><span>Bloqueo</span></label></div></div>
             <div class="form-group full"><label>Insight</label><div class="checkgroup" id="an-insight"><label><input type="checkbox" value="Conservado"><span>Conservado</span></label><label><input type="checkbox" value="Parcial"><span>Parcial</span></label><label><input type="checkbox" value="Sin insight"><span>Sin insight</span></label></div></div>
             <div class="form-group full"><label>Memoria y atención</label><div class="checkgroup"><label><input type="radio" name="an-mem" value="Conservadas"><span>Conservadas</span></label><label><input type="radio" name="an-mem" value="Atención deteriorada"><span>Atención deteriorada</span></label><label><input type="radio" name="an-mem" value="Memoria deteriorada"><span>Memoria deteriorada</span></label><label><input type="radio" name="an-mem" value="Ambas deterioradas"><span>Ambas deterioradas</span></label></div></div>
+          </div></div>
+        </div>
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🧠</span><h4>Distorsiones cognitivas</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-grid">
+            <div class="form-group full"><div class="checkgroup" id="an-distorsiones"><label><input type="checkbox" value="Pensamiento todo o nada"><span>Pensamiento todo o nada</span></label><label><input type="checkbox" value="Sobregeneralización"><span>Sobregeneralización</span></label><label><input type="checkbox" value="Filtro mental"><span>Filtro mental</span></label><label><input type="checkbox" value="Descalificar lo positivo"><span>Descalificar lo positivo</span></label><label><input type="checkbox" value="Lectura de mente"><span>Lectura de mente</span></label><label><input type="checkbox" value="Error del adivino"><span>Error del adivino</span></label><label><input type="checkbox" value="Catastrofismo / Minimización"><span>Catastrofismo / Minimización</span></label><label><input type="checkbox" value="Razonamiento emocional"><span>Razonamiento emocional</span></label><label><input type="checkbox" value="Deberías (Imperativos)"><span>Deberías</span></label><label><input type="checkbox" value="Etiquetado"><span>Etiquetado</span></label><label><input type="checkbox" value="Personalización"><span>Personalización</span></label><label><input type="checkbox" value="Falacia de justicia"><span>Falacia de justicia</span></label><label><input type="checkbox" value="Ninguna"><span>Ninguna</span></label></div></div>
+          </div></div>
+        </div>
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>💭</span><h4>Ideas irracionales</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-grid">
+            <div class="form-group full"><div class="checkgroup" id="an-irracionales"><label><input type="checkbox" value="Necesidad de aprobación"><span>Necesidad de aprobación</span></label><label><input type="checkbox" value="Exigencia de competencia"><span>Exigencia de competencia</span></label><label><input type="checkbox" value="Culpar y castigar"><span>Culpar y castigar</span></label><label><input type="checkbox" value="Catastrofismo"><span>Catastrofismo</span></label><label><input type="checkbox" value="Victimismo"><span>Victimismo</span></label><label><input type="checkbox" value="Preocupación por peligros"><span>Preocupación por peligros</span></label><label><input type="checkbox" value="Evitación de problemas"><span>Evitación de problemas</span></label><label><input type="checkbox" value="Dependencia"><span>Dependencia</span></label><label><input type="checkbox" value="Determinismo"><span>Determinismo</span></label><label><input type="checkbox" value="Preocupación por problemas ajenos"><span>Preoc. problemas ajenos</span></label><label><input type="checkbox" value="Perfeccionismo"><span>Perfeccionismo</span></label><label><input type="checkbox" value="Falacia de la recompensa"><span>Falacia de la recompensa</span></label><label><input type="checkbox" value="Ninguna"><span>Ninguna</span></label></div></div>
           </div></div>
         </div>
         <div class="anamnesis-section">
@@ -1113,7 +1169,7 @@ input.toggle-cb{display:none}
         <div id="hpac-lista"></div>
       </div>
       <div id="hpac-notas-view" style="display:none">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
           <button class="btn btn-secondary" onclick="hpacVolverLista()">← Volver</button>
           <div>
             <div style="font-family:'DM Serif Display',serif;font-size:1.2rem" id="hpac-pac-nombre"></div>
@@ -1121,6 +1177,7 @@ input.toggle-cb{display:none}
           </div>
           <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="hpacNuevaNota()">📝 Nuevo seguimiento</button>
         </div>
+        <div id="hpac-resumen-bar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
         <div id="hpac-notas-list"></div>
       </div>
     </div>
@@ -1148,6 +1205,25 @@ input.toggle-cb{display:none}
       <div id="historial-list"><div class="loading"><div class="spinner"></div><br>Cargando…</div></div>
     </div>
 
+  </div>
+</div>
+
+<!-- PATIENT INFO SHEET -->
+<div class="pac-sheet-overlay" id="pac-sheet-overlay" onclick="closePacSheet(event)">
+  <div class="pac-sheet" id="pac-sheet">
+    <div class="pac-sheet-handle"></div>
+    <div class="pac-sheet-head">
+      <div>
+        <div class="pac-sheet-nombre" id="ps-nombre">—</div>
+        <div class="pac-sheet-sub" id="ps-sub">—</div>
+      </div>
+      <button class="pac-sheet-close" onclick="closePacSheet()">✕</button>
+    </div>
+    <div class="pac-sheet-body">
+      <div id="ps-sesiones-badge" class="pac-sesiones-badge">📅 0 sesiones registradas</div>
+      <div class="pac-info-grid" id="ps-grid"></div>
+    </div>
+    <div class="pac-sheet-actions" id="ps-actions"></div>
   </div>
 </div>
 
@@ -1218,7 +1294,7 @@ input.toggle-cb{display:none}
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, updateDoc, serverTimestamp, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyCsqumG_BRCWwnFEOcoNfLXtfaUlzvPqYE",
@@ -1250,7 +1326,7 @@ onSnapshot(query(collection(db,'pacientes'),orderBy('creado','desc')),snap=>{
 onSnapshot(query(collection(db,'interconsultas'),orderBy('creado','desc')),snap=>{
   interconsultas=snap.docs.map(d=>({id:d.id,...d.data()}));window.interconsultas=interconsultas;
   updateBadges();updateStats();
-  if(document.getElementById('page-interconsultas').classList.contains('active'))renderIC();
+  if(document.getElementById('page-interconsultas').classList.contains('active')||document.getElementById('page-historial-ic').classList.contains('active'))renderIC();
   if(document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();
 });
 onSnapshot(query(collection(db,'anamnesis'),orderBy('creado','desc')),snap=>{
@@ -1356,7 +1432,7 @@ window.renderPacientes=(lista)=>{
   let html=q?`<tr><td colspan="8" style="background:#1a3a2a;font-size:0.75rem;color:#34D399;padding:7px 14px;">🔍 Mostrando ${filtered.length} resultado${filtered.length>1?'s':''} para "<strong>${q}</strong>" — <a href="#" onclick="window._searchQ='';document.getElementById('global-search').value='';renderPacientes();return false;" style="color:#34D399">Limpiar</a></td></tr>`:'';
   pisoOrder.forEach(piso=>{
     if(!q)html+=`<tr><td colspan="8" style="background:var(--surface2);font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;padding:7px 14px;">🏢 ${piso}</td></tr>`;
-    html+=grouped[piso].map(p=>`<tr><td><strong>${p.nombre}</strong><div class="td-sub">${p.hab?'Hab. '+p.hab:''} ${p.fecha?'· '+formatDate(p.fecha):''}</div></td><td>${p.cedula}</td><td>${p.edad?p.edad+' a.':''} ${p.sexo?p.sexo.charAt(0):''}</td><td>${p.motivo?p.motivo.slice(0,40)+(p.motivo.length>40?'…':''):'—'}</td><td>${riskBadge(p.riesgo)}</td><td>${estadoBadge(p.estado)}</td><td>${proxBadge(p)}</td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-sm btn-secondary" onclick="nuevaAnamnesisParaPaciente('${p.id}')">📋</button><button class="btn btn-sm btn-secondary" onclick="abrirICParaPaciente('${p.id}')">💬 IC</button><button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪</button><button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️</button><button class="btn btn-sm btn-danger" onclick="eliminarPaciente('${p.id}')">✕</button></div></td></tr>`).join('');
+    html+=grouped[piso].map(p=>`<tr><td><strong>${p.nombre}</strong><div class="td-sub">${p.hab?'Hab. '+p.hab:''} ${p.fecha?'· '+formatDate(p.fecha):''}</div></td><td>${p.cedula}</td><td>${p.edad?p.edad+' a.':''} ${p.sexo?p.sexo.charAt(0):''}</td><td>${p.motivo?p.motivo.slice(0,40)+(p.motivo.length>40?'…':''):'—'}</td><td>${riskBadge(p.riesgo)}</td><td>${estadoBadge(p.estado)}</td><td>${proxBadge(p)}</td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-sm btn-secondary" onclick="nuevaAnamnesisParaPaciente('${p.id}')">📋</button><button class="btn btn-sm btn-secondary" onclick="abrirICParaPaciente('${p.id}')">💬 IC</button><button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪</button><button class="btn btn-sm btn-secondary" onclick="verHistorialPorId('${p.id}')">📂</button><button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️</button><button class="btn btn-sm btn-danger" onclick="eliminarPaciente('${p.id}')">✕</button></div></td></tr>`).join('');
   });
   tbody.innerHTML=html;
 };
@@ -1520,6 +1596,9 @@ window.selectICPaciente=(id)=>{
   if(edad&&(p.edad||p.sexo))edad.value=(p.edad?p.edad+' años':'')+(p.sexo?' '+p.sexo.charAt(0):'');
   if(dx&&p.motivo)dx.value=p.motivo;
   if(fecha&&p.fecha)fecha.value=formatDate(p.fecha);
+  // Auto-set mode based on patient estado
+  if(p.estado==='nueva-interconsulta-pendiente')setICMode('nueva');
+  else if(p.estado==='seguimiento')setICMode('seg');
 };
 
 window.abrirICParaPaciente=(id)=>{
@@ -1615,7 +1694,8 @@ window.renderIC=()=>{
     const estado=ic.estado||'pendiente';
     const estadoBadgeIC=e=>e==='subida'?'<span class="badge badge-blue">📋 Subida</span>':e==='respondida'?'<span class="badge badge-green">✅ Respondida</span>':'<span class="badge badge-yellow">⏳ Pendiente</span>';
     const accionBtn=estado==='pendiente'?`<button class="btn btn-sm btn-secondary" onclick="responderIC('${ic.id}')">✅ Respondida</button>`:estado==='respondida'?`<button class="btn btn-sm btn-primary" onclick="subirIC('${ic.id}')">📋 Subir al sistema</button>`:`<span style="font-size:0.72rem;color:var(--text3)">✓ En el sistema</span>`;
-    return`<div class="ic-card"><div class="ic-icon ${prioridad==='urgente'?'urgent':estado==='pendiente'?'pending':'done'}">${prioridad==='urgente'?'🚨':estado==='subida'?'📋':estado==='respondida'?'✅':'📤'}</div><div class="ic-body"><h4>${titulo}</h4><p>${desc}</p><div class="ic-meta"><span class="badge ${prioridad==='urgente'?'badge-red':prioridad==='electiva'?'badge-blue':'badge-gray'}">${prioridad}</span>${estadoBadgeIC(estado)}<span class="text-sm">${ic.fecha?ic.fecha:''}</span></div></div><div class="ic-actions">${accionBtn}<button class="btn btn-sm btn-danger" onclick="eliminarIC('${ic.id}')">✕</button></div></div>`;
+    const histBtn=ic.pacienteId?`<button class="btn btn-sm btn-secondary" onclick="verHistorialPorId('${ic.pacienteId}')" title="Ver historial del paciente">📂</button>`:'';
+    return`<div class="ic-card"><div class="ic-icon ${prioridad==='urgente'?'urgent':estado==='pendiente'?'pending':'done'}">${prioridad==='urgente'?'🚨':estado==='subida'?'📋':estado==='respondida'?'✅':'📤'}</div><div class="ic-body"><h4 style="cursor:${ic.pacienteId?'pointer':'default'}" onclick="${ic.pacienteId?`verHistorialPorId('${ic.pacienteId}')`:''}">${titulo}</h4><p>${desc}</p><div class="ic-meta"><span class="badge ${prioridad==='urgente'?'badge-red':prioridad==='electiva'?'badge-blue':'badge-gray'}">${prioridad}</span>${estadoBadgeIC(estado)}<span class="text-sm">${ic.fecha?ic.fecha:''}</span></div></div><div class="ic-actions">${accionBtn}${histBtn}<button class="btn btn-sm btn-danger" onclick="eliminarIC('${ic.id}')">✕</button></div></div>`;
   }).join('');
 };
 
@@ -1663,6 +1743,8 @@ window.guardarICFirebase=async()=>{
     });
     toast('✅ IC guardada en Firebase');
     setSyncStatus('online');
+    // Limpiar formulario después de guardar
+    setTimeout(()=>limpiarFormIC(false),300);
   }catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
 };
 
@@ -1670,7 +1752,11 @@ window.guardarAnamnesis=async()=>{
   const nombre=document.getElementById('an-nombre').value.trim();
   if(!nombre)return toast('⚠️ Ingresa el nombre del paciente');
   const nota=generarNota();setSyncStatus('syncing');
-  try{await addDoc(collection(db,'anamnesis'),{pacienteId:document.getElementById('anamnesis-paciente-sel').value||null,pacienteNombre:nombre,pacienteCedula:document.getElementById('an-cedula').value,fecha:document.getElementById('an-fecha').value,riesgo:document.getElementById('an-riesgo').value,dx:getChecked('an-dx'),nota,creado:serverTimestamp()});toast('✅ Anamnesis guardada');}
+  try{await addDoc(collection(db,'anamnesis'),{pacienteId:document.getElementById('anamnesis-paciente-sel').value||null,pacienteNombre:nombre,pacienteCedula:document.getElementById('an-cedula').value,fecha:document.getElementById('an-fecha').value,riesgo:document.getElementById('an-riesgo').value,dx:getChecked('an-dx'),nota,creado:serverTimestamp()});
+  toast('✅ Anamnesis guardada');
+  // Limpiar formulario después de guardar
+  setTimeout(()=>clearAnamnesis(),300);
+  }
   catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
 };
 
@@ -1767,14 +1853,14 @@ window.renderDashboard=()=>{
     rondaCont.innerHTML=pisoKeys.map(piso=>{
       const ps=grouped[piso];
       const cards=ps.map(p=>`
-        <div class="ronda-card ${riskClass(p.riesgo)}">
+        <div class="ronda-card ${riskClass(p.riesgo)}" onclick="abrirPacSheet('${p.id}')" style="cursor:pointer">
           <div class="rc-hab">${p.tipo==='consulta-externa'?'🚶 Consulta Externa':p.hab&&p.hab.toUpperCase().match(/AZU|AZUL|BLQ|BLOQUE/)?'🔵 '+p.hab:`🚪 ${p.hab?'Hab. '+p.hab:'Sin hab.'}`}</div>
           <div class="rc-nombre">${p.nombre}</div>
           ${p.cedula?`<div style="font-size:0.68rem;color:var(--text3);margin-bottom:2px">CC: ${p.cedula}</div>`:''}
           <div class="rc-dx">${p.motivo?p.motivo.slice(0,70)+(p.motivo.length>70?'…':''):'Sin diagnóstico registrado'}</div>
           <div class="rc-badges">${riskBadge(p.riesgo)} ${estadoBadge(p.estado)}</div>
           ${p.proxSesion?`<div class="rc-proxima">📅 Próx. sesión: ${formatDate(p.proxSesion)}</div>`:''}
-          <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap">
+          <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap" onclick="event.stopPropagation()">
             <button class="btn btn-sm btn-secondary" onclick="abrirICParaPaciente('${p.id}')">💬 IC</button>
             <button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪 Test</button>
             <button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️ Editar</button>
@@ -1935,8 +2021,8 @@ window.hpacResponder=async(ni)=>{
 
 <script>
 // ── UI & NAVIGATION ──────────────────────────────────────────
-const pages=['dashboard','pacientes','consulta-externa','interconsultas','anamnesis','tests','capacidad','historial','historial-pac'];
-const titles={dashboard:'Inicio',pacientes:'Registro de Pacientes','consulta-externa':'Consulta Externa EPS',interconsultas:'Interconsultas',anamnesis:'Nueva Anamnesis',tests:'Tests Clínicos',capacidad:'Valoración de Capacidad Decisional',historial:'Historial de Tests','historial-pac':'Historial de Pacientes'};
+const pages=['dashboard','pacientes','consulta-externa','interconsultas','historial-ic','anamnesis','tests','capacidad','historial','historial-pac'];
+const titles={dashboard:'Inicio',pacientes:'Registro de Pacientes','consulta-externa':'Consulta Externa EPS',interconsultas:'Interconsultas','historial-ic':'Historial de Interconsultas',anamnesis:'Nueva Anamnesis',tests:'Tests Clínicos',capacidad:'Valoración de Capacidad Decisional',historial:'Historial de Tests','historial-pac':'Historial de Pacientes'};
 
 window.goTo=(page)=>{
   pages.forEach(p=>document.getElementById('page-'+p).classList.toggle('active',p===page));
@@ -1945,6 +2031,7 @@ window.goTo=(page)=>{
   if(page==='pacientes'&&typeof renderPacientes==='function')renderPacientes();
   if(page==='consulta-externa'&&typeof renderConsultaExterna==='function')renderConsultaExterna();
   if(page==='interconsultas'){populateICPacientes();if(typeof renderIC==='function')renderIC();}
+  if(page==='historial-ic'&&typeof renderIC==='function')renderIC();
   if(page==='tests')populateICPacientes();
   if(page==='capacidad'){populateICPacientes();const fd=document.getElementById('cap-fecha');if(fd&&!fd.value)fd.value=new Date().toISOString().split('T')[0];}
   if(page==='dashboard'&&typeof renderDashboard==='function')renderDashboard();
@@ -1953,6 +2040,9 @@ window.goTo=(page)=>{
   // Cerrar sidebar en móvil al navegar
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebar-overlay').classList.remove('open');
+  // Cerrar buscador
+  closeSrDrop();
+  const gs=document.getElementById('global-search');if(gs)gs.blur();
 };
 
 window.toggleSidebar=()=>{
@@ -2059,16 +2149,43 @@ ${new Date().toLocaleString('es-CO')}`;
 };
 window.copiarNota=()=>{const t=document.getElementById('nota-output').textContent;if(t.startsWith('Completa'))return toast('⚠️ Genera la nota primero');navigator.clipboard.writeText(t).then(()=>toast('📋 Nota copiada')).catch(()=>toast('❌ No se pudo copiar'));};
 window.toggleSection=(header)=>{header.classList.toggle('open');header.nextElementSibling.classList.toggle('open');};
+window.closeSrDrop=()=>{const d=document.getElementById('sr-drop');if(d)d.style.display='none';};
+
 window.globalSearch=(q)=>{
   window._searchQ=q.trim();
-  const local=document.getElementById('pac-search-local');
-  if(local)local.value=q;
-  if(!document.getElementById('page-pacientes').classList.contains('active')){
-    goTo('pacientes');
-  } else {
-    renderPacientes();
+  const drop=document.getElementById('sr-drop');
+  // Si vacío, ocultar dropdown
+  if(!q.trim()){if(drop)drop.style.display='none';return;}
+  // Filtrar pacientes
+  const ql=q.trim().toLowerCase();
+  const matches=(window.pacientes||[]).filter(p=>
+    (p.nombre||'').toLowerCase().includes(ql)||
+    (p.cedula||'').toLowerCase().includes(ql)||
+    (p.hab||'').toLowerCase().includes(ql)
+  ).slice(0,6);
+  if(drop){
+    if(!matches.length){
+      drop.style.display='';
+      drop.innerHTML=`<div style="padding:14px 16px;font-size:0.82rem;color:var(--text3)">Sin resultados para "<strong>${q}</strong>"</div>`;
+    } else {
+      const riskDot=r=>r==='ALTO'?'🔴':r==='MEDIO'?'🟡':r==='BAJO'?'🟢':'⚪';
+      drop.style.display='';
+      drop.innerHTML=matches.map(p=>`
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer;transition:background 0.1s" onmouseenter="this.style.background='var(--surface2)'" onmouseleave="this.style.background=''">
+          <div style="flex:1;min-width:0" onclick="closeSrDrop();document.getElementById('global-search').value='';abrirPacSheet('${p.id}')">
+            <div style="font-weight:600;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${riskDot(p.riesgo)} ${p.nombre}</div>
+            <div style="font-size:0.72rem;color:var(--text3)">${p.cedula?'CC: '+p.cedula+' · ':''}${p.hab?'Hab. '+p.hab:''}</div>
+          </div>
+          <div style="display:flex;gap:5px;flex-shrink:0">
+            <button class="btn btn-sm btn-secondary" style="padding:3px 8px;font-size:0.72rem" onclick="closeSrDrop();document.getElementById('global-search').value='';verHistorialPorId('${p.id}')">📂</button>
+            <button class="btn btn-sm btn-secondary" style="padding:3px 8px;font-size:0.72rem" onclick="closeSrDrop();document.getElementById('global-search').value='';abrirICParaPaciente('${p.id}')">💬</button>
+          </div>
+        </div>`).join('')+
+        `<div style="padding:9px 14px;font-size:0.73rem;color:var(--text3);text-align:center;cursor:pointer;background:var(--surface2)" onclick="closeSrDrop();goTo('pacientes')">Ver todos los pacientes →</div>`;
+    }
   }
 };
+
 window.buscarPacientesLocal=(q)=>{
   window._searchQ=q.trim();
   const topbar=document.getElementById('global-search');
@@ -2301,6 +2418,16 @@ window.hpacRenderNotas=()=>{
   const ics=interconsultas.filter(ic=>ic.pacienteId===_hpacPacId||ic.pacienteNombre===nombre);
   const anas=anamnesisList.filter(a=>a.pacienteId===_hpacPacId||a.pacienteNombre===nombre);
   const tests=testHistory.filter(t=>t.pacienteId===_hpacPacId||t.paciente===nombre);
+  // Summary bar
+  const rb=document.getElementById('hpac-resumen-bar');
+  if(rb){
+    const badge=(icon,label,count,color)=>count?`<span style="display:inline-flex;align-items:center;gap:5px;background:${color}22;color:${color};border-radius:20px;padding:4px 12px;font-size:0.75rem;font-weight:700">${icon} ${count} ${label}</span>`:'';
+    rb.innerHTML=
+      badge('💬','IC',ics.length,'var(--accent2)')+
+      badge('📋','Anamnesis',anas.length,'#7b1fa2')+
+      badge('🧪','Tests',tests.length,'var(--warning)')+
+      `<span style="display:inline-flex;align-items:center;gap:5px;background:var(--surface2);color:var(--text2);border-radius:20px;padding:4px 12px;font-size:0.75rem;font-weight:700">📅 ${ics.length+anas.length+tests.length} registros totales</span>`;
+  }
   const notas=[].concat(
     ics.map(x=>Object.assign({},x,{_col:'interconsultas'})),
     anas.map(x=>Object.assign({},x,{_col:'anamnesis',modo:x.modo||'Anamnesis'}))
@@ -2375,25 +2502,29 @@ window.hpacRenderNotas=()=>{
   // Build tests HTML
   var testParts=[];
   if(testsSorted.length){
-    testParts.push('<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:10px;margin-top:'+(notas.length?'20':'4')+'px">Tests ('+testsSorted.length+')</div>');
+    testParts.push('<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:10px;margin-top:'+(notas.length?'24':'4')+'px">🧪 Tests aplicados ('+testsSorted.length+')</div>');
     var lc={normal:'var(--success)',moderate:'var(--warning)',high:'var(--danger)',critical:'#7b1fa2'};
-    var ll={normal:'Normal',moderate:'Moderado',high:'Alto',critical:'Critico'};
+    var ll={normal:'Normal / Sin clínica',moderate:'Leve / Moderado',high:'Alto / Clínicamente significativo',critical:'Crítico / Severo'};
+    var testIconos={PHQ9:'💙',GAD7:'⚡',HADS:'🏥',MMSE:'🧠',MoCA:'🧩',CAM:'🌀','C-SSRS':'🔴','MMAS-4':'💊',Duelo:'🕊️','PCL-5':'🌪️'};
     for(var ti=0;ti<testsSorted.length;ti++){
       var t=testsSorted[ti];
-      var tc2=lc[t.level]||'var(--text)';
-      var tl=ll[t.level]||t.level||'-';
-      var scoreHtml=t.score!=null?'<span style="font-size:1.3rem;color:'+tc2+';font-weight:700">'+t.score+'<span style="font-size:0.7rem;color:var(--text3)"> pts</span></span>':'';
+      var tc2=lc[t.level]||'var(--text2)';
+      var tl=ll[t.level]||t.level||'—';
+      var ticon=testIconos[t.test]||'📊';
+      var scoreHtml=t.score!=null
+        ?'<div style="font-size:2rem;font-weight:800;color:'+tc2+';line-height:1">'+t.score+'<span style="font-size:0.72rem;font-weight:400;color:var(--text3);margin-left:2px">pts</span></div>'
+        :'';
       testParts.push(
-        '<div style="background:var(--surface);border:1.5px solid var(--border);border-left:4px solid '+tc2+';border-radius:var(--radius);padding:13px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">'
-        +'<div style="font-size:1.5rem;flex-shrink:0">&#x1F4CA;</div>'
+        '<div style="background:var(--surface);border:1.5px solid var(--border);border-left:5px solid '+tc2+';border-radius:var(--radius);padding:14px 16px;margin-bottom:10px">'
+        +'<div style="display:flex;align-items:flex-start;gap:12px">'
+        +'<div style="font-size:1.8rem;flex-shrink:0;line-height:1;margin-top:2px">'+ticon+'</div>'
         +'<div style="flex:1">'
-        +'<div style="font-weight:700;font-size:0.9rem">'+t.test+'</div>'
-        +'<div style="font-size:0.75rem;color:var(--text3);margin-top:2px">'+(t.fecha||'')+'</div>'
-        +(t.extra?'<div style="font-size:0.78rem;color:var(--text2);margin-top:3px">'+t.extra+'</div>':'')
+        +'<div style="font-weight:700;font-size:0.95rem;color:var(--text)">'+t.test+'</div>'
+        +'<div style="font-size:0.73rem;color:var(--text3);margin-top:2px">📅 '+( t.fecha||'Sin fecha')+'</div>'
+        +'<div style="margin-top:6px"><span style="background:'+tc2+'22;color:'+tc2+';padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700">'+tl+'</span></div>'
+        +(t.extra?'<div style="font-size:0.78rem;color:var(--text2);margin-top:6px;line-height:1.5;border-top:1px solid var(--border);padding-top:6px">'+t.extra+'</div>':'')
         +'</div>'
-        +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'
-        +'<span style="background:'+tc2+'22;color:'+tc2+';padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700">'+tl+'</span>'
-        +scoreHtml
+        +'<div style="text-align:right;flex-shrink:0">'+scoreHtml+'</div>'
         +'</div></div>'
       );
     }
@@ -2461,6 +2592,58 @@ window.hpacCopiar=(ni)=>{
 // ── HISTORIAL IC en dashboard/pacientes ──────────────────────
 window.verHistorialPorId=(pacId)=>verHistorialIC(pacId,'');
 
+// ── PATIENT INFO SHEET ──────────────────────────────────────
+window.abrirPacSheet=async(id)=>{
+  const p=pacientes.find(x=>x.id===id);
+  if(!p)return;
+  // Contar sesiones (IC + anamnesis) en Firebase
+  let sesiones=0;
+  try{
+    const [icSnap,anSnap]=await Promise.all([
+      getDocs(query(collection(db,'interconsultas'),where('pacienteId','==',id))),
+      getDocs(query(collection(db,'anamnesis'),where('pacienteId','==',id)))
+    ]);
+    sesiones=icSnap.size+anSnap.size;
+  }catch(e){sesiones='—';}
+
+  const riskColor={'ALTO':'#F87171','MEDIO':'#FBBF24','BAJO':'#34D399','SIN RIESGO':'#34D399'};
+  const estadoLabel={'seguimiento':'Seguimiento','nueva-interconsulta-pendiente':'IC pendiente','consulta-externa':'Consulta Externa','alta':'Alta','revaloracion':'Revaluación'};
+
+  document.getElementById('ps-nombre').textContent=p.nombre||'Sin nombre';
+  document.getElementById('ps-sub').textContent=(p.cedula?'CC: '+p.cedula:'')+(p.cedula&&(p.edad||p.sexo)?' · ':'')+( p.edad?p.edad+' años':'')+( p.sexo?' · '+p.sexo:'');
+  document.getElementById('ps-sesiones-badge').textContent='📅 '+sesiones+' sesión'+(sesiones!==1?'es':'')+' registrada'+(sesiones!==1?'s':'');
+
+  const ri=item=>`<div class="pac-info-item${item.full?' pac-info-full':''}"><div class="pac-info-label">${item.l}</div><div class="pac-info-value" style="${item.color?'color:'+item.color:''}">${item.v||'—'}</div></div>`;
+  const grid=[
+    {l:'Habitación',v:p.hab||(p.tipo==='consulta-externa'?'Consulta Externa':'—')},
+    {l:'Fecha ingreso',v:p.fecha?formatDate(p.fecha):'—'},
+    {l:'Edad',v:p.edad?p.edad+' años':'—'},
+    {l:'Sexo',v:p.sexo||'—'},
+    {l:'Riesgo suicida',v:p.riesgo||'Sin clasificar',color:riskColor[p.riesgo]||'var(--text2)'},
+    {l:'Estado',v:estadoLabel[p.estado]||p.estado||'—'},
+    {l:'Próxima sesión',v:p.proxSesion?formatDate(p.proxSesion):'No programada'},
+    {l:'Dx médico / Motivo IC',v:p.motivo,full:true},
+    {l:'Impresión psicológica',v:p.dxpsi,full:true},
+    {l:'Observaciones de riesgo',v:p.riesgoObs,full:true},
+    {l:'Notas generales',v:p.notas,full:true},
+  ].filter(x=>x.v);
+  document.getElementById('ps-grid').innerHTML=grid.map(ri).join('');
+  document.getElementById('ps-actions').innerHTML=`
+    <button class="btn btn-primary btn-sm" onclick="abrirICParaPaciente('${id}');closePacSheet()">💬 IC</button>
+    <button class="btn btn-secondary btn-sm" onclick="irTestsPaciente('${id}');closePacSheet()">🧪 Test</button>
+    <button class="btn btn-secondary btn-sm" onclick="editarPaciente('${id}');closePacSheet()">✏️ Editar</button>
+    <button class="btn btn-secondary btn-sm" onclick="verHistorialPorId('${id}');closePacSheet()">📂 Historial</button>
+  `;
+  document.getElementById('pac-sheet-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+};
+
+window.closePacSheet=(e)=>{
+  if(e&&e.target!==document.getElementById('pac-sheet-overlay'))return;
+  document.getElementById('pac-sheet-overlay').classList.remove('open');
+  document.body.style.overflow='';
+};
+
 // ── IC ENRIQUECIDA ────────────────────────────────────────────
 let icCurrentMode='nueva';
 let icCurrentEsp=null;
@@ -2482,14 +2665,7 @@ window.setICMode=function(m){
   if(seg)seg.style.display=m==='seg'?'':'none';
 };
 
-window.toggleICView=function(){
-  var hv=document.getElementById('ic-historial-view');
-  var fv=document.getElementById('ic-form-view');
-  var showing=hv&&hv.style.display!=='none';
-  if(hv)hv.style.display=showing?'none':'';
-  if(fv)fv.style.display=showing?'':'none';
-  if(!showing&&typeof renderIC==='function')renderIC();
-};
+window.toggleICView=function(){goTo('historial-ic');};
 
 window.icTog=function(el){el.classList.toggle('on');};
 window.icTogR=function(el){el.classList.toggle('on-r');};
@@ -2505,11 +2681,14 @@ window.setICSev=function(el,nivel,isHigh){
 };
 
 var icEspNotes={
-  intubado:'Al momento de la valoración, el paciente se encuentra intubado y sin posibilidad de comunicación, lo que impide la realización de valoración e intervención psicológica. No se realiza intervención en este momento. Se sugiere reinterconsulta a psicología en caso de mejoría del estado clínico que permita interacción adecuada. Se cierra seguimiento actual.',
-  dolor:'Análisis subjetivo:\nNo se obtiene información subjetiva relevante en esta oportunidad. El paciente manifiesta no encontrarse en condiciones físicas/emocionales para realizar la entrevista psicológica, solicitando reagendar la intervención.\n\nAnálisis objetivo:\nAl momento de la interconsulta, el paciente se observa con malestar físico significativo / agotamiento / limitación para la comunicación, lo que impide la realización de una valoración psicológica adecuada. Se respeta la condición clínica actual.\n\nRespuesta:\nInterconsulta psicológica no efectiva en esta fecha. Se deja constancia de intento de valoración. Se reagenda intervención psicológica según evolución clínica y disponibilidad del servicio.\n\nTratamiento:\nNo se realiza intervención psicológica en esta oportunidad. Pendiente valoración cuando el paciente se encuentre en mejores condiciones.',
-  nodisponible:'Al momento de la visita, no es posible realizar intervención psicológica debido a que el paciente no se encuentra disponible para valoración. Se deja constancia de intento de abordaje por parte de psicología. Se programa nuevo intento de intervención para el día siguiente, condicionado a disponibilidad y condiciones clínicas del paciente.',
-  fuga:'Al momento de la visita por psicología, el paciente no se encuentra en el servicio debido a fuga hospitalaria, por lo que no es posible realizar valoración ni intervención psicológica. Se deja constancia de intento de abordaje. Se cierra intervención de psicología por ausencia del paciente, quedando sujeta a nueva interconsulta en caso de reingreso o solicitud del equipo tratante.',
-  repetida:'Nota aclaratoria:\nPaciente actualmente en seguimiento por psicología, con valoración realizada el día anterior y próximo control ya programado.\nEn la solicitud actual no se describen cambios clínicos nuevos que justifiquen una nueva interconsulta.\nSe mantiene el plan de seguimiento previamente establecido.'
+  intubado:'Paciente bajo sedación y ventilación mecánica, sin respuesta a estímulos verbales, por lo que no es posible establecer contacto ni realizar exploración del estado mental en este momento; se mantiene en observación y se difiere la valoración psicológica hasta que las condiciones médicas lo permitan.',
+  dolor:'Paciente refiere dolor agudo que limita su disposición para la entrevista, imposibilitando la exploración de su esfera emocional y cognitiva en el día de hoy; se suspende el intento de valoración y se acuerda reagendar la intervención una vez que el síntoma físico se encuentre controlado.',
+  nodisponible:'Al acudir a la unidad para valoración, el paciente no se encuentra en su habitación, por lo que no es posible realizar la entrevista ni la observación conductual programada; se solicita al personal de enfermería informar cuando el paciente esté localizable para retomar la intervención.',
+  fuga:'Se constata la ausencia del paciente del servicio al momento de la valoración programada, imposibilitando la intervención psicológica y el acompañamiento emocional; queda pendiente la valoración para cuando el paciente se encuentre nuevamente disponible en la unidad.',
+  repetida:'Se recibe nueva interconsulta para valoración psicológica, sin embargo, al acudir no se observan cambios en la conducta del paciente ni nuevos elementos que requieran intervención distinta a lo ya indicado en atenciones previas; se mantienen las recomendaciones generales de apoyo emocional por parte del personal tratante.',
+  seguimiento:'Paciente ya se encuentra en protocolo de seguimiento psicológico dentro del contexto hospitalario; en la presente interconsulta no se evidencian criterios de cambios afectivos o conductuales que requieran una valoración adicional, por lo que la evaluación correspondiente se realizará en la fecha programada y registrada en la historia clínica, continuando con las intervenciones previamente establecidas.',
+  niega:'Paciente manifiesta su negativa a recibir atención psicológica en el momento actual, ejerciendo su derecho a rechazar la intervención; se respeta su decisión y se deja constancia, quedando a disposición para futuras ocasiones si el paciente lo solicita.',
+  nocolaborativo:'Durante el intento de entrevista, el paciente no muestra disposición para el diálogo ni para participar en la exploración de su estado emocional, dificultando la intervención; se suspende el intento y se mantiene una actitud de apertura para cuando el paciente se encuentre más receptivo.'
 };
 
 window.setIcEsp=function(type,el){
@@ -2730,8 +2909,8 @@ window.copiarTodoIC=function(){
   navigator.clipboard.writeText(text).then(function(){if(typeof toast==='function')toast('📋 Nota copiada al portapapeles');});
 };
 
-window.limpiarFormIC=function(){
-  if(!confirm('¿Limpiar el formulario?'))return;
+window.limpiarFormIC=function(confirm_=true){
+  if(confirm_!==false&&!confirm('¿Limpiar el formulario?'))return;
   document.querySelectorAll('#ic-form-view input[type=text], #ic-form-view textarea').forEach(function(i){i.value='';});
   document.querySelectorAll('#ic-form-view .ic-chip').forEach(function(c){c.classList.remove('on','on-r','on-g','on-a');});
   document.querySelectorAll('.sev-btn').forEach(function(s){s.classList.remove('on');});
@@ -2740,6 +2919,8 @@ window.limpiarFormIC=function(){
   var wrap=document.getElementById('ic-output-wrap');if(wrap)wrap.style.display='none';
   icCurrentEsp=null;
   var ep=document.getElementById('ic-esp-preview');if(ep)ep.style.display='none';
+  var sel=document.getElementById('ic-paciente-sel');if(sel)sel.value='';
+  setICMode('nueva');
 };
 
 let escolaridadLevel=5;
