@@ -626,6 +626,7 @@ input.toggle-cb{display:none}
                 <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-obj',this)">Copiar</button><div class="out-field-label-ic">Análisis Objetivo</div><div class="out-text-ic ph" id="ic-out-obj">Genera la nota para ver el contenido…</div></div>
                 <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-resp',this)">Copiar</button><div class="out-field-label-ic">Respuesta</div><div class="out-text-ic ph" id="ic-out-resp">Genera la nota para ver el contenido…</div></div>
                 <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-trat',this)">Copiar</button><div class="out-field-label-ic">Tratamiento</div><div class="out-text-ic ph" id="ic-out-trat">Genera la nota para ver el contenido…</div></div>
+
               </div>
             </div>
             <div id="ic-out-seg" style="display:none"><div class="out-seg-wrap"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-seg-texto',this)">Copiar</button><div class="out-field-label-ic">Nota de seguimiento</div><div class="out-text-ic ph" id="ic-out-seg-texto">Genera la nota para ver el contenido…</div></div></div>
@@ -2817,21 +2818,32 @@ function generarNotaIcNueva(){
   var tipoResp=icList(icChipsBySubLabel('Tipo de respuesta emocional'))||'una respuesta contextualizada al proceso de hospitalización y enfermedad';
   var impresion=icChipsBySubLabel('Impresión clínica');
   var red=icChipsBySubLabel('Red de apoyo funcional');
+  var protectores=icChipsBySubLabel('Factores protectores');
   var analisis=icv('ic-resp-analisis');
-  var respuesta='Desde la valoración psicológica con enfoque cognitivo-conductual, la respuesta emocional de '+pn+' se comprende como '+tipoResp+'.';
-  if(impresion.length)respuesta+='\n\nImpresión clínica: '+icList(impresion)+'.';
-  if(analisis)respuesta+='\n\n'+analisis;
-  if(red.length)respuesta+='\n\nRed de apoyo: '+icList(red)+'.';
 
   var intervencion=icChipsBySubLabel('Intervención realizada hoy');
   var planAll=icChipsBySubLabel('Plan');
   var plan=planAll.filter(function(c){return['Continúa seguimiento por psicología','Remisión a psiquiatría','Orientación a trabajo social','Alta de psicología','Reinterconsulta si hay cambios'].includes(c);});
   var frecuencia=icChipsBySubLabel('Frecuencia de seguimiento');
   var tratNotas=icv('ic-trat-notas');
+
+  // RESPUESTA — incluye síntesis de notas al final
+  var respuesta='Desde la valoración psicológica con enfoque cognitivo-conductual, la respuesta emocional de '+pn+' se comprende como '+tipoResp+'.';
+  if(impresion.length)respuesta+='\n\nImpresión clínica: '+icList(impresion)+'.';
+  if(analisis)respuesta+='\n\n'+analisis;
+  if(red.length)respuesta+='\n\nEn cuanto a red de apoyo: '+icList(red)+'.';
+  respuesta+='\n\nSe realiza intervención psicológica que incluye '+(icList(intervencion)||'valoración clínica pertinente al caso')+'.';
+  if(protectores.length)respuesta+=' Se refuerzan factores protectores: '+icList(protectores)+'.';
+  if(plan.length){
+    respuesta+='\n\nComo plan se indica: '+icList(plan);
+    if(frecuencia.length)respuesta+='. Frecuencia de seguimiento: '+icList(frecuencia);
+    respuesta+='.';
+  }
+  if(tratNotas)respuesta+='\n\n'+tratNotas;
+
   var tratamiento='Se realiza intervención psicológica hospitalaria que incluye: '+(icList(intervencion)||'valoración clínica pertinente al caso')+'.';
   if(plan.length)tratamiento+='\n\nPlan: '+icList(plan)+'.';
   if(frecuencia.length)tratamiento+=' Frecuencia de seguimiento: '+icList(frecuencia)+'.';
-  if(tratNotas)tratamiento+='\n\n'+tratNotas;
 
   setIcOut('ic-out-sub',subjetivo);
   setIcOut('ic-out-obj',objetivo);
