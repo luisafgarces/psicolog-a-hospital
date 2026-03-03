@@ -2774,7 +2774,7 @@ function mhicRender(){
   const p=pacientes.find(x=>x.id===_hPacId);const nombre=p?p.nombre:_hPacNombre;
   const ics=interconsultas.filter(ic=>ic.pacienteId===_hPacId||ic.pacienteNombre===nombre);
   const anas=anamnesisList.filter(a=>a.pacienteId===_hPacId||a.pacienteNombre===nombre);
-  const all=[...ics.map(x=>Object.assign({},x,{_col:'interconsultas'})),...anas.map(x=>Object.assign({},x,{_col:'anamnesis',modo:x.modo||'Anamnesis'}))].sort((a,b)=>(b.creado&&b.creado.toDate?b.creado.toDate():new Date())-(a.creado&&a.creado.toDate?a.creado.toDate():new Date()));
+  const all=[...ics.map(x=>Object.assign({},x,{_col:'interconsultas'})),...anas.map(x=>Object.assign({},x,{_col:'anamnesis',modo:x.modo||'Anamnesis'}))].sort((a,b)=>{function fMs(v){if(!v)return 0;if(v.toMillis)return v.toMillis();if(v.seconds)return v.seconds*1000;if(v.toDate)return v.toDate().getTime();return 0;}function dMs(s){if(!s)return 0;s=String(s).trim();var p;if(s.length>=10&&s[4]==='-'){p=s.slice(0,10).split('-');return new Date(+p[0],+p[1]-1,+p[2]).getTime()||0;}if(s.indexOf('/')>-1){p=s.split('/');if(p.length===3){var y=p[2].length<=2?'20'+p[2]:p[2];return new Date(+y,+p[1]-1,+p[0]).getTime()||0;}}return 0;}var ka=Math.max(fMs(a.creado),dMs(a.fecha));var kb=Math.max(fMs(b.creado),dMs(b.fecha));return kb-ka;});
   for(const k in _hMap)delete _hMap[k];
   if(!all.length){body.innerHTML='<div class="empty" style="padding:30px"><p>Sin notas. Usa "Nuevo seguimiento" para agregar.</p></div>';return;}
   const tc={'IC Nueva':'var(--accent2)','Seguimiento':'#1a56db','Anamnesis':'#7b1fa2','Nota especial':'var(--warning)'};
