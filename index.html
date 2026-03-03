@@ -2031,6 +2031,27 @@ window.hpacResponder=async(ni)=>{
 </script>
 
 <script>
+// ── SAFE STUBS (evitan ReferenceError antes de que cargue el módulo Firebase) ──
+// El módulo ES reemplaza window.fn con la función real al cargar.
+// Estos stubs capturan clics tempranos y los reintenta hasta que el módulo esté listo.
+(function(){
+  function makeStub(name){
+    window[name]=function stub(...args){
+      // Si el módulo ya reemplazó el stub, llamar la versión real
+      if(window[name]!==stub)return window[name](...args);
+      // Si no, reintentar en 200ms
+      setTimeout(()=>{if(window[name]!==stub)window[name](...args);else window[name](...args);},200);
+    };
+  }
+  ['guardarPaciente','editarPaciente','eliminarPaciente','guardarIC','eliminarIC',
+   'verHistorialPorId','nuevaAnamnesisParaPaciente','abrirICParaPaciente','irTestsPaciente',
+   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad',
+   'guardarAnamnesis','generarNotaAnamnesis','mhicNuevaNota','mhicCerrar',
+   'mneCerrar','mneGuardar','mneEliminar','hpacNuevaNota','hpacVolverLista',
+   'calcPHQ9','calcGAD7','calcHADS','calcMMSE','calcMoCA','calcCAM',
+   'calcCSSRS','calcMMAS4','calcDuelo','calcPCL5','renderConsultaExterna'
+  ].forEach(makeStub);
+})();
 // ── UI & NAVIGATION ──────────────────────────────────────────
 const pages=['dashboard','pacientes','consulta-externa','interconsultas','historial-ic','anamnesis','tests','capacidad','historial','historial-pac'];
 const titles={dashboard:'Inicio',pacientes:'Registro de Pacientes','consulta-externa':'Consulta Externa EPS',interconsultas:'Interconsultas','historial-ic':'Historial de Interconsultas',anamnesis:'Nueva Anamnesis',tests:'Tests Clínicos',capacidad:'Valoración de Capacidad Decisional',historial:'Historial de Tests','historial-pac':'Historial de Pacientes'};
