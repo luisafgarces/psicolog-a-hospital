@@ -608,6 +608,8 @@ input.toggle-cb{display:none}
                 <span class="ic-chip" onclick="setIcEsp('seguimiento',this)">📋 Paciente en seguimiento</span>
                 <span class="ic-chip" onclick="setIcEsp('niega',this)">🚫 Se niega a la atención</span>
                 <span class="ic-chip" onclick="setIcEsp('nocolaborativo',this)">😶 Paciente cero cooperativo</span>
+                <span class="ic-chip" onclick="setIcEsp('sincapacidad',this)">🧠 Sin capacidad cognitiva para intervención</span>
+                <span class="ic-chip" onclick="setIcEsp('somnoliento',this)">😴 Paciente somnoliento / hipoactivo</span>
               </div>
               <div id="ic-esp-preview" style="display:none"><div class="ic-sublabel" style="margin-top:12px">Vista previa de la nota</div><div class="esp-preview" id="ic-esp-text"></div></div>
             </div>
@@ -2400,21 +2402,25 @@ window.hpacRenderLista=()=>{
   const cont=document.getElementById('hpac-lista');if(!cont)return;
   const pacientes=window.pacientes||[];const interconsultas=window.interconsultas||[];
   const anamnesisList=window.anamnesisList||[];const testHistory=window.testHistory||[];
-  const cnt={};
-  interconsultas.forEach(ic=>{const id=ic.pacienteId||'_'+ic.pacienteNombre;cnt[id]=(cnt[id]||0)+1;});
-  anamnesisList.forEach(a=>{const id=a.pacienteId||'_'+a.pacienteNombre;cnt[id]=(cnt[id]||0)+1;});
-  testHistory.forEach(t=>{const id=t.pacienteId||'_'+t.paciente;cnt[id]=(cnt[id]||0)+1;});
-  const todos=[...pacientes].sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  const cnt={};const lastMod={};
+  const toMs=v=>{if(!v)return 0;if(v&&v.toMillis)return v.toMillis();if(v&&v.seconds)return v.seconds*1000;return new Date(v).getTime()||0;};
+  interconsultas.forEach(ic=>{const id=ic.pacienteId||'_'+ic.pacienteNombre;cnt[id]=(cnt[id]||0)+1;const t=toMs(ic.creado||ic.fecha);if(t>(lastMod[id]||0))lastMod[id]=t;});
+  anamnesisList.forEach(a=>{const id=a.pacienteId||'_'+a.pacienteNombre;cnt[id]=(cnt[id]||0)+1;const t=toMs(a.creado||a.fecha);if(t>(lastMod[id]||0))lastMod[id]=t;});
+  testHistory.forEach(t=>{const id=t.pacienteId||'_'+t.paciente;cnt[id]=(cnt[id]||0)+1;const ts=toMs(t.creado||t.fecha);if(ts>(lastMod[id]||0))lastMod[id]=ts;});
+  pacientes.forEach(p=>{const t=toMs(p.creado);if(t>(lastMod[p.id]||0))lastMod[p.id]=t;});
+  const todos=[...pacientes].sort((a,b)=>(lastMod[b.id]||0)-(lastMod[a.id]||0));
   if(!todos.length){cont.innerHTML='<div class="empty"><p>No hay pacientes registrados.</p></div>';return;}
   const rBadge=r=>{if(!r||r==='SIN RIESGO')return'<span class="badge badge-green">Sin riesgo</span>';if(r==='BAJO')return'<span class="badge badge-green">Riesgo bajo</span>';if(r==='MEDIO')return'<span class="badge badge-yellow">Riesgo medio</span>';if(r==='ALTO')return'<span class="badge badge-red">Riesgo alto</span>';return'';};
   cont.innerHTML=todos.map(p=>{
     const n=cnt[p.id]||cnt['_'+p.nombre]||0;
+    const lm=lastMod[p.id]||0;
+    const lmLabel=lm?new Date(lm).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}):'—';
     return`<div class="hpac-card" onclick="hpacAbrirPaciente('${p.id}')">
       <div style="width:40px;height:40px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">${p.sexo==='Femenino'?'👩':'👨'}</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:700;font-size:0.92rem">${p.nombre}</div>
         <div style="font-size:0.73rem;color:var(--text3);margin-top:2px">${p.cedula?'CC: '+p.cedula+' · ':''}${p.tipo==='consulta-externa'?'🚶 C.Ext · ':''}${p.hab?'Hab. '+p.hab+' · ':''}${p.motivo?p.motivo.slice(0,55):''}</div>
-        <div style="margin-top:5px">${rBadge(p.riesgo)}</div>
+        <div style="margin-top:5px;display:flex;gap:6px;align-items:center">${rBadge(p.riesgo)}<span style="font-size:0.68rem;color:var(--text3)">🕐 Últ. actividad: ${lmLabel}</span></div>
       </div>
       <div style="font-size:0.72rem;font-weight:600;background:var(--accent-light);color:var(--accent);padding:3px 10px;border-radius:20px;flex-shrink:0">${n} ${n===1?'registro':'registros'}</div>
     </div>`;
@@ -2735,7 +2741,9 @@ var icEspNotes={
   repetida:'Se recibe nueva interconsulta para valoración psicológica, sin embargo, al acudir no se observan cambios en la conducta del paciente ni nuevos elementos que requieran intervención distinta a lo ya indicado en atenciones previas; se mantienen las recomendaciones generales de apoyo emocional por parte del personal tratante.',
   seguimiento:'Paciente ya se encuentra en protocolo de seguimiento psicológico dentro del contexto hospitalario; en la presente interconsulta no se evidencian criterios de cambios afectivos o conductuales que requieran una valoración adicional, por lo que la evaluación correspondiente se realizará en la fecha programada y registrada en la historia clínica, continuando con las intervenciones previamente establecidas.',
   niega:'Paciente manifiesta su negativa a recibir atención psicológica en el momento actual, ejerciendo su derecho a rechazar la intervención; se respeta su decisión y se deja constancia, quedando a disposición para futuras ocasiones si el paciente lo solicita.',
-  nocolaborativo:'Durante el intento de entrevista, el paciente no muestra disposición para el diálogo ni para participar en la exploración de su estado emocional, dificultando la intervención; se suspende el intento y se mantiene una actitud de apertura para cuando el paciente se encuentre más receptivo.'
+  nocolaborativo:'Durante el intento de entrevista, el paciente no muestra disposición para el diálogo ni para participar en la exploración de su estado emocional, dificultando la intervención; se suspende el intento y se mantiene una actitud de apertura para cuando el paciente se encuentre más receptivo.',
+  sincapacidad:'Al momento de la valoración, el paciente presenta compromiso cognitivo significativo que impide llevar a cabo una intervención psicológica estructurada: se observan alteraciones en orientación, atención, coherencia del discurso y/o contacto con la realidad, compatibles con cuadro de delirium / déficit cognitivo severo / deterioro neurocognitivo mayor. Dado que el paciente no cuenta con las condiciones cognitivas mínimas para participar en el proceso de evaluación ni para procesar intervenciones terapéuticas, se difiere la valoración psicológica. Se notifica al equipo tratante sobre el estado observado y se recomienda valoración por neurología o psiquiatría si aún no se ha realizado. Se mantiene disponibilidad para reevaluar una vez que el cuadro se estabilice o remita.',
+  somnoliento:'El paciente se encuentra en estado de somnolencia marcada al momento de la valoración, con respuesta mínima a estímulos verbales y escasa capacidad de mantener la atención sostenida durante el intento de entrevista. Dicho estado dificulta la evaluación del funcionamiento emocional, cognitivo y conductual, por lo que no es posible realizar una intervención psicológica efectiva en el momento actual. Se suspende la sesión y se programa reevaluación cuando el nivel de conciencia y alerta del paciente lo permita. Se sugiere al equipo médico revisar posibles causas del estado hipoactivo (medicación, factores metabólicos, progresión de la enfermedad).'
 };
 
 window.setIcEsp=function(type,el){
