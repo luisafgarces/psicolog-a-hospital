@@ -44,7 +44,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pac-info-value{font-size:0.88rem;font-weight:600;color:var(--text)}
 .pac-info-full{grid-column:1/-1}
 .pac-sheet-actions{display:flex;gap:8px;flex-wrap:wrap;padding:0 20px;margin-top:4px}
-.pac-sesiones-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border-radius:20px;padding:5px 14px;font-size:0.8rem;font-weight:700;margin-bottom:12px}
+.pac-sesiones-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-light);color:var(--accent);border-radius:20px;padding:5px 14px;font-size:0.8rem;font-weight:700;margin-bottom:12px;border:1.5px solid var(--accent2)}
 .nav-section{font-size:0.65rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.1em;padding:12px 8px 4px;font-weight:600}
 .nav-item{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:7px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:0.82rem;font-weight:500;transition:all 0.15s;margin-bottom:1px}
 .nav-item:hover{background:rgba(255,255,255,0.1);color:#fff}
@@ -1423,7 +1423,7 @@ input.toggle-cb{display:none}
       <button class="pac-sheet-close" onclick="closePacSheet()">✕</button>
     </div>
     <div class="pac-sheet-body">
-      <div id="ps-sesiones-badge" class="pac-sesiones-badge">📅 0 sesiones registradas</div>
+      <div id="ps-sesiones-badge" class="pac-sesiones-badge" title="Ver historial completo del paciente">📅 0 sesiones registradas</div>
       <div class="pac-info-grid" id="ps-grid"></div>
     </div>
     <div class="pac-sheet-actions" id="ps-actions"></div>
@@ -1549,6 +1549,11 @@ onSnapshot(query(collection(db,'test_resultados'),orderBy('creado','desc')),snap
   if(document.getElementById('page-historial').classList.contains('active'))renderHistorial();
   if(document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();
   if(document.getElementById('page-historial-pac').classList.contains('active')){hpacRenderLista();if(window._hpacPacId)hpacRenderNotas();}
+});
+
+let capacidadList=[];window.capacidadList=capacidadList;
+onSnapshot(query(collection(db,'capacidad_decisional'),orderBy('creado','desc')),snap=>{
+  capacidadList=snap.docs.map(d=>({id:d.id,...d.data()}));window.capacidadList=capacidadList;
 });
 
 window.guardarPaciente=async()=>{
@@ -2314,6 +2319,13 @@ window.irTestsPaciente=(id)=>{
   setTimeout(()=>{
     const sel=document.getElementById('test-pac-sel');
     if(sel)sel.value=id;
+  },200);
+};
+window.abrirCapacidadPaciente=(id)=>{
+  goTo('capacidad');
+  setTimeout(()=>{
+    const sel=document.getElementById('cap-pac-sel');
+    if(sel){sel.value=id;selectCapPaciente(id);}
   },200);
 };
 window.selectAnamPaciente=(id)=>{if(!id||typeof pacientes==='undefined')return;const p=pacientes.find(x=>x.id===id);if(!p)return;document.getElementById('an-nombre').value=p.nombre;document.getElementById('an-cedula').value=p.cedula;if(p.edad)document.getElementById('an-edad').value=p.edad;if(p.motivo)document.getElementById('an-motivo').value=p.motivo;};
@@ -3088,23 +3100,26 @@ window.verHistorialPorId=(pacId)=>verHistorialIC(pacId,'');
 window.abrirPacSheet=async(id)=>{
   const p=pacientes.find(x=>x.id===id);
   if(!p)return;
-  // Contar sesiones (IC + anamnesis) en Firebase
-  let sesiones=0;
-  try{
-    const [icSnap,anSnap]=await Promise.all([
-      getDocs(query(collection(db,'interconsultas'),where('pacienteId','==',id))),
-      getDocs(query(collection(db,'anamnesis'),where('pacienteId','==',id)))
-    ]);
-    sesiones=icSnap.size+anSnap.size;
-  }catch(e){sesiones='—';}
+  // Contar sesiones desde datos ya en memoria (instantáneo, sin fallo de red)
+  const sesiones=(window.interconsultas||[]).filter(ic=>ic.pacienteId===id||ic.pacienteNombre===p.nombre).length
+    + (window.anamnesisList||[]).filter(a=>a.pacienteId===id||a.pacienteNombre===p.nombre).length;
 
   const riskColor={'ALTO':'#F87171','MEDIO':'#FBBF24','BAJO':'#34D399','SIN RIESGO':'#34D399'};
   const estadoLabel={'seguimiento':'Seguimiento','nueva-interconsulta-pendiente':'IC pendiente','consulta-externa':'Consulta Externa','alta':'Alta','revaloracion':'Revaluación'};
 
   document.getElementById('ps-nombre').textContent=p.nombre||'Sin nombre';
   document.getElementById('ps-sub').textContent=(p.cedula?'CC: '+p.cedula:'')+(p.cedula&&(p.edad||p.sexo)?' · ':'')+( p.edad?p.edad+' años':'')+( p.sexo?' · '+p.sexo:'');
-  document.getElementById('ps-sesiones-badge').textContent='📅 '+sesiones+' sesión'+(sesiones!==1?'es':'')+' registrada'+(sesiones!==1?'s':'');
+  const badgeEl=document.getElementById('ps-sesiones-badge');
+  badgeEl.textContent='📅 '+sesiones+' sesión'+(sesiones!==1?'es':'')+' registrada'+(sesiones!==1?'s':'');
+  badgeEl.onclick=null;
+  badgeEl.style.cursor='default';
+  badgeEl.title='';
 
+  const capRecord=(window.capacidadList||[]).find(c=>c.pacienteId===id||c.pacienteNombre===p.nombre);
+  const capColorMap={"CONSERVADA":"var(--success)","DISMINUIDA":"var(--warning)","SIN CAPACIDAD":"var(--danger)"};
+  const capIconMap={"CONSERVADA":"✅","DISMINUIDA":"⚠️","SIN CAPACIDAD":"🚫"};
+  const capVal=capRecord&&capRecord.conclusion;
+  const capText=capVal?((capIconMap[capVal]||"")+" "+capVal+(capRecord.fecha?" · "+capRecord.fecha:"")):null;
   const ri=item=>`<div class="pac-info-item${item.full?' pac-info-full':''}"><div class="pac-info-label">${item.l}</div><div class="pac-info-value" style="${item.color?'color:'+item.color:''}">${item.v||'—'}</div></div>`;
   const grid=[
     {l:'Habitación',v:p.hab||(p.tipo==='consulta-externa'?'Consulta Externa':'—')},
@@ -3113,16 +3128,18 @@ window.abrirPacSheet=async(id)=>{
     {l:'Sexo',v:p.sexo||'—'},
     {l:'Riesgo suicida',v:p.riesgo||'Sin clasificar',color:riskColor[p.riesgo]||'var(--text2)'},
     {l:'Estado',v:estadoLabel[p.estado]||p.estado||'—'},
+    capText?{l:'Capacidad decisional',v:capText,color:capColorMap[capVal]}:null,
     {l:'Próxima sesión',v:p.proxSesion?formatDate(p.proxSesion):'No programada'},
     {l:'Dx médico / Motivo IC',v:p.motivo,full:true},
     {l:'Impresión psicológica',v:p.dxpsi,full:true},
     {l:'Observaciones de riesgo',v:p.riesgoObs,full:true},
     {l:'Notas generales',v:p.notas,full:true},
-  ].filter(x=>x.v);
+  ].filter(x=>x&&x.v);
   document.getElementById('ps-grid').innerHTML=grid.map(ri).join('');
   document.getElementById('ps-actions').innerHTML=`
     <button class="btn btn-primary btn-sm" onclick="abrirICParaPaciente('${id}');closePacSheet()">💬 IC</button>
     <button class="btn btn-secondary btn-sm" onclick="irTestsPaciente('${id}');closePacSheet()">🧪 Test</button>
+    <button class="btn btn-secondary btn-sm" onclick="abrirCapacidadPaciente('${id}');closePacSheet()">⚖️ Capacidad</button>
     <button class="btn btn-secondary btn-sm" onclick="editarPaciente('${id}');closePacSheet()">✏️ Editar</button>
     <button class="btn btn-secondary btn-sm" onclick="verHistorialPorId('${id}');closePacSheet()">📂 Historial</button>
   `;
