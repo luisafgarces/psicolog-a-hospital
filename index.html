@@ -103,6 +103,8 @@ tbody td{padding:12px 14px;font-size:0.85rem}
 .badge-purple{background:#f3e8ff;color:#7b1fa2}
 .badge-blue{background:#dbeafe;color:#1d4ed8}
 .badge-blue{background:#e8f0fe;color:#1a56db}
+.badge-black{background:#1a1a1a;color:#e0e0e0}
+.badge-orange{background:#fff3e0;color:#e65100}
 
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,23,20,0.5);z-index:200;align-items:center;justify-content:center;padding:16px}
@@ -1264,7 +1266,7 @@ input.toggle-cb{display:none}
       </div>
       <div class="form-group full"><label>Observaciones de riesgo</label><textarea id="p-riesgo-obs" rows="2" placeholder="Ideación, plan, factores protectores..."></textarea></div>
       <div class="form-group full"><label>Estado actual</label>
-        <select id="p-estado"><option value="seguimiento">Seguimiento</option><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="consulta-externa">Consulta externa</option><option value="alta">Alta</option><option value="revaloracion">Revaluación</option></select>
+        <select id="p-estado"><option value="seguimiento">Seguimiento</option><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="consulta-externa">Consulta externa</option><option value="alta">Alta</option><option value="revaloracion">Revaluación</option><option value="alta-voluntaria">Alta voluntaria</option><option value="fallecido">Paciente fallecido</option></select>
       </div>
       <div class="form-group"><label>Próxima sesión</label><input type="date" id="p-proxsesion"></div>
       <div class="form-group full"><label>Notas generales del caso</label><textarea id="p-notas" rows="3" placeholder="Observaciones, evolución general, consideraciones clínicas..."></textarea></div>
@@ -1418,7 +1420,7 @@ window.renderPacientes=(lista)=>{
   const pisoCustomOrder=['🔵 Bloque Azul','Piso 1','Piso 6','🔴 UCI','Piso 5','Piso 4','Piso 3','Piso 2','🟡 Urgencias','🚶 Consulta Externa'];
   const pisoOrder=Object.keys(grouped).sort((a,b)=>{const ia=pisoCustomOrder.indexOf(a),ib=pisoCustomOrder.indexOf(b);if(ia!==-1&&ib!==-1)return ia-ib;if(ia!==-1)return-1;if(ib!==-1)return 1;const na=parseInt(a.replace('Piso ','')),nb=parseInt(b.replace('Piso ',''));return isNaN(na)?1:isNaN(nb)?-1:na-nb;});
   const riskBadge=(r)=>{if(!r||r==='SIN RIESGO')return'<span class="badge badge-green">Sin riesgo</span>';if(r==='BAJO')return'<span class="badge badge-green">Bajo</span>';if(r==='MEDIO')return'<span class="badge badge-yellow">Medio</span>';if(r==='ALTO')return'<span class="badge badge-red">Alto</span>';return'<span class="badge badge-gray">—</span>';};
-  const estadoBadge=(e)=>{const m={'seguimiento':'badge-blue','nueva-interconsulta-pendiente':'badge-yellow','consulta-externa':'badge-purple','alta':'badge-gray','revaloracion':'badge-purple'};const l={'seguimiento':'Seguimiento','nueva-interconsulta-pendiente':'IC pendiente','consulta-externa':'C. Externa','alta':'Alta','revaloracion':'Revaluación'};return`<span class="badge ${m[e]||'badge-gray'}">${l[e]||e||'—'}</span>`;};
+  const estadoBadge=(e)=>{const m={'seguimiento':'badge-blue','nueva-interconsulta-pendiente':'badge-yellow','consulta-externa':'badge-purple','alta':'badge-gray','revaloracion':'badge-purple','alta-voluntaria':'badge-orange','fallecido':'badge-black'};const l={'seguimiento':'Seguimiento','nueva-interconsulta-pendiente':'IC pendiente','consulta-externa':'C. Externa','alta':'Alta','revaloracion':'Revaluación','alta-voluntaria':'⚠ Alta voluntaria','fallecido':'✝ Fallecido'};return`<span class="badge ${m[e]||'badge-gray'}">${l[e]||e||'—'}</span>`;};
   const hoyStr=new Date().toISOString().split('T')[0];
   const proxBadge=(p)=>{
     if(!p.proxSesion)return'<span style="color:var(--text3);font-size:12px">—</span>';
@@ -1830,7 +1832,7 @@ window.renderDashboard=()=>{
   const getPiso=(p)=>{if(p.tipo==='consulta-externa')return'🚶 Consulta Externa';const hab=p.hab||'';if(!hab)return'Sin piso asignado';const u=hab.toUpperCase();if(u.includes('UCI')||u.includes('UTI')||u.includes('CUIDADOS INTENSIVOS'))return'🔴 UCI';if(u.includes('URG'))return'🟡 Urgencias';if(u.includes('AZU')||u.includes('AZUL')||u.includes('BLQ')||u.includes('BLOQUE'))return'🔵 Bloque Azul';const m=hab.match(/^(\d+)/);if(!m)return'Sin piso asignado';const n=parseInt(m[1]);if(n>=100)return'Piso '+Math.floor(n/100);return'Piso '+n;};
   const riskClass=(r)=>r==='ALTO'?'riesgo-alto':r==='MEDIO'?'riesgo-medio':r==='BAJO'?'riesgo-bajo':'riesgo-sin';
   const riskBadge=(r)=>{if(!r||r==='SIN RIESGO')return'<span class="badge badge-green">Sin riesgo</span>';if(r==='BAJO')return'<span class="badge badge-green">Riesgo bajo</span>';if(r==='MEDIO')return'<span class="badge badge-yellow">Riesgo medio</span>';if(r==='ALTO')return'<span class="badge badge-red">⚠️ Riesgo alto</span>';return'';};
-  const estadoBadge=(e)=>{const m={'seguimiento':'badge-blue','nueva-interconsulta-pendiente':'badge-yellow','consulta-externa':'badge-purple','alta':'badge-gray','revaloracion':'badge-purple'};const l={'seguimiento':'Seguimiento','nueva-interconsulta-pendiente':'IC pendiente','consulta-externa':'C. Externa','alta':'Alta','revaloracion':'Revaluacion'};return'<span class="badge '+(m[e]||'badge-gray')+'">'+( l[e]||e||'-')+'</span>';};
+  const estadoBadge=(e)=>{const m={'seguimiento':'badge-blue','nueva-interconsulta-pendiente':'badge-yellow','consulta-externa':'badge-purple','alta':'badge-gray','revaloracion':'badge-purple','alta-voluntaria':'badge-orange','fallecido':'badge-black'};const l={'seguimiento':'Seguimiento','nueva-interconsulta-pendiente':'IC pendiente','consulta-externa':'C. Externa','alta':'Alta','revaloracion':'Revaluacion','alta-voluntaria':'⚠ Alta voluntaria','fallecido':'✝ Fallecido'};return'<span class="badge '+(m[e]||'badge-gray')+'">'+( l[e]||e||'-')+'</span>';};
 
   // ── FILTRAR: solo hoy o todos ──
   let lista=pacientes.filter(p=>p.estado!=='alta');
