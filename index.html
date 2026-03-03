@@ -650,13 +650,211 @@ input.toggle-cb{display:none}
     <!-- ANAMNESIS -->
     <div id="page-anamnesis" class="page">
       <div class="section-header">
-        <h2>Anamnesis Psicológica · Primera vez</h2>
-        <div style="display:flex;gap:10px;align-items:center">
+        <h2 id="anam-page-title">Anamnesis Psicológica</h2>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <select id="anamnesis-paciente-sel" onchange="selectAnamPaciente(this.value)" style="padding:7px 11px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;min-width:190px">
             <option value="">— Seleccionar paciente —</option>
           </select>
           <button class="btn btn-secondary" onclick="clearAnamnesis()">Nueva</button>
         </div>
+      </div>
+      <!-- Tabs -->
+      <div id="anam-tabs" style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px">
+        <button id="anam-tab-primera" onclick="anamSwitchTab('primera')" style="padding:9px 20px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:600;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px;cursor:pointer">📋 Primera vez</button>
+        <button id="anam-tab-sesion" onclick="anamSwitchTab('sesion')" style="padding:9px 20px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer">📝 Nota de sesión</button>
+        <button id="anam-tab-historial" onclick="anamSwitchTab('historial')" style="padding:9px 20px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer">📂 Sesiones anteriores</button>
+      </div>
+      <!-- Panel nota de sesión -->
+      <div id="anam-panel-sesion" style="display:none">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;max-width:820px">
+
+          <!-- Cabecera -->
+          <div style="text-align:center;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid var(--accent)">
+            <div style="font-family:'DM Serif Display',serif;font-size:1.15rem;font-weight:700;color:var(--accent)">REGISTRO DE EVOLUCIÓN TERAPÉUTICA</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:end;margin-bottom:18px;flex-wrap:wrap">
+            <div class="form-group">
+              <label>Paciente</label>
+              <select id="seg-pac-sel" onchange="anamSegSelectPac(this.value)" style="padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;width:100%">
+                <option value="">— Seleccionar paciente —</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Fecha</label><input type="date" id="seg-fecha" style="width:140px"></div>
+            <div class="form-group"><label>Sesión #</label><input type="number" id="seg-num" min="1" placeholder="—" style="width:80px;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem"></div>
+          </div>
+
+          <!-- I. DATOS CLAVES -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">I. Datos claves de la sesión</div>
+
+            <div style="margin-bottom:12px">
+              <div style="font-size:0.8rem;font-weight:600;margin-bottom:6px">1. Estado actual del paciente</div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px">Humor predominante:</div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-humor-estable"> Estable</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-humor-ansioso"> Ansioso</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-humor-depresivo"> Depresivo</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-humor-irritable"> Irritable</label>
+                <span style="font-size:0.82rem;color:var(--text2);display:flex;align-items:center;gap:5px">Escala 1-5: <input type="number" id="seg-humor-escala" min="1" max="5" style="width:50px;padding:3px 7px;border:1px solid var(--border);border-radius:6px;font-size:0.82rem"></span>
+              </div>
+              <div class="form-group"><label>Eventos relevantes desde última sesión</label><textarea id="seg-eventos" rows="2" placeholder="¿Qué pasó desde la última vez que se vieron?..."></textarea></div>
+            </div>
+
+            <div>
+              <div style="font-size:0.8rem;font-weight:600;margin-bottom:6px">2. Revisión de tareas asignadas</div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-tarea-completa"> Completa</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-tarea-parcial"> Parcial</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-tarea-no"> No realizada</label>
+              </div>
+              <div class="form-group"><label>Dificultades encontradas</label><textarea id="seg-dificultades" rows="2" placeholder="¿Qué obstáculos encontró para realizar la tarea?..."></textarea></div>
+            </div>
+          </div>
+
+          <!-- II. PROCESO TERAPÉUTICO -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">II. Proceso terapéutico — Foco TCC</div>
+
+            <div style="margin-bottom:12px">
+              <div style="font-size:0.8rem;font-weight:600;margin-bottom:6px">1. Técnicas aplicadas en sesión</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
+                  <input type="checkbox" id="seg-tec-reest" style="margin-top:2px">
+                  <span>Reestructuración cognitiva — Efectividad 1-5: <input type="number" id="seg-tec-reest-ef" min="1" max="5" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem"></span>
+                </label>
+                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
+                  <input type="checkbox" id="seg-tec-expos" style="margin-top:2px">
+                  <span>Exposición gradual — Nivel de ansiedad máximo: <input type="number" id="seg-tec-expos-nivel" min="0" max="10" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem">/10</span>
+                </label>
+                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
+                  <input type="checkbox" id="seg-tec-dbt" style="margin-top:2px">
+                  <span>Entrenamiento habilidades DBT (TLP): 
+                    <label style="margin-left:8px"><input type="checkbox" id="seg-tec-dbt-tol"> Tolerancia al malestar</label>
+                    <label style="margin-left:8px"><input type="checkbox" id="seg-tec-dbt-reg"> Regulación emocional</label>
+                  </span>
+                </label>
+                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
+                  <input type="checkbox" id="seg-tec-psico" style="margin-top:2px">
+                  <span>Psicoeducación sobre: <input type="text" id="seg-tec-psico-tema" placeholder="tema..." style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:200px;padding:1px 4px"></span>
+                </label>
+                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
+                  <input type="checkbox" id="seg-tec-otras" style="margin-top:2px">
+                  <span>Otra técnica: <input type="text" id="seg-tec-otras-cual" placeholder="especificar..." style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:200px;padding:1px 4px"></span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size:0.8rem;font-weight:600;margin-bottom:8px">2. Cogniciones identificadas</div>
+              <div class="form-group" style="margin-bottom:8px"><label>Pensamiento automático clave</label><textarea id="seg-pensamiento" rows="2" placeholder='"Soy un fracasado", "Nunca voy a mejorar"...'></textarea></div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px">Distorsión cognitiva:</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-dist-catas"> Catastrofismo</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-dist-person"> Personalización</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-dist-polar"> Pensamiento polarizado</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-dist-sobre"> Sobregeneralización</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-dist-filtr"> Filtro mental</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-dist-otra"> Otra: <input type="text" id="seg-dist-otra-cual" style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:130px;padding:1px 4px"></label>
+              </div>
+            </div>
+          </div>
+
+          <!-- III. PLAN DE ACCIÓN -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">III. Plan de acción</div>
+
+            <div style="margin-bottom:12px">
+              <div style="font-size:0.8rem;font-weight:600;margin-bottom:8px">1. Tareas para próxima sesión</div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <label style="display:flex;align-items:center;gap:7px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-tarea-reg"> Registro de pensamientos (Situación → Emoción → Pensamiento)</label>
+                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
+                  <input type="checkbox" id="seg-tarea-dbt2" style="margin-top:2px">
+                  <span>Práctica habilidad DBT: <input type="text" id="seg-tarea-dbt2-cual" placeholder="especificar..." style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:200px;padding:1px 4px"></span>
+                </label>
+                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
+                  <input type="checkbox" id="seg-tarea-otra2" style="margin-top:2px">
+                  <span>Otra: <input type="text" id="seg-tarea-otra2-cual" placeholder="especificar..." style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:260px;padding:1px 4px"></span>
+                </label>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label>Objetivo corto plazo — próxima sesión</label><textarea id="seg-obj-corto" rows="2" placeholder="Ej: Practicar respiración ante situaciones de ansiedad..."></textarea></div>
+              <div class="form-group"><label>Objetivo largo plazo</label><textarea id="seg-obj-largo" rows="2" placeholder="Ej: Reducir evitación social y mejorar autoestima..."></textarea></div>
+            </div>
+          </div>
+
+          <!-- IV. NOTAS CLÍNICAS -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">IV. Notas clínicas</div>
+
+            <div style="margin-bottom:12px">
+              <div style="font-size:0.8rem;font-weight:600;margin-bottom:8px">1. Observaciones relevantes</div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px">Riesgos detectados:</div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-riesgo-ideacion"> Ideación suicida</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-riesgo-autolesion"> Autolesiones</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-riesgo-otro"> Otro: <input type="text" id="seg-riesgo-otro-cual" style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:140px;padding:1px 4px;margin-left:4px"></label>
+              </div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px">Recursos del paciente:</div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-rec-insight"> Insight</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-rec-motiv"> Motivación</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-rec-apoyo"> Apoyo social</label>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label>Nivel de riesgo suicida</label>
+                <select id="seg-riesgo"><option value="">Sin cambios / No aplica</option><option value="SIN RIESGO">SIN RIESGO</option><option value="BAJO">BAJO</option><option value="MEDIO">MEDIO</option><option value="ALTO">ALTO</option></select>
+              </div>
+              <div class="form-group"><label>Ajustes terapéuticos</label><textarea id="seg-ajustes" rows="2" placeholder='Ej: "Reducir velocidad por crisis actual"...'></textarea></div>
+            </div>
+          </div>
+
+          <!-- V. ESCALAS -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:18px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">V. Escalas de medición <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3)">(Opcional)</span></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+              <div style="font-size:0.82rem">PHQ-9 (Depresión)<br>
+                <span style="color:var(--text3);font-size:0.75rem">Inicial:</span> <input type="number" id="seg-phq-ini" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem">
+                <span style="color:var(--text3);font-size:0.75rem;margin-left:6px">Actual:</span> <input type="number" id="seg-phq-act" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem">
+              </div>
+              <div style="font-size:0.82rem">GAD-7 (Ansiedad)<br>
+                <span style="color:var(--text3);font-size:0.75rem">Inicial:</span> <input type="number" id="seg-gad-ini" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem">
+                <span style="color:var(--text3);font-size:0.75rem;margin-left:6px">Actual:</span> <input type="number" id="seg-gad-act" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem">
+              </div>
+              <div style="font-size:0.82rem">Impulsividad (TLP)<br>
+                <input type="number" id="seg-impuls" min="0" max="10" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem"> / 10
+              </div>
+            </div>
+          </div>
+
+          <!-- Próxima cita + botones -->
+          <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)">
+            <div class="form-group"><label>Próxima cita</label><input type="date" id="seg-proxcita" style="padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem"></div>
+            <div class="form-group"><label>Modalidad</label>
+              <div style="display:flex;gap:12px;padding:9px 0">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="seg-modalidad" value="Presencial" id="seg-mod-pres"> Presencial</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="seg-modalidad" value="Online" id="seg-mod-online"> Online</label>
+              </div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:10px">
+              <button class="btn btn-secondary" onclick="anamSegLimpiar()">🗑 Limpiar</button>
+              <button class="btn btn-primary" onclick="anamSegGuardar()">💾 Guardar nota de sesión</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Panel historial sesiones -->
+      <div id="anam-panel-historial" style="display:none">
+        <div style="margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <select id="seg-historial-pac-sel" onchange="anamHistorialRender(this.value)" style="padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;min-width:220px">
+            <option value="">— Seleccionar paciente —</option>
+          </select>
+          <span id="seg-historial-count" style="font-size:0.8rem;color:var(--text3)"></span>
+        </div>
+        <div id="seg-historial-lista"></div>
       </div>
       <div class="timer-bar">
         <div class="timer-step"><div class="ts-time">0–5 min</div>Escucha / motivo</div>
@@ -1338,6 +1536,12 @@ onSnapshot(query(collection(db,'anamnesis'),orderBy('creado','desc')),snap=>{
   anamnesisList=snap.docs.map(d=>({id:d.id,...d.data()}));window.anamnesisList=anamnesisList;
   updateStats();
   if(document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();
+  // Refresh historial sesiones si está abierto
+  const histPanel=document.getElementById('anam-panel-historial');
+  if(histPanel&&histPanel.style.display!=='none'){
+    const hs=document.getElementById('seg-historial-pac-sel');
+    if(hs&&hs.value&&typeof anamHistorialRender==='function')anamHistorialRender(hs.value);
+  }
 });
 onSnapshot(query(collection(db,'test_resultados'),orderBy('creado','desc')),snap=>{
   testHistory=snap.docs.map(d=>({id:d.id,...d.data()}));window.testHistory=testHistory;
@@ -1765,7 +1969,7 @@ window.guardarAnamnesis=async()=>{
   const nombre=document.getElementById('an-nombre').value.trim();
   if(!nombre)return toast('⚠️ Ingresa el nombre del paciente');
   const nota=generarNota();setSyncStatus('syncing');
-  try{await addDoc(collection(db,'anamnesis'),{pacienteId:document.getElementById('anamnesis-paciente-sel').value||null,pacienteNombre:nombre,pacienteCedula:document.getElementById('an-cedula').value,fecha:document.getElementById('an-fecha').value,riesgo:document.getElementById('an-riesgo').value,dx:getChecked('an-dx'),nota,creado:serverTimestamp()});
+  try{await addDoc(collection(db,'anamnesis'),{pacienteId:document.getElementById('anamnesis-paciente-sel').value||null,pacienteNombre:nombre,pacienteCedula:document.getElementById('an-cedula').value,fecha:document.getElementById('an-fecha').value,riesgo:document.getElementById('an-riesgo').value,dx:getChecked('an-dx'),nota,modo:'Anamnesis',creado:serverTimestamp()});
   toast('✅ Anamnesis guardada');
   // Limpiar formulario después de guardar
   setTimeout(()=>clearAnamnesis(),300);
@@ -1973,7 +2177,10 @@ window.renderConsultaExterna=(q)=>{
   }).join('')+'</tbody></table></div>';
 };
 
-window.populateAnamPacientes=()=>{const sel=document.getElementById('anamnesis-paciente-sel');if(!sel)return;const cur=sel.value;sel.innerHTML='<option value="">— Seleccionar paciente —</option>'+pacientes.map(p=>`<option value="${p.id}">${p.nombre} (${p.cedula})</option>`).join('');if(cur)sel.value=cur;};
+window.populateAnamPacientes=()=>{
+  const opts='<option value="">— Seleccionar paciente —</option>'+pacientes.map(p=>`<option value="${p.id}">${p.nombre} (${p.cedula})</option>`).join('');
+  ['anamnesis-paciente-sel','seg-pac-sel','seg-historial-pac-sel'].forEach(id=>{const sel=document.getElementById(id);if(!sel)return;const cur=sel.value;sel.innerHTML=opts;if(cur)sel.value=cur;});
+};
 
 setSyncStatus('syncing');
 ['p-fecha','ic-fecha','an-fecha'].forEach(id=>{try{document.getElementById(id).value=new Date().toISOString().split('T')[0];}catch(e){}});
@@ -2111,6 +2318,224 @@ window.irTestsPaciente=(id)=>{
 };
 window.selectAnamPaciente=(id)=>{if(!id||typeof pacientes==='undefined')return;const p=pacientes.find(x=>x.id===id);if(!p)return;document.getElementById('an-nombre').value=p.nombre;document.getElementById('an-cedula').value=p.cedula;if(p.edad)document.getElementById('an-edad').value=p.edad;if(p.motivo)document.getElementById('an-motivo').value=p.motivo;};
 window.clearAnamnesis=()=>{document.getElementById('form-anamnesis').reset();document.getElementById('anamnesis-paciente-sel').value='';document.getElementById('an-riesgo').value='';document.querySelectorAll('.risk-btn').forEach(b=>b.classList.remove('sel'));document.getElementById('nota-output').textContent='Completa los campos y presiona "Generar nota clínica"…';document.getElementById('an-intens-val').textContent='5';};
+
+// ── ANAMNESIS TABS & SESIONES ────────────────────────────────
+window.anamSwitchTab=function(tab){
+  // Update tab styles
+  ['primera','sesion','historial'].forEach(t=>{
+    const btn=document.getElementById('anam-tab-'+t);
+    if(!btn)return;
+    btn.style.color=t===tab?'var(--accent)':'var(--text2)';
+    btn.style.borderBottomColor=t===tab?'var(--accent)':'transparent';
+    btn.style.fontWeight=t===tab?'600':'500';
+  });
+  // Show/hide panels
+  const form=document.getElementById('form-anamnesis');
+  const panelSeg=document.getElementById('anam-panel-sesion');
+  const panelHist=document.getElementById('anam-panel-historial');
+  const timerBar=document.querySelector('#page-anamnesis .timer-bar');
+  if(form)form.style.display=tab==='primera'?'':'none';
+  if(timerBar)timerBar.style.display=tab==='primera'?'':'none';
+  if(panelSeg)panelSeg.style.display=tab==='sesion'?'':'none';
+  if(panelHist){
+    panelHist.style.display=tab==='historial'?'':'none';
+    if(tab==='historial'){
+      const sel=document.getElementById('seg-historial-pac-sel');
+      if(sel&&sel.value)anamHistorialRender(sel.value);
+    }
+  }
+  // Auto-sync patient selection across tabs
+  if(tab==='sesion'){
+    const mainSel=document.getElementById('anamnesis-paciente-sel');
+    const segSel=document.getElementById('seg-pac-sel');
+    if(mainSel&&segSel&&mainSel.value&&!segSel.value)segSel.value=mainSel.value;
+    // Set today's date if empty
+    const fd=document.getElementById('seg-fecha');
+    if(fd&&!fd.value)fd.value=new Date().toISOString().split('T')[0];
+    // Auto-set session number
+    anamSegAutoNum();
+  }
+  if(tab==='historial'){
+    const mainSel=document.getElementById('anamnesis-paciente-sel');
+    const histSel=document.getElementById('seg-historial-pac-sel');
+    if(mainSel&&histSel&&mainSel.value&&!histSel.value){
+      histSel.value=mainSel.value;
+      anamHistorialRender(mainSel.value);
+    }
+  }
+};
+
+window.anamSegSelectPac=function(id){
+  if(!id)return;
+  anamSegAutoNum();
+};
+
+window.anamSegAutoNum=function(){
+  const sel=document.getElementById('seg-pac-sel');
+  const numEl=document.getElementById('seg-num');
+  if(!sel||!sel.value||!numEl||numEl.value)return;
+  const pacId=sel.value;
+  const pacNombre=(window.pacientes||[]).find(p=>p.id===pacId)?.nombre||'';
+  const prevSesiones=(window.anamnesisList||[]).filter(a=>
+    (a.pacienteId===pacId||a.pacienteNombre===pacNombre)&&a.modo==='Seguimiento'
+  );
+  numEl.value=prevSesiones.length+2; // +1 for anamnesis inicial, +1 for this
+};
+
+window.anamSegLimpiar=function(){
+  const ids=['seg-num','seg-eventos','seg-dificultades','seg-pensamiento','seg-ajustes',
+    'seg-obj-corto','seg-obj-largo','seg-tec-psico-tema','seg-tec-otras-cual','seg-tec-reest-ef',
+    'seg-tec-expos-nivel','seg-tarea-dbt2-cual','seg-tarea-otra2-cual','seg-dist-otra-cual',
+    'seg-riesgo-otro-cual','seg-humor-escala','seg-phq-ini','seg-phq-act','seg-gad-ini',
+    'seg-gad-act','seg-impuls','seg-proxcita'];
+  ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const cbs=['seg-humor-estable','seg-humor-ansioso','seg-humor-depresivo','seg-humor-irritable',
+    'seg-tarea-completa','seg-tarea-parcial','seg-tarea-no','seg-tec-reest','seg-tec-expos',
+    'seg-tec-dbt','seg-tec-dbt-tol','seg-tec-dbt-reg','seg-tec-psico','seg-tec-otras',
+    'seg-dist-catas','seg-dist-person','seg-dist-polar','seg-dist-sobre','seg-dist-filtr',
+    'seg-dist-otra','seg-tarea-reg','seg-tarea-dbt2','seg-tarea-otra2','seg-riesgo-ideacion',
+    'seg-riesgo-autolesion','seg-riesgo-otro','seg-rec-insight','seg-rec-motiv','seg-rec-apoyo'];
+  cbs.forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
+  document.querySelectorAll('input[name="seg-modalidad"]').forEach(r=>r.checked=false);
+  const rEl=document.getElementById('seg-riesgo');if(rEl)rEl.value='';
+  const fd=document.getElementById('seg-fecha');if(fd)fd.value=new Date().toISOString().split('T')[0];
+};
+
+window.anamSegGuardar=async function(){
+  const pacId=document.getElementById('seg-pac-sel').value;
+  if(!pacId)return toast('⚠️ Selecciona un paciente');
+  const pac=(window.pacientes||[]).find(p=>p.id===pacId);
+  if(!pac)return toast('⚠️ Paciente no encontrado');
+  const gv=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
+  const gc=id=>{const el=document.getElementById(id);return el?el.checked:false;};
+  // Build structured summary fields
+  const humor=[gc('seg-humor-estable')&&'Estable',gc('seg-humor-ansioso')&&'Ansioso',
+    gc('seg-humor-depresivo')&&'Depresivo',gc('seg-humor-irritable')&&'Irritable'].filter(Boolean);
+  const humorEsc=gv('seg-humor-escala');
+  const subParts=[];
+  if(humor.length)subParts.push('Humor: '+humor.join(', ')+(humorEsc?' ('+humorEsc+'/5)':''));
+  if(gv('seg-eventos'))subParts.push('Eventos desde última sesión: '+gv('seg-eventos'));
+  const tareaRev=[gc('seg-tarea-completa')&&'Completa',gc('seg-tarea-parcial')&&'Parcial',gc('seg-tarea-no')&&'No realizada'].filter(Boolean);
+  if(tareaRev.length)subParts.push('Revisión de tarea: '+tareaRev.join(', '));
+  if(gv('seg-dificultades'))subParts.push('Dificultades: '+gv('seg-dificultades'));
+  const tecnicas=[];
+  if(gc('seg-tec-reest'))tecnicas.push('Reestructuración cognitiva'+(gv('seg-tec-reest-ef')?' (ef. '+gv('seg-tec-reest-ef')+'/5)':''));
+  if(gc('seg-tec-expos'))tecnicas.push('Exposición gradual'+(gv('seg-tec-expos-nivel')?' (ansiedad máx. '+gv('seg-tec-expos-nivel')+'/10)':''));
+  if(gc('seg-tec-dbt')){let dbt='Habilidades DBT';const sub2=[];if(gc('seg-tec-dbt-tol'))sub2.push('Tolerancia al malestar');if(gc('seg-tec-dbt-reg'))sub2.push('Regulación emocional');if(sub2.length)dbt+=' ('+sub2.join(', ')+')';tecnicas.push(dbt);}
+  if(gc('seg-tec-psico')&&gv('seg-tec-psico-tema'))tecnicas.push('Psicoeducación: '+gv('seg-tec-psico-tema'));
+  if(gc('seg-tec-otras')&&gv('seg-tec-otras-cual'))tecnicas.push(gv('seg-tec-otras-cual'));
+  const resp=tecnicas.length?'Técnicas: '+tecnicas.join(' | '):'' ;
+  const cogParts=[];
+  if(gv('seg-pensamiento'))cogParts.push('Pensamiento automático: "'+gv('seg-pensamiento')+'"');
+  const dist=[gc('seg-dist-catas')&&'Catastrofismo',gc('seg-dist-person')&&'Personalización',
+    gc('seg-dist-polar')&&'Pensamiento polarizado',gc('seg-dist-sobre')&&'Sobregeneralización',
+    gc('seg-dist-filtr')&&'Filtro mental',gc('seg-dist-otra')&&gv('seg-dist-otra-cual')].filter(Boolean);
+  if(dist.length)cogParts.push('Distorsiones: '+dist.join(', '));
+  const objParts=[];
+  const tareas=[];
+  if(gc('seg-tarea-reg'))tareas.push('Registro de pensamientos');
+  if(gc('seg-tarea-dbt2')&&gv('seg-tarea-dbt2-cual'))tareas.push('Práctica DBT: '+gv('seg-tarea-dbt2-cual'));
+  if(gc('seg-tarea-otra2')&&gv('seg-tarea-otra2-cual'))tareas.push(gv('seg-tarea-otra2-cual'));
+  if(tareas.length)objParts.push('Tareas: '+tareas.join(' | '));
+  if(gv('seg-obj-corto'))objParts.push('Corto plazo: '+gv('seg-obj-corto'));
+  if(gv('seg-obj-largo'))objParts.push('Largo plazo: '+gv('seg-obj-largo'));
+  const notasParts=[];
+  const riesgosD=[gc('seg-riesgo-ideacion')&&'Ideación suicida',gc('seg-riesgo-autolesion')&&'Autolesiones',
+    gc('seg-riesgo-otro')&&gv('seg-riesgo-otro-cual')].filter(Boolean);
+  if(riesgosD.length)notasParts.push('Riesgos: '+riesgosD.join(', '));
+  const recursos=[gc('seg-rec-insight')&&'Insight',gc('seg-rec-motiv')&&'Motivación',gc('seg-rec-apoyo')&&'Apoyo social'].filter(Boolean);
+  if(recursos.length)notasParts.push('Recursos: '+recursos.join(', '));
+  if(gv('seg-ajustes'))notasParts.push('Ajustes terapéuticos: '+gv('seg-ajustes'));
+  const escalasParts=[];
+  if(gv('seg-phq-ini')||gv('seg-phq-act'))escalasParts.push('PHQ-9: inicial='+gv('seg-phq-ini')+' actual='+gv('seg-phq-act'));
+  if(gv('seg-gad-ini')||gv('seg-gad-act'))escalasParts.push('GAD-7: inicial='+gv('seg-gad-ini')+' actual='+gv('seg-gad-act'));
+  if(gv('seg-impuls'))escalasParts.push('Impulsividad TLP: '+gv('seg-impuls')+'/10');
+  if(escalasParts.length)notasParts.push('Escalas: '+escalasParts.join(' | '));
+  const modalidad=document.querySelector('input[name="seg-modalidad"]:checked')?.value||'';
+  const proxcita=gv('seg-proxcita');
+  if(proxcita)notasParts.push('Próxima cita: '+proxcita+(modalidad?' ('+modalidad+')':''));
+  const sub=subParts.join('\n');
+  const obj=cogParts.join('\n');
+  const trat=objParts.join('\n');
+  const nota=notasParts.join('\n');
+  if(!sub&&!obj&&!resp&&!trat&&!nota)return toast('⚠️ Completa al menos un campo de la sesión');
+  const riesgo=document.getElementById('seg-riesgo').value;
+  const numSesion=gv('seg-num');
+  const fecha=gv('seg-fecha')||new Date().toISOString().split('T')[0];
+  setSyncStatus('syncing');
+  try{
+    const {collection,addDoc,serverTimestamp}=window._fdb||{};
+    await addDoc(collection(window.db,'anamnesis'),{
+      pacienteId:pac.id,pacienteNombre:pac.nombre,pacienteCedula:pac.cedula||'',
+      fecha,numSesion:numSesion?parseInt(numSesion):null,modo:'Seguimiento',
+      riesgo:riesgo||'',sub,obj,resp,trat,nota,
+      creado:serverTimestamp()
+    });
+    toast('✅ Nota de sesión guardada');setSyncStatus('online');
+    anamSegLimpiar();anamSegAutoNum();
+  }catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
+};
+
+window.anamHistorialRender=function(pacId){
+  const cont=document.getElementById('seg-historial-lista');
+  const countEl=document.getElementById('seg-historial-count');
+  if(!cont)return;
+  if(!pacId){cont.innerHTML='';if(countEl)countEl.textContent='';return;}
+  const pac=(window.pacientes||[]).find(p=>p.id===pacId);
+  const nombre=pac?.nombre||'';
+  // Get all anamnesis records for this patient (initial + sessions)
+  const todos=(window.anamnesisList||[]).filter(a=>
+    a.pacienteId===pacId||a.pacienteNombre===nombre
+  ).sort((a,b)=>{
+    const da=a.creado?.toDate?a.creado.toDate():new Date(a.fecha||0);
+    const db2=b.creado?.toDate?b.creado.toDate():new Date(b.fecha||0);
+    return db2-da;
+  });
+  if(countEl)countEl.textContent=todos.length+' registro'+(todos.length!==1?'s':'');
+  if(!todos.length){
+    cont.innerHTML='<div class="empty"><p>Sin sesiones registradas para este paciente.</p></div>';return;
+  }
+  const modoColor={Seguimiento:'#1a56db',Anamnesis:'#7b1fa2'};
+  const modoIcon={Seguimiento:'📝',Anamnesis:'📋'};
+  const noNA=v=>v&&!v.startsWith('N/A')&&!v.startsWith('Genera');
+  cont.innerHTML=todos.map((e,i)=>{
+    const col=modoColor[e.modo]||'var(--accent2)';
+    const ico=modoIcon[e.modo]||'📄';
+    const modo=e.modo||'Nota';
+    const sesLabel=e.numSesion?'Sesión '+e.numSesion:'';
+    const riesgo=e.riesgo;
+    const rColor=riesgo==='ALTO'?'var(--danger)':riesgo==='MEDIO'?'var(--warning)':'var(--success)';
+    const rBadge=(riesgo&&riesgo!=='No clasificado'&&riesgo!=='SIN RIESGO'&&riesgo!=='')?
+      `<span style="background:${rColor}22;color:${rColor};padding:2px 8px;border-radius:20px;font-size:0.68rem;font-weight:600">${riesgo}</span>`:'';
+    const campos=[];
+    const labelSeg={sub:'I. Estado del paciente / Datos de sesión',obj:'II. Cogniciones identificadas',resp:'II. Técnicas aplicadas',trat:'III. Plan de acción',nota:'IV. Notas clínicas'};
+    const labelGen={sub:'Análisis Subjetivo',obj:'Análisis Objetivo',resp:'Respuesta / Impresión clínica',trat:'Tratamiento / Plan',nota:'Notas adicionales'};
+    const isSeg=e.modo==='Seguimiento';
+    const lMap=isSeg?labelSeg:labelGen;
+    if(noNA(e.sub))campos.push({l:lMap.sub,v:e.sub});
+    if(noNA(e.obj))campos.push({l:lMap.obj,v:e.obj});
+    if(noNA(e.resp))campos.push({l:lMap.resp,v:e.resp});
+    if(noNA(e.trat))campos.push({l:lMap.trat,v:e.trat});
+    if(noNA(e.nota))campos.push({l:lMap.nota,v:e.nota});
+    if(!campos.length&&e.nota)campos.push({l:'Nota clínica',v:e.nota});
+    const camposHtml=campos.length
+      ?campos.map(c=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px">
+          <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:4px">${c.l}</div>
+          <div style="font-size:0.8rem;line-height:1.6;white-space:pre-wrap">${c.v}</div></div>`).join('')
+      :'<p style="color:var(--text3);font-size:0.8rem;font-style:italic">Sin texto guardado.</p>';
+    return `<div style="background:var(--surface2);border:1px solid var(--border);border-left:4px solid ${col};border-radius:10px;padding:14px 16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <div>
+          <span style="font-weight:700;font-size:0.88rem">${ico} ${modo}</span>
+          ${sesLabel?`<span style="margin-left:8px;background:var(--accent-light);color:var(--accent);padding:1px 8px;border-radius:20px;font-size:0.72rem;font-weight:600">${sesLabel}</span>`:''}
+          <span style="font-size:0.82rem;color:var(--text2);margin-left:8px">${e.fecha||'Sin fecha'}</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">${rBadge}</div>
+      </div>
+      ${camposHtml}
+    </div>`;
+  }).join('');
+};
 window.setRisk=(level,el)=>{document.querySelectorAll('.risk-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');document.getElementById('an-riesgo').value=level;};
 window.setPRisk=(level,el)=>{document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');document.getElementById('p-riesgo').value=level;};
 window.getChecked=(id)=>[...document.querySelectorAll(`#${id} input:checked`)].map(i=>i.value).join(', ');
@@ -2354,9 +2779,13 @@ function mhicRender(){
     const subInfo=(e.hab||e.dx)?'<div style="font-size:0.72rem;color:var(--text3);margin-top:2px">'+(e.hab?'Hab. '+e.hab+' - ':'')+( e.dx||'')+'</div>':'';
     let camposHtml='<div style="font-size:0.78rem;color:var(--text3);font-style:italic;margin-top:8px">Sin texto guardado</div>';
     const cv=[];
-    if(e.sub)cv.push({l:'Subjetivo',v:e.sub});if(e.obj)cv.push({l:'Objetivo',v:e.obj});
-    if(e.resp)cv.push({l:'Respuesta',v:e.resp});if(e.trat)cv.push({l:'Tratamiento',v:e.trat});
-    if(e.nota)cv.push({l:cv.length?'Notas adicionales':'Nota clínica',v:e.nota});
+    const _noNA=v=>v&&v.trim()&&!v.startsWith('N/A')&&!v.startsWith('Genera');
+    if(_noNA(e.sub))cv.push({l:'Subjetivo',v:e.sub});
+    if(_noNA(e.obj))cv.push({l:'Objetivo',v:e.obj});
+    if(_noNA(e.resp))cv.push({l:'Respuesta',v:e.resp});
+    if(_noNA(e.trat))cv.push({l:'Tratamiento',v:e.trat});
+    if(_noNA(e.nota))cv.push({l:cv.length?'Notas adicionales':'Nota clínica',v:e.nota});
+    if(!cv.length){const any=e.nota||e.trat||e.obj||e.sub||e.resp||'';if(any)cv.push({l:'Nota clínica',v:any});}
     if(cv.length){
       let cHtml='';
       for(let j=0;j<cv.length;j++){
@@ -2506,21 +2935,31 @@ window.hpacRenderNotas=()=>{
       var respondidaBtn=(e.estado||'respondida')==='pendiente'
         ?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacResponder('+ni+')">Respondida</button>':'';
       var cv=[];
+      // Mostrar todos los campos que tengan contenido real (sin importar el modo)
+      // Esto garantiza que siempre se vea todo lo guardado
+      var hasNAVal=function(v){return !v||v.trim()===''||v.startsWith('N/A')||v.startsWith('Genera');};
       if(modo==='Seguimiento'){
-        // Seguimiento: una sola nota en párrafo — obj tiene el texto generado, nota también
+        // Seguimiento: texto principal en obj, fallback a nota o sub
         var segTexto=e.obj||e.nota||e.sub||'';
-        if(segTexto)cv.push({label:'Nota de seguimiento',text:segTexto});
-      } else if(modo==='Nota especial'||modo==='Anamnesis'){
-        // Nota especial: texto principal en nota o trat
-        var espTexto=e.nota||e.trat||e.obj||'';
-        if(espTexto)cv.push({label:'Nota',text:espTexto});
+        if(!hasNAVal(segTexto))cv.push({label:'Nota de seguimiento',text:segTexto});
+        // También mostrar campos adicionales si existen
+        if(!hasNAVal(e.sub)&&e.sub!==segTexto)cv.push({label:'Análisis Subjetivo',text:e.sub});
+        if(!hasNAVal(e.resp))cv.push({label:'Respuesta / Impresión clínica',text:e.resp});
+        if(!hasNAVal(e.trat))cv.push({label:'Tratamiento / Plan',text:e.trat});
       } else {
-        // IC Nueva: secciones separadas
-        if(e.sub)cv.push({label:'Análisis Subjetivo',text:e.sub});
-        if(e.obj)cv.push({label:'Análisis Objetivo',text:e.obj});
-        if(e.resp)cv.push({label:'Respuesta / Impresión clínica',text:e.resp});
-        if(e.trat)cv.push({label:'Tratamiento / Plan',text:e.trat});
-        if(e.nota&&!e.sub&&!e.obj&&!e.resp&&!e.trat)cv.push({label:'Nota clínica',text:e.nota});
+        // IC Nueva, Nota especial, Anamnesis y cualquier otro modo:
+        // mostrar todos los campos con contenido real
+        if(!hasNAVal(e.sub))cv.push({label:'Análisis Subjetivo',text:e.sub});
+        if(!hasNAVal(e.obj))cv.push({label:'Análisis Objetivo',text:e.obj});
+        if(!hasNAVal(e.resp))cv.push({label:'Respuesta / Impresión clínica',text:e.resp});
+        if(!hasNAVal(e.trat))cv.push({label:'Tratamiento / Plan',text:e.trat});
+        // nota: mostrar siempre si tiene contenido (puede ser la nota completa o complementaria)
+        if(!hasNAVal(e.nota))cv.push({label:cv.length?'Notas adicionales':'Nota clínica',text:e.nota});
+        // Si absolutamente nada se encontró, intentar cualquier campo
+        if(!cv.length){
+          var any=e.nota||e.trat||e.obj||e.sub||e.resp||'';
+          if(any)cv.push({label:'Nota clínica',text:any});
+        }
       }
       var camposHtml='';
       if(cv.length){
