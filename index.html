@@ -2498,11 +2498,7 @@ window.anamHistorialRender=function(pacId){
   // Get all anamnesis records for this patient (initial + sessions)
   const todos=(window.anamnesisList||[]).filter(a=>
     a.pacienteId===pacId||a.pacienteNombre===nombre
-  ).sort((a,b)=>{
-    const da=a.creado?.toDate?a.creado.toDate():new Date(a.fecha||0);
-    const db2=b.creado?.toDate?b.creado.toDate():new Date(b.fecha||0);
-    return db2-da;
-  });
+  ).sort((a,b)=>_sk(b)-_sk(a));
   if(countEl)countEl.textContent=todos.length+' registro'+(todos.length!==1?'s':'');
   if(!todos.length){
     cont.innerHTML='<div class="empty"><p>Sin sesiones registradas para este paciente.</p></div>';return;
@@ -2692,7 +2688,7 @@ window.verHistorialIC=(pacId,pacNombre)=>{
   if(!ics.length){
     body.innerHTML='<div class="empty"><p>No hay interconsultas registradas para este paciente.</p></div>';
   } else {
-    const sorted=[...ics].sort((a,b)=>(b.creado?.toDate?.()??new Date())-(a.creado?.toDate?.()??new Date()));
+    const sorted=[...ics].sort((a,b)=>_sk(b)-_sk(a));
     const riskBadge=(r)=>{if(!r||r==='No clasificado')return'';const c=r==='ALTO'?'badge-red':r==='MEDIO'?'badge-yellow':'badge-green';return`<span class="badge ${c}">⚠ ${r}</span>`;};
     body.innerHTML=sorted.map((ic,i)=>`
       <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:10px;padding:14px;margin-bottom:10px">
@@ -2768,13 +2764,14 @@ window.mhicNuevaNota=()=>{
   },200);
 };
 
+function _pf(s){if(!s)return 0;s=String(s).trim();var p;if(s.length>=10&&s[4]==="-"){p=s.slice(0,10).split("-");return new Date(+p[0],+p[1]-1,+p[2]).getTime()||0;}if(s.indexOf("/")>-1){p=s.split("/");if(p.length===3){var y=p[2].length<=2?"20"+p[2]:p[2];return new Date(+y,+p[1]-1,+p[0]).getTime()||0;}}return 0;}function _pt(v){if(!v)return 0;if(v.toMillis)return v.toMillis();if(v.seconds)return v.seconds*1000;if(v.toDate)return v.toDate().getTime();return 0;}function _sk(x){return _pf(x.fecha)||_pt(x.creado)||0;}
 function mhicRender(){
   const body=document.getElementById('mhic-body');if(!body)return;
   const pacientes=window.pacientes||[];const interconsultas=window.interconsultas||[];const anamnesisList=window.anamnesisList||[];
   const p=pacientes.find(x=>x.id===_hPacId);const nombre=p?p.nombre:_hPacNombre;
   const ics=interconsultas.filter(ic=>ic.pacienteId===_hPacId||ic.pacienteNombre===nombre);
   const anas=anamnesisList.filter(a=>a.pacienteId===_hPacId||a.pacienteNombre===nombre);
-  const all=[...ics.map(x=>Object.assign({},x,{_col:'interconsultas'})),...anas.map(x=>Object.assign({},x,{_col:'anamnesis',modo:x.modo||'Anamnesis'}))].sort((a,b)=>{function fMs(v){if(!v)return 0;if(v.toMillis)return v.toMillis();if(v.seconds)return v.seconds*1000;if(v.toDate)return v.toDate().getTime();return 0;}function dMs(s){if(!s)return 0;s=String(s).trim();var p;if(s.length>=10&&s[4]==='-'){p=s.slice(0,10).split('-');return new Date(+p[0],+p[1]-1,+p[2]).getTime()||0;}if(s.indexOf('/')>-1){p=s.split('/');if(p.length===3){var y=p[2].length<=2?'20'+p[2]:p[2];return new Date(+y,+p[1]-1,+p[0]).getTime()||0;}}return 0;}var ka=dMs(a.fecha)||fMs(a.creado)||0;var kb=dMs(b.fecha)||fMs(b.creado)||0;return kb-ka;});
+  const all=[...ics.map(x=>Object.assign({},x,{_col:'interconsultas'})),...anas.map(x=>Object.assign({},x,{_col:'anamnesis',modo:x.modo||'Anamnesis'}))].sort((a,b)=>_sk(b)-_sk(a));
   for(const k in _hMap)delete _hMap[k];
   if(!all.length){body.innerHTML='<div class="empty" style="padding:30px"><p>Sin notas. Usa "Nuevo seguimiento" para agregar.</p></div>';return;}
   const tc={'IC Nueva':'var(--accent2)','Seguimiento':'#1a56db','Anamnesis':'#7b1fa2','Nota especial':'var(--warning)'};
@@ -2913,16 +2910,8 @@ window.hpacRenderNotas=()=>{
   const notas=[].concat(
     ics.map(x=>Object.assign({},x,{_col:'interconsultas'})),
     anas.map(x=>Object.assign({},x,{_col:'anamnesis',modo:x.modo||'Anamnesis'}))
-  ).sort(function(a,b){
-    var da=a.creado&&a.creado.toDate?a.creado.toDate():new Date(0);
-    var db2=b.creado&&b.creado.toDate?b.creado.toDate():new Date(0);
-    return db2-da;
-  });
-  const testsSorted=[].concat(tests).sort(function(a,b){
-    var da=a.creado&&a.creado.toDate?a.creado.toDate():new Date(0);
-    var db2=b.creado&&b.creado.toDate?b.creado.toDate():new Date(0);
-    return db2-da;
-  });
+  ).sort((a,b)=>_sk(b)-_sk(a));
+  const testsSorted=[].concat(tests).sort((a,b)=>_sk(b)-_sk(a));
   for(var k in _hMap)delete _hMap[k];
   if(!notas.length&&!testsSorted.length){
     cont.innerHTML='<div class="empty" style="padding:36px"><p>Sin registros para este paciente.</p></div>';return;
