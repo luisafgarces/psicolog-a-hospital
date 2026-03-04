@@ -495,6 +495,29 @@ input.toggle-cb{display:none}
               </div>
             </div>
           </div>
+          <div class="ic-form-section ic-only-nueva">
+            <div class="ic-form-head slate"><span class="ft">🗂️ Antecedentes de salud mental</span><span class="ic-form-badge">IC NUEVA</span></div>
+            <div class="ic-form-body">
+              <div class="ic-g2">
+                <div class="ic-field"><div class="ic-sublabel">Tto. psicológico / psiquiátrico previo</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Ninguno</span><span class="ic-chip" onclick="icTog(this)">Psicológico previo</span><span class="ic-chip" onclick="icTog(this)">Psiquiátrico previo</span><span class="ic-chip" onclick="icTog(this)">Ambos</span><span class="ic-chip" onclick="icTog(this)">Actualmente en tto.</span></div></div>
+                <div class="ic-field"><div class="ic-sublabel">Hospitalizaciones psiquiátricas previas</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Ninguna</span><span class="ic-chip" onclick="icTogA(this)">Sí — relevantes</span></div></div>
+              </div>
+              <div class="ic-field"><div class="ic-sublabel">Diagnósticos psiquiátricos previos conocidos</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Sin antecedentes conocidos</span><span class="ic-chip" onclick="icTog(this)">Depresión mayor</span><span class="ic-chip" onclick="icTog(this)">TAG</span><span class="ic-chip" onclick="icTog(this)">Trastorno bipolar</span><span class="ic-chip" onclick="icTog(this)">TEPT</span><span class="ic-chip" onclick="icTog(this)">Pánico</span><span class="ic-chip" onclick="icTog(this)">TOC</span><span class="ic-chip" onclick="icTog(this)">Trastorno de personalidad</span><span class="ic-chip" onclick="icTogR(this)">Psicosis / esquizofrenia</span><span class="ic-chip" onclick="icTog(this)">TDAH</span><span class="ic-chip" onclick="icTog(this)">Otro</span></div></div>
+              <div class="ic-g2">
+                <div class="ic-field"><div class="ic-sublabel">Intentos de suicidio previos</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Ninguno</span><span class="ic-chip" onclick="icTogR(this)">Sí — relevantes</span></div></div>
+                <div class="ic-field"><div class="ic-sublabel">Autolesiones previas</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Ninguna</span><span class="ic-chip" onclick="icTogA(this)">Sí — sin intención suicida</span></div></div>
+              </div>
+              <div class="ic-field"><div class="ic-sublabel">Medicación psiquiátrica actual</div><textarea id="ic-meds-psiq" placeholder="Ej: Sertralina 50mg, Clonazepam 0.5mg. Dejar en blanco si ninguna." rows="1"></textarea></div>
+            </div>
+          </div>
+          <div class="ic-form-section ic-only-nueva">
+            <div class="ic-form-head amber"><span class="ft">⚠️ Tamizaje de violencia</span><span class="ic-form-badge amber">IC NUEVA — SOLO DETECTAR</span></div>
+            <div class="ic-form-body">
+              <div class="ic-field"><div class="ic-sublabel">Tipo de violencia (marcar si aplica)</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Niega antecedentes de violencia</span><span class="ic-chip" onclick="icTogA(this)">Maltrato físico infantil</span><span class="ic-chip" onclick="icTogA(this)">Maltrato psicológico infantil</span><span class="ic-chip" onclick="icTogR(this)">Abuso sexual (infancia o adultez)</span><span class="ic-chip" onclick="icTogR(this)">Violencia de pareja — física</span><span class="ic-chip" onclick="icTogA(this)">Violencia de pareja — psicológica/económica</span><span class="ic-chip" onclick="icTogR(this)">Violencia de pareja — sexual</span><span class="ic-chip" onclick="icTogA(this)">Conflicto armado / desplazamiento</span><span class="ic-chip" onclick="icTog(this)">Testigo de violencia intrafamiliar</span><span class="ic-chip" onclick="icTog(this)">Acoso escolar / laboral</span></div></div>
+              <div class="ic-field"><div class="ic-sublabel">Situación actual de riesgo por violencia</div><div class="ic-chips"><span class="ic-chip on-g" onclick="icTogG(this)">Sin riesgo actual identificado</span><span class="ic-chip" onclick="icTogA(this)">Situación activa — requiere orientación</span><span class="ic-chip" onclick="icTogR(this)">Riesgo inminente — remitir urgente a trabajo social</span></div></div>
+              <div style="font-size:0.72rem;color:var(--text3);margin-top:4px;padding:6px 8px;background:var(--warning-light);border-radius:6px;border-left:3px solid var(--warning)">⚠ Solo detectar, no elaborar. Si hay violencia activa, remitir a trabajo social y/o activar ruta de atención. No profundizar en narrativas en contexto hospitalario agudo.</div>
+            </div>
+          </div>
           <div class="ic-form-section">
             <div class="ic-form-head"><span class="ft">💬 Análisis subjetivo — Reporte del paciente</span><span class="ic-form-badge blue">SUBJETIVO</span></div>
             <div class="ic-form-body">
@@ -894,13 +917,22 @@ input.toggle-cb{display:none}
           </div></div>
         </div>
         <div class="anamnesis-section">
-          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🗂️</span><h4>Antecedentes</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🗂️</span><h4>Antecedentes de salud mental</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
           <div class="anamnesis-section-body"><div class="form-grid">
             <div class="form-group"><label>Tto. psicológico previo</label><div class="checkgroup"><label><input type="radio" name="an-tpsi" value="No"><span>No</span></label><label><input type="radio" name="an-tpsi" value="Sí"><span>Sí</span></label></div></div>
+            <div class="form-group"><label>¿Cuándo? / ¿Dónde?</label><input type="text" id="an-tpsi-cuando" placeholder="Ej: 2022, Hospital X"></div>
             <div class="form-group"><label>Tto. psiquiátrico previo</label><div class="checkgroup"><label><input type="radio" name="an-tpsiq" value="No"><span>No</span></label><label><input type="radio" name="an-tpsiq" value="Sí"><span>Sí</span></label></div></div>
-            <div class="form-group"><label>Intentos de suicidio</label><div class="checkgroup"><label><input type="radio" name="an-is" value="No"><span>No</span></label><label><input type="radio" name="an-is" value="Sí"><span>Sí</span></label></div></div>
-            <div class="form-group"><label>Medicamentos actuales</label><input type="text" id="an-meds"></div>
+            <div class="form-group"><label>¿Cuándo? / Diagnóstico previo</label><input type="text" id="an-tpsiq-dx" placeholder="Ej: 2021, depresión mayor"></div>
+            <div class="form-group full"><label>Diagnósticos psiquiátricos previos conocidos</label><div class="checkgroup" id="an-dx-previos"><label><input type="checkbox" value="Trastorno depresivo mayor"><span>Depresión mayor</span></label><label><input type="checkbox" value="Trastorno de ansiedad generalizada"><span>TAG</span></label><label><input type="checkbox" value="Trastorno bipolar"><span>Trastorno bipolar</span></label><label><input type="checkbox" value="TEPT"><span>TEPT</span></label><label><input type="checkbox" value="Trastorno de pánico"><span>Pánico</span></label><label><input type="checkbox" value="TOC"><span>TOC</span></label><label><input type="checkbox" value="Trastorno de personalidad"><span>T. personalidad</span></label><label><input type="checkbox" value="Esquizofrenia / Psicosis"><span>Psicosis</span></label><label><input type="checkbox" value="TDAH"><span>TDAH</span></label><label><input type="checkbox" value="Otro"><span>Otro</span></label><label><input type="checkbox" value="Ninguno conocido"><span>Ninguno conocido</span></label></div></div>
+            <div class="form-group"><label>Hospitalizaciones psiquiátricas</label><div class="checkgroup"><label><input type="radio" name="an-hosp-psiq" value="No"><span>No</span></label><label><input type="radio" name="an-hosp-psiq" value="Sí"><span>Sí</span></label></div></div>
+            <div class="form-group"><label>N° de hospitalizaciones / ¿Cuándo?</label><input type="text" id="an-hosp-psiq-det" placeholder="Ej: 2 veces, última en 2023"></div>
+            <div class="form-group"><label>Ideación suicida previa</label><div class="checkgroup"><label><input type="radio" name="an-is-prev" value="No"><span>No</span></label><label><input type="radio" name="an-is-prev" value="Sí — pasiva"><span>Sí — pasiva</span></label><label><input type="radio" name="an-is-prev" value="Sí — activa"><span>Sí — activa</span></label></div></div>
+            <div class="form-group"><label>Intentos de suicidio previos</label><div class="checkgroup"><label><input type="radio" name="an-is" value="No"><span>No</span></label><label><input type="radio" name="an-is" value="Sí"><span>Sí</span></label></div></div>
+            <div class="form-group"><label>N° intentos / ¿Cuándo?</label><input type="text" id="an-is-det" placeholder="Ej: 1 vez, hace 2 años"></div>
+            <div class="form-group"><label>Medicamentos actuales (psiquiátricos)</label><input type="text" id="an-meds" placeholder="Ej: Sertralina 50mg, Clonazepam 0.5mg"></div>
+            <div class="form-group"><label>Medicamentos previos relevantes</label><input type="text" id="an-meds-prev" placeholder="Ej: Fluoxetina (suspendida por efectos secundarios)"></div>
             <div class="form-group"><label>Enfermedades médicas</label><input type="text" id="an-enf"></div>
+            <div class="form-group full"><label>Autolesiones sin intención suicida</label><div class="checkgroup" id="an-autolesion"><label><input type="checkbox" value="Ninguna"><span>Ninguna</span></label><label><input type="checkbox" value="Cortes / rasguños"><span>Cortes / rasguños</span></label><label><input type="checkbox" value="Golpes a sí mismo/a"><span>Golpes a sí mismo/a</span></label><label><input type="checkbox" value="Quemaduras"><span>Quemaduras</span></label><label><input type="checkbox" value="Otro"><span>Otro</span></label></div></div>
             <div class="form-group full"><label>Red de apoyo</label><div class="checkgroup"><label><input type="radio" name="an-red" value="Adecuada"><span>Adecuada</span></label><label><input type="radio" name="an-red" value="Escasa"><span>Escasa</span></label><label><input type="radio" name="an-red" value="Ausente"><span>Ausente</span></label><label><input type="radio" name="an-red" value="Conflictiva"><span>Conflictiva</span></label></div></div>
           </div></div>
         </div>
@@ -912,7 +944,8 @@ input.toggle-cb{display:none}
             <div class="form-group full"><label>Dinámica familiar</label><div class="checkgroup" id="an-dinamica"><label><input type="checkbox" value="Funcional"><span>Funcional</span></label><label><input type="checkbox" value="Conflictiva"><span>Conflictiva</span></label><label><input type="checkbox" value="Ausente"><span>Ausente</span></label><label><input type="checkbox" value="Sobreprotectora"><span>Sobreprotectora</span></label></div></div>
             <div class="form-group full"><label>Relaciones interpersonales</label><div class="checkgroup"><label><input type="radio" name="an-relaciones" value="Adecuadas"><span>Adecuadas</span></label><label><input type="radio" name="an-relaciones" value="Escasas"><span>Escasas</span></label><label><input type="radio" name="an-relaciones" value="Conflictivas"><span>Conflictivas</span></label><label><input type="radio" name="an-relaciones" value="Aislamiento"><span>Aislamiento</span></label></div></div>
             <div class="form-group full"><label>Situación de pareja</label><div class="checkgroup"><label><input type="radio" name="an-pareja" value="Estable"><span>Estable</span></label><label><input type="radio" name="an-pareja" value="Inestable"><span>Inestable</span></label><label><input type="radio" name="an-pareja" value="Sin pareja"><span>Sin pareja</span></label></div></div>
-            <div class="form-group full"><label>Historia de violencia (marcar si aplica)</label><div class="checkgroup" id="an-violencia"><label><input type="checkbox" value="Maltrato infantil físico"><span>Maltrato físico infantil</span></label><label><input type="checkbox" value="Maltrato infantil psicológico"><span>Maltrato psicológico infantil</span></label><label><input type="checkbox" value="Abuso sexual"><span>Abuso sexual</span></label><label><input type="checkbox" value="Violencia de pareja"><span>Violencia de pareja</span></label><label><input type="checkbox" value="Ninguna"><span>Ninguna reportada</span></label></div></div>
+            <div class="form-group full"><label>Historia de violencia — tamizaje (marcar si aplica)</label><div class="checkgroup" id="an-violencia"><label><input type="checkbox" value="Ninguna reportada"><span>Ninguna reportada</span></label><label><input type="checkbox" value="Maltrato infantil físico"><span>Maltrato físico infantil</span></label><label><input type="checkbox" value="Maltrato infantil psicológico"><span>Maltrato psicológico infantil</span></label><label><input type="checkbox" value="Abuso sexual en la infancia"><span>Abuso sexual infantil</span></label><label><input type="checkbox" value="Abuso sexual en la adultez"><span>Abuso sexual adultez</span></label><label><input type="checkbox" value="Violencia de pareja — física"><span>VIF física</span></label><label><input type="checkbox" value="Violencia de pareja — psicológica"><span>VIF psicológica</span></label><label><input type="checkbox" value="Violencia de pareja — sexual"><span>VIF sexual</span></label><label><input type="checkbox" value="Conflicto armado / desplazamiento"><span>Conflicto armado / desplazamiento</span></label><label><input type="checkbox" value="Testigo de violencia intrafamiliar"><span>Testigo de violencia familiar</span></label><label><input type="checkbox" value="Acoso escolar (bullying)"><span>Bullying</span></label><label><input type="checkbox" value="Acoso laboral (mobbing)"><span>Acoso laboral</span></label></div></div>
+            <div class="form-group full"><label>Observaciones de violencia / contexto adicional</label><textarea id="an-violencia-obs" rows="2" placeholder="Solo detectar, no elaborar. Ej: refiere VIF actual, pareja controladora. Remitir a trabajo social si es necesario."></textarea></div>
             <div class="form-group full"><label>Rendimiento escolar / laboral</label><div class="checkgroup"><label><input type="radio" name="an-rendimiento" value="Bueno"><span>Bueno</span></label><label><input type="radio" name="an-rendimiento" value="Regular"><span>Regular</span></label><label><input type="radio" name="an-rendimiento" value="Malo"><span>Malo</span></label></div></div>
           </div></div>
         </div>
@@ -2570,10 +2603,17 @@ Síntomas: ${getChecked('an-sint')||'—'}
 Impacto: ${getChecked('an-impacto')||'—'}
 ${v('an-descripcion')?'Descripción: '+v('an-descripcion'):''}
 
-ANTECEDENTES
-Tto. psicológico: ${getRadio('an-tpsi')||'—'} | Psiquiátrico: ${getRadio('an-tpsiq')||'—'} | IS previos: ${getRadio('an-is')||'—'}
-${v('an-meds')?'Medicamentos: '+v('an-meds'):''}${v('an-enf')?'\nEnfermedades: '+v('an-enf'):''}
+ANTECEDENTES DE SALUD MENTAL
+Tto. psicológico: ${getRadio('an-tpsi')||'—'}${v('an-tpsi-cuando')?' ('+v('an-tpsi-cuando')+')':''} | Tto. psiquiátrico: ${getRadio('an-tpsiq')||'—'}${v('an-tpsiq-dx')?' ('+v('an-tpsiq-dx')+')':''}
+Dx. previos: ${getChecked('an-dx-previos')||'—'}
+Hosp. psiquiátricas: ${getRadio('an-hosp-psiq')||'—'}${v('an-hosp-psiq-det')?' — '+v('an-hosp-psiq-det'):''}
+IS previos: ${getRadio('an-is-prev')||'—'} | Intentos de suicidio: ${getRadio('an-is')||'—'}${v('an-is-det')?' ('+v('an-is-det')+')':''}
+Autolesiones: ${getChecked('an-autolesion')||'—'}
+${v('an-meds')?'Medicación psiquiátrica actual: '+v('an-meds'):''}${v('an-meds-prev')?'\nMedicación previa: '+v('an-meds-prev'):''}${v('an-enf')?'\nEnfermedades médicas: '+v('an-enf'):''}
 Red de apoyo: ${getRadio('an-red')||'—'}
+
+HISTORIA DE VIOLENCIA (TAMIZAJE)
+${getChecked('an-violencia')||'—'}${v('an-violencia-obs')?'\nObservaciones: '+v('an-violencia-obs'):''}
 
 ANTECEDENTES FAMILIARES
 Trastorno mental familiar: ${getRadio('an-fam-tmh')||'—'}${v('an-fam-quien')?' · '+v('an-fam-quien'):''}
@@ -2582,7 +2622,6 @@ Suicidio familiar: ${getRadio('an-fam-suicidio')||'—'}${v('an-fam-suicidio-qui
 HISTORIA PERSONAL Y SOCIAL
 Vive con: ${v('an-convive')||'—'} | Dinámica: ${getChecked('an-dinamica')||'—'}
 Relaciones interpersonales: ${getRadio('an-relaciones')||'—'} | Pareja: ${getRadio('an-pareja')||'—'}
-Historia de violencia: ${getChecked('an-violencia')||'—'}
 Rendimiento escolar/laboral: ${getRadio('an-rendimiento')||'—'}
 
 HÁBITOS — ALIMENTACIÓN, SUEÑO Y SUSTANCIAS
