@@ -481,7 +481,7 @@ input.toggle-cb{display:none}
           <div class="ic-pat-field"><label>Nombre del paciente</label><input type="text" id="ic-pnombre" placeholder="Nombre completo"></div>
           <div class="ic-pat-field"><label>Edad / Sexo</label><input type="text" id="ic-edad" placeholder="42 años, F"></div>
           <div class="ic-pat-field"><label>Diagnóstico médico / Motivo IC</label><input type="text" id="ic-pdx" placeholder="Ca. de mama, impacto emocional dx reciente"></div>
-          <div class="ic-pat-field"><label>Fecha</label><input type="text" id="ic-pfecha" placeholder="dd/mm/aa"></div>
+          <div class="ic-pat-field"><label>Fecha</label><input type="date" id="ic-pfecha"></div>
         </div>
         <div class="risk-alert-bar" id="ic-risk-alert">⚠️ RIESGO ALTO — Verificar protocolo de seguridad antes de cerrar la nota</div>
         <!-- MODO IC NUEVA + SEGUIMIENTO -->
@@ -1842,7 +1842,7 @@ window.selectICPaciente=(id)=>{
   if(nombre)nombre.value=p.nombre;
   if(edad&&(p.edad||p.sexo))edad.value=(p.edad?p.edad+' años':'')+(p.sexo?' '+p.sexo.charAt(0):'');
   if(dx&&p.motivo)dx.value=p.motivo;
-  if(fecha&&p.fecha)fecha.value=formatDate(p.fecha);
+  if(fecha)fecha.value=new Date().toISOString().split('T')[0];
   // Auto-set mode based on patient estado
   if(p.estado==='nueva-interconsulta-pendiente')setICMode('nueva');
   else if(p.estado==='seguimiento')setICMode('seg');
@@ -1957,7 +1957,7 @@ window.guardarICFirebase=async()=>{
   const dx=document.getElementById('ic-pdx').value.trim()||'—';
   const riesgo=document.getElementById('ic-riesgo-nivel').value||'No clasificado';
   const edad=document.getElementById('ic-edad')?.value||'';
-  const fecha=document.getElementById('ic-pfecha').value||new Date().toLocaleDateString('es-CO');
+  const fecha=document.getElementById('ic-pfecha').value||new Date().toISOString().split('T')[0];
   // Buscar paciente vinculado por nombre o selector
   const selPac=document.getElementById('ic-paciente-sel');
   const pacId=selPac?.value||null;
@@ -1982,7 +1982,7 @@ window.guardarICFirebase=async()=>{
     } else if(icCurrentMode==='seg'){
       const el=document.getElementById('ic-out-seg-texto');if(el){const v=el.textContent||'';obj=v.startsWith('Genera')?'':v;}
     } else if(icCurrentMode==='esp'){
-      trat=notaTexto; // guardar también en trat para compatibilidad
+      // solo en nota para evitar duplicado al renderizar
     }
   }catch(ex){}
   try{
@@ -2221,7 +2221,7 @@ window.populateAnamPacientes=()=>{
 };
 
 setSyncStatus('syncing');
-['p-fecha','ic-fecha','an-fecha'].forEach(id=>{try{document.getElementById(id).value=new Date().toISOString().split('T')[0];}catch(e){}});
+['p-fecha','ic-fecha','an-fecha','ic-pfecha'].forEach(id=>{try{document.getElementById(id).value=new Date().toISOString().split('T')[0];}catch(e){}});
 
 // ── NOTA EDITAR/GUARDAR (dentro del módulo para acceder a Firebase) ───
 window.mneCerrar=()=>{const m=document.getElementById('modal-nota-edit');if(m)m.style.display='none';};
@@ -3470,6 +3470,7 @@ window.limpiarFormIC=function(confirm_=true){
   icCurrentEsp=null;
   var ep=document.getElementById('ic-esp-preview');if(ep)ep.style.display='none';
   var sel=document.getElementById('ic-paciente-sel');if(sel)sel.value='';
+  var pf=document.getElementById('ic-pfecha');if(pf)pf.value=new Date().toISOString().split('T')[0];
   setICMode('nueva');
 };
 
