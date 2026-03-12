@@ -2560,6 +2560,13 @@ window.anamSegLimpiar=function(){
   document.querySelectorAll('input[name="seg-modalidad"]').forEach(r=>r.checked=false);
   const rEl=document.getElementById('seg-riesgo');if(rEl)rEl.value='';
   const fd=document.getElementById('seg-fecha');if(fd)fd.value=new Date().toISOString().split('T')[0];
+  // Reset nota output
+  const outEl=document.getElementById('ic-out-seg-texto');
+  if(outEl){outEl.textContent='Genera la nota para ver el contenido…';outEl.classList.add('ph');}
+  const segOut=document.getElementById('ic-out-seg');
+  if(segOut)segOut.style.display='none';
+  const wrap=document.getElementById('ic-output-wrap');
+  if(wrap)wrap.style.display='none';
 };
 
 window.anamSegGuardar=async function(){
@@ -3784,49 +3791,8 @@ function generarNotaIcSeg(){
 }
 
 function generarSegLocal(){
-  var nombre=icv('ic-pnombre')||'el/la paciente';
-  var pn=nombre.split(' ')[0];
-  var sev=icv('ic-riesgo-nivel')||'No clasificado';
-  var colabora=icChipsBySubLabel('Conciencia / Colaboración').filter(function(c){return c==='Consciente'||c==='Colaborador/a';});
-  var conducta=icChipsBySubLabel('Conducta');
-  var afecto=icChipsBySubLabel('Afecto');
-  var pensamiento=icChipsBySubLabel('Pensamiento');
-  var lenguaje=icChipsBySubLabel('Lenguaje / Insight');
-  var ideacion=icChipsBySubLabel('Ideación actual');
-  var sinIdeacion=ideacion.includes('Ninguna');
-  var ideacionActiva=ideacion.filter(function(c){return['Pasiva — deseo de que termine','Activa','Con plan estructurado'].includes(c);});
-  var intervencion=icChipsBySubLabel('Intervención realizada hoy');
-  var planAll=icChipsBySubLabel('Plan');
-  var plan=planAll.filter(function(c){return['Continúa seguimiento por psicología','Remisión a psiquiatría','Orientación a trabajo social','Alta de psicología','Reinterconsulta si hay cambios'].includes(c);});
-  var analisis=icv('ic-resp-analisis');
-  var tratNotas=icv('ic-trat-notas');
-  var riesgoNotas=icv('ic-riesgo-notas');
-  var orientChips=icChipsBySubLabel('Orientación');
-  var desorient=orientChips.includes('Desorientado/a');
-  var lsi=lenguaje.filter(function(c){return!['Insight conservado','Insight parcial','Sin insight'].includes(c);});
-
-  var p=pn+' se muestra '+(icList(colabora)||'consciente y colaborador/a')+' durante la entrevista, con conducta '+(icList(conducta)||'adecuada')+'. ';
-  if(!desorient)p+='Orientado/a en las tres esferas. ';
-  else p+='Con alteración en la orientación. ';
-  p+='Afecto '+(icList(afecto)||'observable')+(afecto.includes('Congruente')?', congruente con el discurso':'')+'. Lenguaje '+(icList(lsi)||'coherente')+', pensamiento '+(icList(pensamiento)||'organizado')+', sin alteraciones del contenido ni de la percepción. ';
-  if(lenguaje.includes('Insight conservado'))p+='Juicio conservado e insight adecuado. ';
-  else if(lenguaje.includes('Insight parcial'))p+='Insight parcial. ';
-  else if(lenguaje.includes('Sin insight'))p+='Sin insight para la situación actual. ';
-  if(sinIdeacion)p+='Niega ideación suicida, heteroagresiva o síntomas psicóticos. ';
-  else if(ideacionActiva.length)p+='Refiere '+icList(ideacionActiva).toLowerCase()+'. Riesgo clasificado como '+sev+'. '+(riesgoNotas?riesgoNotas+' ':'');
-  if(analisis)p+=analisis+' ';
-  if(intervencion.length)p+='Se realiza '+icList(intervencion)+'. ';
-  if(plan.length)p+=icList(plan)+'. ';
-  if(tratNotas)p+=tratNotas+' ';
-  p=p.trim();
-
-  setIcOut('ic-out-seg-texto',p);
-  var seg=document.getElementById('ic-out-seg');
-  var f4=document.getElementById('ic-out-4campos');
-  if(seg)seg.style.display='';
-  if(f4)f4.style.display='none';
-  var wrap=document.getElementById('ic-output-wrap');
-  if(wrap){wrap.style.display='';wrap.scrollIntoView({behavior:'smooth',block:'start'});}
+  // Deprecated — always uses Gemini. This is a no-op fallback.
+  toast('⚠️ Configura tu API key de Gemini para generar la nota.');
 }
 
 async function generarSegConGemini(apiKey){
