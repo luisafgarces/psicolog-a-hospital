@@ -1077,6 +1077,11 @@ input.toggle-cb{display:none}
           <div class="anamnesis-section-header open" onclick="toggleSection(this)"><span>📄</span><h4>Nota clínica generada</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
           <div class="anamnesis-section-body open">
             <div id="nota-output" class="nota-output">Completa los campos y presiona "Generar nota clínica"…</div>
+            <div style="margin:10px 0;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:9px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="font-size:0.75rem;font-weight:700;color:#166534;white-space:nowrap">🤖 IA Clínica</span>
+              <input type="password" id="an-gemini-key" placeholder="API Key de Google Gemini…" style="flex:1;min-width:160px;padding:5px 9px;border:1px solid #bbf7d0;border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('gemini_api_key',this.value);document.getElementById('an-key-status').textContent='✅ Guardada';">
+              <span id="an-key-status" style="font-size:0.7rem;color:#166534;white-space:nowrap">Guardada en este dispositivo</span>
+            </div>
             <div class="flex gap-2 mt-4" style="flex-wrap:wrap">
               <button type="button" class="btn btn-primary" onclick="generarNota()">✨ Generar nota</button>
               <button type="button" class="btn btn-secondary" onclick="copiarNota()">Copiar</button>
@@ -2692,7 +2697,138 @@ window.setRisk=(level,el)=>{document.querySelectorAll('.risk-btn').forEach(b=>b.
 window.setPRisk=(level,el)=>{document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');document.getElementById('p-riesgo').value=level;};
 window.getChecked=(id)=>[...document.querySelectorAll(`#${id} input:checked`)].map(i=>i.value).join(', ');
 window.getRadio=(name)=>{const el=document.querySelector(`input[name="${name}"]:checked`);return el?el.value:'';};
-window.generarNota=()=>{
+window.generarNota=async ()=>{
+  const apiKey=document.getElementById('an-gemini-key')?.value||localStorage.getItem('gemini_api_key')||'';
+  if(!apiKey.trim()){
+    toast('⚠️ Agrega tu API key de Gemini para generar la nota con IA.');
+    document.getElementById('an-gemini-key')?.focus();
+    return;
+  }
+  await generarAnamnesisConGemini(apiKey.trim());
+};
+
+async function generarAnamnesisConGemini(apiKey){
+  const v=id=>document.getElementById(id)?.value||'';
+  const getChecked=w=>{const c=document.getElementById(w);if(!c)return'—';return Array.from(c.querySelectorAll('input:checked')).map(i=>i.value).join(', ')||'—';};
+  const getRadio=w=>{const r=document.querySelector('input[name="'+w+'"]:checked');return r?r.value:'—';};
+
+  const datos=`
+DATOS DE IDENTIFICACIÓN:
+- Nombre: Paciente (omitir nombre en la nota)
+- Edad: ${v('an-edad')} años | Estado civil: ${v('an-ecivil')} | Escolaridad: ${v('an-esc')}
+- Ocupación: ${v('an-ocupacion')} | Remitido por: ${v('an-remitido')}
+
+MOTIVO DE CONSULTA:
+${v('an-motivo')||'No registrado'}
+
+HISTORIA DEL PROBLEMA ACTUAL:
+- Inicio: ${getRadio('an-inicio')} | Evolución: ${v('an-evolucion')} | Intensidad: ${v('an-intens')}/10
+- Desencadenantes: ${getChecked('an-desenc')}
+- Síntomas: ${getChecked('an-sint')}
+- Impacto funcional: ${getChecked('an-impacto')}
+- Descripción libre: ${v('an-descripcion')||'—'}
+
+ANTECEDENTES DE SALUD MENTAL:
+- Tto. psicológico previo: ${getRadio('an-tpsi')} ${v('an-tpsi-cuando')}
+- Tto. psiquiátrico previo: ${getRadio('an-tpsiq')} ${v('an-tpsiq-dx')}
+- Diagnósticos previos: ${getChecked('an-dx-previos')}
+- Hospitalizaciones psiquiátricas: ${getRadio('an-hosp-psiq')} ${v('an-hosp-psiq-det')}
+- Ideación suicida previa: ${getRadio('an-is-prev')} | Intentos: ${getRadio('an-is')} ${v('an-is-det')}
+- Autolesiones: ${getChecked('an-autolesion')}
+- Medicación psiquiátrica actual: ${v('an-meds')||'Ninguna'}
+- Enfermedades médicas: ${v('an-enf')||'Ninguna'}
+- Red de apoyo: ${getRadio('an-red')}
+
+HISTORIA DE VIOLENCIA:
+${getChecked('an-violencia')} ${v('an-violencia-obs')}
+
+ANTECEDENTES FAMILIARES:
+- Trastorno mental familiar: ${getRadio('an-fam-tmh')} ${v('an-fam-quien')}
+- Suicidio familiar: ${getRadio('an-fam-suicidio')} ${v('an-fam-suicidio-quien')}
+
+HISTORIA PERSONAL Y SOCIAL:
+- Vive con: ${v('an-convive')} | Dinámica familiar: ${getChecked('an-dinamica')}
+- Relaciones interpersonales: ${getRadio('an-relaciones')} | Pareja: ${getRadio('an-pareja')}
+- Rendimiento escolar/laboral: ${getRadio('an-rendimiento')}
+
+HÁBITOS:
+- Alimentación: ${getChecked('an-alimentacion')}
+- Sueño: ${getChecked('an-sueno')} | Horas: ${v('an-horas-sueno')} | Calidad: ${v('an-calidad-sueno')}/10
+- Sustancias: ${getChecked('an-sustancias')} | Frecuencia: ${getRadio('an-freq-sust')}
+
+EXAMEN MENTAL:
+- Orientación: ${getChecked('an-orient')}
+- Afecto: ${getChecked('an-afecto')}
+- Pensamiento — Curso: ${getRadio('an-pcurso')}
+- Insight: ${getChecked('an-insight')}
+- Memoria y atención: ${getRadio('an-mem')}
+
+RIESGO SUICIDA:
+- Ideación actual: ${getRadio('an-ideacion')} | Clasificación: ${v('an-riesgo')}
+- Notas: ${v('an-riesgo-notas')||'—'}
+
+IMPRESIÓN DIAGNÓSTICA:
+- Diagnóstico: ${getChecked('an-dx')} ${v('an-cie')?'('+v('an-cie')+')':''}
+- Observaciones: ${v('an-dx-obs')||'—'}
+
+PLAN TERAPÉUTICO:
+- Enfoque: ${getChecked('an-enfoque')}
+- Remisiones: ${getChecked('an-remisiones')}
+- Próxima cita: ${v('an-proxcita')||'—'}
+`.trim();
+
+  const prompt=`Eres un psicólogo clínico experto con enfoque cognitivo-conductual. Redacta una nota clínica de anamnesis psicológica de alta calidad a partir de los datos de evaluación.
+
+INSTRUCCIONES CRÍTICAS:
+1. Redacta en TEXTO CORRIDO, sin listas, sin viñetas, sin guiones. Todo en párrafos narrativos fluidos.
+2. NO uses el nombre del paciente. Usa "el paciente" o "la paciente" según corresponda.
+3. Organiza la nota en estas secciones con sus títulos exactos en mayúsculas seguidos de dos puntos:
+   MOTIVO DE CONSULTA:
+   HISTORIA DEL PROBLEMA ACTUAL:
+   ANTECEDENTES:
+   HISTORIA PERSONAL Y SOCIAL:
+   HÁBITOS:
+   EXAMEN MENTAL:
+   EVALUACIÓN DE RIESGO:
+   IMPRESIÓN DIAGNÓSTICA:
+   PLAN TERAPÉUTICO:
+4. Cada sección es un párrafo narrativo profundo, no una lista de datos.
+5. En HISTORIA DEL PROBLEMA ACTUAL integra la formulación cognitivo-conductual: identifica el patrón de pensamientos, emociones y conductas.
+6. En IMPRESIÓN DIAGNÓSTICA justifica el diagnóstico clínicamente con código CIE-10 si aplica, y realiza descarte diferencial si es pertinente.
+7. El nivel de escritura debe ser el de un psicólogo clínico de alto nivel, técnico pero legible.
+8. Si algún dato no fue completado, omítelo naturalmente.
+9. NO incluyas fecha, nombre del profesional ni encabezados decorativos.
+
+DATOS DE LA EVALUACIÓN:
+${datos}
+
+Genera la nota clínica de anamnesis ahora:`;
+
+  const outEl=document.getElementById('nota-output');
+  if(outEl){outEl.textContent='⏳ Generando anamnesis con IA clínica…';}
+
+  try{
+    const resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[{text:prompt}]}],
+        generationConfig:{temperature:0.4,maxOutputTokens:3000}
+      })
+    });
+    const data=await resp.json();
+    if(!resp.ok||data.error)throw new Error(data.error?.message||'Error de API');
+    const texto=(data.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    if(!texto)throw new Error('Respuesta vacía de Gemini');
+    if(outEl)outEl.textContent=texto;
+  }catch(e){
+    console.error('Gemini anamnesis error:',e);
+    if(outEl)outEl.textContent='❌ Error al generar con Gemini: '+e.message+'. Verifica tu API key e intenta de nuevo.';
+    toast('❌ Error Gemini: '+e.message);
+  }
+}
+
+window.generarNota_local=()=>{
   const v=id=>document.getElementById(id)?.value||'';
   const nota=`NOTA CLÍNICA · PSICOLOGÍA · CONSULTA EXTERNA EPS
 Fecha: ${v('an-fecha')||new Date().toLocaleDateString('es-CO')}
@@ -4263,6 +4399,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(savedKey&&keyInput){
       keyInput.value=savedKey;
       if(keyStatus)keyStatus.textContent='✅ API key lista';
+    }
+    var anKeyInput=document.getElementById('an-gemini-key');
+    var anKeyStatus=document.getElementById('an-key-status');
+    if(savedKey&&anKeyInput){
+      anKeyInput.value=savedKey;
+      if(anKeyStatus)anKeyStatus.textContent='✅ API key lista';
     }
   }catch(e){}
 });
