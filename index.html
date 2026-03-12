@@ -4172,12 +4172,36 @@ window.copiarTodoIC=function(){
 
 window.limpiarFormIC=function(confirm_=true){
   if(confirm_!==false&&!confirm('¿Limpiar el formulario?'))return;
-  document.querySelectorAll('#ic-form-view input[type=text], #ic-form-view textarea').forEach(function(i){i.value='';});
+  // Limpiar inputs de texto y textareas
+  document.querySelectorAll('#ic-form-view input[type=text], #ic-form-view input[type=number], #ic-form-view textarea').forEach(function(i){i.value='';});
+  // Limpiar chips de interconsulta
   document.querySelectorAll('#ic-form-view .ic-chip').forEach(function(c){c.classList.remove('on','on-r','on-g','on-a');});
+  // Limpiar checkboxes (formulario de seguimiento y otros)
+  document.querySelectorAll('#ic-form-view input[type=checkbox]').forEach(function(c){c.checked=false;});
+  // Limpiar radio buttons
+  document.querySelectorAll('#ic-form-view input[type=radio]').forEach(function(r){r.checked=false;});
+  // Limpiar selects (excepto el selector de paciente que se maneja aparte)
+  document.querySelectorAll('#ic-form-view select').forEach(function(s){
+    if(s.id!=='ic-paciente-sel')s.value='';
+  });
+  // Limpiar inputs de fecha dentro del formulario (excepto la fecha principal)
+  document.querySelectorAll('#ic-form-view input[type=date]').forEach(function(d){
+    if(d.id==='ic-pfecha')d.value=new Date().toISOString().split('T')[0];
+    else d.value='';
+  });
   document.querySelectorAll('.sev-btn').forEach(function(s){s.classList.remove('on');});
   var rn=document.getElementById('ic-riesgo-nivel');if(rn)rn.value='';
   var ra=document.getElementById('ic-risk-alert');if(ra)ra.classList.remove('show');
+  // Resetear notas generadas
   var wrap=document.getElementById('ic-output-wrap');if(wrap)wrap.style.display='none';
+  var outSeg=document.getElementById('ic-out-seg-texto');
+  if(outSeg){outSeg.textContent='Genera la nota para ver el contenido…';outSeg.classList.add('ph');}
+  var segOut=document.getElementById('ic-out-seg');if(segOut)segOut.style.display='none';
+  ['ic-out-sub','ic-out-obj','ic-out-resp','ic-out-trat'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){el.textContent='Genera la nota para ver el contenido…';el.classList.add('ph');}
+  });
+  var outFour=document.getElementById('ic-out-4campos');if(outFour)outFour.style.display='none';
   icCurrentEsp=null;
   var ep=document.getElementById('ic-esp-preview');if(ep)ep.style.display='none';
   var sel=document.getElementById('ic-paciente-sel');if(sel)sel.value='';
