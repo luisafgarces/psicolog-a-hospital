@@ -3973,116 +3973,117 @@ function generarSegLocal(){
 }
 
 async function generarSegConGemini(apiKey){
-  // Recolectar datos del formulario de seguimiento
-  function cb(id){return document.getElementById(id)?.checked||false;}
-  function val(id){return (document.getElementById(id)?.value||'').trim();}
+  // Leer datos directamente de los chips del formulario IC (modo seguimiento)
+  var chips=icChipsBySubLabel.bind(null);
+  var icvl=function(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';};
 
-  var humor=[];
-  if(cb('seg-humor-estable'))humor.push('Estable');
-  if(cb('seg-humor-ansioso'))humor.push('Ansioso');
-  if(cb('seg-humor-depresivo'))humor.push('Depresivo');
-  if(cb('seg-humor-irritable'))humor.push('Irritable');
-  var humorEscala=val('seg-humor-escala');
-  var eventos=val('seg-eventos');
-  var sesNum=val('seg-num');
+  // Estado emocional y examen mental
+  var estadoEmoc=icChipsBySubLabel('Estado emocional referido');
+  var preocupaciones=icChipsBySubLabel('Principales preocupaciones');
+  var pensamientosAut=icChipsBySubLabel('Pensamientos automáticos');
+  var citaTextual=icvl('ic-sub-cita');
+  var intensidad=icvl('ic-sub-intensidad');
+  var funcionalidad=icChipsBySubLabel('Funcionalidad física actual');
 
-  var tareaEstado=[];
-  if(cb('seg-tarea-completa'))tareaEstado.push('Completa');
-  if(cb('seg-tarea-parcial'))tareaEstado.push('Parcial');
-  if(cb('seg-tarea-no'))tareaEstado.push('No realizada');
-  var dificultades=val('seg-dificultades');
+  var orientacion=icChipsBySubLabel('Orientación');
+  var conciencia=icChipsBySubLabel('Conciencia / Colaboración');
+  var conducta=icChipsBySubLabel('Conducta');
+  var afecto=icChipsBySubLabel('Afecto');
+  var pensamiento=icChipsBySubLabel('Pensamiento');
+  var lenguaje=icChipsBySubLabel('Lenguaje / Insight');
+  var regulacion=icChipsBySubLabel('Regulación emocional');
+  var afrontamiento=icChipsBySubLabel('Estrategias de afrontamiento');
+  var comprension=icChipsBySubLabel('Comprensión del Dx');
 
-  var tecnicas=[];
-  if(cb('seg-tec-reest'))tecnicas.push('Reestructuración cognitiva (efectividad '+val('seg-tec-reest-ef')+'/5)');
-  if(cb('seg-tec-expos'))tecnicas.push('Exposición gradual (ansiedad máx. '+val('seg-tec-expos-nivel')+'/10)');
-  if(cb('seg-tec-dbt')){
-    var dbt=[];
-    if(cb('seg-tec-dbt-tol'))dbt.push('tolerancia al malestar');
-    if(cb('seg-tec-dbt-reg'))dbt.push('regulación emocional');
-    tecnicas.push('Habilidades DBT'+(dbt.length?': '+dbt.join(' y '):''));
-  }
-  if(cb('seg-tec-psico'))tecnicas.push('Psicoeducación: '+val('seg-tec-psico-tema'));
-  if(cb('seg-tec-otras'))tecnicas.push(val('seg-tec-otras-cual'));
+  var distorsiones=icChipsBySubLabel('Distorsiones cognitivas').filter(function(c){return c!=='Ninguna';});
+  var ideasIrrac=icChipsBySubLabel('Ideas irracionales').filter(function(c){return c!=='Ninguna';});
 
-  var pensamiento=val('seg-pensamiento');
-  var distorsiones=[];
-  if(cb('seg-dist-catas'))distorsiones.push('Catastrofismo');
-  if(cb('seg-dist-person'))distorsiones.push('Personalización');
-  if(cb('seg-dist-polar'))distorsiones.push('Pensamiento polarizado');
-  if(cb('seg-dist-sobre'))distorsiones.push('Sobregeneralización');
-  if(cb('seg-dist-filtr'))distorsiones.push('Filtro mental');
-  if(cb('seg-dist-otra'))distorsiones.push(val('seg-dist-otra-cual'));
+  // Riesgo
+  var ideacion=icChipsBySubLabel('Ideación actual');
+  var protectores=icChipsBySubLabel('Factores protectores');
+  var sev=icvl('ic-riesgo-nivel')||'No clasificado';
+  var riesgoNotas=icvl('ic-riesgo-notas');
 
-  var tareas=[];
-  if(cb('seg-tarea-reg'))tareas.push('Registro de pensamientos (Situación → Emoción → Pensamiento)');
-  if(cb('seg-tarea-dbt2'))tareas.push('Práctica habilidad DBT: '+val('seg-tarea-dbt2-cual'));
-  if(cb('seg-tarea-otra2'))tareas.push(val('seg-tarea-otra2-cual'));
+  // Respuesta e impresión clínica
+  var tipoResp=icChipsBySubLabel('Tipo de respuesta emocional');
+  var impresion=icChipsBySubLabel('Impresión clínica');
+  var esquema=icChipsBySubLabel('Esquema cognitivo predominante');
+  var red=icChipsBySubLabel('Red de apoyo funcional');
+  var analisisCC=icvl('ic-resp-analisis');
 
-  var objCorto=val('seg-obj-corto');
-  var objLargo=val('seg-obj-largo');
+  // Intervención y plan
+  var intervencion=icChipsBySubLabel('Intervención realizada hoy');
+  var plan=icChipsBySubLabel('Plan');
+  var frecuencia=icChipsBySubLabel('Frecuencia de seguimiento');
+  var tratNotas=icvl('ic-trat-notas');
 
-  var riesgos=[];
-  if(cb('seg-riesgo-ideacion'))riesgos.push('Ideación suicida');
-  if(cb('seg-riesgo-autolesion'))riesgos.push('Autolesiones');
-  if(cb('seg-riesgo-otro'))riesgos.push(val('seg-riesgo-otro-cual'));
-  var nivelRiesgo=val('seg-riesgo');
-
-  var recursos=[];
-  if(cb('seg-rec-insight'))recursos.push('Insight');
-  if(cb('seg-rec-motiv'))recursos.push('Motivación');
-  if(cb('seg-rec-apoyo'))recursos.push('Apoyo social');
-
-  var ajustes=val('seg-ajustes');
-  var phqIni=val('seg-phq-ini'),phqAct=val('seg-phq-act');
-  var gadIni=val('seg-gad-ini'),gadAct=val('seg-gad-act');
-  var impuls=val('seg-impuls');
-  var proxCita=val('seg-proxcita');
+  // Datos del paciente
+  var nombre=icvl('ic-pnombre')||'el paciente';
+  var hab=icvl('ic-hab');
+  var dx=icvl('ic-pdx');
+  var fecha=icvl('ic-pfecha');
 
   var datos=`
-TIPO DE NOTA: Seguimiento psicológico hospitalario — Sesión #${sesNum||'N/A'}
+TIPO DE NOTA: Seguimiento psicológico hospitalario
 
-ESTADO ACTUAL DEL PACIENTE:
-- Humor predominante: ${humor.length?humor.join(', '):'No especificado'}${humorEscala?' (escala '+humorEscala+'/5)':''}
-- Eventos relevantes desde última sesión: ${eventos||'Ninguno referido'}
+DATOS DEL PACIENTE:
+- Nombre: ${nombre}${hab?' | Hab. '+hab:''}${dx?' | Dx: '+dx:''}${fecha?' | Fecha: '+fecha:''}
 
-REVISIÓN DE TAREAS:
-- Estado de tarea asignada: ${tareaEstado.length?tareaEstado.join(', '):'No evaluada'}
-- Dificultades encontradas: ${dificultades||'Ninguna referida'}
+ESTADO EMOCIONAL REFERIDO (SUBJETIVO):
+- Estado emocional: ${estadoEmoc.length?estadoEmoc.join(', '):'No especificado'}
+- Principales preocupaciones: ${preocupaciones.length?preocupaciones.join(', '):'Ninguna referida'}
+- Pensamientos automáticos: ${pensamientosAut.filter(function(c){return c!=='Ninguno';}).join(', ')||'No identificados'}
+- Cita textual: ${citaTextual||'No registrada'}
+- Intensidad de malestar: ${intensidad||'No evaluada'}
+- Funcionalidad física: ${funcionalidad.length?funcionalidad.join(', '):'No especificada'}
 
-PROCESO TERAPÉUTICO — TCC:
-- Técnicas aplicadas en sesión: ${tecnicas.length?tecnicas.join('; '):'No especificadas'}
-- Pensamiento automático clave trabajado: ${pensamiento||'No identificado'}
-- Distorsiones cognitivas abordadas: ${distorsiones.length?distorsiones.join(', '):'Ninguna'}
+EXAMEN MENTAL (OBJETIVO):
+- Orientación: ${orientacion.length?orientacion.join(', '):'No evaluada'}
+- Conciencia/Colaboración: ${conciencia.length?conciencia.join(', '):'No especificada'}
+- Conducta: ${conducta.length?conducta.join(', '):'No especificada'}
+- Afecto: ${afecto.length?afecto.join(', '):'No especificado'}
+- Pensamiento: ${pensamiento.length?pensamiento.join(', '):'No especificado'}
+- Lenguaje/Insight: ${lenguaje.length?lenguaje.join(', '):'No especificado'}
+- Regulación emocional: ${regulacion.length?regulacion.join(', '):'No evaluada'}
+- Estrategias de afrontamiento: ${afrontamiento.length?afrontamiento.join(', '):'No especificadas'}
+- Comprensión del Dx/pronóstico: ${comprension.length?comprension.join(', '):'No evaluada'}
 
-PLAN DE ACCIÓN:
-- Tareas asignadas para próxima sesión: ${tareas.length?tareas.join('; '):'Ninguna asignada'}
-- Objetivo corto plazo: ${objCorto||'No especificado'}
-- Objetivo largo plazo: ${objLargo||'No especificado'}
+COGNICIÓN:
+- Distorsiones cognitivas: ${distorsiones.length?distorsiones.join(', '):'Ninguna identificada'}
+- Ideas irracionales: ${ideasIrrac.length?ideasIrrac.join(', '):'Ninguna identificada'}
+- Análisis cognitivo-conductual: ${analisisCC||'No registrado'}
+- Esquema cognitivo predominante: ${esquema.filter(function(c){return c!=='Sin esquema disfuncional predominante';}).join(', ')||'Sin esquema disfuncional predominante'}
 
-NOTAS CLÍNICAS:
-- Riesgos detectados: ${riesgos.length?riesgos.join(', '):'Ninguno'}
-- Nivel de riesgo suicida: ${nivelRiesgo||'Sin cambios'}
-- Recursos del paciente: ${recursos.length?recursos.join(', '):'No evaluados'}
-- Ajustes terapéuticos: ${ajustes||'Ninguno'}
-- Próxima cita: ${proxCita||'Por definir'}
+EVALUACIÓN DE RIESGO:
+- Ideación suicida/autolesiva: ${ideacion.join(', ')||'No evaluada'}
+- Nivel de riesgo: ${sev}
+- Factores protectores: ${protectores.length?protectores.join(', '):'No identificados'}
+${riesgoNotas?'- Notas de riesgo: '+riesgoNotas:''}
 
-ESCALAS:
-${phqIni||phqAct?'- PHQ-9: inicial '+phqIni+' / actual '+phqAct:''}
-${gadIni||gadAct?'- GAD-7: inicial '+gadIni+' / actual '+gadAct:''}
-${impuls?'- Impulsividad: '+impuls+'/10':''}
+IMPRESIÓN CLÍNICA:
+- Tipo de respuesta emocional: ${tipoResp.length?tipoResp.join(', '):'No especificada'}
+- Impresión diagnóstica: ${impresion.length?impresion.join(', '):'No especificada'}
+- Red de apoyo: ${red.length?red.join(', '):'No evaluada'}
+
+INTERVENCIÓN Y PLAN:
+- Intervención realizada: ${intervencion.length?intervencion.join(', '):'No especificada'}
+- Plan: ${plan.length?plan.join(', '):'No especificado'}
+- Frecuencia de seguimiento: ${frecuencia.length?frecuencia.join(', '):'No especificada'}
+${tratNotas?'- Notas de tratamiento: '+tratNotas:''}
 `.trim();
 
-  var prompt=`Eres un psicólogo clínico hospitalario experto con enfoque cognitivo-conductual. Redacta una nota de seguimiento psicológico hospitalaria de alta calidad clínica a partir de los datos de la sesión.
+  var prompt=`Eres un psicólogo clínico hospitalario experto con enfoque cognitivo-conductual. Redacta una nota de seguimiento psicológico hospitalario de alta calidad clínica a partir de los datos de la sesión.
 
 INSTRUCCIONES CRÍTICAS:
 1. Redacta en TEXTO CORRIDO, sin listas, sin viñetas, sin guiones, sin numeración. Todo en párrafos narrativos fluidos.
 2. NO uses el nombre del paciente. Usa siempre "el paciente" o "la paciente".
 3. La nota debe ser UNA SOLA nota narrativa integrada, no dividida en secciones con etiquetas.
-4. Debe incluir: estado mental observado en la sesión, revisión y análisis de la tarea, proceso terapéutico trabajado con análisis CC de las cogniciones identificadas, evolución clínica respecto a sesiones previas si hay datos, plan e indicaciones para próxima sesión, y evaluación de riesgo.
+4. Debe incluir: estado emocional y mental observado en la sesión (subjetivo y objetivo), análisis cognitivo-conductual de las cogniciones y emociones identificadas, evaluación de riesgo suicida/autolesivo, impresión clínica, intervención realizada y plan de seguimiento.
 5. El nivel de escritura debe ser el de un psicólogo clínico de alto nivel, técnico pero legible para el equipo médico.
 6. La nota debe ser concisa pero clínicamente rica — entre 150 y 250 palabras aproximadamente.
-7. NO incluyas encabezados, fechas, número de sesión explícito ni firmas.
-8. Si algún dato no fue completado, omítelo de forma natural sin mencionarlo.
+7. NO incluyas encabezados, fechas ni firmas.
+8. Si algún dato aparece como "No especificado", "No evaluado" o similar, omítelo de forma natural sin mencionarlo.
+9. El contexto es HOSPITALARIO (interconsulta de seguimiento), no consulta externa ambulatoria.
 
 DATOS DE LA SESIÓN:
 ${datos}
