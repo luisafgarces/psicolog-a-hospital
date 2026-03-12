@@ -2705,13 +2705,13 @@ window.setPRisk=(level,el)=>{document.querySelectorAll('#modal-paciente .risk-bt
 window.getChecked=(id)=>[...document.querySelectorAll(`#${id} input:checked`)].map(i=>i.value).join(', ');
 window.getRadio=(name)=>{const el=document.querySelector(`input[name="${name}"]:checked`);return el?el.value:'';};
 window.generarNota=async ()=>{
-  const apiKey=document.getElementById('an-gemini-key')?.value||localStorage.getItem('gemini_api_key')||'';
-  if(!apiKey.trim()){
+  const apiKey=getGeminiKey();
+  if(!apiKey){
     toast('⚠️ Agrega tu API key de Gemini para generar la nota con IA.');
     document.getElementById('an-gemini-key')?.focus();
     return;
   }
-  await generarAnamnesisConGemini(apiKey.trim());
+  await generarAnamnesisConGemini(apiKey);
 };
 
 async function generarAnamnesisConGemini(apiKey){
@@ -3515,20 +3515,32 @@ function icList(arr){
   return arr.slice(0,-1).join(', ')+' y '+arr[arr.length-1];
 }
 
+function getGeminiKey(){
+  // Always read from DOM first (most up-to-date), then localStorage
+  var fromDom=(document.getElementById('gemini-api-key')||{}).value||'';
+  var fromStorage=localStorage.getItem('gemini_api_key')||'';
+  // Sync: if DOM has value, update storage
+  if(fromDom.trim()){
+    if(fromDom.trim()!==fromStorage.trim())localStorage.setItem('gemini_api_key',fromDom.trim());
+    return fromDom.trim();
+  }
+  return fromStorage.trim();
+}
+
 window.generarNotaIC=function(){
   var wrap=document.getElementById('ic-output-wrap');
   if(wrap)wrap.style.display='';
   if(icCurrentMode==='esp'){generarNotaIcEsp();return;}
   if(icCurrentMode==='seg'){generarNotaIcSeg();return;}
-  var apiKey=(document.getElementById('gemini-api-key')||{}).value||localStorage.getItem('gemini_api_key')||'';
-  if(!apiKey.trim()){
+  var apiKey=getGeminiKey();
+  if(!apiKey){
     toast('⚠️ Agrega tu API key de Gemini para generar la nota con IA.');
     var wrap=document.getElementById('ic-output-wrap');
     if(wrap)wrap.style.display='none';
     document.getElementById('gemini-api-key')?.focus();
     return;
   }
-  generarNotaIcConGemini(apiKey.trim());
+  generarNotaIcConGemini(apiKey);
 };
 
 async function generarNotaIcConGemini(apiKey){
@@ -3782,12 +3794,12 @@ function generarNotaIcNueva(){
 }
 
 function generarNotaIcSeg(){
-  var apiKey=(document.getElementById('gemini-api-key')||{}).value||localStorage.getItem('gemini_api_key')||'';
-  if(!apiKey.trim()){
-    toast('⚠️ Agrega tu API key de Gemini para generar la nota con IA.');
+  var apiKey=getGeminiKey();
+  if(!apiKey){
+    toast('⚠️ Agrega tu API key de Gemini en el módulo de Interconsulta.');
     return;
   }
-  generarSegConGemini(apiKey.trim());
+  generarSegConGemini(apiKey);
 }
 
 function generarSegLocal(){
