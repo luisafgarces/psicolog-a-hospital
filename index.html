@@ -433,9 +433,12 @@ input.toggle-cb{display:none}
 
       <div class="section-header" style="margin-top:8px">
         <h2 id="ronda-titulo">📋 Pacientes para hoy</h2>
-        <div style="display:flex;gap:6px;align-items:center">
-          <button class="btn btn-secondary btn-sm" id="btn-todos-dash" onclick="toggleDashView(false)" style="opacity:.5">Ver todos</button>
-          <button class="btn btn-primary btn-sm" id="btn-hoy-dash" onclick="toggleDashView(true)">Solo hoy</button>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" id="btn-todos-dash" onclick="setDashMode('todos')" style="opacity:.5">Todos</button>
+          <button class="btn btn-primary btn-sm" id="btn-hoy-dash" onclick="setDashMode('hoy')">Hoy</button>
+          <button class="btn btn-secondary btn-sm" id="btn-man-dash" onclick="setDashMode('manana')" style="opacity:.5">→ Mañana</button>
+          <button class="btn btn-secondary btn-sm" id="btn-sem-dash" onclick="setDashMode('semana')" style="opacity:.5">Semana</button>
+          <button class="btn btn-secondary btn-sm" id="btn-mes-dash" onclick="setDashMode('mes')" style="opacity:.5">Mes</button>
           <button class="btn btn-secondary btn-sm" onclick="renderDashboard()">↺</button>
         </div>
       </div>
@@ -2090,14 +2093,20 @@ window.clearTestHistory=async()=>{
 };
 
 // ── DASHBOARD STATE ──
-let dashSoloHoy=true;
-window.toggleDashView=(soloHoy)=>{
-  dashSoloHoy=soloHoy;
-  document.getElementById('btn-hoy-dash').style.opacity=soloHoy?'1':'0.5';
-  document.getElementById('btn-todos-dash').style.opacity=soloHoy?'0.5':'1';
-  document.getElementById('ronda-titulo').textContent=soloHoy?'📋 Pacientes para hoy':'🏥 Todos los pacientes — por piso';
+// dashSoloHoy legacy — replaced by _dashMode
+window._dashMode='hoy';
+window.setDashMode=(modo)=>{
+  window._dashMode=modo;
+  const btnIds={hoy:'btn-hoy-dash',manana:'btn-man-dash',semana:'btn-sem-dash',mes:'btn-mes-dash',todos:'btn-todos-dash'};
+  Object.entries(btnIds).forEach(([k,id])=>{
+    const el=document.getElementById(id);
+    if(el){el.style.opacity=k===modo?'1':'0.5';el.className=k===modo?'btn btn-primary btn-sm':'btn btn-secondary btn-sm';}
+  });
+  const titulos={hoy:'📋 Pacientes para hoy',manana:'📅 Pacientes para mañana',semana:'📆 Pacientes esta semana',mes:'🗓️ Pacientes este mes',todos:'🏥 Todos los pacientes — por piso'};
+  document.getElementById('ronda-titulo').textContent=titulos[modo]||'📋 Pacientes';
   renderDashboard();
 };
+window.toggleDashView=(soloHoy)=>setDashMode(soloHoy?'hoy':'todos');
 
 window.renderDashboard=()=>{
   const rondaCont=document.getElementById('ronda-pisos');
@@ -2106,27 +2115,41 @@ window.renderDashboard=()=>{
   if(!rondaCont)return;
 
   // ── HELPERS ──
-  const todayStr=()=>{const d=new Date();const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${day}`;};
-  const hoy=todayStr();
   const getPiso=(p)=>{if(p.tipo==='consulta-externa')return'🚶 Consulta Externa';const hab=p.hab||'';if(!hab)return'Sin piso asignado';const u=hab.toUpperCase();if(u.includes('UCI')||u.includes('UTI')||u.includes('CUIDADOS INTENSIVOS'))return'🔴 UCI';if(u.includes('URG'))return'🟡 Urgencias';if(u.includes('AZU')||u.includes('AZUL')||u.includes('BLQ')||u.includes('BLOQUE'))return'🔵 Bloque Azul';const m=hab.match(/^(\d+)/);if(!m)return'Sin piso asignado';const n=parseInt(m[1]);if(n>=100)return'Piso '+Math.floor(n/100);return'Piso '+n;};
   const riskClass=(r)=>r==='ALTO'?'riesgo-alto':r==='MEDIO'?'riesgo-medio':r==='BAJO'?'riesgo-bajo':'riesgo-sin';
   const riskBadge=(r)=>{if(!r||r==='SIN RIESGO')return'<span class="badge badge-green">Sin riesgo</span>';if(r==='BAJO')return'<span class="badge badge-green">Riesgo bajo</span>';if(r==='MEDIO')return'<span class="badge badge-yellow">Riesgo medio</span>';if(r==='ALTO')return'<span class="badge badge-red">⚠️ Riesgo alto</span>';return'';};
   const estadoBadge=(e)=>{const m={'seguimiento':'badge-blue','nueva-interconsulta-pendiente':'badge-yellow','consulta-externa':'badge-purple','alta':'badge-gray','revaloracion':'badge-purple','alta-voluntaria':'badge-orange','fallecido':'badge-black'};const l={'seguimiento':'Seguimiento','nueva-interconsulta-pendiente':'IC pendiente','consulta-externa':'C. Externa','alta':'Alta','revaloracion':'Revaluacion','alta-voluntaria':'⚠ Alta voluntaria','fallecido':'✝ Fallecido'};return'<span class="badge '+(m[e]||'badge-gray')+'">'+( l[e]||e||'-')+'</span>';};
 
-  // ── FILTRAR: solo hoy o todos ──
+  // ── FILTRAR ──
+  const todayStr=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+  const hoy=todayStr();
+  const mananaDate=new Date();mananaDate.setDate(mananaDate.getDate()+1);
+  const manana=`${mananaDate.getFullYear()}-${String(mananaDate.getMonth()+1).padStart(2,'0')}-${String(mananaDate.getDate()).padStart(2,'0')}`;
+  // semana: lunes a domingo de la semana actual
+  const hoyD=new Date();
+  const diaSemana=hoyD.getDay()===0?7:hoyD.getDay();
+  const lunesD=new Date(hoyD);lunesD.setDate(hoyD.getDate()-(diaSemana-1));
+  const domD=new Date(lunesD);domD.setDate(lunesD.getDate()+6);
+  const fmt=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const semanaIni=fmt(lunesD),semanaFin=fmt(domD);
+  // mes actual
+  const mesIni=`${hoyD.getFullYear()}-${String(hoyD.getMonth()+1).padStart(2,'0')}-01`;
+  const lastDay=new Date(hoyD.getFullYear(),hoyD.getMonth()+1,0);
+  const mesFin=fmt(lastDay);
+  const modo=window._dashMode||'hoy';
   let lista=pacientes.filter(p=>p.estado!=='alta');
-  if(dashSoloHoy){
-    lista=lista.filter(p=>p.proxSesion===hoy);
-  }
+  if(modo==='hoy') lista=lista.filter(p=>p.proxSesion===hoy);
+  else if(modo==='manana') lista=lista.filter(p=>p.proxSesion===manana);
+  else if(modo==='semana') lista=lista.filter(p=>p.proxSesion>=semanaIni&&p.proxSesion<=semanaFin);
+  else if(modo==='mes') lista=lista.filter(p=>p.proxSesion>=mesIni&&p.proxSesion<=mesFin);
 
   // ── AGRUPAR POR PISO ──
   const grouped={};
   lista.forEach(p=>{const key=getPiso(p);if(!grouped[key])grouped[key]=[];grouped[key].push(p);});
 
   if(!lista.length){
-    rondaCont.innerHTML=dashSoloHoy
-      ?`<div class="empty"><p>✅ No hay pacientes programados para hoy.<br><small>Si acabas de registrar pacientes, verifica que tengan fecha de próxima sesión igual a hoy (${hoy}).</small></p><button class="btn btn-secondary btn-sm" style="margin-top:12px" onclick="toggleDashView(false)">Ver todos los pacientes</button></div>`
-      :`<div class="empty"><p>No hay pacientes activos registrados.</p></div>`;
+    const msgs={hoy:`✅ No hay pacientes programados para hoy.<br><small>Verifica que tengan fecha de próxima sesión igual a hoy (${hoy}).</small>`,manana:`✅ No hay pacientes programados para mañana (${manana}).`,semana:`✅ No hay pacientes programados esta semana (${semanaIni} – ${semanaFin}).`,mes:`✅ No hay pacientes programados este mes.`,todos:`No hay pacientes activos registrados.`};
+    rondaCont.innerHTML=`<div class="empty"><p>${msgs[modo]||msgs.hoy}</p><button class="btn btn-secondary btn-sm" style="margin-top:12px" onclick="setDashMode('todos')">Ver todos los pacientes</button></div>`;
   } else {
     const pisoCustomOrder=['🔵 Bloque Azul','Piso 1','Piso 6','🔴 UCI','Piso 5','Piso 4','Piso 3','Piso 2','🟡 Urgencias','🚶 Consulta Externa'];
     const pisoKeys=Object.keys(grouped).sort((a,b)=>{
@@ -2331,7 +2354,8 @@ window.hpacResponder=async(ni)=>{
    'guardarAnamnesis','generarNotaAnamnesis','mhicNuevaNota','mhicCerrar',
    'mneCerrar','mneGuardar','mneEliminar','hpacNuevaNota','hpacVolverLista',
    'calcPHQ9','calcGAD7','calcHADS','calcMMSE','calcMoCA','calcCAM',
-   'calcCSSRS','calcMMAS4','calcDuelo','calcPCL5','renderConsultaExterna'
+   'calcCSSRS','calcMMAS4','calcDuelo','calcPCL5','renderConsultaExterna',
+   'setDashMode','toggleDashView'
   ].forEach(makeStub);
 })();
 // ── UI & NAVIGATION ──────────────────────────────────────────
