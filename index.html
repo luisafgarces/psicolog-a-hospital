@@ -2143,28 +2143,59 @@ window.renderDashboard=()=>{
   else if(modo==='semana') lista=lista.filter(p=>p.proxSesion>=semanaIni&&p.proxSesion<=semanaFin);
   else if(modo==='mes') lista=lista.filter(p=>p.proxSesion>=mesIni&&p.proxSesion<=mesFin);
 
-  // ── AGRUPAR POR PISO ──
+  // ── AGRUPAR ──
+  const esPorFecha = modo==='semana'||modo==='mes';
   const grouped={};
-  lista.forEach(p=>{const key=getPiso(p);if(!grouped[key])grouped[key]=[];grouped[key].push(p);});
+
+  if(esPorFecha){
+    // Agrupar por fecha de próxima sesión
+    lista.forEach(p=>{
+      const key=p.proxSesion||'Sin fecha';
+      if(!grouped[key])grouped[key]=[];
+      grouped[key].push(p);
+    });
+  } else {
+    lista.forEach(p=>{const key=getPiso(p);if(!grouped[key])grouped[key]=[];grouped[key].push(p);});
+  }
 
   if(!lista.length){
     const msgs={hoy:`✅ No hay pacientes programados para hoy.<br><small>Verifica que tengan fecha de próxima sesión igual a hoy (${hoy}).</small>`,manana:`✅ No hay pacientes programados para mañana (${manana}).`,semana:`✅ No hay pacientes programados esta semana (${semanaIni} – ${semanaFin}).`,mes:`✅ No hay pacientes programados este mes.`,todos:`No hay pacientes activos registrados.`};
     rondaCont.innerHTML=`<div class="empty"><p>${msgs[modo]||msgs.hoy}</p><button class="btn btn-secondary btn-sm" style="margin-top:12px" onclick="setDashMode('todos')">Ver todos los pacientes</button></div>`;
   } else {
     const pisoCustomOrder=['🔵 Bloque Azul','Piso 1','Piso 6','🔴 UCI','Piso 5','Piso 4','Piso 3','Piso 2','🟡 Urgencias','🚶 Consulta Externa'];
-    const pisoKeys=Object.keys(grouped).sort((a,b)=>{
-      const ia=pisoCustomOrder.indexOf(a),ib=pisoCustomOrder.indexOf(b);
-      if(ia!==-1&&ib!==-1)return ia-ib;
-      if(ia!==-1)return-1;if(ib!==-1)return 1;
-      const na=parseInt(a.replace('Piso ','')),nb=parseInt(b.replace('Piso ',''));
-      return isNaN(na)?1:isNaN(nb)?-1:na-nb;
-    });
-    // Ordenar dentro de cada piso: riesgo ALTO primero
     const riskOrder={'ALTO':0,'MEDIO':1,'BAJO':2,'SIN RIESGO':3,'':4};
+
+    let pisoKeys;
+    if(esPorFecha){
+      // Ordenar por fecha ascendente
+      pisoKeys=Object.keys(grouped).sort((a,b)=>a.localeCompare(b));
+    } else {
+      pisoKeys=Object.keys(grouped).sort((a,b)=>{
+        const ia=pisoCustomOrder.indexOf(a),ib=pisoCustomOrder.indexOf(b);
+        if(ia!==-1&&ib!==-1)return ia-ib;
+        if(ia!==-1)return-1;if(ib!==-1)return 1;
+        const na=parseInt(a.replace('Piso ','')),nb=parseInt(b.replace('Piso ',''));
+        return isNaN(na)?1:isNaN(nb)?-1:na-nb;
+      });
+    }
+    // Ordenar dentro de cada grupo: riesgo ALTO primero
     pisoKeys.forEach(k=>grouped[k].sort((a,b)=>(riskOrder[a.riesgo]||4)-(riskOrder[b.riesgo]||4)));
 
-    rondaCont.innerHTML=pisoKeys.map(piso=>{
-      const ps=grouped[piso];
+    // Helper para label de fecha con día de la semana
+    const diasSemana=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const labelFecha=(dateStr)=>{
+      if(!dateStr||dateStr==='Sin fecha')return'📅 Sin fecha asignada';
+      const [y,m,d]=dateStr.split('-').map(Number);
+      const fecha=new Date(y,m-1,d);
+      const diaNombre=diasSemana[fecha.getDay()];
+      const esHoy=dateStr===hoy;
+      const esMañana=dateStr===manana;
+      const sufijo=esHoy?' — HOY 📍':esMañana?' — Mañana ➡️':'';
+      return`📅 ${diaNombre} ${d}/${m}/${y}${sufijo}`;
+    };
+
+    rondaCont.innerHTML=pisoKeys.map(grupo=>{
+      const ps=grouped[grupo];
       const cards=ps.map(p=>`
         <div class="ronda-card ${riskClass(p.riesgo)}" onclick="abrirPacSheet('${p.id}')" style="cursor:pointer">
           <div class="rc-hab">${p.tipo==='consulta-externa'?'🚶 Consulta Externa':p.hab&&p.hab.toUpperCase().match(/AZU|AZUL|BLQ|BLOQUE/)?'🔵 '+p.hab:`🚪 ${p.hab?'Hab. '+p.hab:'Sin hab.'}`}</div>
@@ -2172,7 +2203,7 @@ window.renderDashboard=()=>{
           ${p.cedula?`<div style="font-size:0.68rem;color:var(--text3);margin-bottom:2px">CC: ${p.cedula}</div>`:''}
           <div class="rc-dx">${p.motivo?p.motivo.slice(0,70)+(p.motivo.length>70?'…':''):'Sin diagnóstico registrado'}</div>
           <div class="rc-badges">${riskBadge(p.riesgo)} ${estadoBadge(p.estado)}</div>
-          ${p.proxSesion?`<div class="rc-proxima">📅 Próx. sesión: ${formatDate(p.proxSesion)}</div>`:''}
+          ${esPorFecha?`<div class="rc-proxima">🏢 ${getPiso(p)}</div>`:p.proxSesion?`<div class="rc-proxima">📅 Próx. sesión: ${formatDate(p.proxSesion)}</div>`:''}
           <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap" onclick="event.stopPropagation()">
             <button class="btn btn-sm btn-secondary" onclick="abrirICParaPaciente('${p.id}')">💬 IC</button>
             <button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪 Test</button>
@@ -2180,8 +2211,9 @@ window.renderDashboard=()=>{
             <button class="btn btn-sm btn-secondary" onclick="verHistorialPorId('${p.id}')">📂 Historial IC</button>
           </div>
         </div>`).join('');
+      const headerLabel=esPorFecha?labelFecha(grupo):`🏢 ${grupo}`;
       return`<div class="piso-group">
-        <div class="piso-header">🏢 ${piso}<span class="piso-count">${ps.length} paciente${ps.length>1?'s':''}</span></div>
+        <div class="piso-header">${headerLabel}<span class="piso-count">${ps.length} paciente${ps.length>1?'s':''}</span></div>
         <div class="ronda-cards">${cards}</div>
       </div>`;
     }).join('');
