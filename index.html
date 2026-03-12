@@ -2029,7 +2029,12 @@ window.guardarICFirebase=async()=>{
   let notaTexto='';
   try{
     if(icCurrentMode==='nueva')notaTexto=generarNotaIcNueva()||'';
-    else if(icCurrentMode==='seg')notaTexto=generarNotaIcSeg()||'';
+    else if(icCurrentMode==='seg'){
+      // No llamar generarNotaIcSeg() aquí porque es asíncrona — leer lo que ya esté en el DOM
+      const elSeg=document.getElementById('ic-out-seg-texto');
+      const vSeg=(elSeg?.textContent||'').trim();
+      if(vSeg&&!vSeg.startsWith('Genera')&&!vSeg.startsWith('⏳'))notaTexto=vSeg;
+    }
     else if(icCurrentMode==='esp'){
       generarNotaIcEsp();
       const el=document.getElementById('ic-esp-text');
@@ -2043,11 +2048,132 @@ window.guardarICFirebase=async()=>{
       const gs=t=>{const el=document.getElementById(t);if(!el)return'';const v=el.textContent||'';return v.startsWith('Genera')?'':v;};
       sub=gs('ic-out-sub');obj=gs('ic-out-obj');resp=gs('ic-out-resp');trat=gs('ic-out-trat');
     } else if(icCurrentMode==='seg'){
-      const el=document.getElementById('ic-out-seg-texto');if(el){const v=el.textContent||'';obj=v.startsWith('Genera')?'':v;}
+      // Primero intentar usar la nota generada por IA
+      const elIA=document.getElementById('ic-out-seg-texto');
+      const vIA=elIA?(elIA.textContent||'').trim():'';
+      const iaGenerada=vIA&&!vIA.startsWith('Genera')&&!vIA.startsWith('⏳');
+      if(iaGenerada){
+        obj=vIA;
+        // También capturar datos del formulario para los demás campos
+        const cb2=id=>document.getElementById(id)?.checked||false;
+        const val2=id=>(document.getElementById(id)?.value||'').trim();
+        const humor2=[];
+        if(cb2('seg-humor-estable'))humor2.push('Estable');
+        if(cb2('seg-humor-ansioso'))humor2.push('Ansioso');
+        if(cb2('seg-humor-depresivo'))humor2.push('Depresivo');
+        if(cb2('seg-humor-irritable'))humor2.push('Irritable');
+        const eventos2=val2('seg-eventos');
+        const sesNum2=val2('seg-num');
+        const tareaEstado2=[];
+        if(cb2('seg-tarea-completa'))tareaEstado2.push('Completa');
+        if(cb2('seg-tarea-parcial'))tareaEstado2.push('Parcial');
+        if(cb2('seg-tarea-no'))tareaEstado2.push('No realizada');
+        const partesSub2=[];
+        if(humor2.length)partesSub2.push('Estado anímico: '+humor2.join(', '));
+        if(eventos2)partesSub2.push('Eventos: '+eventos2);
+        if(tareaEstado2.length)partesSub2.push('Tarea: '+tareaEstado2.join(', '));
+        const pensamiento2=val2('seg-pensamiento');
+        if(pensamiento2)partesSub2.push('Pensamiento trabajado: '+pensamiento2);
+        sub=partesSub2.join('\n')||'Sesión #'+(sesNum2||'N/A');
+        const riesgos2=[];
+        if(cb2('seg-riesgo-ideacion'))riesgos2.push('Ideación suicida');
+        if(cb2('seg-riesgo-autolesion'))riesgos2.push('Autolesiones');
+        const nivelRiesgo2=val2('seg-riesgo');
+        const ajustes2=val2('seg-ajustes');
+        const respArr=[];
+        if(riesgos2.length)respArr.push('Riesgos: '+riesgos2.join(', '));
+        if(nivelRiesgo2)respArr.push('Nivel riesgo: '+nivelRiesgo2);
+        if(ajustes2)respArr.push('Ajustes: '+ajustes2);
+        resp=respArr.join('\n');
+        const tareas2=[];
+        if(cb2('seg-tarea-reg'))tareas2.push('Registro de pensamientos');
+        if(cb2('seg-tarea-dbt2'))tareas2.push('Habilidad DBT: '+val2('seg-tarea-dbt2-cual'));
+        if(cb2('seg-tarea-otra2'))tareas2.push(val2('seg-tarea-otra2-cual'));
+        const tratArr=[];
+        const objCorto2=val2('seg-obj-corto');
+        const objLargo2=val2('seg-obj-largo');
+        const proxCita2=val2('seg-proxcita');
+        if(tareas2.length)tratArr.push('Tareas: '+tareas2.join('; '));
+        if(objCorto2)tratArr.push('Obj. corto: '+objCorto2);
+        if(objLargo2)tratArr.push('Obj. largo: '+objLargo2);
+        if(proxCita2)tratArr.push('Próxima cita: '+proxCita2);
+        trat=tratArr.join('\n');
+      } else {
+        // Si la IA no generó nota, construir la nota directamente desde el formulario
+        const cb=id=>document.getElementById(id)?.checked||false;
+        const val=id=>(document.getElementById(id)?.value||'').trim();
+        const humor=[];
+        if(cb('seg-humor-estable'))humor.push('Estable');
+        if(cb('seg-humor-ansioso'))humor.push('Ansioso');
+        if(cb('seg-humor-depresivo'))humor.push('Depresivo');
+        if(cb('seg-humor-irritable'))humor.push('Irritable');
+        const humorEscala=val('seg-humor-escala');
+        const eventos=val('seg-eventos');
+        const sesNum=val('seg-num');
+        const tareaEstado=[];
+        if(cb('seg-tarea-completa'))tareaEstado.push('Completa');
+        if(cb('seg-tarea-parcial'))tareaEstado.push('Parcial');
+        if(cb('seg-tarea-no'))tareaEstado.push('No realizada');
+        const dificultades=val('seg-dificultades');
+        const tecnicas=[];
+        if(cb('seg-tec-reest'))tecnicas.push('Reestructuración cognitiva (ef. '+val('seg-tec-reest-ef')+'/5)');
+        if(cb('seg-tec-expos'))tecnicas.push('Exposición gradual (ansiedad '+val('seg-tec-expos-nivel')+'/10)');
+        if(cb('seg-tec-dbt')){const dbt=[];if(cb('seg-tec-dbt-tol'))dbt.push('tolerancia al malestar');if(cb('seg-tec-dbt-reg'))dbt.push('regulación emocional');tecnicas.push('Habilidades DBT'+(dbt.length?': '+dbt.join(' y '):''));}
+        if(cb('seg-tec-psico'))tecnicas.push('Psicoeducación: '+val('seg-tec-psico-tema'));
+        if(cb('seg-tec-otras'))tecnicas.push(val('seg-tec-otras-cual'));
+        const pensamiento=val('seg-pensamiento');
+        const distorsiones=[];
+        if(cb('seg-dist-catas'))distorsiones.push('Catastrofismo');
+        if(cb('seg-dist-person'))distorsiones.push('Personalización');
+        if(cb('seg-dist-polar'))distorsiones.push('Pensamiento polarizado');
+        if(cb('seg-dist-sobre'))distorsiones.push('Sobregeneralización');
+        if(cb('seg-dist-filtr'))distorsiones.push('Filtro mental');
+        if(cb('seg-dist-otra'))distorsiones.push(val('seg-dist-otra-cual'));
+        const tareas=[];
+        if(cb('seg-tarea-reg'))tareas.push('Registro de pensamientos');
+        if(cb('seg-tarea-dbt2'))tareas.push('Habilidad DBT: '+val('seg-tarea-dbt2-cual'));
+        if(cb('seg-tarea-otra2'))tareas.push(val('seg-tarea-otra2-cual'));
+        const riesgos=[];
+        if(cb('seg-riesgo-ideacion'))riesgos.push('Ideación suicida');
+        if(cb('seg-riesgo-autolesion'))riesgos.push('Autolesiones');
+        if(cb('seg-riesgo-otro'))riesgos.push(val('seg-riesgo-otro-cual'));
+        const recursos=[];
+        if(cb('seg-rec-insight'))recursos.push('Insight');
+        if(cb('seg-rec-motiv'))recursos.push('Motivación');
+        if(cb('seg-rec-apoyo'))recursos.push('Apoyo social');
+        // Construir campos SOAP directamente del formulario
+        const partesSub=[];
+        if(humor.length)partesSub.push('Estado anímico: '+humor.join(', ')+(humorEscala?' ('+humorEscala+'/5)':''));
+        if(eventos)partesSub.push('Eventos referidos: '+eventos);
+        if(tareaEstado.length)partesSub.push('Tarea asignada: '+tareaEstado.join(', ')+(dificultades?' — Dificultades: '+dificultades:''));
+        if(pensamiento)partesSub.push('Pensamiento automático trabajado: '+pensamiento);
+        if(distorsiones.length)partesSub.push('Distorsiones cognitivas: '+distorsiones.join(', '));
+        sub=partesSub.join('\n')||'Sesión #'+(sesNum||'N/A');
+        const partesObj=[];
+        if(tecnicas.length)partesObj.push('Técnicas aplicadas: '+tecnicas.join('; '));
+        if(recursos.length)partesObj.push('Recursos del paciente: '+recursos.join(', '));
+        obj=partesObj.join('\n');
+        const partesResp=[];
+        if(riesgos.length)partesResp.push('Riesgos detectados: '+riesgos.join(', '));
+        const nivelRiesgo=val('seg-riesgo');
+        if(nivelRiesgo)partesResp.push('Nivel de riesgo: '+nivelRiesgo);
+        const ajustes=val('seg-ajustes');
+        if(ajustes)partesResp.push('Ajustes terapéuticos: '+ajustes);
+        resp=partesResp.join('\n');
+        const partesTrat=[];
+        const objCorto=val('seg-obj-corto');
+        const objLargo=val('seg-obj-largo');
+        const proxCita=val('seg-proxcita');
+        if(tareas.length)partesTrat.push('Tareas asignadas: '+tareas.join('; '));
+        if(objCorto)partesTrat.push('Objetivo corto plazo: '+objCorto);
+        if(objLargo)partesTrat.push('Objetivo largo plazo: '+objLargo);
+        if(proxCita)partesTrat.push('Próxima cita: '+proxCita);
+        trat=partesTrat.join('\n');
+      }
     } else if(icCurrentMode==='esp'){
       // solo en nota para evitar duplicado al renderizar
     }
-  }catch(ex){}
+  }catch(ex){console.error('Error capturando datos de seguimiento:',ex);}
   try{
     await addDoc(collection(db,'interconsultas'),{
       pacienteId:pacObj?.id||pacId||null,
@@ -3081,7 +3207,7 @@ function mhicRender(){
     const subInfo=(e.hab||e.dx)?'<div style="font-size:0.72rem;color:var(--text3);margin-top:2px">'+(e.hab?'Hab. '+e.hab+' - ':'')+( e.dx||'')+'</div>':'';
     let camposHtml='<div style="font-size:0.78rem;color:var(--text3);font-style:italic;margin-top:8px">Sin texto guardado</div>';
     const cv=[];
-    const _noNA=v=>v&&v.trim()&&!v.startsWith('N/A')&&!v.startsWith('Genera');
+    const _noNA=v=>v&&v.trim()&&!v.startsWith('N/A')&&!v.startsWith('Genera')&&!v.startsWith('⏳');
     if(_noNA(e.sub))cv.push({l:'Subjetivo',v:e.sub});
     if(_noNA(e.obj))cv.push({l:'Objetivo',v:e.obj});
     if(_noNA(e.resp))cv.push({l:'Respuesta',v:e.resp});
