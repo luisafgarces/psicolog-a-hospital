@@ -2489,6 +2489,7 @@ window.renderDashboard=()=>{
           ${esPorFecha?`<div class="rc-proxima">🏢 ${getPiso(p)}</div>`:p.proxSesion?`<div class="rc-proxima">📅 Próx. sesión: ${formatDate(p.proxSesion)}</div>`:''}
           <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap" onclick="event.stopPropagation()">
             <button class="btn btn-sm btn-secondary" onclick="abrirICParaPaciente('${p.id}')">💬 IC</button>
+            <button class="btn btn-sm btn-secondary" onclick="nuevaAnamnesisParaPaciente('${p.id}')">📋 Anamnesis</button>
             <button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪 Test</button>
             <button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️ Editar</button>
             <button class="btn btn-sm btn-secondary" onclick="verHistorialPorId('${p.id}')">📂 Historial IC</button>
@@ -3883,12 +3884,12 @@ RESPUESTA Y TRATAMIENTO:
 INSTRUCCIONES CRÍTICAS:
 1. Redacta en TEXTO CORRIDO, sin listas, sin viñetas, sin guiones, sin numeración. Todo en párrafos narrativos fluidos.
 2. NO uses el nombre del paciente. Usa siempre "el paciente" o "la paciente" según el sexo indicado.
-3. La nota DEBE tener exactamente CUATRO secciones. Usa OBLIGATORIAMENTE estas etiquetas con corchetes cuadrados, en mayúsculas, cada una sola en su línea, sin asteriscos ni almohadillas:
-   [SUBJETIVO]
-   [OBJETIVO]
-   [RESPUESTA]
-   [TRATAMIENTO]
-   Este formato es estricto. No uses **SUBJETIVO**, ## SUBJETIVO, ni ninguna otra variación.
+3. La nota DEBE tener exactamente CUATRO secciones. Usa OBLIGATORIAMENTE estas etiquetas exactas, cada una sola en su propia línea, sin asteriscos, sin almohadillas, sin dos puntos, sin nada más:
+[SUBJETIVO]
+[OBJETIVO]
+[RESPUESTA]
+[TRATAMIENTO]
+   CRÍTICO: El formato es exactamente así — corchetes cuadrados, mayúsculas, sin ningún otro carácter. Cualquier variación como **SUBJETIVO**, SUBJETIVO:, ## SUBJETIVO rompe el sistema. Usa solo [SUBJETIVO], [OBJETIVO], [RESPUESTA], [TRATAMIENTO].
 4. Cada sección debe ser un análisis clínico profundo, no una enumeración de los datos.
 5. En el OBJETIVO incluye la formulación cognitivo-conductual completa: evento activador, pensamientos automáticos identificados, respuesta emocional, respuesta conductual y factores protectores.
 6. En la RESPUESTA incluye impresión diagnóstica con código CIE-10 si aplica, justificación clínica y descarte diferencial.
@@ -3926,57 +3927,36 @@ Genera la nota clínica completa ahora:`;
     var texto=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     if(!texto) throw new Error('Respuesta vacía de Gemini');
 
-    // Parsear las 4 secciones — acepta múltiples formatos de Gemini:
-    // [ETIQUETA], **ETIQUETA**, ## ETIQUETA, ETIQUETA:, ETIQUETA
-
-    function extraerSeccionRobusta(texto, etiqueta, siguiente){
-      // Patrones que Gemini puede usar para marcar una sección
-      var patrones=[
-        '\\['+etiqueta+'\\]',
-        '\\*\\*'+etiqueta+'\\*\\*',
-        '##\\s*'+etiqueta,
-        '#\\s*'+etiqueta,
-        etiqueta+':'
-      ];
-      var ini=-1, iniLen=0;
-      for(var p=0;p<patrones.length;p++){
-        var m=texto.match(new RegExp(patrones[p],'i'));
-        if(m&&m.index!==undefined){ini=m.index;iniLen=m[0].length;break;}
+    // Parser robusto — maneja [ETIQUETA], **ETIQUETA**, ETIQUETA:, ## ETIQUETA
+    function encontrarPos(txt, lbl){
+      var pats=['\\['+lbl+'\\]','\\*\\*'+lbl+'\\*\\*','##\\s*'+lbl,'#\\s*'+lbl,lbl+':'];
+      var best=null;
+      for(var i=0;i<pats.length;i++){
+        var m=txt.match(new RegExp(pats[i],'im'));
+        if(m&&m.index!==undefined&&(!best||m.index<best.pos))best={pos:m.index,len:m[0].length};
       }
-      if(ini===-1)return'';
-      ini+=iniLen;
-      // Buscar la siguiente sección
-      var fin=texto.length;
-      if(siguiente){
-        var sigPatrones=[
-          '\\['+siguiente+'\\]',
-          '\\*\\*'+siguiente+'\\*\\*',
-          '##\\s*'+siguiente,
-          '#\\s*'+siguiente,
-          siguiente+':'
-        ];
-        for(var q=0;q<sigPatrones.length;q++){
-          var m2=texto.match(new RegExp(sigPatrones[q],'i'));
-          if(m2&&m2.index!==undefined&&m2.index>ini){fin=m2.index;break;}
-        }
-      }
-      return texto.slice(ini,fin).trim();
+      return best;
     }
-    var sub=extraerSeccionRobusta(texto,'SUBJETIVO','OBJETIVO');
-    var obj=extraerSeccionRobusta(texto,'OBJETIVO','RESPUESTA');
-    var res=extraerSeccionRobusta(texto,'RESPUESTA','TRATAMIENTO');
-    var tra=extraerSeccionRobusta(texto,'TRATAMIENTO',null);
-
-    // Si no se parseó nada (Gemini ignoró el formato), dividir el texto en 4 partes iguales
+    function extraerSec(txt,lbl,sig){
+      var ini=encontrarPos(txt,lbl);if(!ini)return'';
+      var start=ini.pos+ini.len;
+      var fin=txt.length;
+      if(sig){var s=encontrarPos(txt,sig);if(s&&s.pos>start)fin=s.pos;}
+      return txt.slice(start,fin).replace(/^[\s:\-\*#\n]+/,'').trim();
+    }
+    var sub=extraerSec(texto,'SUBJETIVO','OBJETIVO');
+    var obj=extraerSec(texto,'OBJETIVO','RESPUESTA');
+    var res=extraerSec(texto,'RESPUESTA','TRATAMIENTO');
+    var tra=extraerSec(texto,'TRATAMIENTO',null);
+    // Fallback: dividir en 4 bloques por párrafos si no se parseó nada
     if(!sub&&!obj&&!res&&!tra){
-      var lineas=texto.split('\n').filter(function(l){return l.trim();});
-      var cuarto=Math.ceil(lineas.length/4);
-      sub=lineas.slice(0,cuarto).join('\n').trim();
-      obj=lineas.slice(cuarto,cuarto*2).join('\n').trim();
-      res=lineas.slice(cuarto*2,cuarto*3).join('\n').trim();
-      tra=lineas.slice(cuarto*3).join('\n').trim();
+      var parrafos=texto.split(/\n\n+/).filter(function(p){return p.trim().length>20;});
+      var c=Math.ceil(parrafos.length/4)||1;
+      sub=parrafos.slice(0,c).join('\n\n').trim()||texto.trim();
+      obj=parrafos.slice(c,c*2).join('\n\n').trim();
+      res=parrafos.slice(c*2,c*3).join('\n\n').trim();
+      tra=parrafos.slice(c*3).join('\n\n').trim();
     }
-
     setIcOut('ic-out-sub',sub||'');
     setIcOut('ic-out-obj',obj||'');
     setIcOut('ic-out-resp',res||'');
