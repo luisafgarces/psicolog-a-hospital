@@ -3678,6 +3678,7 @@ window.abrirPacSheet=async(id)=>{
   document.getElementById('ps-grid').innerHTML=grid.map(ri).join('');
   document.getElementById('ps-actions').innerHTML=`
     <button class="btn btn-primary btn-sm" onclick="abrirICParaPaciente('${id}');closePacSheet()">💬 IC</button>
+    <button class="btn btn-secondary btn-sm" onclick="nuevaAnamnesisParaPaciente('${id}');closePacSheet()">📋 Anamnesis</button>
     <button class="btn btn-secondary btn-sm" onclick="irTestsPaciente('${id}');closePacSheet()">🧪 Test</button>
     <button class="btn btn-secondary btn-sm" onclick="abrirCapacidadPaciente('${id}');closePacSheet()">⚖️ Capacidad</button>
     <button class="btn btn-secondary btn-sm" onclick="editarPaciente('${id}');closePacSheet()">✏️ Editar</button>
