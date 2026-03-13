@@ -3367,7 +3367,8 @@ function mhicRender(){
     if(_noNA(e.obj))cv.push({l:'Objetivo',v:e.obj});
     if(_noNA(e.resp))cv.push({l:'Respuesta',v:e.resp});
     if(_noNA(e.trat))cv.push({l:'Tratamiento',v:e.trat});
-    if(_noNA(e.nota))cv.push({l:cv.length?'Notas adicionales':'Nota clínica',v:e.nota});
+    // Solo mostrar nota si NO hay campos individuales (evita duplicado 'Notas adicionales')
+    if(_noNA(e.nota)&&!cv.length)cv.push({l:'Nota clínica',v:e.nota});
     if(!cv.length){const any=e.nota||e.trat||e.obj||e.sub||e.resp||'';if(any)cv.push({l:'Nota clínica',v:any});}
     if(cv.length){
       let cHtml='';
@@ -3529,7 +3530,7 @@ window.hpacRenderNotas=()=>{
         if(!hasNAVal(e.resp))cv.push({label:'Respuesta / Impresión clínica',text:e.resp});
         if(!hasNAVal(e.trat))cv.push({label:'Tratamiento / Plan',text:e.trat});
         // nota: mostrar siempre si tiene contenido (puede ser la nota completa o complementaria)
-        if(!hasNAVal(e.nota))cv.push({label:cv.length?'Notas adicionales':'Nota clínica',text:e.nota});
+        if(!hasNAVal(e.nota)&&!cv.length)cv.push({label:'Nota clínica',text:e.nota});
         // Si absolutamente nada se encontró, intentar cualquier campo
         if(!cv.length){
           var any=e.nota||e.trat||e.obj||e.sub||e.resp||'';
