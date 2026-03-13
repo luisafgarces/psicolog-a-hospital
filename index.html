@@ -3901,7 +3901,19 @@ INSTRUCCIONES CRÍTICAS:
 DATOS DE LA EVALUACIÓN:
 ${datos}
 
-Genera la nota clínica completa ahora:`;
+Escribe la nota clínica ahora. Tu respuesta debe comenzar EXACTAMENTE con la palabra [SUBJETIVO] en la primera línea, sin ningún texto antes. Estructura obligatoria:
+
+[SUBJETIVO]
+(párrafo del análisis subjetivo)
+
+[OBJETIVO]
+(párrafo del análisis objetivo)
+
+[RESPUESTA]
+(párrafo de la impresión clínica y respuesta)
+
+[TRATAMIENTO]
+(párrafo del plan e intervención)`;
 
   // Mostrar estado de carga
   ['ic-out-sub','ic-out-obj','ic-out-resp','ic-out-trat'].forEach(function(id){
@@ -3926,19 +3938,21 @@ Genera la nota clínica completa ahora:`;
     }
     var texto=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     if(!texto) throw new Error('Respuesta vacía de Gemini');
+    console.log('[IC] Gemini raw (first 300):', texto.slice(0,300));
 
-    // Parser robusto — maneja [ETIQUETA], **ETIQUETA**, ETIQUETA:, ## ETIQUETA
+    // Parser — detecta [ETIQUETA], **ETIQUETA**, ETIQUETA:, ## ETIQUETA
     function encontrarPos(txt, lbl){
-      var pats=['\\['+lbl+'\\]','\\*\\*'+lbl+'\\*\\*','##\\s*'+lbl,'#\\s*'+lbl,lbl+':'];
+      var pats=['\\['+lbl+'\\]','\\*\\*'+lbl+'\\*\\*','##\\s*'+lbl,'#\\s*'+lbl,'(?:^|\\n)'+lbl+':'];
       var best=null;
       for(var i=0;i<pats.length;i++){
-        var m=txt.match(new RegExp(pats[i],'im'));
-        if(m&&m.index!==undefined&&(!best||m.index<best.pos))best={pos:m.index,len:m[0].length};
+        try{var m=txt.match(new RegExp(pats[i],'im'));
+        if(m&&m.index!==undefined&&(!best||m.index<best.pos))best={pos:m.index,len:m[0].length};}catch(e){}
       }
       return best;
     }
     function extraerSec(txt,lbl,sig){
-      var ini=encontrarPos(txt,lbl);if(!ini)return'';
+      var ini=encontrarPos(txt,lbl);
+      if(!ini)return'';
       var start=ini.pos+ini.len;
       var fin=txt.length;
       if(sig){var s=encontrarPos(txt,sig);if(s&&s.pos>start)fin=s.pos;}
@@ -3948,16 +3962,25 @@ Genera la nota clínica completa ahora:`;
     var obj=extraerSec(texto,'OBJETIVO','RESPUESTA');
     var res=extraerSec(texto,'RESPUESTA','TRATAMIENTO');
     var tra=extraerSec(texto,'TRATAMIENTO',null);
-    // Fallback: dividir en 4 bloques por párrafos si no se parseó nada
-    if(!sub&&!obj&&!res&&!tra){
-      var parrafos=texto.split(/\n\n+/).filter(function(p){return p.trim().length>20;});
-      var c=Math.ceil(parrafos.length/4)||1;
-      sub=parrafos.slice(0,c).join('\n\n').trim()||texto.trim();
-      obj=parrafos.slice(c,c*2).join('\n\n').trim();
-      res=parrafos.slice(c*2,c*3).join('\n\n').trim();
-      tra=parrafos.slice(c*3).join('\n\n').trim();
+    console.log('[IC] parsed lengths — sub:',sub.length,'obj:',obj.length,'res:',res.length,'tra:',tra.length);
+
+    // Fallback robusto cuando Gemini no usó etiquetas:
+    // dividir por oraciones para repartir equitativamente entre los 4 campos
+    if(!obj&&!res&&!tra){
+      console.log('[IC] usando fallback por oraciones');
+      var oraciones=texto.match(/[^.!?\n]+[.!?]+/g)||[];
+      if(oraciones.length>=4){
+        var chunk=Math.ceil(oraciones.length/4);
+        sub=oraciones.slice(0,chunk).join(' ').trim();
+        obj=oraciones.slice(chunk,chunk*2).join(' ').trim();
+        res=oraciones.slice(chunk*2,chunk*3).join(' ').trim();
+        tra=oraciones.slice(chunk*3).join(' ').trim();
+      } else {
+        // último recurso: poner todo en sub
+        sub=texto.trim();
+      }
     }
-    setIcOut('ic-out-sub',sub||'');
+    setIcOut('ic-out-sub',sub||texto.trim());
     setIcOut('ic-out-obj',obj||'');
     setIcOut('ic-out-resp',res||'');
     setIcOut('ic-out-trat',tra||'');
