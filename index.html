@@ -2040,7 +2040,16 @@ window.guardarICFirebase=async()=>{
   // Capturar nota generada si existe
   let notaTexto='';
   try{
-    if(icCurrentMode==='nueva')notaTexto=generarNotaIcNueva()||'';
+    if(icCurrentMode==='nueva'){
+      // Preferir contenido generado por IA (ya visible en pantalla) sobre nota local
+      const gsV=t=>{const el=document.getElementById(t);if(!el)return'';const v=(el.textContent||'').trim();return(v.startsWith('Genera')||v.startsWith('⏳')||v.startsWith('❌')||v.length<10)?'':v;};
+      const aiSub=gsV('ic-out-sub'),aiObj=gsV('ic-out-obj'),aiResp=gsV('ic-out-resp'),aiTrat=gsV('ic-out-trat');
+      if(aiSub||aiObj||aiResp||aiTrat){
+        notaTexto=[aiSub&&'ANÁLISIS SUBJETIVO\n'+aiSub,aiObj&&'ANÁLISIS OBJETIVO\n'+aiObj,aiResp&&'RESPUESTA\n'+aiResp,aiTrat&&'TRATAMIENTO\n'+aiTrat].filter(Boolean).join('\n\n');
+      } else {
+        notaTexto=generarNotaIcNueva()||'';
+      }
+    }
     else if(icCurrentMode==='seg'){
       // Generar nota con Gemini si hay API key, y esperar el resultado antes de guardar
       const apiKey=getGeminiKey();
