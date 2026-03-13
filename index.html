@@ -288,6 +288,9 @@ input.toggle-cb{display:none}
 
 /* RONDA DEL DÍA */
 .piso-group{margin-bottom:18px}
+#dash-nav-wrap .nav-arrow-btn{background:none;border:none;padding:10px 16px;cursor:pointer;font-size:1.3rem;color:var(--text2);transition:all 0.15s;flex-shrink:0;line-height:1}
+#dash-nav-wrap .nav-arrow-btn:hover{background:var(--surface2);color:var(--accent)}
+#dash-nav-label.es-hoy{color:var(--accent);}
 .piso-header{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--accent);color:#fff;border-radius:9px 9px 0 0;font-weight:700;font-size:0.85rem}
 .piso-header .piso-count{margin-left:auto;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:20px;font-size:0.75rem}
 .ronda-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;padding:12px;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 9px 9px}
@@ -431,15 +434,24 @@ input.toggle-cb{display:none}
         <div class="stat-card"><div class="label">Tests hoy</div><div class="value" id="stat-tests">—</div><div class="sub">Aplicados</div></div><div class="stat-card" id="stat-altas-card" onclick="toggleAltasPanel()" style="cursor:pointer;border:1px solid var(--border)"><div class="label">Altas</div><div class="value" id="stat-altas" style="color:var(--success)">—</div><div class="sub">Este mes &#128196;</div></div>
       </div>
 
-      <div class="section-header" style="margin-top:8px">
-        <h2 id="ronda-titulo">📋 Pacientes para hoy</h2>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <!-- NAVEGADOR DE FECHAS -->
+      <div id="dash-nav-wrap" style="margin-top:8px">
+        <!-- Fila 1: navegador de día -->
+        <div style="display:flex;align-items:center;gap:0;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px">
+          <button onclick="dashNavDia(-1)" style="background:none;border:none;padding:10px 16px;cursor:pointer;font-size:1.1rem;color:var(--text2);transition:background 0.15s;flex-shrink:0" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='none'">‹</button>
+          <div style="flex:1;text-align:center;padding:0 8px">
+            <div id="dash-nav-label" style="font-family:'DM Serif Display',serif;font-size:1.05rem;font-weight:700;color:var(--text);white-space:nowrap"></div>
+            <div id="dash-nav-sublabel" style="font-size:0.7rem;color:var(--text3);margin-top:1px"></div>
+          </div>
+          <button onclick="dashNavDia(1)" style="background:none;border:none;padding:10px 16px;cursor:pointer;font-size:1.1rem;color:var(--text2);transition:background 0.15s;flex-shrink:0" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='none'">›</button>
+        </div>
+        <!-- Fila 2: accesos rápidos -->
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:2px">
           <button class="btn btn-secondary btn-sm" id="btn-todos-dash" onclick="setDashMode('todos')" style="opacity:.5">Todos</button>
-          <button class="btn btn-primary btn-sm" id="btn-hoy-dash" onclick="setDashMode('hoy')">Hoy</button>
-          <button class="btn btn-secondary btn-sm" id="btn-man-dash" onclick="setDashMode('manana')" style="opacity:.5">→ Mañana</button>
+          <button class="btn btn-primary btn-sm" id="btn-hoy-dash" onclick="dashNavHoy()">Hoy</button>
           <button class="btn btn-secondary btn-sm" id="btn-sem-dash" onclick="setDashMode('semana')" style="opacity:.5">Semana</button>
           <button class="btn btn-secondary btn-sm" id="btn-mes-dash" onclick="setDashMode('mes')" style="opacity:.5">Mes</button>
-          <button class="btn btn-secondary btn-sm" onclick="renderDashboard()">↺</button>
+          <button class="btn btn-secondary btn-sm" onclick="renderDashboard()" title="Actualizar">↺</button>
         </div>
       </div>
       <div id="ronda-pisos"></div>
@@ -2287,19 +2299,90 @@ window.clearTestHistory=async()=>{
 
 // ── DASHBOARD STATE ──
 // dashSoloHoy legacy — replaced by _dashMode
-window._dashMode='hoy';
-window.setDashMode=(modo)=>{
-  window._dashMode=modo;
-  const btnIds={hoy:'btn-hoy-dash',manana:'btn-man-dash',semana:'btn-sem-dash',mes:'btn-mes-dash',todos:'btn-todos-dash'};
-  Object.entries(btnIds).forEach(([k,id])=>{
-    const el=document.getElementById(id);
-    if(el){el.style.opacity=k===modo?'1':'0.5';el.className=k===modo?'btn btn-primary btn-sm':'btn btn-secondary btn-sm';}
-  });
-  const titulos={hoy:'📋 Pacientes para hoy',manana:'📅 Pacientes para mañana',semana:'📆 Pacientes esta semana',mes:'🗓️ Pacientes este mes',todos:'🏥 Todos los pacientes — por piso'};
-  document.getElementById('ronda-titulo').textContent=titulos[modo]||'📋 Pacientes';
+// ── NAVEGADOR DE FECHAS ──────────────────────────────────────────────────
+window._dashMode='dia'; // 'dia' | 'semana' | 'mes' | 'todos'
+window._dashDiaOffset=0; // 0=hoy, -1=ayer, 1=mañana, etc.
+
+const _fmtDia=(offset)=>{
+  const d=new Date();d.setDate(d.getDate()+offset);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+};
+const _labelDia=(offset)=>{
+  if(offset===0)return'Hoy';
+  if(offset===-1)return'Ayer';
+  if(offset===1)return'Mañana';
+  if(offset===-2)return'Anteayer';
+  const d=new Date();d.setDate(d.getDate()+offset);
+  const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return dias[d.getDay()]+' '+d.getDate()+' '+meses[d.getMonth()];
+};
+const _fechaLarga=(offset)=>{
+  const d=new Date();d.setDate(d.getDate()+offset);
+  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return dias[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()]+' de '+d.getFullYear();
+};
+
+window.dashNavDia=(delta)=>{
+  window._dashDiaOffset=(window._dashDiaOffset||0)+delta;
+  window._dashMode='dia';
+  _updateNavUI();
   renderDashboard();
 };
-window.toggleDashView=(soloHoy)=>setDashMode(soloHoy?'hoy':'todos');
+window.dashNavHoy=()=>{
+  window._dashDiaOffset=0;
+  window._dashMode='dia';
+  _updateNavUI();
+  renderDashboard();
+};
+const _updateNavUI=()=>{
+  const offset=window._dashDiaOffset||0;
+  const modo=window._dashMode||'dia';
+  // Actualizar label del navegador
+  const lbl=document.getElementById('dash-nav-label');
+  const sub=document.getElementById('dash-nav-sublabel');
+  if(lbl){
+    if(modo==='dia')lbl.textContent=_labelDia(offset);
+    else if(modo==='semana')lbl.textContent='Esta semana';
+    else if(modo==='mes')lbl.textContent='Este mes';
+    else lbl.textContent='Todos los pacientes';
+  }
+  if(sub){
+    if(modo==='dia')sub.textContent=_fechaLarga(offset);
+    else if(modo==='semana'){
+      const hoyD=new Date();
+      const ds=hoyD.getDay()===0?7:hoyD.getDay();
+      const lu=new Date(hoyD);lu.setDate(hoyD.getDate()-(ds-1));
+      const do_=new Date(lu);do_.setDate(lu.getDate()+6);
+      const fmt=d=>d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+      sub.textContent=fmt(lu)+' — '+fmt(do_);
+    }
+    else sub.textContent='';
+  }
+  // Actualizar botones quick-access
+  const btnIds={todos:'btn-todos-dash',hoy:'btn-hoy-dash',semana:'btn-sem-dash',mes:'btn-mes-dash'};
+  Object.entries(btnIds).forEach(([k,id])=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const active=(k==='hoy'&&modo==='dia'&&offset===0)||(k==='semana'&&modo==='semana')||(k==='mes'&&modo==='mes')||(k==='todos'&&modo==='todos');
+    el.style.opacity=active?'1':'0.5';
+    el.className=active?'btn btn-primary btn-sm':'btn btn-secondary btn-sm';
+  });
+  // Mostrar/ocultar flechas (siempre visibles en modo dia)
+  const nav=document.getElementById('dash-nav-wrap');
+  // las flechas solo tienen sentido en modo dia — ocultarlas en semana/mes/todos
+  const flechas=nav?.querySelectorAll('button[onclick*="dashNavDia"]');
+  if(flechas)flechas.forEach(b=>b.style.opacity=modo==='dia'?'1':'0.3');
+};
+
+window.setDashMode=(modo)=>{
+  window._dashMode=modo;
+  if(modo==='dia')window._dashDiaOffset=0;
+  _updateNavUI();
+  renderDashboard();
+};
+window.toggleDashView=(soloHoy)=>setDashMode(soloHoy?'dia':'todos');
 
 window.renderDashboard=()=>{
   const rondaCont=document.getElementById('ronda-pisos');
@@ -2314,25 +2397,29 @@ window.renderDashboard=()=>{
   const estadoBadge=(e)=>{const m={'seguimiento':'badge-blue','nueva-interconsulta-pendiente':'badge-yellow','consulta-externa':'badge-purple','alta':'badge-gray','revaloracion':'badge-purple','alta-voluntaria':'badge-orange','fallecido':'badge-black'};const l={'seguimiento':'Seguimiento','nueva-interconsulta-pendiente':'IC pendiente','consulta-externa':'C. Externa','alta':'Alta','revaloracion':'Revaluacion','alta-voluntaria':'⚠ Alta voluntaria','fallecido':'✝ Fallecido'};return'<span class="badge '+(m[e]||'badge-gray')+'">'+( l[e]||e||'-')+'</span>';};
 
   // ── FILTRAR ──
-  const todayStr=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
-  const hoy=todayStr();
-  const mananaDate=new Date();mananaDate.setDate(mananaDate.getDate()+1);
-  const manana=`${mananaDate.getFullYear()}-${String(mananaDate.getMonth()+1).padStart(2,'0')}-${String(mananaDate.getDate()).padStart(2,'0')}`;
-  // semana: lunes a domingo de la semana actual
+  const fmt=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const hoyD=new Date();
+  const hoy=fmt(hoyD);
+  const mananaDate=new Date(hoyD);mananaDate.setDate(hoyD.getDate()+1);
+  const manana=fmt(mananaDate);
+  // semana actual
   const diaSemana=hoyD.getDay()===0?7:hoyD.getDay();
   const lunesD=new Date(hoyD);lunesD.setDate(hoyD.getDate()-(diaSemana-1));
   const domD=new Date(lunesD);domD.setDate(lunesD.getDate()+6);
-  const fmt=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const semanaIni=fmt(lunesD),semanaFin=fmt(domD);
   // mes actual
   const mesIni=`${hoyD.getFullYear()}-${String(hoyD.getMonth()+1).padStart(2,'0')}-01`;
   const lastDay=new Date(hoyD.getFullYear(),hoyD.getMonth()+1,0);
   const mesFin=fmt(lastDay);
-  const modo=window._dashMode||'hoy';
+  const modo=window._dashMode||'dia';
+  const offset=window._dashDiaOffset||0;
+  // Fecha del día navegado (puede ser ayer, hoy, mañana, cualquier día)
+  const diaNavD=new Date(hoyD);diaNavD.setDate(hoyD.getDate()+offset);
+  const diaNave=fmt(diaNavD);
+  // Inicializar UI del navegador si aún no se hizo
+  _updateNavUI();
   let lista=pacientes.filter(p=>p.estado!=='alta');
-  if(modo==='hoy') lista=lista.filter(p=>p.proxSesion===hoy);
-  else if(modo==='manana') lista=lista.filter(p=>p.proxSesion===manana);
+  if(modo==='dia') lista=lista.filter(p=>p.proxSesion===diaNave);
   else if(modo==='semana') lista=lista.filter(p=>p.proxSesion>=semanaIni&&p.proxSesion<=semanaFin);
   else if(modo==='mes') lista=lista.filter(p=>p.proxSesion>=mesIni&&p.proxSesion<=mesFin);
 
@@ -2352,8 +2439,9 @@ window.renderDashboard=()=>{
   }
 
   if(!lista.length){
-    const msgs={hoy:`✅ No hay pacientes programados para hoy.<br><small>Verifica que tengan fecha de próxima sesión igual a hoy (${hoy}).</small>`,manana:`✅ No hay pacientes programados para mañana (${manana}).`,semana:`✅ No hay pacientes programados esta semana (${semanaIni} – ${semanaFin}).`,mes:`✅ No hay pacientes programados este mes.`,todos:`No hay pacientes activos registrados.`};
-    rondaCont.innerHTML=`<div class="empty"><p>${msgs[modo]||msgs.hoy}</p><button class="btn btn-secondary btn-sm" style="margin-top:12px" onclick="setDashMode('todos')">Ver todos los pacientes</button></div>`;
+    const labelDiaVacio=offset===0?'hoy':offset===-1?'ayer':offset===1?'mañana':_labelDia(offset);
+    const msgs={dia:`✅ Sin pacientes para ${labelDiaVacio} (${diaNave}).`,semana:`✅ No hay pacientes esta semana (${semanaIni} – ${semanaFin}).`,mes:`✅ No hay pacientes este mes.`,todos:`No hay pacientes activos registrados.`};
+    rondaCont.innerHTML=`<div class="empty"><p>${msgs[modo]||msgs.dia}</p><button class="btn btn-secondary btn-sm" style="margin-top:12px" onclick="setDashMode('todos')">Ver todos los pacientes</button></div>`;
   } else {
     const pisoCustomOrder=['🔵 Bloque Azul','Piso 1','Piso 6','🔴 UCI','Piso 5','Piso 4','Piso 3','Piso 2','🟡 Urgencias','🚶 Consulta Externa'];
     const riskOrder={'ALTO':0,'MEDIO':1,'BAJO':2,'SIN RIESGO':3,'':4};
@@ -2376,6 +2464,7 @@ window.renderDashboard=()=>{
 
     // Helper para label de fecha con día de la semana
     const diasSemana=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const ayer=fmt(new Date(hoyD.getTime()-86400000));
     const labelFecha=(dateStr)=>{
       if(!dateStr||dateStr==='Sin fecha')return'📅 Sin fecha asignada';
       const [y,m,d]=dateStr.split('-').map(Number);
@@ -2383,7 +2472,8 @@ window.renderDashboard=()=>{
       const diaNombre=diasSemana[fecha.getDay()];
       const esHoy=dateStr===hoy;
       const esMañana=dateStr===manana;
-      const sufijo=esHoy?' — HOY 📍':esMañana?' — Mañana ➡️':'';
+      const esAyer=dateStr===ayer;
+      const sufijo=esHoy?' — HOY 📍':esMañana?' — Mañana ➡️':esAyer?' — Ayer':'';
       return`📅 ${diaNombre} ${d}/${m}/${y}${sufijo}`;
     };
 
@@ -2580,7 +2670,7 @@ window.hpacResponder=async(ni)=>{
    'mneCerrar','mneGuardar','mneEliminar','hpacNuevaNota','hpacVolverLista',
    'calcPHQ9','calcGAD7','calcHADS','calcMMSE','calcMoCA','calcCAM',
    'calcCSSRS','calcMMAS4','calcDuelo','calcPCL5','renderConsultaExterna',
-   'setDashMode','toggleDashView','populateICPacientes','populateAnamPacientes'
+   'setDashMode','toggleDashView','dashNavDia','dashNavHoy','populateICPacientes','populateAnamPacientes'
   ].forEach(makeStub);
 })();
 // ── UI & NAVIGATION ──────────────────────────────────────────
