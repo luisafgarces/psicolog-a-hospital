@@ -3880,10 +3880,10 @@ async function generarNotaIcConGemini(apiKey){
   try{
     // 4 llamadas paralelas — objetivo tiene más tokens por ser el campo más denso
     var [sub,obj,res,tra]=await Promise.all([
-      llamarGemini(instrBase+'\n\nEscribe el ANÁLISIS SUBJETIVO de la interconsulta psicológica hospitalaria basándote en:\n'+dSub, 2000),
+      llamarGemini(instrBase+'\n\nEscribe el ANÁLISIS SUBJETIVO de la interconsulta psicológica hospitalaria basándote en:\n'+dSub, 4000),
       llamarGemini(instrBase+'\n\nEscribe el ANÁLISIS OBJETIVO completo (examen mental + formulación CC: evento activador, respuesta emocional/conductual, factores protectores, riesgo suicida). Termina con punto final. Datos:\n'+dObj, 4000),
-      llamarGemini(instrBase+'\n\nEscribe la IMPRESIÓN CLÍNICA Y RESPUESTA (tipo de respuesta emocional, impresión diagnóstica, código CIE-10 si aplica, descarte diferencial) basándote en:\n'+dResp, 2000),
-      llamarGemini(instrBase+'\n\nEscribe el PLAN DE TRATAMIENTO (intervenciones realizadas, plan, frecuencia, recomendaciones al equipo médico) basándote en:\n'+dTrat, 2000)
+      llamarGemini(instrBase+'\n\nEscribe la IMPRESIÓN CLÍNICA Y RESPUESTA (tipo de respuesta emocional, impresión diagnóstica, código CIE-10 si aplica, descarte diferencial) basándote en:\n'+dResp, 4000),
+      llamarGemini(instrBase+'\n\nEscribe el PLAN DE TRATAMIENTO (intervenciones realizadas, plan, frecuencia, recomendaciones al equipo médico) basándote en:\n'+dTrat, 4000)
     ]);
     setIcOut('ic-out-sub',sub);
     setIcOut('ic-out-obj',obj);
