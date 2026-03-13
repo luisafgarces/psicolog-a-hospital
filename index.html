@@ -2041,14 +2041,27 @@ window.guardarICFirebase=async()=>{
   let notaTexto='';
   try{
     if(icCurrentMode==='nueva'){
-      // Preferir contenido generado por IA (ya visible en pantalla) sobre nota local
-      const gsV=t=>{const el=document.getElementById(t);if(!el)return'';const v=(el.textContent||'').trim();return(v.startsWith('Genera')||v.startsWith('⏳')||v.startsWith('❌')||v.length<10)?'':v;};
+      // Leer SOLO lo que está visible en pantalla (generado por Gemini)
+      // NUNCA llamar generarNotaIcNueva() aquí — sobreescribe la nota IA
+      const PLACEHOLDER=['Genera la nota','⏳','❌','N/A'];
+      const gsV=t=>{
+        const el=document.getElementById(t);
+        if(!el)return'';
+        const v=(el.textContent||'').trim();
+        if(v.length<15)return'';
+        for(var i=0;i<PLACEHOLDER.length;i++){if(v.startsWith(PLACEHOLDER[i]))return'';}
+        return v;
+      };
       const aiSub=gsV('ic-out-sub'),aiObj=gsV('ic-out-obj'),aiResp=gsV('ic-out-resp'),aiTrat=gsV('ic-out-trat');
-      if(aiSub||aiObj||aiResp||aiTrat){
-        notaTexto=[aiSub&&'ANÁLISIS SUBJETIVO\n'+aiSub,aiObj&&'ANÁLISIS OBJETIVO\n'+aiObj,aiResp&&'RESPUESTA\n'+aiResp,aiTrat&&'TRATAMIENTO\n'+aiTrat].filter(Boolean).join('\n\n');
-      } else {
-        notaTexto=generarNotaIcNueva()||'';
-      }
+      console.log('[SAVE] aiSub len:',aiSub.length,'aiObj len:',aiObj.length,'aiResp len:',aiResp.length,'aiTrat len:',aiTrat.length);
+      notaTexto=[
+        aiSub&&'ANÁLISIS SUBJETIVO\n'+aiSub,
+        aiObj&&'ANÁLISIS OBJETIVO\n'+aiObj,
+        aiResp&&'RESPUESTA\n'+aiResp,
+        aiTrat&&'TRATAMIENTO\n'+aiTrat
+      ].filter(Boolean).join('\n\n');
+      // Si no hay NADA de IA, guardar mensaje indicativo en vez de nota genérica
+      if(!notaTexto) notaTexto='[Nota no generada — completar con IA antes de guardar]';
     }
     else if(icCurrentMode==='seg'){
       // Generar nota con Gemini si hay API key, y esperar el resultado antes de guardar
