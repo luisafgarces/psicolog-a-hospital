@@ -3897,6 +3897,7 @@ INSTRUCCIONES CRÍTICAS:
 8. El nivel de escritura debe ser el de un psicólogo clínico de alto nivel, con terminología técnica apropiada pero legible para el equipo médico.
 9. NO incluyas encabezados decorativos, fechas, ni firmas. Solo las cuatro secciones.
 10. Si algún dato no fue explorado, menciónalo brevemente como área pendiente para el seguimiento, no lo omitas ni lo inventes.
+11. Cada sección debe tener máximo 150 palabras. La nota completa no debe superar 600 palabras en total. Sé clínicamente preciso pero conciso.
 
 DATOS DE LA EVALUACIÓN:
 ${datos}
@@ -3929,7 +3930,7 @@ Escribe la nota clínica ahora. Tu respuesta debe comenzar EXACTAMENTE con la pa
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.4,maxOutputTokens:3000}
+        generationConfig:{temperature:0.4,maxOutputTokens:8000}
       })
     });
     var data=await resp.json();
