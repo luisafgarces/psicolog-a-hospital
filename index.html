@@ -3939,47 +3939,64 @@ Escribe la nota clínica ahora. Tu respuesta debe comenzar EXACTAMENTE con la pa
     }
     var texto=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     if(!texto) throw new Error('Respuesta vacía de Gemini');
-    console.log('[IC] Gemini raw (first 300):', texto.slice(0,300));
+    console.log('[IC] Gemini raw:', texto.slice(0,400));
 
-    // Parser — detecta [ETIQUETA], **ETIQUETA**, ETIQUETA:, ## ETIQUETA
-    function encontrarPos(txt, lbl){
-      var pats=['\\['+lbl+'\\]','\\*\\*'+lbl+'\\*\\*','##\\s*'+lbl,'#\\s*'+lbl,'(?:^|\\n)'+lbl+':'];
-      var best=null;
-      for(var i=0;i<pats.length;i++){
-        try{var m=txt.match(new RegExp(pats[i],'im'));
-        if(m&&m.index!==undefined&&(!best||m.index<best.pos))best={pos:m.index,len:m[0].length};}catch(e){}
-      }
-      return best;
-    }
-    function extraerSec(txt,lbl,sig){
-      var ini=encontrarPos(txt,lbl);
-      if(!ini)return'';
-      var start=ini.pos+ini.len;
-      var fin=txt.length;
-      if(sig){var s=encontrarPos(txt,sig);if(s&&s.pos>start)fin=s.pos;}
-      return txt.slice(start,fin).replace(/^[\s:\-\*#\n]+/,'').trim();
-    }
-    var sub=extraerSec(texto,'SUBJETIVO','OBJETIVO');
-    var obj=extraerSec(texto,'OBJETIVO','RESPUESTA');
-    var res=extraerSec(texto,'RESPUESTA','TRATAMIENTO');
-    var tra=extraerSec(texto,'TRATAMIENTO',null);
-    console.log('[IC] parsed lengths — sub:',sub.length,'obj:',obj.length,'res:',res.length,'tra:',tra.length);
+    // Parser simplificado: split por etiquetas conocidas en cualquier formato
+    // Normalizar: quitar **, ##, y dejar solo el texto entre corchetes o la palabra sola
+    var partes={SUBJETIVO:'',OBJETIVO:'',RESPUESTA:'',TRATAMIENTO:''};
+    var etiquetas=['SUBJETIVO','OBJETIVO','RESPUESTA','TRATAMIENTO'];
+    
+    // Estrategia 1: buscar etiquetas entre corchetes [ETIQUETA] — el formato preferido
+    var regCorchetes=/\[?(SUBJETIVO|OBJETIVO|RESPUESTA|TRATAMIENTO)\]?/gi;
+    // Estrategia más robusta: partir el texto usando cualquier variante de las 4 etiquetas como separador
+    // Reemplazar todas las variantes por un marcador limpio %%%ETIQUETA%%%
+    var normalizado=texto
+      .replace(/\[SUBJETIVO\]/gi,'%%%SUBJETIVO%%%')
+      .replace(/\[OBJETIVO\]/gi,'%%%OBJETIVO%%%')
+      .replace(/\[RESPUESTA\]/gi,'%%%RESPUESTA%%%')
+      .replace(/\[TRATAMIENTO\]/gi,'%%%TRATAMIENTO%%%')
+      .replace(/\*\*SUBJETIVO\*\*/gi,'%%%SUBJETIVO%%%')
+      .replace(/\*\*OBJETIVO\*\*/gi,'%%%OBJETIVO%%%')
+      .replace(/\*\*RESPUESTA\*\*/gi,'%%%RESPUESTA%%%')
+      .replace(/\*\*TRATAMIENTO\*\*/gi,'%%%TRATAMIENTO%%%')
+      .replace(/^##\s*SUBJETIVO\s*$/gim,'%%%SUBJETIVO%%%')
+      .replace(/^##\s*OBJETIVO\s*$/gim,'%%%OBJETIVO%%%')
+      .replace(/^##\s*RESPUESTA\s*$/gim,'%%%RESPUESTA%%%')
+      .replace(/^##\s*TRATAMIENTO\s*$/gim,'%%%TRATAMIENTO%%%')
+      .replace(/^SUBJETIVO:\s*$/gim,'%%%SUBJETIVO%%%')
+      .replace(/^OBJETIVO:\s*$/gim,'%%%OBJETIVO%%%')
+      .replace(/^RESPUESTA:\s*$/gim,'%%%RESPUESTA%%%')
+      .replace(/^TRATAMIENTO:\s*$/gim,'%%%TRATAMIENTO%%%')
+      .replace(/^SUBJETIVO:/gim,'%%%SUBJETIVO%%%')
+      .replace(/^OBJETIVO:/gim,'%%%OBJETIVO%%%')
+      .replace(/^RESPUESTA:/gim,'%%%RESPUESTA%%%')
+      .replace(/^TRATAMIENTO:/gim,'%%%TRATAMIENTO%%%');
 
-    // Fallback robusto cuando Gemini no usó etiquetas:
-    // dividir por oraciones para repartir equitativamente entre los 4 campos
-    if(!obj&&!res&&!tra){
-      console.log('[IC] usando fallback por oraciones');
-      var oraciones=texto.match(/[^.!?\n]+[.!?]+/g)||[];
-      if(oraciones.length>=4){
-        var chunk=Math.ceil(oraciones.length/4);
-        sub=oraciones.slice(0,chunk).join(' ').trim();
-        obj=oraciones.slice(chunk,chunk*2).join(' ').trim();
-        res=oraciones.slice(chunk*2,chunk*3).join(' ').trim();
-        tra=oraciones.slice(chunk*3).join(' ').trim();
-      } else {
-        // último recurso: poner todo en sub
-        sub=texto.trim();
-      }
+    console.log('[IC] normalizado (first 300):', normalizado.slice(0,300));
+
+    // Partir por los marcadores
+    var trozos=normalizado.split(/%%%(\w+)%%%/);
+    // trozos = [texto_antes, 'SUBJETIVO', contenido, 'OBJETIVO', contenido, ...]
+    var sub='', obj='', res='', tra='';
+    for(var i=0;i<trozos.length-1;i+=2){
+      var lbl=(trozos[i+1]||'').toUpperCase();
+      var val=(trozos[i+2]||'').trim();
+      if(lbl==='SUBJETIVO')sub=val;
+      else if(lbl==='OBJETIVO')obj=val;
+      else if(lbl==='RESPUESTA')res=val;
+      else if(lbl==='TRATAMIENTO')tra=val;
+    }
+    console.log('[IC] parsed — sub:',sub.length,'obj:',obj.length,'res:',res.length,'tra:',tra.length);
+
+    // Fallback: si no se encontró ninguna etiqueta, dividir por oraciones en 4 partes
+    if(!sub&&!obj&&!res&&!tra){
+      console.log('[IC] sin etiquetas — fallback por oraciones');
+      var ors=texto.match(/[^.!?\n]{10,}[.!?]/g)||[];
+      var n=Math.ceil(ors.length/4)||1;
+      sub=ors.slice(0,n).join(' ').trim()||texto.trim();
+      obj=ors.slice(n,n*2).join(' ').trim();
+      res=ors.slice(n*2,n*3).join(' ').trim();
+      tra=ors.slice(n*3).join(' ').trim();
     }
     setIcOut('ic-out-sub',sub||texto.trim());
     setIcOut('ic-out-obj',obj||'');
