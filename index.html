@@ -2195,11 +2195,30 @@ window.guardarICFirebase=async()=>{
 window.guardarAnamnesis=async()=>{
   const nombre=document.getElementById('an-nombre').value.trim();
   if(!nombre)return toast('⚠️ Ingresa el nombre del paciente');
-  const nota=generarNota();setSyncStatus('syncing');
-  try{await addDoc(collection(db,'anamnesis'),{pacienteId:document.getElementById('anamnesis-paciente-sel').value||null,pacienteNombre:nombre,pacienteCedula:document.getElementById('an-cedula').value,fecha:document.getElementById('an-fecha').value,riesgo:document.getElementById('an-riesgo').value,dx:getChecked('an-dx'),nota,modo:'Anamnesis',creado:serverTimestamp()});
-  toast('✅ Anamnesis guardada');
-  // Limpiar formulario después de guardar
-  setTimeout(()=>clearAnamnesis(),300);
+  // BUGFIX: generarNota() es async (Gemini) y no retorna string — siempre guardaba undefined.
+  // Usamos generarNota_local() que es síncrona y retorna el texto completo del formulario.
+  // Si el usuario ya generó la nota con IA (aparece en nota-output), se usa esa versión.
+  const notaLocal=window.generarNota_local();
+  const notaEl=document.getElementById('nota-output');
+  const notaIA=(notaEl?.textContent||'').trim();
+  const notaValida=notaIA&&!notaIA.startsWith('❌')&&!notaIA.startsWith('⏳')&&notaIA.length>100;
+  const nota=notaValida?notaIA:notaLocal;
+  setSyncStatus('syncing');
+  try{
+    await addDoc(collection(db,'anamnesis'),{
+      pacienteId:document.getElementById('anamnesis-paciente-sel').value||null,
+      pacienteNombre:nombre,
+      pacienteCedula:document.getElementById('an-cedula').value,
+      fecha:document.getElementById('an-fecha').value,
+      riesgo:document.getElementById('an-riesgo').value,
+      dx:window.getChecked('an-dx'),
+      nota,
+      modo:'Anamnesis',
+      creado:serverTimestamp()
+    });
+    setSyncStatus('online');
+    toast('✅ Anamnesis guardada');
+    setTimeout(()=>clearAnamnesis(),300);
   }
   catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
 };
