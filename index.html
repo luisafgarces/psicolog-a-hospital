@@ -3804,8 +3804,7 @@ window.generarNotaIC=function(){
 };
 
 async function generarNotaIcConGemini(apiKey){
-  // Recolectar todos los datos del formulario
-  var nombre=icv('ic-pnombre')||'el/la paciente';
+  // Recolectar datos del formulario
   var edad=icv('ic-edad')||'';
   var sexo=icv('ic-sexo')||'';
   var dx=icv('ic-pdx')||'[diagnóstico médico]';
@@ -3817,202 +3816,66 @@ async function generarNotaIcConGemini(apiKey){
   var tratNotas=icv('ic-trat-notas')||'';
   var sustNotas=icv('ic-sustancias-notas')||'';
   var riesgoNotas=icv('ic-riesgo-notas')||'';
-
   function chips(label){return icChipsBySubLabel(label).join(', ');}
 
-  var datos=`
-DATOS DEL PACIENTE:
-- Nombre: Paciente (no usar nombre real en la nota)
-- Edad: ${edad} años | Sexo: ${sexo}
-- Servicio / Habitación: ${hab}
-- Diagnóstico médico: ${dx}
-- Tipo de IC: Nueva
+  // Contexto base del paciente
+  var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}. Dx médico: ${dx}. Servicio: ${hab||'no especificado'}. Riesgo suicida: ${sev}.`;
 
-SUBJETIVO — Datos recolectados:
-- Estado emocional referido: ${chips('Estado emocional referido')||'variable'}
-- Principales preocupaciones: ${chips('Principales preocupaciones')||'no especificadas'}
-- Funcionalidad física actual: ${chips('Funcionalidad física actual')||'no explorada'}
-- Pensamientos automáticos (CC): ${chips('Pensamientos automáticos')||'no identificados explícitamente'}
-- Intensidad del malestar: ${intensidad||'no cuantificada'}
-- Cita textual del paciente: ${cita||'ninguna registrada'}
-- Antecedentes psiquiátricos: ${chips('Diagnósticos psiquiátricos previos')||'sin antecedentes referidos'}
-- Tto. psicológico/psiquiátrico previo: ${chips('Tto. psicológico')||'ninguno referido'}
-- Intentos de suicidio previos: ${chips('Intentos de suicidio previos')||'ninguno'}
-- Evento crítico reciente: ${chips('Evento crítico reciente')||'hospitalización actual'}
-- Tamizaje de violencia: ${chips('Tipo de violencia')||'niega antecedentes'}
+  // Datos por sección
+  var dSub=`Estado emocional: ${chips('Estado emocional referido')||'no especificado'}. Preocupaciones: ${chips('Principales preocupaciones')||'ninguna'}. Pensamientos automáticos: ${chips('Pensamientos automáticos')||'no identificados'}. Intensidad malestar: ${intensidad||'no cuantificada'}. Cita textual: ${cita||'ninguna'}. Antecedentes psiq: ${chips('Diagnósticos psiquiátricos previos')||'ninguno'}. Intentos suicidio: ${chips('Intentos de suicidio previos')||'ninguno'}. Violencia: ${chips('Tipo de violencia')||'niega'}.`;
 
-OBJETIVO — Examen mental y formulación:
-- Orientación: ${chips('Orientación')||'conservada en las tres esferas'}
-- Conciencia / Colaboración: ${chips('Conciencia / Colaboración')||'consciente y colaborador/a'}
-- Conducta: ${chips('Conducta')||'adecuada'}
-- Afecto: ${chips('Afecto')||'observable'}
-- Pensamiento: ${chips('Pensamiento')||'organizado'}
-- Lenguaje / Insight: ${chips('Lenguaje / Insight')||'coherente'}
-- Regulación emocional: ${chips('Regulación emocional')||'no explorada'}
-- Estrategias de afrontamiento: ${chips('Estrategias de afrontamiento')||'no exploradas'}
-- Comprensión del Dx/pronóstico: ${chips('Comprensión del Dx')||'no explorada'}
-- Nivel de conocimiento del diagnóstico: ${chips('Nivel de conocimiento del diagnóstico')||'no explorado'}
-- Indicadores de duelo anticipatorio: ${chips('Indicadores de duelo anticipatorio')||'no identificados'}
-- Alimentación: ${chips('Alimentación')||'no explorada'}
-- Sueño: ${chips('Sueño')||'no explorado'}
-- Sustancias psicoactivas: ${chips('Consumo de sustancias')||'niega consumo'} ${sustNotas}
-- Distorsiones cognitivas: ${chips('Distorsiones cognitivas')||'ninguna identificada'}
-- Ideas irracionales: ${chips('Ideas irracionales')||'ninguna identificada'}
-- Ideación suicida actual: ${chips('Ideación actual')||'ninguna'}
-- Riesgo suicida: ${sev}
-- Factores protectores: ${chips('Factores protectores')||'no explorados'}
-- Notas de riesgo: ${riesgoNotas}
-- Interferencia con manejo médico: ${chips('Factores de interferencia')||'sin interferencia'}
-- Análisis CC libre: ${analisisLibre}
-- Esquema cognitivo predominante: ${chips('Esquema cognitivo predominante')||'no identificado'}
-- Red de apoyo: ${chips('Red de apoyo funcional')||'no explorada'}
+  var dObj=`Orientación: ${chips('Orientación')||'conservada'}. Conciencia: ${chips('Conciencia / Colaboración')||'consciente'}. Conducta: ${chips('Conducta')||'adecuada'}. Afecto: ${chips('Afecto')||'observable'}. Pensamiento: ${chips('Pensamiento')||'organizado'}. Insight: ${chips('Lenguaje / Insight')||'conservado'}. Regulación emocional: ${chips('Regulación emocional')||'no explorada'}. Afrontamiento: ${chips('Estrategias de afrontamiento')||'no exploradas'}. Distorsiones: ${chips('Distorsiones cognitivas')||'ninguna'}. Ideación suicida: ${chips('Ideación actual')||'niega'}. Factores protectores: ${chips('Factores protectores')||'no explorados'}. Análisis CC: ${analisisLibre||'no registrado'}. Red de apoyo: ${chips('Red de apoyo funcional')||'no explorada'}.`;
 
-RESPUESTA Y TRATAMIENTO:
-- Tipo de respuesta emocional: ${chips('Tipo de respuesta emocional')||'esperable/adaptativa'}
-- Impresión clínica: ${chips('Impresión clínica')||'respuesta adaptativa'}
-- Intervención realizada: ${chips('Intervención realizada hoy')||'valoración clínica'}
-- Plan: ${chips('Plan')||'seguimiento'}
-- Frecuencia: ${chips('Frecuencia de seguimiento')||'según evolución'}
-- Recomendaciones al equipo — Comunicación: ${chips('Comunicación con el paciente')||'no especificadas'}
-- Recomendaciones al equipo — Entorno: ${chips('Entorno y condiciones hospitalarias')||'no especificadas'}
-- Alertas para reportar: ${chips('Alertas para reportar a psicología')||'no especificadas'}
-- Notas libres tratamiento: ${tratNotas}
-`.trim();
+  var dResp=`Tipo respuesta emocional: ${chips('Tipo de respuesta emocional')||'esperable'}. Impresión clínica: ${chips('Impresión clínica')||'respuesta adaptativa'}. Esquema cognitivo: ${chips('Esquema cognitivo predominante')||'no identificado'}.`;
 
-  var prompt=`Eres un psicólogo clínico hospitalario experto con enfoque cognitivo-conductual que trabaja en un hospital de tercer nivel. Debes redactar una nota de interconsulta psicológica hospitalaria de alta calidad clínica a partir de los datos recolectados en la evaluación.
+  var dTrat=`Intervención: ${chips('Intervención realizada hoy')||'valoración clínica'}. Plan: ${chips('Plan')||'seguimiento'}. Frecuencia: ${chips('Frecuencia de seguimiento')||'según evolución'}. Recomendaciones comunicación: ${chips('Comunicación con el paciente')||'no especificadas'}. Recomendaciones entorno: ${chips('Entorno y condiciones hospitalarias')||'no especificadas'}. Alertas: ${chips('Alertas para reportar a psicología')||'ninguna'}. Notas: ${tratNotas||'ninguna'}.`;
 
-INSTRUCCIONES CRÍTICAS:
-1. Redacta en TEXTO CORRIDO, sin listas, sin viñetas, sin guiones, sin numeración. Todo en párrafos narrativos fluidos.
-2. NO uses el nombre del paciente. Usa siempre "el paciente" o "la paciente" según el sexo indicado.
-3. La nota DEBE tener exactamente CUATRO secciones. Usa OBLIGATORIAMENTE estas etiquetas exactas, cada una sola en su propia línea, sin asteriscos, sin almohadillas, sin dos puntos, sin nada más:
-[SUBJETIVO]
-[OBJETIVO]
-[RESPUESTA]
-[TRATAMIENTO]
-   CRÍTICO: El formato es exactamente así — corchetes cuadrados, mayúsculas, sin ningún otro carácter. Cualquier variación como **SUBJETIVO**, SUBJETIVO:, ## SUBJETIVO rompe el sistema. Usa solo [SUBJETIVO], [OBJETIVO], [RESPUESTA], [TRATAMIENTO].
-4. Cada sección debe ser un análisis clínico profundo, no una enumeración de los datos.
-5. En el OBJETIVO incluye la formulación cognitivo-conductual completa: evento activador, pensamientos automáticos identificados, respuesta emocional, respuesta conductual y factores protectores.
-6. En la RESPUESTA incluye impresión diagnóstica con código CIE-10 si aplica, justificación clínica y descarte diferencial.
-7. En el TRATAMIENTO describe las intervenciones realizadas con lenguaje técnico CC y el plan de seguimiento con recomendaciones específicas al equipo tratante.
-8. El nivel de escritura debe ser el de un psicólogo clínico de alto nivel, con terminología técnica apropiada pero legible para el equipo médico.
-9. NO incluyas encabezados decorativos, fechas, ni firmas. Solo las cuatro secciones.
-10. Si algún dato no fue explorado, menciónalo brevemente como área pendiente para el seguimiento, no lo omitas ni lo inventes.
-11. Cada sección debe tener máximo 150 palabras. La nota completa no debe superar 600 palabras en total. Sé clínicamente preciso pero conciso.
-
-DATOS DE LA EVALUACIÓN:
-${datos}
-
-Escribe la nota clínica ahora. Tu respuesta debe comenzar EXACTAMENTE con la palabra [SUBJETIVO] en la primera línea, sin ningún texto antes. Estructura obligatoria:
-
-[SUBJETIVO]
-(párrafo del análisis subjetivo)
-
-[OBJETIVO]
-(párrafo del análisis objetivo)
-
-[RESPUESTA]
-(párrafo de la impresión clínica y respuesta)
-
-[TRATAMIENTO]
-(párrafo del plan e intervención)`;
-
-  // Mostrar estado de carga
+  // Mostrar carga
   ['ic-out-sub','ic-out-obj','ic-out-resp','ic-out-trat'].forEach(function(id){
     var el=document.getElementById(id);
-    if(el){el.classList.remove('ph');el.textContent='⏳ Generando con IA clínica…';}
+    if(el){el.classList.remove('ph');el.textContent='⏳ Generando…';}
   });
   var wrap=document.getElementById('ic-output-wrap');
   if(wrap){wrap.style.display='';wrap.scrollIntoView({behavior:'smooth',block:'start'});}
+  var f4=document.getElementById('ic-out-4campos');
+  var seg=document.getElementById('ic-out-seg');
+  if(f4)f4.style.display='';
+  if(seg)seg.style.display='none';
+
+  // Helper para llamar Gemini con un prompt corto
+  async function llamarGemini(prompt){
+    var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:400}})
+    });
+    var d=await r.json();
+    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+    return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+  }
+
+  var instrBase=`Psicólogo clínico hospitalario (TCC). Responde en UN SOLO PÁRRAFO, texto corrido, sin listas. Máximo 80 palabras. No uses el nombre del paciente. Contexto: ${ctx}`;
 
   try{
-    var resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.4,maxOutputTokens:8000}
-      })
-    });
-    var data=await resp.json();
-    if(!resp.ok||data.error){
-      throw new Error(data.error?.message||'Error de API');
-    }
-    var texto=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-    if(!texto) throw new Error('Respuesta vacía de Gemini');
-    console.log('[IC] Gemini raw:', texto.slice(0,400));
-
-    // Parser simplificado: split por etiquetas conocidas en cualquier formato
-    // Normalizar: quitar **, ##, y dejar solo el texto entre corchetes o la palabra sola
-    var partes={SUBJETIVO:'',OBJETIVO:'',RESPUESTA:'',TRATAMIENTO:''};
-    var etiquetas=['SUBJETIVO','OBJETIVO','RESPUESTA','TRATAMIENTO'];
-    
-    // Estrategia 1: buscar etiquetas entre corchetes [ETIQUETA] — el formato preferido
-    var regCorchetes=/\[?(SUBJETIVO|OBJETIVO|RESPUESTA|TRATAMIENTO)\]?/gi;
-    // Estrategia más robusta: partir el texto usando cualquier variante de las 4 etiquetas como separador
-    // Reemplazar todas las variantes por un marcador limpio %%%ETIQUETA%%%
-    var normalizado=texto
-      .replace(/\[SUBJETIVO\]/gi,'%%%SUBJETIVO%%%')
-      .replace(/\[OBJETIVO\]/gi,'%%%OBJETIVO%%%')
-      .replace(/\[RESPUESTA\]/gi,'%%%RESPUESTA%%%')
-      .replace(/\[TRATAMIENTO\]/gi,'%%%TRATAMIENTO%%%')
-      .replace(/\*\*SUBJETIVO\*\*/gi,'%%%SUBJETIVO%%%')
-      .replace(/\*\*OBJETIVO\*\*/gi,'%%%OBJETIVO%%%')
-      .replace(/\*\*RESPUESTA\*\*/gi,'%%%RESPUESTA%%%')
-      .replace(/\*\*TRATAMIENTO\*\*/gi,'%%%TRATAMIENTO%%%')
-      .replace(/^##\s*SUBJETIVO\s*$/gim,'%%%SUBJETIVO%%%')
-      .replace(/^##\s*OBJETIVO\s*$/gim,'%%%OBJETIVO%%%')
-      .replace(/^##\s*RESPUESTA\s*$/gim,'%%%RESPUESTA%%%')
-      .replace(/^##\s*TRATAMIENTO\s*$/gim,'%%%TRATAMIENTO%%%')
-      .replace(/^SUBJETIVO:\s*$/gim,'%%%SUBJETIVO%%%')
-      .replace(/^OBJETIVO:\s*$/gim,'%%%OBJETIVO%%%')
-      .replace(/^RESPUESTA:\s*$/gim,'%%%RESPUESTA%%%')
-      .replace(/^TRATAMIENTO:\s*$/gim,'%%%TRATAMIENTO%%%')
-      .replace(/^SUBJETIVO:/gim,'%%%SUBJETIVO%%%')
-      .replace(/^OBJETIVO:/gim,'%%%OBJETIVO%%%')
-      .replace(/^RESPUESTA:/gim,'%%%RESPUESTA%%%')
-      .replace(/^TRATAMIENTO:/gim,'%%%TRATAMIENTO%%%');
-
-    console.log('[IC] normalizado (first 300):', normalizado.slice(0,300));
-
-    // Partir por los marcadores
-    var trozos=normalizado.split(/%%%(\w+)%%%/);
-    // trozos = [texto_antes, 'SUBJETIVO', contenido, 'OBJETIVO', contenido, ...]
-    var sub='', obj='', res='', tra='';
-    for(var i=0;i<trozos.length-1;i+=2){
-      var lbl=(trozos[i+1]||'').toUpperCase();
-      var val=(trozos[i+2]||'').trim();
-      if(lbl==='SUBJETIVO')sub=val;
-      else if(lbl==='OBJETIVO')obj=val;
-      else if(lbl==='RESPUESTA')res=val;
-      else if(lbl==='TRATAMIENTO')tra=val;
-    }
-    console.log('[IC] parsed — sub:',sub.length,'obj:',obj.length,'res:',res.length,'tra:',tra.length);
-
-    // Fallback: si no se encontró ninguna etiqueta, dividir por oraciones en 4 partes
-    if(!sub&&!obj&&!res&&!tra){
-      console.log('[IC] sin etiquetas — fallback por oraciones');
-      var ors=texto.match(/[^.!?\n]{10,}[.!?]/g)||[];
-      var n=Math.ceil(ors.length/4)||1;
-      sub=ors.slice(0,n).join(' ').trim()||texto.trim();
-      obj=ors.slice(n,n*2).join(' ').trim();
-      res=ors.slice(n*2,n*3).join(' ').trim();
-      tra=ors.slice(n*3).join(' ').trim();
-    }
-    setIcOut('ic-out-sub',sub||texto.trim());
-    setIcOut('ic-out-obj',obj||'');
-    setIcOut('ic-out-resp',res||'');
-    setIcOut('ic-out-trat',tra||'');
-
+    // 4 llamadas paralelas — una por sección
+    var [sub,obj,res,tra]=await Promise.all([
+      llamarGemini(`${instrBase}\n\nEscribe el ANÁLISIS SUBJETIVO de la interconsulta psicológica hospitalaria basándote en:\n${dSub}`),
+      llamarGemini(`${instrBase}\n\nEscribe el ANÁLISIS OBJETIVO (examen mental + formulación cognitivo-conductual: evento activador, respuesta emocional/conductual, factores protectores, riesgo suicida) basándote en:\n${dObj}`),
+      llamarGemini(`${instrBase}\n\nEscribe la IMPRESIÓN CLÍNICA Y RESPUESTA (tipo de respuesta emocional, impresión diagnóstica, código CIE-10 si aplica, descarte diferencial breve) basándote en:\n${dResp}`),
+      llamarGemini(`${instrBase}\n\nEscribe el PLAN DE TRATAMIENTO (intervenciones realizadas, plan de seguimiento, frecuencia, recomendaciones al equipo médico) basándote en:\n${dTrat}`)
+    ]);
+    setIcOut('ic-out-sub',sub);
+    setIcOut('ic-out-obj',obj);
+    setIcOut('ic-out-resp',res);
+    setIcOut('ic-out-trat',tra);
   }catch(e){
-    console.error('Gemini error:',e);
+    console.error('Gemini IC error:',e);
     ['ic-out-sub','ic-out-obj','ic-out-resp','ic-out-trat'].forEach(function(id){
       var el=document.getElementById(id);
-      if(el){el.textContent='❌ Error al generar con Gemini: '+e.message+'. Verifica tu API key e intenta de nuevo.';el.classList.remove('ph');}
+      if(el){el.textContent='❌ Error: '+e.message;el.classList.remove('ph');}
     });
     toast('❌ Error Gemini: '+e.message);
   }
 }
-
 function generarNotaIcNueva(){
   var nombre=icv('ic-pnombre')||'el/la paciente';
   var pn=nombre.split(' ')[0];
@@ -4226,24 +4089,14 @@ INTERVENCIÓN Y PLAN:
 ${tratNotas?'- Notas de tratamiento: '+tratNotas:''}
 `.trim();
 
-  var prompt=`Eres un psicólogo clínico hospitalario experto con enfoque cognitivo-conductual. Redacta una nota de evolución psicológica hospitalaria a partir de los datos de la sesión de seguimiento.
-
-INSTRUCCIONES CRÍTICAS — LÉELAS TODAS ANTES DE ESCRIBIR:
-1. La nota debe ser UN SOLO PÁRRAFO CONTINUO. Sin secciones, sin títulos, sin viñetas, sin guiones, sin numeración, sin saltos de línea. Todo fluye en un único bloque de texto narrativo.
-2. NO uses el nombre del paciente. Usa "el paciente" o "la paciente" según corresponda.
-3. El párrafo debe integrar fluidamente en este orden: estado emocional y conductual observado → examen mental relevante → análisis cognitivo-conductual (pensamientos, emociones, patrones) → evaluación de riesgo suicida/autolesivo → intervención realizada → impresión clínica → plan y frecuencia de seguimiento.
-4. Lenguaje técnico clínico de psicología hospitalaria, preciso y conciso. Legible para el equipo médico tratante.
-5. Entre 150 y 220 palabras exactamente — ni más ni menos.
-6. NO incluyas encabezados, fechas, firmas ni metadatos.
-7. Si un dato aparece como "No especificado" o similar, omítelo naturalmente sin mencionarlo.
-8. Contexto: interconsulta hospitalaria de seguimiento, no consulta externa ambulatoria.
-9. Evita frases genéricas como "se realizó sesión de seguimiento". Ve directo al contenido clínico.
+  var prompt=`Psicólogo clínico hospitalario (TCC). Escribe una nota de evolución psicológica hospitalaria en UN SOLO PÁRRAFO, máximo 120 palabras. Texto corrido, sin listas ni títulos. No uses el nombre del paciente. Usa SOLO los datos proporcionados — no inventes ni generalices. Integra en orden: estado emocional → examen mental → análisis CC → riesgo suicida → intervención → plan.
 
 DATOS DE LA SESIÓN:
 ${datos}
 
-Escribe el párrafo de evolución psicológica ahora (un solo párrafo, sin títulos ni secciones):`;
+Escribe el párrafo ahora, directo, sin encabezado:`;
 
+  console.log('[SEG] datos enviados a Gemini:', datos.slice(0,600));
   // Mostrar carga
   var outEl=document.getElementById('ic-out-seg-texto');
   if(outEl){outEl.classList.remove('ph');outEl.textContent='⏳ Generando nota con IA clínica…';}
@@ -4260,12 +4113,15 @@ Escribe el párrafo de evolución psicológica ahora (un solo párrafo, sin tít
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.4,maxOutputTokens:1500}
+        generationConfig:{temperature:0.4,maxOutputTokens:600}
       })
     });
     var data=await resp.json();
+    console.log('[SEG] Gemini full response:', JSON.stringify(data).slice(0,800));
     if(!resp.ok||data.error)throw new Error(data.error?.message||'Error de API');
-    var texto=(data.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    var candidate=data.candidates?.[0];
+    console.log('[SEG] finishReason:', candidate?.finishReason, '| texto length:', candidate?.content?.parts?.[0]?.text?.length);
+    var texto=(candidate?.content?.parts?.[0]?.text||'').trim();
     if(!texto)throw new Error('Respuesta vacía de Gemini');
     setIcOut('ic-out-seg-texto',texto);
   }catch(e){
