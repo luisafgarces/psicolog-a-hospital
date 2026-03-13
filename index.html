@@ -2030,10 +2030,32 @@ window.guardarICFirebase=async()=>{
   try{
     if(icCurrentMode==='nueva')notaTexto=generarNotaIcNueva()||'';
     else if(icCurrentMode==='seg'){
-      // No llamar generarNotaIcSeg() aquí porque es asíncrona — leer lo que ya esté en el DOM
+      // Generar nota con Gemini si hay API key, y esperar el resultado antes de guardar
+      const apiKey=getGeminiKey();
+      if(apiKey){
+        try{await generarSegConGemini(apiKey);}catch(e){}
+      }
       const elSeg=document.getElementById('ic-out-seg-texto');
       const vSeg=(elSeg?.textContent||'').trim();
-      if(vSeg&&!vSeg.startsWith('Genera')&&!vSeg.startsWith('⏳'))notaTexto=vSeg;
+      if(vSeg&&!vSeg.startsWith('Genera')&&!vSeg.startsWith('⏳')&&!vSeg.startsWith('❌'))notaTexto=vSeg;
+      // Si no hay nota IA, construir nota local desde el formulario
+      if(!notaTexto){
+        const cb=id=>document.getElementById(id)?.checked||false;
+        const val=id=>(document.getElementById(id)?.value||'').trim();
+        const icC=lbl=>icChipsBySubLabel(lbl);
+        const partes=[];
+        const emoc=icC('Estado emocional referido');if(emoc.length)partes.push('Estado emocional: '+emoc.join(', '));
+        const preoc=icC('Principales preocupaciones');if(preoc.length)partes.push('Preocupaciones: '+preoc.join(', '));
+        const orient=icC('Orientación');if(orient.length)partes.push('Orientación: '+orient.join(', '));
+        const afecto=icC('Afecto');if(afecto.length)partes.push('Afecto: '+afecto.join(', '));
+        const pens=icC('Pensamiento');if(pens.length)partes.push('Pensamiento: '+pens.join(', '));
+        const ideac=icC('Ideación actual');if(ideac.length)partes.push('Ideación: '+ideac.join(', '));
+        const niv=val('ic-riesgo-nivel');if(niv)partes.push('Nivel de riesgo: '+niv);
+        const interv=icC('Intervención realizada hoy');if(interv.length)partes.push('Intervención: '+interv.join(', '));
+        const plan=icC('Plan');if(plan.length)partes.push('Plan: '+plan.join(', '));
+        const freq=icC('Frecuencia de seguimiento');if(freq.length)partes.push('Frecuencia: '+freq.join(', '));
+        notaTexto=partes.join(' | ')||'Seguimiento psicológico realizado. Ver formulario para detalles.';
+      }
     }
     else if(icCurrentMode==='esp'){
       generarNotaIcEsp();
@@ -2051,8 +2073,9 @@ window.guardarICFirebase=async()=>{
       // Primero intentar usar la nota generada por IA
       const elIA=document.getElementById('ic-out-seg-texto');
       const vIA=elIA?(elIA.textContent||'').trim():'';
-      const iaGenerada=vIA&&!vIA.startsWith('Genera')&&!vIA.startsWith('⏳');
+      const iaGenerada=vIA&&!vIA.startsWith('Genera')&&!vIA.startsWith('⏳')&&!vIA.startsWith('❌')&&vIA.length>50;
       if(iaGenerada){
+        // La nota de seguimiento es un párrafo único — va en nota y obj
         obj=vIA;
         // También capturar datos del formulario para los demás campos
         const cb2=id=>document.getElementById(id)?.checked||false;
@@ -4091,23 +4114,23 @@ INTERVENCIÓN Y PLAN:
 ${tratNotas?'- Notas de tratamiento: '+tratNotas:''}
 `.trim();
 
-  var prompt=`Eres un psicólogo clínico hospitalario experto con enfoque cognitivo-conductual. Redacta una nota de seguimiento psicológico hospitalario de alta calidad clínica a partir de los datos de la sesión.
+  var prompt=`Eres un psicólogo clínico hospitalario experto con enfoque cognitivo-conductual. Redacta una nota de evolución psicológica hospitalaria a partir de los datos de la sesión de seguimiento.
 
-INSTRUCCIONES CRÍTICAS:
-1. Redacta en TEXTO CORRIDO, sin listas, sin viñetas, sin guiones, sin numeración. Todo en párrafos narrativos fluidos.
-2. NO uses el nombre del paciente. Usa siempre "el paciente" o "la paciente".
-3. La nota debe ser UNA SOLA nota narrativa integrada, no dividida en secciones con etiquetas.
-4. Debe incluir: estado emocional y mental observado en la sesión (subjetivo y objetivo), análisis cognitivo-conductual de las cogniciones y emociones identificadas, evaluación de riesgo suicida/autolesivo, impresión clínica, intervención realizada y plan de seguimiento.
-5. El nivel de escritura debe ser el de un psicólogo clínico de alto nivel, técnico pero legible para el equipo médico.
-6. La nota debe ser concisa pero clínicamente rica — entre 150 y 250 palabras aproximadamente.
-7. NO incluyas encabezados, fechas ni firmas.
-8. Si algún dato aparece como "No especificado", "No evaluado" o similar, omítelo de forma natural sin mencionarlo.
-9. El contexto es HOSPITALARIO (interconsulta de seguimiento), no consulta externa ambulatoria.
+INSTRUCCIONES CRÍTICAS — LÉELAS TODAS ANTES DE ESCRIBIR:
+1. La nota debe ser UN SOLO PÁRRAFO CONTINUO. Sin secciones, sin títulos, sin viñetas, sin guiones, sin numeración, sin saltos de línea. Todo fluye en un único bloque de texto narrativo.
+2. NO uses el nombre del paciente. Usa "el paciente" o "la paciente" según corresponda.
+3. El párrafo debe integrar fluidamente en este orden: estado emocional y conductual observado → examen mental relevante → análisis cognitivo-conductual (pensamientos, emociones, patrones) → evaluación de riesgo suicida/autolesivo → intervención realizada → impresión clínica → plan y frecuencia de seguimiento.
+4. Lenguaje técnico clínico de psicología hospitalaria, preciso y conciso. Legible para el equipo médico tratante.
+5. Entre 150 y 220 palabras exactamente — ni más ni menos.
+6. NO incluyas encabezados, fechas, firmas ni metadatos.
+7. Si un dato aparece como "No especificado" o similar, omítelo naturalmente sin mencionarlo.
+8. Contexto: interconsulta hospitalaria de seguimiento, no consulta externa ambulatoria.
+9. Evita frases genéricas como "se realizó sesión de seguimiento". Ve directo al contenido clínico.
 
 DATOS DE LA SESIÓN:
 ${datos}
 
-Genera la nota de seguimiento ahora:`;
+Escribe el párrafo de evolución psicológica ahora (un solo párrafo, sin títulos ni secciones):`;
 
   // Mostrar carga
   var outEl=document.getElementById('ic-out-seg-texto');
