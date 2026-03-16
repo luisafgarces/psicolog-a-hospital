@@ -2630,7 +2630,10 @@ window.mneGuardar=async()=>{
   setSyncStatus('syncing');
   try{
     if(window._mneId){
-      await updateDoc(doc(db,window._mneCol,window._mneId),{fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,editado:serverTimestamp()});
+      // Preservar campos originales si el modal los dejó vacíos
+      const orig=window._mneOrig||{};
+      const fSub=sub||orig.sub||'', fObj=obj||orig.obj||'', fResp=resp||orig.resp||'', fTrat=trat||orig.trat||'', fNota=nota||orig.nota||'';
+      await updateDoc(doc(db,window._mneCol,window._mneId),{fecha,modo,riesgo,estado,sub:fSub,obj:fObj,resp:fResp,trat:fTrat,nota:fNota,editado:serverTimestamp()});
       toast('✅ Nota actualizada');
     } else {
       const pac=pacientes.find(p=>p.id===window._hPacId);
@@ -3402,6 +3405,9 @@ window.mhicEditar=(ni)=>{
   document.getElementById('mne-resp').value=e.resp||'';
   document.getElementById('mne-trat').value=e.trat||'';
   // mne-nota removed
+  window._mneOrig={sub:e.sub||'',obj:e.obj||'',resp:e.resp||'',trat:e.trat||'',nota:e.nota||''};
+  // Guardar valores originales para no perder campos que el modal no muestre
+  window._mneOrig={sub:e.sub||'',obj:e.obj||'',resp:e.resp||'',trat:e.trat||'',nota:e.nota||''};
   document.getElementById('mne-del-btn').style.display='';
   window._mneId=m.id;window._mneCol=m.col;
   window._mneOnSave=()=>setTimeout(mhicRender,500);
