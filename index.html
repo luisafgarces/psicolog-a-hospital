@@ -2512,6 +2512,8 @@ window.renderDashboard=()=>{
           <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap" onclick="event.stopPropagation()">
             <button class="btn btn-sm btn-secondary" onclick="abrirICParaPaciente('${p.id}')">💬 IC</button>
             <button class="btn btn-sm btn-secondary" onclick="nuevaAnamnesisParaPaciente('${p.id}')">📋 Anamnesis</button>
+        <button class="btn btn-sm btn-secondary" onclick="abrirCapacidadPaciente('${p.id}')">⚖️ Capacidad</button>
+            <button class="btn btn-sm btn-secondary" onclick="abrirCapacidadPaciente('${p.id}')">⚖️ Capacidad</button>
             <button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪 Test</button>
             <button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️ Editar</button>
             <button class="btn btn-sm btn-secondary" onclick="verHistorialPorId('${p.id}')">📂 Historial IC</button>
@@ -2603,6 +2605,7 @@ window.renderConsultaExterna=(q)=>{
       <td>${p.proxSesion?`<div>${citaBadge}</div><div style="font-size:0.78rem;color:var(--text2)">${formatDate(p.proxSesion)}</div>`:'<span style="color:var(--text3)">—</span>'}</td>
       <td><div style="display:flex;gap:5px;flex-wrap:wrap">
         <button class="btn btn-sm btn-secondary" onclick="nuevaAnamnesisParaPaciente('${p.id}')">📋 Anamnesis</button>
+        <button class="btn btn-sm btn-secondary" onclick="abrirCapacidadPaciente('${p.id}')">⚖️ Capacidad</button>
         <button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪 Tests</button>
         <button class="btn btn-sm btn-secondary" onclick="goTo('historial-pac');setTimeout(()=>hpacAbrirPaciente('${p.id}'),200)">📂 Historial</button>
         <button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️ Editar</button>
@@ -2624,24 +2627,13 @@ window.mneCerrar=()=>{const m=document.getElementById('modal-nota-edit');if(m)m.
 
 window.mneGuardar=async()=>{
   const v=id=>document.getElementById(id)?.value||'';
-  const sub=v('mne-sub'),obj=v('mne-obj'),resp=v('mne-resp'),trat=v('mne-trat'),nota='';
+  const sub=v('mne-sub'),obj=v('mne-obj'),resp=v('mne-resp'),trat=v('mne-trat'),nota=v('mne-nota');
   const fecha=v('mne-fecha'),modo=v('mne-tipo'),riesgo=v('mne-riesgo'),estado=v('mne-estado');
   if(!fecha){toast('⚠️ Ingresa una fecha');return;}
   setSyncStatus('syncing');
   try{
     if(window._mneId){
-      // Si es seguimiento, leer del campo único
-      const orig=window._mneOrig||{};
-      const esSeg2=(modo||'').toLowerCase().includes('seguimiento');
-      let fSub,fObj,fResp,fTrat,fNota;
-      if(esSeg2){
-        const segTxt=document.getElementById('mne-seg-texto')?.value||'';
-        fObj=segTxt||orig.obj||'';
-        fSub=orig.sub||''; fResp=orig.resp||''; fTrat=orig.trat||''; fNota=orig.nota||'';
-      } else {
-        fSub=sub||orig.sub||''; fObj=obj||orig.obj||''; fResp=resp||orig.resp||''; fTrat=trat||orig.trat||''; fNota=nota||orig.nota||'';
-      }
-      await updateDoc(doc(db,window._mneCol,window._mneId),{fecha,modo,riesgo,estado,sub:fSub,obj:fObj,resp:fResp,trat:fTrat,nota:fNota,editado:serverTimestamp()});
+      await updateDoc(doc(db,window._mneCol,window._mneId),{fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,editado:serverTimestamp()});
       toast('✅ Nota actualizada');
     } else {
       const pac=pacientes.find(p=>p.id===window._hPacId);
@@ -3412,13 +3404,7 @@ window.mhicEditar=(ni)=>{
   document.getElementById('mne-obj').value=e.obj||'';
   document.getElementById('mne-resp').value=e.resp||'';
   document.getElementById('mne-trat').value=e.trat||'';
-  // mne-nota removed
-  window._mneOrig={sub:e.sub||'',obj:e.obj||'',resp:e.resp||'',trat:e.trat||'',nota:e.nota||''};
-  // Mostrar campo único para seguimiento, 4 campos para el resto
-  const esSeg=(e.modo||'').toLowerCase().includes('seguimiento');
-  document.getElementById('mne-campos-4').style.display=esSeg?'none':'';
-  document.getElementById('mne-campos-seg').style.display=esSeg?'':'none';
-  if(esSeg){document.getElementById('mne-seg-texto').value=e.obj||e.nota||'';}
+  document.getElementById('mne-nota').value=e.nota||'';
   document.getElementById('mne-del-btn').style.display='';
   window._mneId=m.id;window._mneCol=m.col;
   window._mneOnSave=()=>setTimeout(mhicRender,500);
@@ -3489,6 +3475,7 @@ window.hpacRenderNotas=()=>{
   const ics=interconsultas.filter(ic=>ic.pacienteId===_hpacPacId||ic.pacienteNombre===nombre);
   const anas=anamnesisList.filter(a=>a.pacienteId===_hpacPacId||a.pacienteNombre===nombre);
   const tests=testHistory.filter(t=>t.pacienteId===_hpacPacId||t.paciente===nombre);
+  const caps=(window.capacidadList||[]).filter(c=>c.pacienteId===_hpacPacId||c.pacienteNombre===nombre);
   // Summary bar
   const rb=document.getElementById('hpac-resumen-bar');
   if(rb){
@@ -3497,19 +3484,21 @@ window.hpacRenderNotas=()=>{
       badge('💬','IC',ics.length,'var(--accent2)')+
       badge('📋','Anamnesis',anas.length,'#7b1fa2')+
       badge('🧪','Tests',tests.length,'var(--warning)')+
-      `<span style="display:inline-flex;align-items:center;gap:5px;background:var(--surface2);color:var(--text2);border-radius:20px;padding:4px 12px;font-size:0.75rem;font-weight:700">📅 ${ics.length+anas.length+tests.length} registros totales</span>`;
+      badge('⚖️','Cap.',caps.length,'#c0392b')+
+      `<span style="display:inline-flex;align-items:center;gap:5px;background:var(--surface2);color:var(--text2);border-radius:20px;padding:4px 12px;font-size:0.75rem;font-weight:700">📅 ${ics.length+anas.length+tests.length+caps.length} registros totales</span>`;
   }
   const notas=[].concat(
     ics.map(x=>Object.assign({},x,{_col:'interconsultas'})),
-    anas.map(x=>Object.assign({},x,{_col:'anamnesis',modo:x.modo||'Anamnesis'}))
+    anas.map(x=>Object.assign({},x,{_col:'anamnesis',modo:x.modo||'Anamnesis'})),
+    caps.map(x=>Object.assign({},x,{_col:'capacidad_decisional',modo:'Capacidad Decisional'}))
   ).sort((a,b)=>_sk(b)-_sk(a));
   const testsSorted=[].concat(tests).sort((a,b)=>_sk(b)-_sk(a));
   for(var k in _hMap)delete _hMap[k];
   if(!notas.length&&!testsSorted.length){
     cont.innerHTML='<div class="empty" style="padding:36px"><p>Sin registros para este paciente.</p></div>';return;
   }
-  var tc={'IC Nueva':'tipo-ic','Seguimiento':'tipo-seg','Anamnesis':'tipo-anam','Nota especial':'tipo-esp'};
-  var tcol={'IC Nueva':'var(--accent2)','Seguimiento':'#1a56db','Anamnesis':'#7b1fa2','Nota especial':'var(--warning)'};
+  var tc={'IC Nueva':'tipo-ic','Seguimiento':'tipo-seg','Anamnesis':'tipo-anam','Nota especial':'tipo-esp','Capacidad Decisional':'tipo-ic'};
+  var tcol={'IC Nueva':'var(--accent2)','Seguimiento':'#1a56db','Anamnesis':'#7b1fa2','Nota especial':'var(--warning)','Capacidad Decisional':'#c0392b'};
 
   // Build notas HTML with for loop (no nested template literals)
   var notasParts=[];
@@ -3539,6 +3528,20 @@ window.hpacRenderNotas=()=>{
         if(!hasNAVal(e.sub)&&e.sub!==segTexto)cv.push({label:'Análisis Subjetivo',text:e.sub});
         if(!hasNAVal(e.resp))cv.push({label:'Respuesta / Impresión clínica',text:e.resp});
         if(!hasNAVal(e.trat))cv.push({label:'Tratamiento / Plan',text:e.trat});
+      } else if(modo==='Capacidad Decisional'){
+        // Capacidad: mostrar nota completa estructurada
+        if(e.nota&&!hasNAVal(e.nota))cv.push({label:'Valoración de Capacidad Decisional',text:e.nota});
+        else {
+          // Reconstruir desde campos si no hay nota
+          var capTxt='';
+          if(e.conclusion)capTxt+='CONCLUSIÓN: '+e.conclusion+'\n';
+          if(e.decision)capTxt+='Decisión evaluada: '+e.decision+'\n';
+          if(e.c1)capTxt+='Comprensión: '+e.c1+'\n';
+          if(e.c2)capTxt+='Apreciación: '+e.c2+'\n';
+          if(e.c3)capTxt+='Razonamiento: '+e.c3+'\n';
+          if(e.c4)capTxt+='Expresión de decisión: '+e.c4;
+          if(capTxt)cv.push({label:'Valoración de Capacidad Decisional',text:capTxt.trim()});
+        }
       } else {
         // IC Nueva, Nota especial, Anamnesis y cualquier otro modo:
         // mostrar todos los campos con contenido real
@@ -3652,15 +3655,11 @@ window.hpacEditar=(ni)=>{
   document.getElementById('mne-obj').value=e.obj||'';
   document.getElementById('mne-resp').value=e.resp||'';
   document.getElementById('mne-trat').value=e.trat||'';
-  // mne-nota removed
-  window._mneOrig={sub:e.sub||'',obj:e.obj||'',resp:e.resp||'',trat:e.trat||'',nota:e.nota||''};
-  const esSeg2=(e.modo||'').toLowerCase().includes('seguimiento');
-  document.getElementById('mne-campos-4').style.display=esSeg2?'none':'';
-  document.getElementById('mne-campos-seg').style.display=esSeg2?'':'none';
-  if(esSeg2){document.getElementById('mne-seg-texto').value=e.obj||e.nota||'';}
+  document.getElementById('mne-nota').value=e.nota||'';
   document.getElementById('mne-del-btn').style.display='';
   window._mneId=m.id;window._mneCol=m.col;
   window._mneOnSave=()=>setTimeout(hpacRenderNotas,500);
+  document.getElementById('modal-nota-edit').style.display='flex';
 };
 
 window.hpacCopiar=(ni)=>{
@@ -3890,7 +3889,7 @@ async function generarNotaIcConGemini(apiKey){
   async function llamarGemini(prompt, tokens){
     var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:tokens||4000}})
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:tokens||2000}})
     });
     var d=await r.json();
     if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
@@ -4157,7 +4156,7 @@ Escribe el párrafo ahora, directo, sin encabezado:`;
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.4,maxOutputTokens:4000}
+        generationConfig:{temperature:0.4,maxOutputTokens:2000}
       })
     });
     var data=await resp.json();
@@ -4673,17 +4672,11 @@ document.addEventListener('DOMContentLoaded',()=>{
           <select id="mne-estado"><option value="respondida">Completada</option><option value="pendiente">Pendiente</option></select>
         </div>
       </div>
-      <!-- Campos 4-secciones (IC Nueva / Anamnesis) -->
-      <div id="mne-campos-4">
-        <div class="form-group" style="margin-bottom:10px"><label>Análisis Subjetivo</label><textarea id="mne-sub" rows="3" placeholder="Estado emocional, preocupaciones, citas textuales..."></textarea></div>
-        <div class="form-group" style="margin-bottom:10px"><label>Análisis Objetivo</label><textarea id="mne-obj" rows="3" placeholder="Examen mental, hábitos, evaluación de riesgo..."></textarea></div>
-        <div class="form-group" style="margin-bottom:10px"><label>Respuesta / Impresión clínica</label><textarea id="mne-resp" rows="3" placeholder="Impresión diagnóstica, análisis CC..."></textarea></div>
-        <div class="form-group" style="margin-bottom:10px"><label>Tratamiento / Plan</label><textarea id="mne-trat" rows="3" placeholder="Intervenciones realizadas, plan..."></textarea></div>
-      </div>
-      <!-- Campo único (Seguimiento) -->
-      <div id="mne-campos-seg" style="display:none">
-        <div class="form-group" style="margin-bottom:10px"><label>Nota de seguimiento</label><textarea id="mne-seg-texto" rows="8" placeholder="Nota de evolución psicológica..."></textarea></div>
-      </div>
+      <div class="form-group" style="margin-bottom:10px"><label>Análisis Subjetivo</label><textarea id="mne-sub" rows="3" placeholder="Estado emocional, preocupaciones, citas textuales..."></textarea></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Análisis Objetivo</label><textarea id="mne-obj" rows="3" placeholder="Examen mental, hábitos, evaluación de riesgo..."></textarea></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Respuesta / Impresión clínica</label><textarea id="mne-resp" rows="3" placeholder="Impresión diagnóstica, análisis CC..."></textarea></div>
+      <div class="form-group" style="margin-bottom:10px"><label>Tratamiento / Plan</label><textarea id="mne-trat" rows="3" placeholder="Intervenciones realizadas, plan..."></textarea></div>
+      <div class="form-group"><label>Nota libre / Complementaria</label><textarea id="mne-nota" rows="3" placeholder="Nota en formato libre..."></textarea></div>
     </div>
     <div style="padding:12px 22px 18px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;align-items:center">
       <button class="btn btn-danger btn-sm" id="mne-del-btn" onclick="mneEliminar()" style="display:none;margin-right:auto">🗑 Eliminar</button>
