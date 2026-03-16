@@ -3869,7 +3869,7 @@ async function generarNotaIcConGemini(apiKey){
   async function llamarGemini(prompt, tokens){
     var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:tokens||2000}})
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:tokens||4000}})
     });
     var d=await r.json();
     if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
@@ -4136,7 +4136,7 @@ Escribe el párrafo ahora, directo, sin encabezado:`;
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.4,maxOutputTokens:2000}
+        generationConfig:{temperature:0.4,maxOutputTokens:4000}
       })
     });
     var data=await resp.json();
