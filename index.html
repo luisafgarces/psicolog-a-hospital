@@ -2630,9 +2630,17 @@ window.mneGuardar=async()=>{
   setSyncStatus('syncing');
   try{
     if(window._mneId){
-      // Preservar campos originales si el modal los dejó vacíos
+      // Si es seguimiento, leer del campo único
       const orig=window._mneOrig||{};
-      const fSub=sub||orig.sub||'', fObj=obj||orig.obj||'', fResp=resp||orig.resp||'', fTrat=trat||orig.trat||'', fNota=nota||orig.nota||'';
+      const esSeg2=(modo||'').toLowerCase().includes('seguimiento');
+      let fSub,fObj,fResp,fTrat,fNota;
+      if(esSeg2){
+        const segTxt=document.getElementById('mne-seg-texto')?.value||'';
+        fObj=segTxt||orig.obj||'';
+        fSub=orig.sub||''; fResp=orig.resp||''; fTrat=orig.trat||''; fNota=orig.nota||'';
+      } else {
+        fSub=sub||orig.sub||''; fObj=obj||orig.obj||''; fResp=resp||orig.resp||''; fTrat=trat||orig.trat||''; fNota=nota||orig.nota||'';
+      }
       await updateDoc(doc(db,window._mneCol,window._mneId),{fecha,modo,riesgo,estado,sub:fSub,obj:fObj,resp:fResp,trat:fTrat,nota:fNota,editado:serverTimestamp()});
       toast('✅ Nota actualizada');
     } else {
@@ -3406,8 +3414,11 @@ window.mhicEditar=(ni)=>{
   document.getElementById('mne-trat').value=e.trat||'';
   // mne-nota removed
   window._mneOrig={sub:e.sub||'',obj:e.obj||'',resp:e.resp||'',trat:e.trat||'',nota:e.nota||''};
-  // Guardar valores originales para no perder campos que el modal no muestre
-  window._mneOrig={sub:e.sub||'',obj:e.obj||'',resp:e.resp||'',trat:e.trat||'',nota:e.nota||''};
+  // Mostrar campo único para seguimiento, 4 campos para el resto
+  const esSeg=(e.modo||'').toLowerCase().includes('seguimiento');
+  document.getElementById('mne-campos-4').style.display=esSeg?'none':'';
+  document.getElementById('mne-campos-seg').style.display=esSeg?'':'none';
+  if(esSeg){document.getElementById('mne-seg-texto').value=e.obj||e.nota||'';}
   document.getElementById('mne-del-btn').style.display='';
   window._mneId=m.id;window._mneCol=m.col;
   window._mneOnSave=()=>setTimeout(mhicRender,500);
@@ -3642,10 +3653,14 @@ window.hpacEditar=(ni)=>{
   document.getElementById('mne-resp').value=e.resp||'';
   document.getElementById('mne-trat').value=e.trat||'';
   // mne-nota removed
+  window._mneOrig={sub:e.sub||'',obj:e.obj||'',resp:e.resp||'',trat:e.trat||'',nota:e.nota||''};
+  const esSeg2=(e.modo||'').toLowerCase().includes('seguimiento');
+  document.getElementById('mne-campos-4').style.display=esSeg2?'none':'';
+  document.getElementById('mne-campos-seg').style.display=esSeg2?'':'none';
+  if(esSeg2){document.getElementById('mne-seg-texto').value=e.obj||e.nota||'';}
   document.getElementById('mne-del-btn').style.display='';
   window._mneId=m.id;window._mneCol=m.col;
   window._mneOnSave=()=>setTimeout(hpacRenderNotas,500);
-  document.getElementById('modal-nota-edit').style.display='flex';
 };
 
 window.hpacCopiar=(ni)=>{
@@ -4658,10 +4673,17 @@ document.addEventListener('DOMContentLoaded',()=>{
           <select id="mne-estado"><option value="respondida">Completada</option><option value="pendiente">Pendiente</option></select>
         </div>
       </div>
-      <div class="form-group" style="margin-bottom:10px"><label>Análisis Subjetivo</label><textarea id="mne-sub" rows="3" placeholder="Estado emocional, preocupaciones, citas textuales..."></textarea></div>
-      <div class="form-group" style="margin-bottom:10px"><label>Análisis Objetivo</label><textarea id="mne-obj" rows="3" placeholder="Examen mental, hábitos, evaluación de riesgo..."></textarea></div>
-      <div class="form-group" style="margin-bottom:10px"><label>Respuesta / Impresión clínica</label><textarea id="mne-resp" rows="3" placeholder="Impresión diagnóstica, análisis CC..."></textarea></div>
-      <div class="form-group" style="margin-bottom:10px"><label>Tratamiento / Plan</label><textarea id="mne-trat" rows="3" placeholder="Intervenciones realizadas, plan..."></textarea></div>
+      <!-- Campos 4-secciones (IC Nueva / Anamnesis) -->
+      <div id="mne-campos-4">
+        <div class="form-group" style="margin-bottom:10px"><label>Análisis Subjetivo</label><textarea id="mne-sub" rows="3" placeholder="Estado emocional, preocupaciones, citas textuales..."></textarea></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Análisis Objetivo</label><textarea id="mne-obj" rows="3" placeholder="Examen mental, hábitos, evaluación de riesgo..."></textarea></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Respuesta / Impresión clínica</label><textarea id="mne-resp" rows="3" placeholder="Impresión diagnóstica, análisis CC..."></textarea></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Tratamiento / Plan</label><textarea id="mne-trat" rows="3" placeholder="Intervenciones realizadas, plan..."></textarea></div>
+      </div>
+      <!-- Campo único (Seguimiento) -->
+      <div id="mne-campos-seg" style="display:none">
+        <div class="form-group" style="margin-bottom:10px"><label>Nota de seguimiento</label><textarea id="mne-seg-texto" rows="8" placeholder="Nota de evolución psicológica..."></textarea></div>
+      </div>
     </div>
     <div style="padding:12px 22px 18px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;align-items:center">
       <button class="btn btn-danger btn-sm" id="mne-del-btn" onclick="mneEliminar()" style="display:none;margin-right:auto">🗑 Eliminar</button>
