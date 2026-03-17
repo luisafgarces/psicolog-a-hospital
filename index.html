@@ -3225,6 +3225,7 @@ PLAN TERAPÉUTICO:
 - Enfoque: ${getChecked('an-enfoque')}
 - Remisiones: ${getChecked('an-remisiones')}
 - Próxima cita: ${v('an-proxcita')||'—'}
+${(()=>{const _anPacId=(document.getElementById('anamnesis-paciente-sel')||{}).value||null;const _anNombre=(document.getElementById('an-nombre')||{}).value||'';const _anTests=getTestsResumenPaciente(_anPacId,_anNombre);return _anTests?'\n'+_anTests:'';})()}
 `.trim();
 
   const prompt=`Eres un psicólogo clínico experto con enfoque cognitivo-conductual. Redacta una nota clínica de anamnesis psicológica de alta calidad a partir de los datos de evaluación.
@@ -4005,6 +4006,44 @@ window.generarNotaIC=function(){
   generarNotaIcConGemini(apiKey);
 };
 
+// ── HELPER: obtener resumen de tests recientes del paciente ──────────
+function getTestsResumenPaciente(pacienteId, pacienteNombre){
+  const tests=window.testHistory||[];
+  if(!tests.length)return'';
+  // Filtrar por paciente
+  const misTests=tests.filter(t=>
+    (pacienteId&&t.pacienteId===pacienteId)||(pacienteNombre&&t.paciente===pacienteNombre)
+  );
+  if(!misTests.length)return'';
+  // Etiquetas de nivel por test
+  const levelLabel={normal:'Normal/sin clínicamente significativo',mild:'Leve',moderate:'Moderado',severe:'Severo/alto',critical:'Crítico/clínicamente significativo',high:'Alto',low:'Bajo'};
+  // Puntajes máximos y descripciones
+  const testInfo={
+    'PHQ-9':{max:27,desc:'depresión'},
+    'GAD-7':{max:21,desc:'ansiedad generalizada'},
+    'HADS':{max:'21A/21D',desc:'ansiedad y depresión hospitalaria'},
+    'MMSE':{max:30,desc:'estado mental (cognición)'},
+    'MoCA':{max:30,desc:'evaluación cognitiva'},
+    'C-SSRS':{max:'escala',desc:'riesgo suicida'},
+    'MMAS-4':{max:4,desc:'adherencia farmacológica'},
+    'Duelo':{max:'escala',desc:'duelo complicado'},
+    'PCL-5':{max:80,desc:'estrés postraumático'}
+  };
+  // Tomar el más reciente de cada tipo
+  const porTipo={};
+  for(const t of misTests){
+    if(!porTipo[t.test]||new Date(t.fecha)>new Date(porTipo[t.test].fecha))
+      porTipo[t.test]=t;
+  }
+  const lineas=Object.values(porTipo).map(t=>{
+    const info=testInfo[t.test]||{};
+    const nivel=levelLabel[t.level]||t.level||'—';
+    const pts=t.score!==undefined&&t.score!==null?t.score+' pts':'—';
+    return t.test+(info.desc?' ('+info.desc+')':'')+': '+pts+(info.max?' / '+info.max:'')+' — '+nivel+(t.extra?' ['+t.extra+']':'')+(t.fecha?' ('+t.fecha+')':'');
+  });
+  return lineas.length?'RESULTADOS DE TESTS PSICOLÓGICOS (más reciente por instrumento):\n'+lineas.join('\n'):'';
+}
+
 async function generarNotaIcConGemini(apiKey){
   // Recolectar datos del formulario
   var edad=icv('ic-edad')||'';
@@ -4021,7 +4060,12 @@ async function generarNotaIcConGemini(apiKey){
   function chips(label){return icChipsBySubLabel(label).join(', ');}
 
   // Contexto base del paciente
+  var selPacIC=document.getElementById('ic-paciente-sel');
+  var _icPacId=selPacIC?selPacIC.value:null;
+  var _icPacNombre=icv('ic-pnombre')||'';
+  var _testsResumen=getTestsResumenPaciente(_icPacId,_icPacNombre);
   var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}. Dx médico: ${dx}. Servicio: ${hab||'no especificado'}. Riesgo suicida: ${sev}.`;
+  if(_testsResumen)ctx+=`\n\n${_testsResumen}`;
 
   // Datos por sección
   var dSub=`Estado emocional: ${chips('Estado emocional referido')||'no especificado'}. Preocupaciones: ${chips('Principales preocupaciones')||'ninguna'}. Pensamientos automáticos: ${chips('Pensamientos automáticos')||'no identificados'}. Intensidad malestar: ${intensidad||'no cuantificada'}. Cita textual: ${cita||'ninguna'}. Antecedentes psiq: ${chips('Diagnósticos psiquiátricos previos')||'ninguno'}. Intentos suicidio: ${chips('Intentos de suicidio previos')||'ninguno'}. Violencia: ${chips('Tipo de violencia')||'niega'}.`;
@@ -4241,6 +4285,8 @@ async function generarSegConGemini(apiKey){
   var hab=icvl('ic-hab');
   var dx=icvl('ic-pdx');
   var fecha=icvl('ic-pfecha');
+  var _segPacId=(document.getElementById('ic-paciente-sel')||{}).value||null;
+  var _segTestsResumen=getTestsResumenPaciente(_segPacId,nombre);
 
   var datos=`
 TIPO DE NOTA: Seguimiento psicológico hospitalario
@@ -4289,6 +4335,7 @@ INTERVENCIÓN Y PLAN:
 - Plan: ${plan.length?plan.join(', '):'No especificado'}
 - Frecuencia de seguimiento: ${frecuencia.length?frecuencia.join(', '):'No especificada'}
 ${tratNotas?'- Notas de tratamiento: '+tratNotas:''}
+${_segTestsResumen?'\n'+_segTestsResumen:''}
 `.trim();
 
   var prompt=`Psicólogo clínico hospitalario (TCC). Escribe una nota de evolución psicológica hospitalaria en UN SOLO PÁRRAFO, máximo 120 palabras. Texto corrido, sin listas ni títulos. No uses el nombre del paciente. Usa SOLO los datos proporcionados — no inventes ni generalices. Integra en orden: estado emocional → examen mental → análisis CC → riesgo suicida → intervención → plan.
