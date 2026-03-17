@@ -399,9 +399,12 @@ input.toggle-cb{display:none}
     <div class="nav-item" onclick="goTo('historial-pac')"><span class="icon">📂</span>Historial Pacientes</div>
     <div class="nav-item" onclick="goTo('historial')"><span class="icon">📊</span>Historial Tests</div>
   </div>
-  <div class="sidebar-footer">
-    <span class="sync-dot" id="sync-dot"></span>
-    <span id="sync-status">Conectando…</span>
+  <div class="sidebar-footer" style="flex-direction:column;align-items:flex-start;gap:6px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span id="sync-status">Conectando…</span>
+    </div>
+    <span id="pending-badge" style="display:none;font-size:0.72rem;font-weight:700;color:var(--warning);cursor:pointer" onclick="sincronizarPendientes()">⏳ 0 pendientes</span>
   </div>
 </nav>
 
@@ -1605,7 +1608,7 @@ input.toggle-cb{display:none}
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, updateDoc, serverTimestamp, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, updateDoc, serverTimestamp, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyCsqumG_BRCWwnFEOcoNfLXtfaUlzvPqYE",
@@ -1615,17 +1618,146 @@ const app = initializeApp({
   messagingSenderId:"641640192728",
   appId:"1:641640192728:web:14a1d4074e2a6fa6e3d5ad"
 });
-const db = getFirestore(app);
+// Activar persistencia offline multi-tab (iPhone + PC comparten cola via Firebase)
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
+});
 window.db=db;
 window._fdb={collection,addDoc,deleteDoc,doc,updateDoc,serverTimestamp,query,orderBy};
 let pacientes=[],interconsultas=[],anamnesisList=[],testHistory=[];
 window.pacientes=pacientes;window.interconsultas=interconsultas;window.anamnesisList=anamnesisList;window.testHistory=testHistory;
 
-function setSyncStatus(s){
+function setSyncStatus(s,extra){
   const dot=document.getElementById('sync-dot'),txt=document.getElementById('sync-status');
   dot.className='sync-dot'+(s==='online'?'':' '+s);
-  txt.textContent=s==='online'?'Sincronizado':s==='syncing'?'Guardando…':'Sin conexión';
+  if(s==='online')txt.textContent=extra||'Sincronizado';
+  else if(s==='syncing')txt.textContent=extra||'Guardando…';
+  else if(s==='offline')txt.textContent=extra||'Sin conexión — guardando local';
+  else txt.textContent=extra||s;
 }
+
+// ── DETECCIÓN DE CONEXIÓN Y SINCRONIZACIÓN PENDIENTE ──────────────
+let _estaOnline=navigator.onLine;
+const PENDING_KEY='psico_pending_v1';
+
+function getPendientes(){try{return JSON.parse(localStorage.getItem(PENDING_KEY)||'[]');}catch(e){return[];}}
+function setPendientes(arr){localStorage.setItem(PENDING_KEY,JSON.stringify(arr));}
+function agregarPendiente(item){const arr=getPendientes();arr.push({...item,_pendId:Date.now()+'_'+Math.random().toString(36).slice(2)});setPendientes(arr);actualizarBadgePendientes();}
+function actualizarBadgePendientes(){
+  const arr=getPendientes();
+  const badge=document.getElementById('pending-badge');
+  if(badge){badge.textContent=arr.length?'⏳ '+arr.length+' pendiente'+(arr.length>1?'s':''):'';badge.style.display=arr.length?'':'none';}
+}
+
+async function sincronizarPendientes(){
+  const arr=getPendientes();
+  if(!arr.length)return;
+  const apiKey=getGeminiKey?getGeminiKey():'';
+  let ok=0,fail=0;
+  setSyncStatus('syncing','Sincronizando '+arr.length+' pendiente'+(arr.length>1?'s':'')+'…');
+  const nuevosArr=[...arr];
+  for(let i=0;i<nuevosArr.length;i++){
+    const item=nuevosArr[i];
+    try{
+      // Generar nota IA si falta y hay API key
+      let {col,data}=item;
+      if(apiKey&&!data.sub&&!data.obj&&data._formData){
+        // Intentar generar nota según tipo
+        try{
+          if(col==='interconsultas'&&data.modo==='IC Nueva'){
+            // Llamar directamente al endpoint con los datos guardados
+            const ctx=`Paciente: ${data._formData.edad||''}${data._formData.sexo?' | '+data._formData.sexo:''}. Dx: ${data._formData.dx||'—'}. Riesgo: ${data._formData.riesgo||'—'}.`;
+            const llamar=async(prompt)=>{
+              const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
+              });
+              const d=await r.json();
+              return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+            };
+            const base='Psicólogo clínico hospitalario (TCC). Un párrafo completo, texto corrido, sin listas. No uses el nombre del paciente. Contexto: '+ctx;
+            const fd=data._formData;
+            const [sub,obj,res,tra]=await Promise.all([
+              llamar(base+'\n\nAnálisis Subjetivo de interconsulta hospitalaria. Datos: '+JSON.stringify(fd.sub||{})),
+              llamar(base+'\n\nAnálisis Objetivo con formulación CC. Datos: '+JSON.stringify(fd.obj||{})),
+              llamar(base+'\n\nImpresión clínica y Respuesta. Datos: '+JSON.stringify(fd.resp||{})),
+              llamar(base+'\n\nPlan de Tratamiento. Datos: '+JSON.stringify(fd.trat||{}))
+            ]);
+            data={...data,sub,obj,resp:res,trat:tra};
+            delete data._formData;
+          }
+        }catch(e){console.warn('IA offline sync error:',e);}
+      }
+      // Subir a Firebase
+      delete data._pendId;delete data._formData;
+      await addDoc(collection(db,col),{...data,creado:serverTimestamp(),sincronizadoOffline:true});
+      nuevosArr.splice(nuevosArr.indexOf(item),1);
+      ok++;
+    }catch(e){fail++;console.error('Sync error item:',e);}
+  }
+  setPendientes(nuevosArr);
+  actualizarBadgePendientes();
+  if(ok>0)toast('✅ '+ok+' registro'+(ok>1?'s':'')+' sincronizado'+(ok>1?'s':''));
+  if(fail>0)toast('⚠️ '+fail+' pendiente'+(fail>1?'s':'')+' no pudieron sincronizarse');
+  setSyncStatus('online');
+}
+
+window.addEventListener('online',()=>{
+  _estaOnline=true;
+  setSyncStatus('online');
+  setTimeout(sincronizarPendientes,1500);
+  setTimeout(generarNotasPendientesIA,3000);
+});
+
+// Generar notas IA para registros guardados offline sin nota
+async function generarNotasPendientesIA(){
+  const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
+  if(!apiKey)return;
+  try{
+    const snap=await getDocs(query(collection(db,'interconsultas'),where('needsAI','==',true)));
+    if(snap.empty)return;
+    toast('🤖 Generando notas IA para '+snap.size+' registro'+(snap.size>1?'s':'')+' offline…');
+    for(const docSnap of snap.docs){
+      const e=docSnap.data();
+      const fd=e._aiFormSnap;
+      if(!fd)continue;
+      try{
+        const ctx='Paciente: '+(fd.edad||'')+(fd.sexo?' | '+fd.sexo:'')+'. Dx: '+(fd.dx||'—')+'. Riesgo: '+(fd.riesgo||'—')+'.';
+        const base='Psicólogo clínico hospitalario (TCC). Un párrafo completo, texto corrido, sin listas. No uses el nombre del paciente. Contexto: '+ctx;
+        const llamar=async(prompt)=>{
+          const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+            method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
+          });
+          const d=await r.json();
+          return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+        };
+        const [sub,obj,res,tra]=await Promise.all([
+          llamar(base+'\n\nAnálisis Subjetivo de interconsulta hospitalaria. Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos automáticos: '+(fd.sub?.pens||'—')+'. Cita textual: '+(fd.sub?.cita||'—')+'.'  ),
+          llamar(base+'\n\nAnálisis Objetivo con formulación CC. Orientación: '+(fd.obj?.orient||'—')+'. Afecto: '+(fd.obj?.afecto||'—')+'. Pensamiento: '+(fd.obj?.pens||'—')+'. Insight: '+(fd.obj?.insight||'—')+'. Regulación emocional: '+(fd.obj?.regulacion||'—')+'. Ideación: '+(fd.obj?.ideacion||'niega')+'. Riesgo: '+(fd.obj?.riesgoN||'—')+'. Factores protectores: '+(fd.obj?.protectores||'—')+'.'  ),
+          llamar(base+'\n\nImpresión clínica y Respuesta. Tipo de respuesta: '+(fd.resp?.tipoResp||'—')+'. Impresión: '+(fd.resp?.impresion||'—')+'.'  ),
+          llamar(base+'\n\nPlan de Tratamiento. Intervención: '+(fd.trat?.interv||'—')+'. Plan: '+(fd.trat?.plan||'—')+'. Frecuencia: '+(fd.trat?.freq||'—')+'.'  )
+        ]);
+        const notaTexto='ANÁLISIS SUBJETIVO\n'+sub+'\n\nANÁLISIS OBJETIVO\n'+obj+'\n\nRESPUESTA\n'+res+'\n\nTRATAMIENTO\n'+tra;
+        await updateDoc(doc(db,'interconsultas',docSnap.id),{
+          sub,obj,resp:res,trat:tra,nota:notaTexto,
+          needsAI:false,_aiFormSnap:null
+        });
+      }catch(e){console.error('Error generando IA para',docSnap.id,e);}
+    }
+    toast('✅ Notas IA generadas para registros offline');
+  }catch(e){console.error('generarNotasPendientesIA error:',e);}
+}
+window.generarNotasPendientesIA=generarNotasPendientesIA;
+window.addEventListener('offline',()=>{
+  _estaOnline=false;
+  setSyncStatus('offline');
+});
+// Al cargar, revisar pendientes
+setTimeout(()=>{
+  actualizarBadgePendientes();
+  if(navigator.onLine&&getPendientes().length)sincronizarPendientes();
+},2000);
 
 onSnapshot(query(collection(db,'pacientes'),orderBy('creado','desc')),snap=>{
   pacientes=snap.docs.map(d=>({id:d.id,...d.data()}));window.pacientes=pacientes;
@@ -1887,8 +2019,13 @@ window.guardarCapacidadFirebase=async()=>{
       nota,
       creado:serverTimestamp()
     });
-    setSyncStatus('online');
-    toast('✅ Valoración guardada en Firebase');
+    if(!navigator.onLine){
+      toast('💾 Valoración guardada sin conexión — se sincronizará al reconectar');
+      setSyncStatus('offline','Sin conexión — guardado local');
+    } else {
+      setSyncStatus('online');
+      toast('✅ Valoración guardada en Firebase');
+    }
   }catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
 };
 
@@ -2231,6 +2368,17 @@ window.guardarICFirebase=async()=>{
       // solo en nota para evitar duplicado al renderizar
     }
   }catch(ex){console.error('Error capturando datos de seguimiento:',ex);}
+  // Marcar needsAI si no hay nota IA generada (para sincronizar IA al reconectar)
+  const sinNotaIA=!sub&&!obj&&!resp&&!trat&&icCurrentMode==='nueva';
+  const needsAI=sinNotaIA&&!navigator.onLine;
+  // Capturar datos del formulario para regenerar IA después si es necesario
+  const _aiFormSnap=sinNotaIA?{
+    edad:icv('ic-edad'),sexo:icv('ic-sexo'),dx:dx,hab:hab,riesgo:riesgo,
+    sub:{emoc:icChipsBySubLabel('Estado emocional referido').join(', '),preoc:icChipsBySubLabel('Principales preocupaciones').join(', '),pens:icChipsBySubLabel('Pensamientos automáticos').join(', '),cita:icv('ic-sub-cita'),intens:icv('ic-sub-intensidad')},
+    obj:{orient:icChipsBySubLabel('Orientación').join(', '),conc:icChipsBySubLabel('Conciencia / Colaboración').join(', '),afecto:icChipsBySubLabel('Afecto').join(', '),pens:icChipsBySubLabel('Pensamiento').join(', '),insight:icChipsBySubLabel('Lenguaje / Insight').join(', '),regulacion:icChipsBySubLabel('Regulación emocional').join(', '),ideacion:icChipsBySubLabel('Ideación actual').join(', '),riesgoN:riesgo,protectores:icChipsBySubLabel('Factores protectores').join(', ')},
+    resp:{tipoResp:icChipsBySubLabel('Tipo de respuesta emocional').join(', '),impresion:icChipsBySubLabel('Impresión clínica').join(', ')},
+    trat:{interv:icChipsBySubLabel('Intervención realizada hoy').join(', '),plan:icChipsBySubLabel('Plan').join(', '),freq:icChipsBySubLabel('Frecuencia de seguimiento').join(', ')}
+  }:null;
   try{
     await addDoc(collection(db,'interconsultas'),{
       pacienteId:pacObj?.id||pacId||null,
@@ -2240,12 +2388,18 @@ window.guardarICFirebase=async()=>{
       modo:icCurrentMode==='nueva'?'IC Nueva':icCurrentMode==='seg'?'Seguimiento':'Nota especial',
       fecha,nota:notaTexto,sub,obj,resp,trat,
       estado:'respondida',
+      needsAI:needsAI||false,
+      ...(needsAI&&_aiFormSnap?{_aiFormSnap}:{}),
       creado:serverTimestamp()
     });
-    toast('✅ IC guardada en Firebase');
-    setSyncStatus('online');
-    // Limpiar formulario después de guardar
-    setTimeout(()=>limpiarFormIC(false),300);
+    if(!navigator.onLine){
+      toast('💾 Guardado sin conexión — la nota IA se generará al reconectar');
+      setSyncStatus('offline','Sin conexión — guardado local');
+    } else {
+      toast('✅ IC guardada en Firebase');
+      setSyncStatus('online');
+      setTimeout(()=>limpiarFormIC(false),300);
+    }
   }catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
 };
 
@@ -2273,9 +2427,14 @@ window.guardarAnamnesis=async()=>{
       modo:'Anamnesis',
       creado:serverTimestamp()
     });
-    setSyncStatus('online');
-    toast('✅ Anamnesis guardada');
-    setTimeout(()=>clearAnamnesis(),300);
+    if(!navigator.onLine){
+      toast('💾 Anamnesis guardada sin conexión — se sincronizará al reconectar');
+      setSyncStatus('offline','Sin conexión — guardado local');
+    } else {
+      setSyncStatus('online');
+      toast('✅ Anamnesis guardada');
+      setTimeout(()=>clearAnamnesis(),300);
+    }
   }
   catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
 };
@@ -2691,7 +2850,7 @@ window.hpacResponder=async(ni)=>{
   }
   ['guardarPaciente','editarPaciente','eliminarPaciente','guardarIC','eliminarIC',
    'verHistorialPorId','nuevaAnamnesisParaPaciente','abrirICParaPaciente','irTestsPaciente',
-   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad',
+   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad','sincronizarPendientes','generarNotasPendientesIA',
    'guardarAnamnesis','generarNotaAnamnesis','mhicNuevaNota','mhicCerrar',
    'mneCerrar','mneGuardar','mneEliminar','hpacNuevaNota','hpacVolverLista',
    'calcPHQ9','calcGAD7','calcHADS','calcMMSE','calcMoCA','calcCAM',
