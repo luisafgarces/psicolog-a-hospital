@@ -3779,6 +3779,50 @@ window.mhicEditar=(ni)=>{
 // ── HISTORIAL PACIENTES (página) ──────────────────────────────
 let _hpacPacId=null;window._hpacPacId=null;
 
+
+// Generar nota IA para un registro guardado offline desde el historial
+window.hpacGenerarNotaIA=async(docId, ni)=>{
+  const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
+  if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
+  const m=_hMap[ni];
+  if(!m)return toast('⚠️ Registro no encontrado');
+  const col=m.col||'interconsultas';
+  const todos=[...(window.interconsultas||[]),...(window.anamnesisList||[])];
+  const e=todos.find(x=>x.id===docId);
+  if(!e)return toast('⚠️ No se encontró el registro');
+  const fd=e._aiFormSnap;
+  if(!fd)return toast('⚠️ No hay datos del formulario para regenerar');
+  toast('⏳ Generando nota IA…');
+  try{
+    const ctx='Paciente: '+(fd.edad||'')+(fd.sexo?' | '+fd.sexo:'')+'. Dx: '+(fd.dx||'—')+'. Riesgo: '+(fd.riesgo||'—')+'.';
+    const base='Psicólogo clínico hospitalario (TCC). Un párrafo completo, texto corrido, sin listas. No uses el nombre del paciente. Contexto: '+ctx;
+    const llamar=async(prompt)=>{
+      const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
+      });
+      const d=await r.json();
+      if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+      return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    };
+    const [sub,obj,res,tra]=await Promise.all([
+      llamar(base+'\n\nAnálisis Subjetivo. Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos: '+(fd.sub?.pens||'—')+'. Cita: '+(fd.sub?.cita||'—')+'.'),
+      llamar(base+'\n\nAnálisis Objetivo con formulación CC. Afecto: '+(fd.obj?.afecto||'—')+'. Pensamiento: '+(fd.obj?.pens||'—')+'. Insight: '+(fd.obj?.insight||'—')+'. Regulación: '+(fd.obj?.regulacion||'—')+'. Ideación: '+(fd.obj?.ideacion||'niega')+'. Riesgo: '+(fd.obj?.riesgoN||'—')+'. Protectores: '+(fd.obj?.protectores||'—')+'.'),
+      llamar(base+'\n\nImpresión clínica. Tipo respuesta: '+(fd.resp?.tipoResp||'—')+'. Impresión: '+(fd.resp?.impresion||'—')+'.'),
+      llamar(base+'\n\nPlan de Tratamiento. Intervención: '+(fd.trat?.interv||'—')+'. Plan: '+(fd.trat?.plan||'—')+'. Frecuencia: '+(fd.trat?.freq||'—')+'.')
+    ]);
+    const notaTexto='ANÁLISIS SUBJETIVO\n'+sub+'\n\nANÁLISIS OBJETIVO\n'+obj+'\n\nRESPUESTA\n'+res+'\n\nTRATAMIENTO\n'+tra;
+    await updateDoc(doc(db,col,docId),{
+      sub,obj,resp:res,trat:tra,nota:notaTexto,
+      needsAI:false,_aiFormSnap:null
+    });
+    toast('✅ Nota generada y guardada');
+    setTimeout(hpacRenderNotas,500);
+  }catch(err){
+    console.error('hpacGenerarNotaIA error:',err);
+    toast('❌ Error: '+err.message);
+  }
+};
 window.hpacRenderLista=()=>{
   const cont=document.getElementById('hpac-lista');if(!cont)return;
   const pacientes=window.pacientes||[];const interconsultas=window.interconsultas||[];
@@ -3925,6 +3969,7 @@ window.hpacRenderNotas=()=>{
         }
       }
       var camposHtml='';
+      var esPendienteIA=e.needsAI===true&&!cv.length;
       if(cv.length){
         for(var j=0;j<cv.length;j++){
           camposHtml+='<div class="hpac-campo">'
@@ -3932,18 +3977,41 @@ window.hpacRenderNotas=()=>{
             +'<div class="hpac-campo-text">'+cv[j].text+'</div>'
             +'</div>';
         }
+      } else if(esPendienteIA&&e._aiFormSnap){
+        // Mostrar datos del formulario guardados offline
+        var fd=e._aiFormSnap;
+        var fdLines=[];
+        if(fd.dx)fdLines.push('Diagnóstico: '+fd.dx);
+        if(fd.sub&&fd.sub.emoc)fdLines.push('Estado emocional: '+fd.sub.emoc);
+        if(fd.sub&&fd.sub.preoc)fdLines.push('Preocupaciones: '+fd.sub.preoc);
+        if(fd.sub&&fd.sub.pens&&fd.sub.pens!=='no identificados')fdLines.push('Pensamientos automáticos: '+fd.sub.pens);
+        if(fd.sub&&fd.sub.cita)fdLines.push('Cita textual: "'+fd.sub.cita+'"');
+        if(fd.obj&&fd.obj.afecto)fdLines.push('Afecto: '+fd.obj.afecto);
+        if(fd.obj&&fd.obj.ideacion)fdLines.push('Ideación suicida: '+fd.obj.ideacion);
+        if(fd.riesgo)fdLines.push('Riesgo: '+fd.riesgo);
+        if(fd.trat&&fd.trat.interv)fdLines.push('Intervención: '+fd.trat.interv);
+        if(fd.trat&&fd.trat.plan)fdLines.push('Plan: '+fd.trat.plan);
+        camposHtml='<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:8px">'
+          +'<div style="font-size:0.72rem;font-weight:700;color:#92400e;margin-bottom:6px">⏳ NOTA IA PENDIENTE — Datos guardados sin conexión</div>'
+          +'<div style="font-size:0.78rem;color:var(--text2);line-height:1.7">'+fdLines.join('<br>')+'</div>'
+          +'</div>';
       } else {
         camposHtml='<p style="color:var(--text3);font-size:0.82rem;font-style:italic">Sin texto guardado.</p>';
       }
+      // Botón generar nota si es pendiente de IA
+      var genBtn=esPendienteIA
+        ?'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacGenerarNotaIA(\'' + e.id + '\','+ni+')">✨ Generar nota</button>'
+        :'';
       notasParts.push(
         '<div class="hpac-nota">'
         +'<div class="hpac-nota-head '+cls+'">'
         +'<div>'
         +'<span style="font-weight:700;font-size:0.88rem;color:'+col+'">'+modo+'</span>'
+        +(esPendienteIA?'<span style="font-size:0.68rem;font-weight:700;background:#fef3c7;color:#92400e;padding:1px 7px;border-radius:20px;margin-left:6px">⏳ Sin nota</span>':'')
         +'<span style="font-size:0.82rem;color:var(--text2);margin-left:8px">'+(e.fecha||'Sin fecha')+'</span>'
         +'</div>'
         +'<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">'
-        +rBadgeHtml+respondidaBtn
+        +rBadgeHtml+respondidaBtn+genBtn
         +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacEditar('+ni+')">Editar</button>'
         +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacCopiar('+ni+')">Copiar</button>'
         +'</div></div>'
