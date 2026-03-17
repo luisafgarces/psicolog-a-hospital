@@ -4376,15 +4376,54 @@ async function generarNotaIcConGemini(apiKey){
     return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
   }
 
-  var instrBase=`Psicólogo clínico hospitalario (TCC). Responde en UN SOLO PÁRRAFO COMPLETO, texto corrido, sin listas ni viñetas. No uses el nombre del paciente. Lenguaje técnico clínico. Termina siempre con punto final. Contexto: ${ctx}`;
+  // Prompts individuales con ejemplo de estilo clínico real
+  var estiloBase = 'Eres un psicólogo clínico hospitalario experto con enfoque cognitivo-conductual. '+
+    'Redacta en texto corrido, UN SOLO PÁRRAFO sin listas ni viñetas. No uses el nombre del paciente. '+
+    'Lenguaje técnico-clínico preciso, conciso y con criterio clínico propio — no enumeres datos, analízalos. '+
+    'Termina siempre con punto final. '+
+    'CONTEXTO DEL PACIENTE: '+ctx;
+
+  var promptSub = estiloBase +
+    '\n\nEJEMPLO DEL ESTILO Y ESTRUCTURA ESPERADOS para el SUBJETIVO:\n'+
+    '"El paciente refiere sentirse tranquilo y sin preocupaciones, verbalizando: \"yo me siento bien, en el hogar estoy muy bien, es lo mejor que me ha pasado\". '+
+    'Este reporte contrasta con la observación del personal de enfermería, que describe ánimo hipotímico y llanto constante durante la estancia. '+
+    'Sin antecedentes psiquiátricos ni intentos suicidas previos. Se registra historial de exposición a violencia en contexto de conflicto armado y desplazamiento, '+
+    'lo cual podría estar modulando la expresión y el reconocimiento del malestar emocional actual."'+
+    '\n\nAHORA escribe el SUBJETIVO con ese mismo nivel y estilo, usando estos datos reales:\n'+dSub;
+
+  var promptObj = estiloBase +
+    '\n\nEJEMPLO DEL ESTILO Y ESTRUCTURA ESPERADOS para el OBJETIVO:\n'+
+    '"Paciente consciente, orientado en las tres esferas, colaborador. Verbaliza sentirse eutímico, aunque refiere momentos de tristeza asociados a la soledad. '+
+    'Sin alteraciones psicóticas ni distorsiones cognitivas significativas. Insight conservado. '+
+    'La incongruencia entre el discurso del paciente y lo reportado por enfermería sugiere una posible minimización defensiva del malestar, '+
+    'patrón frecuente en adultos mayores con trayectorias vitales de alta adversidad y estilos de afrontamiento por supresión emocional. '+
+    'Red de apoyo familiar ausente. Riesgo suicida: BAJO."'+
+    '\n\nAHORA escribe el OBJETIVO con ese mismo nivel y estilo — integra el examen mental con la formulación CC, identifica patrones cognitivos y conductuales, '+
+    'no solo listes hallazgos. Usa estos datos reales:\n'+dObj;
+
+  var promptResp = estiloBase +
+    '\n\nEJEMPLO DEL ESTILO Y ESTRUCTURA ESPERADOS para la RESPUESTA:\n'+
+    '"Respuesta emocional esperable ante estrés médico agudo en un paciente con vulnerabilidad psicosocial significativa. '+
+    'No se identifican criterios para trastorno depresivo mayor ni trastorno de adaptación. Sin código CIE-10 aplicable en esta fase. '+
+    'La minimización del malestar y el llanto observado se interpretan como expresión de un afrontamiento por supresión, '+
+    'probablemente arraigado en su historia de adversidad, más que como ausencia real de sufrimiento. Riesgo suicida: BAJO."'+
+    '\n\nAHORA escribe la RESPUESTA con ese mismo nivel y estilo — justifica la impresión diagnóstica, incluye CIE-10 si aplica y descarte diferencial si es pertinente. '+
+    'Usa estos datos reales:\n'+dResp;
+
+  var promptTrat = estiloBase +
+    '\n\nEJEMPLO DEL ESTILO Y ESTRUCTURA ESPERADOS para el TRATAMIENTO:\n'+
+    '"Se realizó escucha activa, validación emocional y exploración de recursos y factores protectores. Se da alta de psicología. '+
+    'Se recomienda al equipo monitorizar el estado anímico del paciente y alertar a psicología ante cambios conductuales, '+
+    'rechazo al tratamiento o expresiones de desesperanza para reevaluación."'+
+    '\n\nAHORA escribe el TRATAMIENTO con ese mismo nivel y estilo — especifica la intervención realizada, el plan y recomendaciones concretas al equipo médico. '+
+    'Usa estos datos reales:\n'+dTrat;
 
   try{
-    // 4 llamadas paralelas — objetivo tiene más tokens por ser el campo más denso
     var [sub,obj,res,tra]=await Promise.all([
-      llamarGemini(instrBase+'\n\nEscribe el ANÁLISIS SUBJETIVO de la interconsulta psicológica hospitalaria basándote en:\n'+dSub, 4000),
-      llamarGemini(instrBase+'\n\nEscribe el ANÁLISIS OBJETIVO completo (examen mental + formulación CC: evento activador, respuesta emocional/conductual, factores protectores, riesgo suicida). Termina con punto final. Datos:\n'+dObj, 4000),
-      llamarGemini(instrBase+'\n\nEscribe la IMPRESIÓN CLÍNICA Y RESPUESTA (tipo de respuesta emocional, impresión diagnóstica, código CIE-10 si aplica, descarte diferencial) basándote en:\n'+dResp, 4000),
-      llamarGemini(instrBase+'\n\nEscribe el PLAN DE TRATAMIENTO (intervenciones realizadas, plan, frecuencia, recomendaciones al equipo médico) basándote en:\n'+dTrat, 4000)
+      llamarGemini(promptSub, 4000),
+      llamarGemini(promptObj, 4000),
+      llamarGemini(promptResp, 4000),
+      llamarGemini(promptTrat, 4000)
     ]);
     setIcOut('ic-out-sub',sub);
     setIcOut('ic-out-obj',obj);
@@ -4616,12 +4655,18 @@ ${_segTestsResumen?'\n'+_segTestsResumen:''}
 ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
 `.trim();
 
-  var prompt=`Psicólogo clínico hospitalario (TCC). Escribe una nota de evolución psicológica hospitalaria en UN SOLO PÁRRAFO, máximo 120 palabras. Texto corrido, sin listas ni títulos. No uses el nombre del paciente. Usa SOLO los datos proporcionados — no inventes ni generalices. Integra en orden: estado emocional → examen mental → análisis CC → riesgo suicida → intervención → plan.
-
-DATOS DE LA SESIÓN:
-${datos}
-
-Escribe el párrafo ahora, directo, sin encabezado:`;
+  var prompt='Eres un psicólogo clínico hospitalario experto con enfoque cognitivo-conductual. '+
+    'Escribe una NOTA DE SEGUIMIENTO PSICOLÓGICO en un solo párrafo continuo, texto corrido, sin listas ni títulos. '+
+    'No uses el nombre del paciente. Lenguaje técnico-clínico con criterio propio — no enumeres datos, analízalos e interprètalos. '+
+    'Termina con punto final. '+
+    '\n\nEJEMPLO DEL ESTILO ESPERADO:\n'+
+    '"Paciente en seguimiento psicológico hospitalario, consciente, orientado y colaborador durante la entrevista. '+
+    'Refiere estado emocional estable, aunque se observa afecto lábil con momentos de llanto contenido al abordar la situación familiar. '+
+    'El análisis cognitivo-conductual evidencia pensamientos de incertidumbre frente al pronóstico médico, con respuesta emocional congruente al estresor identificado. '+
+    'No se identifican distorsiones cognitivas predominantes ni ideación suicida activa. Riesgo suicida: BAJO. '+
+    'Se realizó intervención de contención emocional y psicoeducación sobre el proceso de hospitalización. '+
+    'Continúa en seguimiento activo por psicología; se recomienda al equipo alertar ante cambios conductuales o expresiones de desesperanza."'+
+    '\n\nAHORA escribe la nota de seguimiento con ese estilo, usando solo estos datos reales — no inventes ni generalices:\n\n'+datos;
 
   console.log('[SEG] datos enviados a Gemini:', datos.slice(0,600));
   // Mostrar carga
