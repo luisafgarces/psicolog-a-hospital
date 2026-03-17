@@ -3053,7 +3053,7 @@ window.generarPlanTratamiento=async function(pacId){
   const ctx=`DATOS DEL PACIENTE:
 - Nombre: (omitir en el plan)
 - Edad: ${pac.edad||'No registrada'} | Sexo: ${pac.sexo||'No registrado'}
-- Habitación/Servicio: ${pac.hab||'No registrado'}
+- Servicio: ${pac.hab||'No registrado'}
 - Diagnóstico médico: ${pac.motivo||'No registrado'}
 - Impresión psicológica: ${pac.dxpsi||'No registrada'}
 - Riesgo suicida: ${pac.riesgo||'Sin clasificar'}
@@ -4526,7 +4526,7 @@ async function generarNotaIcConGemini(apiKey){
   var _icPacId=selPacIC?selPacIC.value:null;
   var _icPacNombre=icv('ic-pnombre')||'';
   var _testsResumen=getTestsResumenPaciente(_icPacId,_icPacNombre);
-  var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}. Dx médico: ${dx}. Servicio: ${hab||'no especificado'}. Riesgo suicida: ${sev}.`;
+  var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}. Dx médico: ${dx}. Riesgo suicida: ${sev}.`;
   if(_testsResumen)ctx+=`\n\n${_testsResumen}`;
   // Incluir valoración de capacidad si se llenó
   var _capTextoIC=getCapInlineTexto('ic');
@@ -4564,47 +4564,47 @@ async function generarNotaIcConGemini(apiKey){
     return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
   }
 
-  // Prompts individuales con ejemplo de estilo clínico real
+  // Instrucción base compartida — los datos demográficos van UNA SOLA VEZ en ctx
+  // Cada sección recibe SOLO sus datos específicos para evitar repetición
   var estiloBase = 'Eres un psicólogo clínico hospitalario experto con enfoque cognitivo-conductual. '+
     'Redacta en texto corrido, UN SOLO PÁRRAFO sin listas ni viñetas. No uses el nombre del paciente. '+
-    'Lenguaje técnico-clínico preciso, conciso y con criterio clínico propio — no enumeres datos, analízalos. '+
-    'Termina siempre con punto final. '+
-    'CONTEXTO DEL PACIENTE: '+ctx;
+    'Lenguaje técnico-clínico preciso y conciso — no enumeres datos, analízalos. '+
+    'CRÍTICO: NO repitas datos demográficos (edad, sexo, diagnóstico) que ya aparecen en otras secciones. '+
+    'Cada sección aporta información nueva y específica. Termina siempre con punto final. '+
+    'CONTEXTO GENERAL DEL CASO (solo referencia, no repetir en la nota): '+ctx;
 
   var promptSub = estiloBase +
-    '\n\nEJEMPLO DEL ESTILO Y ESTRUCTURA ESPERADOS para el SUBJETIVO:\n'+
+    '\n\nEJEMPLO DE ESTILO para el SUBJETIVO:\n'+
     '"El paciente refiere sentirse tranquilo y sin preocupaciones, verbalizando: \"yo me siento bien, en el hogar estoy muy bien, es lo mejor que me ha pasado\". '+
     'Este reporte contrasta con la observación del personal de enfermería, que describe ánimo hipotímico y llanto constante durante la estancia. '+
-    'Sin antecedentes psiquiátricos ni intentos suicidas previos. Se registra historial de exposición a violencia en contexto de conflicto armado y desplazamiento, '+
+    'Sin antecedentes psiquiátricos ni intentos suicidas previos. Se registra historial de exposición a violencia en contexto de conflicto armado, '+
     'lo cual podría estar modulando la expresión y el reconocimiento del malestar emocional actual."'+
-    '\n\nAHORA escribe el SUBJETIVO con ese mismo nivel y estilo, usando estos datos reales:\n'+dSub;
+    '\n\nEscribe el SUBJETIVO: lo que el paciente refiere, cita textual si aplica, antecedentes relevantes. '+
+    'NO incluyas hallazgos del examen mental (eso va en objetivo). Datos:\n'+dSub;
 
   var promptObj = estiloBase +
-    '\n\nEJEMPLO DEL ESTILO Y ESTRUCTURA ESPERADOS para el OBJETIVO:\n'+
+    '\n\nEJEMPLO DE ESTILO para el OBJETIVO:\n'+
     '"Paciente consciente, orientado en las tres esferas, colaborador. Verbaliza sentirse eutímico, aunque refiere momentos de tristeza asociados a la soledad. '+
     'Sin alteraciones psicóticas ni distorsiones cognitivas significativas. Insight conservado. '+
-    'La incongruencia entre el discurso del paciente y lo reportado por enfermería sugiere una posible minimización defensiva del malestar, '+
-    'patrón frecuente en adultos mayores con trayectorias vitales de alta adversidad y estilos de afrontamiento por supresión emocional. '+
+    'La incongruencia entre el discurso y lo reportado por enfermería sugiere minimización defensiva del malestar. '+
     'Red de apoyo familiar ausente. Riesgo suicida: BAJO."'+
-    '\n\nAHORA escribe el OBJETIVO con ese mismo nivel y estilo — integra el examen mental con la formulación CC, identifica patrones cognitivos y conductuales, '+
-    'no solo listes hallazgos. Usa estos datos reales:\n'+dObj;
+    '\n\nEscribe el OBJETIVO: examen mental + formulación CC. NO repitas lo que el paciente refirió (eso ya está en subjetivo). '+
+    'NO menciones edad ni diagnóstico médico de nuevo. Datos:\n'+dObj;
 
   var promptResp = estiloBase +
-    '\n\nEJEMPLO DEL ESTILO Y ESTRUCTURA ESPERADOS para la RESPUESTA:\n'+
-    '"Respuesta emocional esperable ante estrés médico agudo en un paciente con vulnerabilidad psicosocial significativa. '+
+    '\n\nEJEMPLO DE ESTILO para la RESPUESTA:\n'+
+    '"Respuesta emocional esperable ante estrés médico agudo con vulnerabilidad psicosocial significativa. '+
     'No se identifican criterios para trastorno depresivo mayor ni trastorno de adaptación. Sin código CIE-10 aplicable en esta fase. '+
-    'La minimización del malestar y el llanto observado se interpretan como expresión de un afrontamiento por supresión, '+
-    'probablemente arraigado en su historia de adversidad, más que como ausencia real de sufrimiento. Riesgo suicida: BAJO."'+
-    '\n\nAHORA escribe la RESPUESTA con ese mismo nivel y estilo — justifica la impresión diagnóstica, incluye CIE-10 si aplica y descarte diferencial si es pertinente. '+
-    'Usa estos datos reales:\n'+dResp;
+    'El llanto observado se interpreta como expresión de afrontamiento por supresión, más que como ausencia real de sufrimiento. Riesgo suicida: BAJO."'+
+    '\n\nEscribe la RESPUESTA: impresión diagnóstica y análisis clínico. NO repitas hallazgos del examen mental ni lo referido por el paciente. '+
+    'Incluye CIE-10 si aplica y descarte diferencial si es pertinente. Datos:\n'+dResp;
 
   var promptTrat = estiloBase +
-    '\n\nEJEMPLO DEL ESTILO Y ESTRUCTURA ESPERADOS para el TRATAMIENTO:\n'+
-    '"Se realizó escucha activa, validación emocional y exploración de recursos y factores protectores. Se da alta de psicología. '+
-    'Se recomienda al equipo monitorizar el estado anímico del paciente y alertar a psicología ante cambios conductuales, '+
-    'rechazo al tratamiento o expresiones de desesperanza para reevaluación."'+
-    '\n\nAHORA escribe el TRATAMIENTO con ese mismo nivel y estilo — especifica la intervención realizada, el plan y recomendaciones concretas al equipo médico. '+
-    'Usa estos datos reales:\n'+dTrat;
+    '\n\nEJEMPLO DE ESTILO para el TRATAMIENTO:\n'+
+    '"Se realizó escucha activa, validación emocional y exploración de factores protectores. Se da alta de psicología. '+
+    'Se recomienda al equipo monitorizar el estado anímico y alertar a psicología ante cambios conductuales o expresiones de desesperanza."'+
+    '\n\nEscribe el TRATAMIENTO: intervención realizada hoy y plan. NO repitas la impresión diagnóstica ni datos clínicos previos. '+
+    'Solo lo que se hizo y lo que sigue. Datos:\n'+dTrat;
 
   try{
     var [sub,obj,res,tra]=await Promise.all([
@@ -4640,7 +4640,7 @@ function generarNotaIcNueva(){
   var cita=icv('ic-sub-cita');
   var intensidad=icv('ic-sub-intensidad');
 
-  var subjetivo=nombre+(edad?', '+edad:'')+', hospitalizado/a en hab. '+hab+' por '+dx+', es valorado/a por psicología a solicitud del equipo tratante.\n\nDurante la entrevista, '+pn+' refiere encontrarse emocionalmente '+estadoEmoc+'.';
+  var subjetivo=nombre+(edad?', '+edad:'')+', hospitalizado/a por '+dx+', es valorado/a por psicología a solicitud del equipo tratante.\n\nDurante la entrevista, '+pn+' refiere encontrarse emocionalmente '+estadoEmoc+'.';
   if(intensidad)subjetivo+=' '+intensidad+'.';
   if(preocup.length)subjetivo+='\n\nLas principales preocupaciones referidas incluyen: '+icList(preocup)+'.';
   if(pensamientos.length)subjetivo+='\n\nDesde una perspectiva cognitivo-conductual, se identifican los siguientes pensamientos automáticos: '+icList(pensamientos)+', los cuales generan un impacto significativo en su estado emocional y conducta durante la hospitalización.';
@@ -4796,7 +4796,7 @@ async function generarSegConGemini(apiKey){
 TIPO DE NOTA: Seguimiento psicológico hospitalario
 
 DATOS DEL PACIENTE:
-- Nombre: ${nombre}${hab?' | Hab. '+hab:''}${dx?' | Dx: '+dx:''}${fecha?' | Fecha: '+fecha:''}
+- Nombre: ${nombre}${dx?' | Dx: '+dx:''}${fecha?' | Fecha: '+fecha:''}
 
 ESTADO EMOCIONAL REFERIDO (SUBJETIVO):
 - Estado emocional: ${estadoEmoc.length?estadoEmoc.join(', '):'No especificado'}
