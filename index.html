@@ -2989,73 +2989,6 @@ window.hpacResponder=async(ni)=>{
     setTimeout(()=>{if(typeof hpacRenderNotas==='function')hpacRenderNotas();},400);
   }catch(ex){toast('❌ '+ex.message);}
 };
-</script>
-
-<script>
-// ── SAFE STUBS (evitan ReferenceError antes de que cargue el módulo Firebase) ──
-// El módulo ES reemplaza window.fn con la función real al cargar.
-
-// ── VALORACIÓN DE CAPACIDAD INLINE ───────────────────────────────
-function updateCapConclusion(prefix){
-  var sel=document.getElementById(prefix+'-cap-conclusion');
-  var badge=document.getElementById(prefix+'-cap-conclusion-badge');
-  if(!sel||!badge)return;
-  var val=sel.value;
-  if(!val){badge.style.display='none';return;}
-  badge.style.display='';
-  if(val.includes('CONSERVADA')&&!val.includes('PARCIAL')){
-    badge.style.background='#dcfce7';badge.style.color='#166534';badge.style.border='1px solid #bbf7d0';
-  } else if(val.includes('PARCIAL')){
-    badge.style.background='#fef9c3';badge.style.color='#854d0e';badge.style.border='1px solid #fde68a';
-  } else if(val.includes('NO CONSERVADA')){
-    badge.style.background='#fee2e2';badge.style.color='#991b1b';badge.style.border='1px solid #fecaca';
-  } else {
-    badge.style.background='var(--surface2)';badge.style.color='var(--text2)';badge.style.border='1px solid var(--border)';
-  }
-  badge.textContent=val;
-}
-window.updateCapConclusion=updateCapConclusion;
-
-function getCapInlineData(prefix){
-  var v=function(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';};
-  var decision=v(prefix+'-cap-decision');
-  var conclusion=v(prefix+'-cap-conclusion');
-  // Solo incluir si se llenó algo
-  if(!decision&&!conclusion&&!v(prefix+'-cap-c1'))return null;
-  return{
-    capDecision:decision,
-    capSolicitante:v(prefix+'-cap-solicitante'),
-    capC1:v(prefix+'-cap-c1'),capC1obs:v(prefix+'-cap-c1-obs'),
-    capC2:v(prefix+'-cap-c2'),capC2obs:v(prefix+'-cap-c2-obs'),
-    capC3:v(prefix+'-cap-c3'),capC3obs:v(prefix+'-cap-c3-obs'),
-    capC4:v(prefix+'-cap-c4'),capC4obs:v(prefix+'-cap-c4-obs'),
-    capConclusion:conclusion,
-    capObs:v(prefix+'-cap-obs')
-  };
-}
-
-function getCapInlineTexto(prefix){
-  var d=getCapInlineData(prefix);
-  if(!d||!d.capConclusion)return'';
-  var lines=[];
-  lines.push('VALORACIÓN DE CAPACIDAD DECISIONAL');
-  if(d.capDecision)lines.push('Decisión evaluada: '+d.capDecision);
-  if(d.capSolicitante)lines.push('Solicitado por: '+d.capSolicitante);
-  lines.push('');
-  lines.push('Criterios de Appelbaum:');
-  if(d.capC1)lines.push('1. Comprensión: '+d.capC1+(d.capC1obs?' — '+d.capC1obs:''));
-  if(d.capC2)lines.push('2. Apreciación: '+d.capC2+(d.capC2obs?' — '+d.capC2obs:''));
-  if(d.capC3)lines.push('3. Razonamiento: '+d.capC3+(d.capC3obs?' — '+d.capC3obs:''));
-  if(d.capC4)lines.push('4. Expresión de decisión: '+d.capC4+(d.capC4obs?' — '+d.capC4obs:''));
-  lines.push('');
-  lines.push('CONCLUSIÓN: '+d.capConclusion);
-  if(d.capObs)lines.push('Observaciones: '+d.capObs);
-  return lines.join('\n');
-}
-window.getCapInlineData=getCapInlineData;
-window.getCapInlineTexto=getCapInlineTexto;
-
-
 // ── PLAN DE TRATAMIENTO INTRAHOSPITALARIO ────────────────────────────
 window.cargarPlanTratamiento=function(pacId){
   const pac=(window.pacientes||[]).find(p=>p.id===pacId);
@@ -3145,7 +3078,7 @@ ${ctx}`;
   try{
     const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.4,maxOutputTokens:1500}})
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.4,maxOutputTokens:4000}})
     });
     const d=await r.json();
     if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
@@ -3196,6 +3129,73 @@ window.copiarPlanTratamiento=function(){
   if(!txt)return toast('⚠️ No hay plan generado');
   navigator.clipboard.writeText(txt).then(()=>toast('📋 Plan copiado'));
 };
+
+</script>
+
+<script>
+// ── SAFE STUBS (evitan ReferenceError antes de que cargue el módulo Firebase) ──
+// El módulo ES reemplaza window.fn con la función real al cargar.
+
+// ── VALORACIÓN DE CAPACIDAD INLINE ───────────────────────────────
+function updateCapConclusion(prefix){
+  var sel=document.getElementById(prefix+'-cap-conclusion');
+  var badge=document.getElementById(prefix+'-cap-conclusion-badge');
+  if(!sel||!badge)return;
+  var val=sel.value;
+  if(!val){badge.style.display='none';return;}
+  badge.style.display='';
+  if(val.includes('CONSERVADA')&&!val.includes('PARCIAL')){
+    badge.style.background='#dcfce7';badge.style.color='#166534';badge.style.border='1px solid #bbf7d0';
+  } else if(val.includes('PARCIAL')){
+    badge.style.background='#fef9c3';badge.style.color='#854d0e';badge.style.border='1px solid #fde68a';
+  } else if(val.includes('NO CONSERVADA')){
+    badge.style.background='#fee2e2';badge.style.color='#991b1b';badge.style.border='1px solid #fecaca';
+  } else {
+    badge.style.background='var(--surface2)';badge.style.color='var(--text2)';badge.style.border='1px solid var(--border)';
+  }
+  badge.textContent=val;
+}
+window.updateCapConclusion=updateCapConclusion;
+
+function getCapInlineData(prefix){
+  var v=function(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';};
+  var decision=v(prefix+'-cap-decision');
+  var conclusion=v(prefix+'-cap-conclusion');
+  // Solo incluir si se llenó algo
+  if(!decision&&!conclusion&&!v(prefix+'-cap-c1'))return null;
+  return{
+    capDecision:decision,
+    capSolicitante:v(prefix+'-cap-solicitante'),
+    capC1:v(prefix+'-cap-c1'),capC1obs:v(prefix+'-cap-c1-obs'),
+    capC2:v(prefix+'-cap-c2'),capC2obs:v(prefix+'-cap-c2-obs'),
+    capC3:v(prefix+'-cap-c3'),capC3obs:v(prefix+'-cap-c3-obs'),
+    capC4:v(prefix+'-cap-c4'),capC4obs:v(prefix+'-cap-c4-obs'),
+    capConclusion:conclusion,
+    capObs:v(prefix+'-cap-obs')
+  };
+}
+
+function getCapInlineTexto(prefix){
+  var d=getCapInlineData(prefix);
+  if(!d||!d.capConclusion)return'';
+  var lines=[];
+  lines.push('VALORACIÓN DE CAPACIDAD DECISIONAL');
+  if(d.capDecision)lines.push('Decisión evaluada: '+d.capDecision);
+  if(d.capSolicitante)lines.push('Solicitado por: '+d.capSolicitante);
+  lines.push('');
+  lines.push('Criterios de Appelbaum:');
+  if(d.capC1)lines.push('1. Comprensión: '+d.capC1+(d.capC1obs?' — '+d.capC1obs:''));
+  if(d.capC2)lines.push('2. Apreciación: '+d.capC2+(d.capC2obs?' — '+d.capC2obs:''));
+  if(d.capC3)lines.push('3. Razonamiento: '+d.capC3+(d.capC3obs?' — '+d.capC3obs:''));
+  if(d.capC4)lines.push('4. Expresión de decisión: '+d.capC4+(d.capC4obs?' — '+d.capC4obs:''));
+  lines.push('');
+  lines.push('CONCLUSIÓN: '+d.capConclusion);
+  if(d.capObs)lines.push('Observaciones: '+d.capObs);
+  return lines.join('\n');
+}
+window.getCapInlineData=getCapInlineData;
+window.getCapInlineTexto=getCapInlineTexto;
+
 
 // Estos stubs capturan clics tempranos y los reintenta hasta que el módulo esté listo.
 (function(){
@@ -4843,7 +4843,7 @@ ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.4,maxOutputTokens:2000}
+        generationConfig:{temperature:0.4,maxOutputTokens:4000}
       })
     });
     var data=await resp.json();
