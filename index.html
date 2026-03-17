@@ -2930,7 +2930,7 @@ window.mneCerrar=()=>{const m=document.getElementById('modal-nota-edit');if(m)m.
 
 window.mneGuardar=async()=>{
   const v=id=>document.getElementById(id)?.value||'';
-  const sub=v('mne-sub'),obj=v('mne-obj'),resp=v('mne-resp'),trat=v('mne-trat'),nota=v('mne-nota');
+  const sub=v('mne-sub'),obj=v('mne-obj'),resp=v('mne-resp'),trat=v('mne-trat'),nota='';
   const fecha=v('mne-fecha'),modo=v('mne-tipo'),riesgo=v('mne-riesgo'),estado=v('mne-estado');
   if(!fecha){toast('⚠️ Ingresa una fecha');return;}
   setSyncStatus('syncing');
@@ -3769,7 +3769,7 @@ window.mhicEditar=(ni)=>{
   document.getElementById('mne-obj').value=e.obj||'';
   document.getElementById('mne-resp').value=e.resp||'';
   document.getElementById('mne-trat').value=e.trat||'';
-  document.getElementById('mne-nota').value=e.nota||'';
+  // mne-nota removed
   document.getElementById('mne-del-btn').style.display='';
   window._mneId=m.id;window._mneCol=m.col;
   window._mneOnSave=()=>setTimeout(mhicRender,500);
@@ -4090,7 +4090,7 @@ window.hpacEditar=(ni)=>{
   document.getElementById('mne-obj').value=e.obj||'';
   document.getElementById('mne-resp').value=e.resp||'';
   document.getElementById('mne-trat').value=e.trat||'';
-  document.getElementById('mne-nota').value=e.nota||'';
+  // mne-nota removed
   document.getElementById('mne-del-btn').style.display='';
   window._mneId=m.id;window._mneCol=m.col;
   window._mneOnSave=()=>setTimeout(hpacRenderNotas,500);
@@ -5160,7 +5160,6 @@ document.addEventListener('DOMContentLoaded',()=>{
       <div class="form-group" style="margin-bottom:10px"><label>Análisis Objetivo</label><textarea id="mne-obj" rows="3" placeholder="Examen mental, hábitos, evaluación de riesgo..."></textarea></div>
       <div class="form-group" style="margin-bottom:10px"><label>Respuesta / Impresión clínica</label><textarea id="mne-resp" rows="3" placeholder="Impresión diagnóstica, análisis CC..."></textarea></div>
       <div class="form-group" style="margin-bottom:10px"><label>Tratamiento / Plan</label><textarea id="mne-trat" rows="3" placeholder="Intervenciones realizadas, plan..."></textarea></div>
-      <div class="form-group"><label>Nota libre / Complementaria</label><textarea id="mne-nota" rows="3" placeholder="Nota en formato libre..."></textarea></div>
     </div>
     <div style="padding:12px 22px 18px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;align-items:center">
       <button class="btn btn-danger btn-sm" id="mne-del-btn" onclick="mneEliminar()" style="display:none;margin-right:auto">🗑 Eliminar</button>
