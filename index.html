@@ -394,7 +394,6 @@ input.toggle-cb{display:none}
     <div class="nav-item" onclick="goTo('tests');showTest('duelo')"><span class="icon">🕊️</span>Duelo</div>
     <div class="nav-item" onclick="goTo('tests');showTest('pcl5')"><span class="icon">🌪️</span>PCL-5 (TEPT)</div>
     <div class="nav-section">Valoraciones Especiales</div>
-    <div class="nav-item" onclick="goTo('capacidad')"><span class="icon">⚖️</span>Capacidad Decisional</div>
     <div class="nav-section">Historial</div>
     <div class="nav-item" onclick="goTo('historial-pac')"><span class="icon">📂</span>Historial Pacientes</div>
     <div class="nav-item" onclick="goTo('historial')"><span class="icon">📊</span>Historial Tests</div>
@@ -702,6 +701,79 @@ input.toggle-cb{display:none}
                 <span class="ic-chip" onclick="setIcEsp('somnoliento',this)">😴 Paciente somnoliento / hipoactivo</span>
               </div>
               <div id="ic-esp-preview" style="display:none"><div class="ic-sublabel" style="margin-top:12px">Vista previa de la nota</div><div class="esp-preview" id="ic-esp-text"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="div style="margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden"" id="ic-cap-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)" style="background:var(--surface2);border-top:2px solid #c0392b22">
+            <span>⚖️</span><h4 style="color:#c0392b">Valoración de Capacidad Decisional <span style="font-size:0.72rem;font-weight:400;color:var(--text3)">(opcional)</span></h4>
+            <svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+          </div>
+          <div class="anamnesis-section-body" style="padding:14px 16px">
+            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px;background:#fff5f5;border:1px solid #fecaca;border-radius:7px;padding:8px 12px">
+              ⚖️ <strong>Criterio Appelbaum:</strong> Comprensión · Apreciación · Razonamiento · Expresión de decisión. Todos deben estar presentes para capacidad conservada.
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+              <div class="form-group"><label>Decisión a evaluar</label><input type="text" id="ic-cap-decision" placeholder="Ej: Consentimiento para cirugía"></div>
+              <div class="form-group"><label>Solicitado por</label><input type="text" id="ic-cap-solicitante" placeholder="Ej: Cirugía, UCI"></div>
+            </div>
+            <div style="display:grid;gap:8px;margin-bottom:10px">
+              <div class="form-group">
+                <label>1. Comprensión — ¿Entiende el diagnóstico, tratamiento y alternativas?</label>
+                <select id="ic-cap-c1" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  <option value="">— No evaluado —</option>
+                  <option value="Conservada">✅ Conservada</option>
+                  <option value="Parcial">⚠️ Parcial</option>
+                  <option value="Ausente">❌ Ausente</option>
+                </select>
+                <input type="text" id="ic-cap-c1-obs" placeholder="Observaciones…" style="margin-top:4px;width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif">
+              </div>
+              <div class="form-group">
+                <label>2. Apreciación — ¿Reconoce que le aplica a su situación?</label>
+                <select id="ic-cap-c2" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  <option value="">— No evaluado —</option>
+                  <option value="Conservada">✅ Conservada</option>
+                  <option value="Parcial">⚠️ Parcial</option>
+                  <option value="Ausente">❌ Ausente</option>
+                </select>
+                <input type="text" id="ic-cap-c2-obs" placeholder="Observaciones…" style="margin-top:4px;width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif">
+              </div>
+              <div class="form-group">
+                <label>3. Razonamiento — ¿Puede comparar opciones y consecuencias?</label>
+                <select id="ic-cap-c3" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  <option value="">— No evaluado —</option>
+                  <option value="Conservada">✅ Conservada</option>
+                  <option value="Parcial">⚠️ Parcial</option>
+                  <option value="Ausente">❌ Ausente</option>
+                </select>
+                <input type="text" id="ic-cap-c3-obs" placeholder="Observaciones…" style="margin-top:4px;width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif">
+              </div>
+              <div class="form-group">
+                <label>4. Expresión de la decisión — ¿Comunica una elección consistente?</label>
+                <select id="ic-cap-c4" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  <option value="">— No evaluado —</option>
+                  <option value="Conservada">✅ Conservada</option>
+                  <option value="Parcial">⚠️ Parcial</option>
+                  <option value="Ausente">❌ Ausente</option>
+                </select>
+                <input type="text" id="ic-cap-c4-obs" placeholder="Observaciones…" style="margin-top:4px;width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label>Conclusión</label>
+              <select id="ic-cap-conclusion" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem" onchange="updateCapConclusion('ic')">
+                <option value="">— No determinada —</option>
+                <option value="CAPACIDAD CONSERVADA">✅ CAPACIDAD CONSERVADA</option>
+                <option value="CAPACIDAD PARCIALMENTE CONSERVADA">⚠️ CAPACIDAD PARCIALMENTE CONSERVADA</option>
+                <option value="CAPACIDAD NO CONSERVADA">❌ CAPACIDAD NO CONSERVADA</option>
+                <option value="NO EVALUABLE EN ESTE MOMENTO">⏸️ NO EVALUABLE EN ESTE MOMENTO</option>
+              </select>
+            </div>
+            <div id="ic-cap-conclusion-badge" style="display:none;padding:8px 14px;border-radius:8px;font-size:0.82rem;font-weight:700;margin-bottom:8px;text-align:center"></div>
+            <div class="form-group">
+              <label>Observaciones adicionales</label>
+              <textarea id="ic-cap-obs" rows="2" placeholder="Factores que afectaron la evaluación, recomendaciones al equipo…" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif"></textarea>
             </div>
           </div>
         </div>
@@ -1087,6 +1159,79 @@ input.toggle-cb{display:none}
             <div class="form-group full"><label>Remisiones</label><div class="checkgroup" id="an-remisiones"><label><input type="checkbox" value="Ninguna"><span>Ninguna</span></label><label><input type="checkbox" value="Psiquiatría"><span>Psiquiatría</span></label><label><input type="checkbox" value="Trabajo social"><span>Trabajo social</span></label></div></div>
             <div class="form-group"><label>Próxima cita</label><input type="date" id="an-proxcita"></div>
           </div></div>
+        </div>
+
+        <div class="anamnesis-section" id="an-cap-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)" style="background:var(--surface2);border-top:2px solid #c0392b22">
+            <span>⚖️</span><h4 style="color:#c0392b">Valoración de Capacidad Decisional <span style="font-size:0.72rem;font-weight:400;color:var(--text3)">(opcional)</span></h4>
+            <svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+          </div>
+          <div class="anamnesis-section-body" style="padding:14px 16px">
+            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px;background:#fff5f5;border:1px solid #fecaca;border-radius:7px;padding:8px 12px">
+              ⚖️ <strong>Criterio Appelbaum:</strong> Comprensión · Apreciación · Razonamiento · Expresión de decisión. Todos deben estar presentes para capacidad conservada.
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+              <div class="form-group"><label>Decisión a evaluar</label><input type="text" id="an-cap-decision" placeholder="Ej: Consentimiento para cirugía"></div>
+              <div class="form-group"><label>Solicitado por</label><input type="text" id="an-cap-solicitante" placeholder="Ej: Cirugía, UCI"></div>
+            </div>
+            <div style="display:grid;gap:8px;margin-bottom:10px">
+              <div class="form-group">
+                <label>1. Comprensión — ¿Entiende el diagnóstico, tratamiento y alternativas?</label>
+                <select id="an-cap-c1" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  <option value="">— No evaluado —</option>
+                  <option value="Conservada">✅ Conservada</option>
+                  <option value="Parcial">⚠️ Parcial</option>
+                  <option value="Ausente">❌ Ausente</option>
+                </select>
+                <input type="text" id="an-cap-c1-obs" placeholder="Observaciones…" style="margin-top:4px;width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif">
+              </div>
+              <div class="form-group">
+                <label>2. Apreciación — ¿Reconoce que le aplica a su situación?</label>
+                <select id="an-cap-c2" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  <option value="">— No evaluado —</option>
+                  <option value="Conservada">✅ Conservada</option>
+                  <option value="Parcial">⚠️ Parcial</option>
+                  <option value="Ausente">❌ Ausente</option>
+                </select>
+                <input type="text" id="an-cap-c2-obs" placeholder="Observaciones…" style="margin-top:4px;width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif">
+              </div>
+              <div class="form-group">
+                <label>3. Razonamiento — ¿Puede comparar opciones y consecuencias?</label>
+                <select id="an-cap-c3" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  <option value="">— No evaluado —</option>
+                  <option value="Conservada">✅ Conservada</option>
+                  <option value="Parcial">⚠️ Parcial</option>
+                  <option value="Ausente">❌ Ausente</option>
+                </select>
+                <input type="text" id="an-cap-c3-obs" placeholder="Observaciones…" style="margin-top:4px;width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif">
+              </div>
+              <div class="form-group">
+                <label>4. Expresión de la decisión — ¿Comunica una elección consistente?</label>
+                <select id="an-cap-c4" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  <option value="">— No evaluado —</option>
+                  <option value="Conservada">✅ Conservada</option>
+                  <option value="Parcial">⚠️ Parcial</option>
+                  <option value="Ausente">❌ Ausente</option>
+                </select>
+                <input type="text" id="an-cap-c4-obs" placeholder="Observaciones…" style="margin-top:4px;width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label>Conclusión</label>
+              <select id="an-cap-conclusion" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem" onchange="updateCapConclusion('an')">
+                <option value="">— No determinada —</option>
+                <option value="CAPACIDAD CONSERVADA">✅ CAPACIDAD CONSERVADA</option>
+                <option value="CAPACIDAD PARCIALMENTE CONSERVADA">⚠️ CAPACIDAD PARCIALMENTE CONSERVADA</option>
+                <option value="CAPACIDAD NO CONSERVADA">❌ CAPACIDAD NO CONSERVADA</option>
+                <option value="NO EVALUABLE EN ESTE MOMENTO">⏸️ NO EVALUABLE EN ESTE MOMENTO</option>
+              </select>
+            </div>
+            <div id="an-cap-conclusion-badge" style="display:none;padding:8px 14px;border-radius:8px;font-size:0.82rem;font-weight:700;margin-bottom:8px;text-align:center"></div>
+            <div class="form-group">
+              <label>Observaciones adicionales</label>
+              <textarea id="an-cap-obs" rows="2" placeholder="Factores que afectaron la evaluación, recomendaciones al equipo…" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif"></textarea>
+            </div>
+          </div>
         </div>
         <div class="anamnesis-section">
           <div class="anamnesis-section-header open" onclick="toggleSection(this)"><span>📄</span><h4>Nota clínica generada</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
@@ -2390,6 +2535,7 @@ window.guardarICFirebase=async()=>{
       estado:'respondida',
       needsAI:needsAI||false,
       ...(needsAI&&_aiFormSnap?{_aiFormSnap}:{}),
+      ...(getCapInlineData('ic')||{}),
       creado:serverTimestamp()
     });
     if(!navigator.onLine){
@@ -2425,6 +2571,7 @@ window.guardarAnamnesis=async()=>{
       dx:window.getChecked('an-dx'),
       nota,
       modo:'Anamnesis',
+      ...(getCapInlineData('an')||{}),
       creado:serverTimestamp()
     });
     if(!navigator.onLine){
@@ -2671,7 +2818,6 @@ window.renderDashboard=()=>{
           <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap" onclick="event.stopPropagation()">
             <button class="btn btn-sm btn-secondary" onclick="abrirICParaPaciente('${p.id}')">💬 IC</button>
             <button class="btn btn-sm btn-secondary" onclick="nuevaAnamnesisParaPaciente('${p.id}')">📋 Anamnesis</button>
-            <button class="btn btn-sm btn-secondary" onclick="abrirCapacidadPaciente('${p.id}')">⚖️ Capacidad</button>
             <button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪 Test</button>
             <button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️ Editar</button>
             <button class="btn btn-sm btn-secondary" onclick="verHistorialPorId('${p.id}')">📂 Historial IC</button>
@@ -2763,7 +2909,6 @@ window.renderConsultaExterna=(q)=>{
       <td>${p.proxSesion?`<div>${citaBadge}</div><div style="font-size:0.78rem;color:var(--text2)">${formatDate(p.proxSesion)}</div>`:'<span style="color:var(--text3)">—</span>'}</td>
       <td><div style="display:flex;gap:5px;flex-wrap:wrap">
         <button class="btn btn-sm btn-secondary" onclick="nuevaAnamnesisParaPaciente('${p.id}')">📋 Anamnesis</button>
-        <button class="btn btn-sm btn-secondary" onclick="abrirCapacidadPaciente('${p.id}')">⚖️ Capacidad</button>
         <button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪 Tests</button>
         <button class="btn btn-sm btn-secondary" onclick="goTo('historial-pac');setTimeout(()=>hpacAbrirPaciente('${p.id}'),200)">📂 Historial</button>
         <button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️ Editar</button>
@@ -2837,6 +2982,67 @@ window.hpacResponder=async(ni)=>{
 <script>
 // ── SAFE STUBS (evitan ReferenceError antes de que cargue el módulo Firebase) ──
 // El módulo ES reemplaza window.fn con la función real al cargar.
+
+// ── VALORACIÓN DE CAPACIDAD INLINE ───────────────────────────────
+function updateCapConclusion(prefix){
+  var sel=document.getElementById(prefix+'-cap-conclusion');
+  var badge=document.getElementById(prefix+'-cap-conclusion-badge');
+  if(!sel||!badge)return;
+  var val=sel.value;
+  if(!val){badge.style.display='none';return;}
+  badge.style.display='';
+  if(val.includes('CONSERVADA')&&!val.includes('PARCIAL')){
+    badge.style.background='#dcfce7';badge.style.color='#166534';badge.style.border='1px solid #bbf7d0';
+  } else if(val.includes('PARCIAL')){
+    badge.style.background='#fef9c3';badge.style.color='#854d0e';badge.style.border='1px solid #fde68a';
+  } else if(val.includes('NO CONSERVADA')){
+    badge.style.background='#fee2e2';badge.style.color='#991b1b';badge.style.border='1px solid #fecaca';
+  } else {
+    badge.style.background='var(--surface2)';badge.style.color='var(--text2)';badge.style.border='1px solid var(--border)';
+  }
+  badge.textContent=val;
+}
+window.updateCapConclusion=updateCapConclusion;
+
+function getCapInlineData(prefix){
+  var v=function(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';};
+  var decision=v(prefix+'-cap-decision');
+  var conclusion=v(prefix+'-cap-conclusion');
+  // Solo incluir si se llenó algo
+  if(!decision&&!conclusion&&!v(prefix+'-cap-c1'))return null;
+  return{
+    capDecision:decision,
+    capSolicitante:v(prefix+'-cap-solicitante'),
+    capC1:v(prefix+'-cap-c1'),capC1obs:v(prefix+'-cap-c1-obs'),
+    capC2:v(prefix+'-cap-c2'),capC2obs:v(prefix+'-cap-c2-obs'),
+    capC3:v(prefix+'-cap-c3'),capC3obs:v(prefix+'-cap-c3-obs'),
+    capC4:v(prefix+'-cap-c4'),capC4obs:v(prefix+'-cap-c4-obs'),
+    capConclusion:conclusion,
+    capObs:v(prefix+'-cap-obs')
+  };
+}
+
+function getCapInlineTexto(prefix){
+  var d=getCapInlineData(prefix);
+  if(!d||!d.capConclusion)return'';
+  var lines=[];
+  lines.push('VALORACIÓN DE CAPACIDAD DECISIONAL');
+  if(d.capDecision)lines.push('Decisión evaluada: '+d.capDecision);
+  if(d.capSolicitante)lines.push('Solicitado por: '+d.capSolicitante);
+  lines.push('');
+  lines.push('Criterios de Appelbaum:');
+  if(d.capC1)lines.push('1. Comprensión: '+d.capC1+(d.capC1obs?' — '+d.capC1obs:''));
+  if(d.capC2)lines.push('2. Apreciación: '+d.capC2+(d.capC2obs?' — '+d.capC2obs:''));
+  if(d.capC3)lines.push('3. Razonamiento: '+d.capC3+(d.capC3obs?' — '+d.capC3obs:''));
+  if(d.capC4)lines.push('4. Expresión de decisión: '+d.capC4+(d.capC4obs?' — '+d.capC4obs:''));
+  lines.push('');
+  lines.push('CONCLUSIÓN: '+d.capConclusion);
+  if(d.capObs)lines.push('Observaciones: '+d.capObs);
+  return lines.join('\n');
+}
+window.getCapInlineData=getCapInlineData;
+window.getCapInlineTexto=getCapInlineTexto;
+
 // Estos stubs capturan clics tempranos y los reintenta hasta que el módulo esté listo.
 (function(){
   function makeStub(name){
@@ -3224,7 +3430,7 @@ PLAN TERAPÉUTICO:
 - Enfoque: ${getChecked('an-enfoque')}
 - Remisiones: ${getChecked('an-remisiones')}
 - Próxima cita: ${v('an-proxcita')||'—'}
-${(()=>{const _anPacId=(document.getElementById('anamnesis-paciente-sel')||{}).value||null;const _anNombre=(document.getElementById('an-nombre')||{}).value||'';const _anTests=getTestsResumenPaciente(_anPacId,_anNombre);return _anTests?'\n'+_anTests:'';})()}
+${(()=>{const _anPacId=(document.getElementById('anamnesis-paciente-sel')||{}).value||null;const _anNombre=(document.getElementById('an-nombre')||{}).value||'';const _anTests=getTestsResumenPaciente(_anPacId,_anNombre);const _anCap=getCapInlineTexto('an');return (_anTests?'\n'+_anTests:'')+(_anCap?'\n'+_anCap:'');})()}
 `.trim();
 
   const prompt=`Eres un psicólogo clínico experto con enfoque cognitivo-conductual. Redacta una nota clínica de anamnesis psicológica de alta calidad a partir de los datos de evaluación.
@@ -3707,6 +3913,8 @@ window.hpacRenderNotas=()=>{
         if(!hasNAVal(e.sub))cv.push({label:'Análisis Subjetivo',text:e.sub});
         if(!hasNAVal(e.obj))cv.push({label:'Análisis Objetivo',text:e.obj});
         if(!hasNAVal(e.resp))cv.push({label:'Respuesta / Impresión clínica',text:e.resp});
+        // Mostrar valoración de capacidad si se incluyó
+        if(e.capConclusion)cv.push({label:'⚖️ Capacidad Decisional',text:(e.capDecision?'Decisión: '+e.capDecision+'\n':'')+'CONCLUSIÓN: '+e.capConclusion+(e.capObs?'\nObservaciones: '+e.capObs:'')});
         if(!hasNAVal(e.trat))cv.push({label:'Tratamiento / Plan',text:e.trat});
         // nota: mostrar siempre si tiene contenido (puede ser la nota completa o complementaria)
         if(!hasNAVal(e.nota)&&!cv.length)cv.push({label:'Nota clínica',text:e.nota});
@@ -3883,7 +4091,6 @@ window.abrirPacSheet=async(id)=>{
     <button class="btn btn-primary btn-sm" onclick="abrirICParaPaciente('${id}');closePacSheet()">💬 IC</button>
     <button class="btn btn-secondary btn-sm" onclick="nuevaAnamnesisParaPaciente('${id}');closePacSheet()">📋 Anamnesis</button>
     <button class="btn btn-secondary btn-sm" onclick="irTestsPaciente('${id}');closePacSheet()">🧪 Test</button>
-    <button class="btn btn-secondary btn-sm" onclick="abrirCapacidadPaciente('${id}');closePacSheet()">⚖️ Capacidad</button>
     <button class="btn btn-secondary btn-sm" onclick="editarPaciente('${id}');closePacSheet()">✏️ Editar</button>
     <button class="btn btn-secondary btn-sm" onclick="verHistorialPorId('${id}');closePacSheet()">📂 Historial</button>
   `;
@@ -4065,6 +4272,9 @@ async function generarNotaIcConGemini(apiKey){
   var _testsResumen=getTestsResumenPaciente(_icPacId,_icPacNombre);
   var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}. Dx médico: ${dx}. Servicio: ${hab||'no especificado'}. Riesgo suicida: ${sev}.`;
   if(_testsResumen)ctx+=`\n\n${_testsResumen}`;
+  // Incluir valoración de capacidad si se llenó
+  var _capTextoIC=getCapInlineTexto('ic');
+  if(_capTextoIC)ctx+='\n\n'+_capTextoIC;
 
   // Datos por sección
   var dSub=`Estado emocional: ${chips('Estado emocional referido')||'no especificado'}. Preocupaciones: ${chips('Principales preocupaciones')||'ninguna'}. Pensamientos automáticos: ${chips('Pensamientos automáticos')||'no identificados'}. Intensidad malestar: ${intensidad||'no cuantificada'}. Cita textual: ${cita||'ninguna'}. Antecedentes psiq: ${chips('Diagnósticos psiquiátricos previos')||'ninguno'}. Intentos suicidio: ${chips('Intentos de suicidio previos')||'ninguno'}. Violencia: ${chips('Tipo de violencia')||'niega'}.`;
@@ -4335,6 +4545,7 @@ INTERVENCIÓN Y PLAN:
 - Frecuencia de seguimiento: ${frecuencia.length?frecuencia.join(', '):'No especificada'}
 ${tratNotas?'- Notas de tratamiento: '+tratNotas:''}
 ${_segTestsResumen?'\n'+_segTestsResumen:''}
+${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
 `.trim();
 
   var prompt=`Psicólogo clínico hospitalario (TCC). Escribe una nota de evolución psicológica hospitalaria en UN SOLO PÁRRAFO, máximo 120 palabras. Texto corrido, sin listas ni títulos. No uses el nombre del paciente. Usa SOLO los datos proporcionados — no inventes ni generalices. Integra en orden: estado emocional → examen mental → análisis CC → riesgo suicida → intervención → plan.
