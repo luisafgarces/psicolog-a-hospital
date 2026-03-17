@@ -1681,6 +1681,18 @@ input.toggle-cb{display:none}
     <div class="pac-sheet-body">
       <div id="ps-sesiones-badge" class="pac-sesiones-badge" title="Ver historial completo del paciente">📅 0 sesiones registradas</div>
       <div class="pac-info-grid" id="ps-grid"></div>
+      <!-- Plan de tratamiento intrahospitalario -->
+      <div id="ps-plan-wrap" style="display:none;margin-top:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:0.72rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.06em">🧠 Plan de tratamiento intrahospitalario</span>
+          <div style="display:flex;gap:5px">
+            <button class="btn btn-sm btn-secondary" style="font-size:0.68rem;padding:2px 8px" onclick="generarPlanTratamiento(window._psPacId)">↻ Regenerar</button>
+            <button class="btn btn-sm btn-secondary" style="font-size:0.68rem;padding:2px 8px" onclick="editarPlanTratamiento(window._psPacId)">✏️</button>
+            <button class="btn btn-sm btn-secondary" style="font-size:0.68rem;padding:2px 8px" onclick="copiarPlanTratamiento()">Copiar</button>
+          </div>
+        </div>
+        <div id="ps-plan-texto" style="font-size:0.78rem;color:#166534;line-height:1.6;white-space:pre-wrap"></div>
+      </div>
     </div>
     <div class="pac-sheet-actions" id="ps-actions"></div>
   </div>
@@ -3043,6 +3055,148 @@ function getCapInlineTexto(prefix){
 window.getCapInlineData=getCapInlineData;
 window.getCapInlineTexto=getCapInlineTexto;
 
+
+// ── PLAN DE TRATAMIENTO INTRAHOSPITALARIO ────────────────────────────
+window.cargarPlanTratamiento=function(pacId){
+  const pac=(window.pacientes||[]).find(p=>p.id===pacId);
+  const plan=pac?.planTratamiento||'';
+  const wrap=document.getElementById('ps-plan-wrap');
+  const txt=document.getElementById('ps-plan-texto');
+  if(plan&&wrap&&txt){
+    wrap.style.display='';
+    txt.textContent=plan;
+  } else if(wrap){
+    wrap.style.display='none';
+  }
+};
+
+window.generarPlanTratamiento=async function(pacId){
+  const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
+  if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
+  const pac=(window.pacientes||[]).find(p=>p.id===pacId);
+  if(!pac)return toast('⚠️ Paciente no encontrado');
+
+  // Mostrar carga
+  const wrap=document.getElementById('ps-plan-wrap');
+  const txt=document.getElementById('ps-plan-texto');
+  if(wrap)wrap.style.display='';
+  if(txt)txt.textContent='⏳ Generando plan clínico…';
+  toast('⏳ Generando plan de tratamiento…');
+
+  // Recopilar contexto clínico del paciente
+  const ics=(window.interconsultas||[]).filter(i=>i.pacienteId===pacId||i.pacienteNombre===pac.nombre);
+  const tests=(window.testHistory||[]).filter(t=>t.pacienteId===pacId||t.paciente===pac.nombre);
+  const caps=(window.capacidadList||[]).filter(c=>c.pacienteId===pacId||c.pacienteNombre===pac.nombre);
+
+  // Última IC más reciente
+  const ultimaIC=ics.sort((a,b)=>{
+    const ta=a.creado?.toMillis?a.creado.toMillis():0;
+    const tb=b.creado?.toMillis?b.creado.toMillis():0;
+    return tb-ta;
+  })[0];
+
+  // Tests más recientes por tipo
+  const testsPorTipo={};
+  for(const t of tests){
+    if(!testsPorTipo[t.test]||new Date(t.fecha)>new Date(testsPorTipo[t.test].fecha))
+      testsPorTipo[t.test]=t;
+  }
+  const resumenTests=Object.values(testsPorTipo).map(t=>t.test+': '+t.score+' pts ('+t.level+') — '+t.fecha).join('; ');
+
+  const ctx=`DATOS DEL PACIENTE:
+- Nombre: (omitir en el plan)
+- Edad: ${pac.edad||'No registrada'} | Sexo: ${pac.sexo||'No registrado'}
+- Habitación/Servicio: ${pac.hab||'No registrado'}
+- Diagnóstico médico: ${pac.motivo||'No registrado'}
+- Impresión psicológica: ${pac.dxpsi||'No registrada'}
+- Riesgo suicida: ${pac.riesgo||'Sin clasificar'}
+${pac.riesgoObs?'- Obs. riesgo: '+pac.riesgoObs:''}
+${resumenTests?'\nTESTS APLICADOS:\n'+resumenTests:''}
+${ultimaIC?'\nÚLTIMA IC ('+ultimaIC.modo+' — '+(ultimaIC.fecha||'sin fecha')+'):\nSubjetivo: '+(ultimaIC.sub||ultimaIC.nota||'—').slice(0,300)+'\nObjetivo: '+(ultimaIC.obj||'—').slice(0,300):''}
+${caps.length?'\nCAPACIDAD DECISIONAL: '+(caps[0].capConclusion||caps[0].conclusion||'evaluada'):''}`;
+
+  const prompt=`Eres una psicóloga clínica hospitalaria experta trabajando en un hospital de tercer nivel con más de 200 camas. Eres la ÚNICA psicóloga del hospital, por lo que las intervenciones deben ser REALISTAS: sesiones de aproximadamente 15 minutos, enfocadas, con criterio de priorización clínica.
+
+Genera un PLAN DE TRATAMIENTO PSICOLÓGICO INTRAHOSPITALARIO para este paciente. Este plan es tu herramienta de trabajo interno — NO va en la historia clínica. Debe ser conciso, operativo y ajustado a la realidad de un hospital de alta complejidad con recursos limitados.
+
+ESTRUCTURA OBLIGATORIA (usa exactamente estos campos):
+
+Nivel: [1 — Monitoreo básico / 2 — Seguimiento estándar / 3 — Seguimiento intensivo]
+Justificación del nivel: [1-2 oraciones que expliquen por qué ese nivel]
+Foco clínico: [El problema psicológico central a abordar en esta hospitalización]
+Técnica principal: [Técnicas específicas con enfoque TCC/humanista que son viables en 15 min]
+Contactos estimados: [Número realista de contactos durante la hospitalización y frecuencia]
+Articulación: [Coordinación necesaria con otros servicios: psiquiatría, trabajo social, etc. Si no aplica: "No requiere articulación adicional en esta fase"]
+Criterio de cierre: [Qué debe ocurrir para dar el caso por cerrado o referir a ambulatorio]
+
+EJEMPLO DE REFERENCIA (estilo y nivel esperado):
+Nivel: 3 — Seguimiento intensivo
+Justificación del nivel: Diagnóstico de novo de alto impacto emocional con ansiedad anticipatoria significativa y red de apoyo limitada.
+Foco clínico: Procesamiento de ruptura biográfica por diagnóstico de VIH y manejo de ansiedad anticipatoria.
+Técnica principal: Psicoeducación sobre respuesta emocional al diagnóstico, reestructuración cognitiva de pensamientos catastróficos y validación emocional.
+Contactos estimados: 3 a 4 durante la hospitalización, en días alternos.
+Articulación: Coordinación activa con psiquiatría dado cuadro delirante activo y neuroinfección en estudio.
+Criterio de cierre: Estabilización emocional, reducción de ideación catastrófica y egreso con remisión a salud mental ambulatoria.
+
+AHORA genera el plan para este paciente con ese mismo nivel de especificidad clínica:
+
+${ctx}`;
+
+  try{
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.4,maxOutputTokens:1500}})
+    });
+    const d=await r.json();
+    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+    const plan=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    if(!plan)throw new Error('Respuesta vacía');
+
+    // Guardar en Firebase como campo del paciente
+    await updateDoc(doc(db,'pacientes',pacId),{planTratamiento:plan,planFecha:new Date().toISOString().split('T')[0]});
+
+    if(txt)txt.textContent=plan;
+    if(wrap)wrap.style.display='';
+    toast('✅ Plan generado y guardado');
+  }catch(e){
+    console.error('Plan error:',e);
+    if(txt)txt.textContent='❌ Error al generar: '+e.message;
+    toast('❌ '+e.message);
+  }
+};
+
+window.editarPlanTratamiento=function(pacId){
+  const pac=(window.pacientes||[]).find(p=>p.id===pacId);
+  const ta=document.getElementById('plan-trat-textarea');
+  if(ta)ta.value=pac?.planTratamiento||'';
+  window._planEditPacId=pacId;
+  document.getElementById('modal-plan-trat').style.display='flex';
+};
+
+window.guardarPlanEditado=async function(){
+  const pacId=window._planEditPacId;
+  if(!pacId)return;
+  const plan=document.getElementById('plan-trat-textarea')?.value||'';
+  try{
+    await updateDoc(doc(db,'pacientes',pacId),{planTratamiento:plan,planFecha:new Date().toISOString().split('T')[0]});
+    const txt=document.getElementById('ps-plan-texto');
+    const wrap=document.getElementById('ps-plan-wrap');
+    if(txt)txt.textContent=plan;
+    if(wrap)wrap.style.display=plan?'':'none';
+    document.getElementById('modal-plan-trat').style.display='none';
+    toast('✅ Plan guardado');
+    // Actualizar pacientes array local
+    const pac=(window.pacientes||[]).find(p=>p.id===pacId);
+    if(pac)pac.planTratamiento=plan;
+  }catch(e){toast('❌ '+e.message);}
+};
+
+window.copiarPlanTratamiento=function(){
+  const txt=document.getElementById('ps-plan-texto')?.textContent||'';
+  if(!txt)return toast('⚠️ No hay plan generado');
+  navigator.clipboard.writeText(txt).then(()=>toast('📋 Plan copiado'));
+};
+
 // Estos stubs capturan clics tempranos y los reintenta hasta que el módulo esté listo.
 (function(){
   function makeStub(name){
@@ -3055,7 +3209,7 @@ window.getCapInlineTexto=getCapInlineTexto;
   }
   ['guardarPaciente','editarPaciente','eliminarPaciente','guardarIC','eliminarIC',
    'verHistorialPorId','nuevaAnamnesisParaPaciente','abrirICParaPaciente','irTestsPaciente',
-   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad','sincronizarPendientes','generarNotasPendientesIA',
+   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad','sincronizarPendientes','generarNotasPendientesIA','generarPlanTratamiento','editarPlanTratamiento','guardarPlanEditado','copiarPlanTratamiento','cargarPlanTratamiento',
    'guardarAnamnesis','generarNotaAnamnesis','mhicNuevaNota','mhicCerrar',
    'mneCerrar','mneGuardar','mneEliminar','hpacNuevaNota','hpacVolverLista',
    'calcPHQ9','calcGAD7','calcHADS','calcMMSE','calcMoCA','calcCAM',
@@ -4155,13 +4309,17 @@ window.abrirPacSheet=async(id)=>{
     {l:'Notas generales',v:p.notas,full:true},
   ].filter(x=>x&&x.v);
   document.getElementById('ps-grid').innerHTML=grid.map(ri).join('');
+  window._psPacId=id;
   document.getElementById('ps-actions').innerHTML=`
     <button class="btn btn-primary btn-sm" onclick="abrirICParaPaciente('${id}');closePacSheet()">💬 IC</button>
     <button class="btn btn-secondary btn-sm" onclick="nuevaAnamnesisParaPaciente('${id}');closePacSheet()">📋 Anamnesis</button>
     <button class="btn btn-secondary btn-sm" onclick="irTestsPaciente('${id}');closePacSheet()">🧪 Test</button>
+    <button class="btn btn-secondary btn-sm" onclick="generarPlanTratamiento('${id}')">🧠 Plan</button>
     <button class="btn btn-secondary btn-sm" onclick="editarPaciente('${id}');closePacSheet()">✏️ Editar</button>
     <button class="btn btn-secondary btn-sm" onclick="verHistorialPorId('${id}');closePacSheet()">📂 Historial</button>
   `;
+  // Cargar plan existente si hay
+  cargarPlanTratamiento(id);
   document.getElementById('pac-sheet-overlay').classList.add('open');
   document.body.style.overflow='hidden';
 };
@@ -5210,6 +5368,26 @@ document.addEventListener('DOMContentLoaded',()=>{
       <button class="btn btn-danger btn-sm" id="mne-del-btn" onclick="mneEliminar()" style="display:none;margin-right:auto">🗑 Eliminar</button>
       <button class="btn btn-secondary" onclick="mneCerrar()">Cancelar</button>
       <button class="btn btn-primary" onclick="mneGuardar()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL PLAN DE TRATAMIENTO -->
+<div id="modal-plan-trat" style="display:none;position:fixed;inset:0;background:rgba(26,23,20,0.5);z-index:500;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
+  <div style="background:var(--surface);border-radius:16px;width:100%;max-width:600px;margin:auto;box-shadow:0 8px 40px rgba(26,23,20,0.18)">
+    <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.05rem">🧠 Plan de tratamiento intrahospitalario</div>
+      <button style="background:var(--surface2);border:none;border-radius:7px;padding:5px;cursor:pointer;display:flex" onclick="document.getElementById('modal-plan-trat').style.display='none'">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div style="padding:16px 22px">
+      <textarea id="plan-trat-textarea" rows="16" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;line-height:1.7;resize:vertical"></textarea>
+    </div>
+    <div style="padding:12px 22px 18px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="document.getElementById('modal-plan-trat').style.display='none'">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPlanEditado()">💾 Guardar</button>
     </div>
   </div>
 </div>
