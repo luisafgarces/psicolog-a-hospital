@@ -4145,7 +4145,8 @@ window.hpacRenderNotas=()=>{
         }
       }
       var camposHtml='';
-      var esPendienteIA=e.needsAI===true&&!cv.length;
+      var esModoConIA=(modo==='IC Nueva'||modo==='Seguimiento'||modo==='Anamnesis');
+      var esPendienteIA=!cv.length&&esModoConIA; // Cualquier registro sin nota puede regenerarse
       if(cv.length){
         for(var j=0;j<cv.length;j++){
           camposHtml+='<div class="hpac-campo">'
@@ -4170,6 +4171,10 @@ window.hpacRenderNotas=()=>{
         camposHtml='<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:8px">'
           +'<div style="font-size:0.72rem;font-weight:700;color:#92400e;margin-bottom:6px">⏳ NOTA IA PENDIENTE — Datos guardados sin conexión</div>'
           +'<div style="font-size:0.78rem;color:var(--text2);line-height:1.7">'+fdLines.join('<br>')+'</div>'
+          +'</div>';
+      } else if(esPendienteIA){
+        camposHtml='<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px">'
+          +'<div style="font-size:0.78rem;color:#92400e">⏳ Nota IA no generada. Presiona ✨ Generar nota para crearla ahora.</div>'
           +'</div>';
       } else {
         camposHtml='<p style="color:var(--text3);font-size:0.82rem;font-style:italic">Sin texto guardado.</p>';
