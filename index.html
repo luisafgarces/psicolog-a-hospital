@@ -3007,6 +3007,14 @@ window.populateAnamPacientes=()=>{
 
 setSyncStatus('syncing');
 ['p-fecha','ic-fecha','an-fecha','ic-pfecha'].forEach(id=>{try{document.getElementById(id).value=new Date().toISOString().split('T')[0];}catch(e){}});
+// Poblar campos de API key desde localStorage al cargar
+const _savedKey=localStorage.getItem('gemini_api_key')||'';
+if(_savedKey){
+  ['gemini-api-key','an-gemini-key'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=_savedKey;});
+  const s1=document.getElementById('gemini-key-status'),s2=document.getElementById('an-key-status');
+  if(s1)s1.textContent='✅ API key guardada';
+  if(s2)s2.textContent='✅ Guardada';
+}
 
 // ── NOTA EDITAR/GUARDAR (dentro del módulo para acceder a Firebase) ───
 window.mneCerrar=()=>{const m=document.getElementById('modal-nota-edit');if(m)m.style.display='none';};
@@ -4679,15 +4687,25 @@ function icList(arr){
 }
 
 function getGeminiKey(){
-  // Always read from DOM first (most up-to-date), then localStorage
-  var fromDom=(document.getElementById('gemini-api-key')||{}).value||'';
-  var fromStorage=localStorage.getItem('gemini_api_key')||'';
-  // Sync: if DOM has value, update storage
-  if(fromDom.trim()){
-    if(fromDom.trim()!==fromStorage.trim())localStorage.setItem('gemini_api_key',fromDom.trim());
-    return fromDom.trim();
+  // Leer de cualquier campo de API key visible en el DOM
+  var ids=['gemini-api-key','an-gemini-key'];
+  var fromDom='';
+  for(var i=0;i<ids.length;i++){
+    var v=(document.getElementById(ids[i])||{}).value||'';
+    if(v.trim()){fromDom=v.trim();break;}
   }
-  return fromStorage.trim();
+  var fromStorage=localStorage.getItem('gemini_api_key')||'';
+  if(fromDom){
+    if(fromDom!==fromStorage)localStorage.setItem('gemini_api_key',fromDom);
+    // Sincronizar todos los campos con el valor actual
+    ids.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value)el.value=fromDom;});
+    return fromDom;
+  }
+  if(fromStorage){
+    // Poblar campos vacíos con el valor del storage
+    ids.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value)el.value=fromStorage;});
+  }
+  return fromStorage;
 }
 
 window.generarNotaIC=function(){
