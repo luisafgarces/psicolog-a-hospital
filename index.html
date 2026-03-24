@@ -404,6 +404,7 @@ input.toggle-cb{display:none}
       <span id="sync-status">Conectando…</span>
     </div>
     <span id="pending-badge" style="display:none;font-size:0.72rem;font-weight:700;color:var(--warning);cursor:pointer" onclick="sincronizarPendientes()">⏳ 0 pendientes</span>
+    <span id="backup-badge" style="display:none;font-size:0.72rem;font-weight:700;color:#f87171;cursor:pointer" onclick="verBackupsLocales()">💾 Formularios sin subir</span>
   </div>
 </nav>
 
@@ -2607,6 +2608,20 @@ window.guardarICFirebase=async()=>{
     resp:{tipoResp:icChipsBySubLabel('Tipo de respuesta emocional').join(', '),impresion:icChipsBySubLabel('Impresión clínica').join(', ')},
     trat:{interv:icChipsBySubLabel('Intervención realizada hoy').join(', '),plan:icChipsBySubLabel('Plan').join(', '),freq:icChipsBySubLabel('Frecuencia de seguimiento').join(', ')}
   }:null;
+  // Guardar snapshot en localStorage como respaldo antes de intentar Firebase
+  if(sinNotaIA&&_aiFormSnap){
+    try{
+      const bkKey='ic_backup_'+Date.now();
+      const bkData={key:bkKey,nombre,fecha,dx,riesgo,modo:icCurrentMode==='nueva'?'IC Nueva':'Seguimiento',_aiFormSnap,guardado:new Date().toISOString()};
+      localStorage.setItem(bkKey,JSON.stringify(bkData));
+      // Guardar lista de backups
+      const bkList=JSON.parse(localStorage.getItem('ic_backups')||'[]');
+      bkList.push(bkKey);
+      // Mantener solo los últimos 20
+      if(bkList.length>20)bkList.splice(0,bkList.length-20).forEach(k=>localStorage.removeItem(k));
+      localStorage.setItem('ic_backups',JSON.stringify(bkList));
+    }catch(e){console.warn('Backup localStorage error:',e);}
+  }
   try{
     await addDoc(collection(db,'interconsultas'),{
       pacienteId:pacObj?.id||pacId||null,
@@ -2627,6 +2642,8 @@ window.guardarICFirebase=async()=>{
     } else {
       toast('✅ IC guardada en Firebase');
       setSyncStatus('online');
+      // Limpiar backups de localStorage ya sincronizados
+      try{const bkList=JSON.parse(localStorage.getItem('ic_backups')||'[]');if(bkList.length){const last=bkList[bkList.length-1];localStorage.removeItem(last);localStorage.setItem('ic_backups',JSON.stringify(bkList.slice(0,-1)));}}catch(e){}
       setTimeout(()=>limpiarFormIC(false),300);
     }
   }catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
@@ -3452,6 +3469,143 @@ window.showTest=function(name){
   if(name==='svacbca')setTimeout(renderSVACBCA,50);
 };
 
+
+// ── RESPALDO LOCAL DE FORMULARIOS ────────────────────────────────────
+function actualizarBackupBadge(){
+  try{
+    const bkList=JSON.parse(localStorage.getItem('ic_backups')||'[]');
+    const validos=bkList.filter(k=>localStorage.getItem(k));
+    const badge=document.getElementById('backup-badge');
+    if(badge){
+      badge.style.display=validos.length?'':'none';
+      badge.textContent='💾 '+validos.length+' formulario'+(validos.length>1?'s':'')+' sin subir';
+    }
+  }catch(e){}
+}
+
+window.verBackupsLocales=function(){
+  try{
+    const bkList=JSON.parse(localStorage.getItem('ic_backups')||'[]');
+    const validos=bkList.map(k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}).filter(Boolean);
+    if(!validos.length){toast('No hay formularios pendientes en este dispositivo');return;}
+
+    let modal=document.getElementById('modal-backups');
+    if(!modal){
+      modal=document.createElement('div');
+      modal.id='modal-backups';
+      modal.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:600;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
+      modal.innerHTML='<div style="background:var(--surface);border-radius:16px;width:100%;max-width:620px;margin:auto;box-shadow:0 8px 40px rgba(0,0,0,0.2)">'+
+        '<div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'+
+        '<div style="font-weight:700">💾 Formularios guardados localmente</div>'+
+        '<button onclick="verBackupsLocales_cerrar()" style="background:var(--surface2);border:none;border-radius:7px;padding:5px 10px;cursor:pointer">✕</button>'+
+        '</div><div id="backups-body" style="padding:16px 20px"></div></div>';
+      document.body.appendChild(modal);
+    }
+
+    const body=document.getElementById('backups-body');
+    body.innerHTML=validos.map((bk,i)=>{
+      const fd=bk._aiFormSnap||{};
+      const lines=[];
+      if(bk.nombre)lines.push('<strong>Paciente:</strong> '+bk.nombre);
+      if(bk.fecha)lines.push('<strong>Fecha:</strong> '+bk.fecha);
+      if(bk.dx)lines.push('<strong>Dx:</strong> '+bk.dx);
+      if(fd.sub&&fd.sub.emoc)lines.push('<strong>Estado emocional:</strong> '+fd.sub.emoc);
+      if(fd.sub&&fd.sub.preoc)lines.push('<strong>Preocupaciones:</strong> '+fd.sub.preoc);
+      if(fd.sub&&fd.sub.cita)lines.push('<strong>Cita:</strong> "'+fd.sub.cita+'"');
+      if(fd.obj&&fd.obj.afecto)lines.push('<strong>Afecto:</strong> '+fd.obj.afecto);
+      if(fd.obj&&fd.obj.ideacion)lines.push('<strong>Ideación:</strong> '+fd.obj.ideacion);
+      if(bk.riesgo)lines.push('<strong>Riesgo:</strong> '+bk.riesgo);
+      if(fd.trat&&fd.trat.interv)lines.push('<strong>Intervención:</strong> '+fd.trat.interv);
+      if(fd.trat&&fd.trat.plan)lines.push('<strong>Plan:</strong> '+fd.trat.plan);
+      return '<div style="background:var(--surface2);border:1px solid var(--border);border-left:4px solid #f87171;border-radius:10px;padding:12px 14px;margin-bottom:12px">'+
+        '<div style="font-size:0.72rem;color:#92400e;font-weight:700;margin-bottom:6px">📋 '+bk.modo+' — '+(bk.guardado?new Date(bk.guardado).toLocaleString('es-CO'):'Sin fecha')+'</div>'+
+        '<div style="font-size:0.78rem;line-height:1.8">'+lines.join('<br>')+'</div>'+
+        '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'+
+        '<button class="btn btn-sm btn-primary" data-bk="'+bk.key+'" onclick="generarNotaDesdeBackup(this.dataset.bk)">✨ Generar nota con IA</button>'+
+        '<button class="btn btn-sm btn-secondary" data-bk="'+bk.key+'" onclick="eliminarBackup(this.dataset.bk)">🗑 Descartar</button>'+
+        '</div></div>';
+    }).join('');
+
+    modal.style.display='flex';
+  }catch(e){toast('Error: '+e.message);}
+};
+
+window.generarNotaDesdeBackup=async function(key){
+  const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
+  if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
+  try{
+    const bk=JSON.parse(localStorage.getItem(key)||'null');
+    if(!bk)return toast('⚠️ Backup no encontrado');
+    const fd=bk._aiFormSnap||{};
+    toast('⏳ Generando nota desde formulario guardado…');
+    document.getElementById('modal-backups').style.display='none';
+
+    const ctx='Dx: '+(fd.dx||bk.dx||'—')+'. Riesgo: '+(bk.riesgo||'—')+'.';
+    const base='Eres psicólogo clínico hospitalario (TCC). UN SOLO PÁRRAFO, texto corrido, sin listas, no uses el nombre del paciente. '+ctx;
+    const llamar=async(p)=>{
+      const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:p}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
+      });
+      const d=await r.json();
+      if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+      return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    };
+
+    const dSub='Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos: '+(fd.sub?.pens||'—')+'. Cita: '+(fd.sub?.cita||'—')+'.';
+    const dObj='Afecto: '+(fd.obj?.afecto||'—')+'. Pensamiento: '+(fd.obj?.pens||'—')+'. Insight: '+(fd.obj?.insight||'—')+'. Regulación: '+(fd.obj?.regulacion||'—')+'. Ideación: '+(fd.obj?.ideacion||'niega')+'. Riesgo: '+(bk.riesgo||'—')+'. Protectores: '+(fd.obj?.protectores||'—')+'.';
+    const dResp='Tipo respuesta: '+(fd.resp?.tipoResp||'—')+'. Impresión: '+(fd.resp?.impresion||'—')+'.';
+    const dTrat='Intervención: '+(fd.trat?.interv||'—')+'. Plan: '+(fd.trat?.plan||'—')+'. Frecuencia: '+(fd.trat?.freq||'—')+'.';
+
+    const [sub,obj,res,tra]=await Promise.all([
+      llamar(base+'\n\nAnálisis SUBJETIVO. '+dSub),
+      llamar(base+'\n\nAnálisis OBJETIVO — examen mental + formulación CC. '+dObj),
+      llamar(base+'\n\nRESPUESTA — impresión clínica. '+dResp),
+      llamar(base+'\n\nTRATAMIENTO — intervención y plan. '+dTrat)
+    ]);
+
+    const notaTexto='ANÁLISIS SUBJETIVO\n'+sub+'\n\nANÁLISIS OBJETIVO\n'+obj+'\n\nRESPUESTA\n'+res+'\n\nTRATAMIENTO\n'+tra;
+
+    // Buscar el registro en Firebase para actualizarlo
+    const todos=[...(window.interconsultas||[]),...(window.anamnesisList||[])];
+    const reg=todos.find(x=>x.pacienteNombre===bk.nombre&&x.fecha===bk.fecha&&(x.needsAI||!x.sub));
+    if(reg){
+      await updateDoc(doc(db,'interconsultas',reg.id),{sub,obj,resp:res,trat:tra,nota:notaTexto,needsAI:false,_aiFormSnap:null});
+      toast('✅ Nota generada y guardada en Firebase');
+    } else {
+      // No se encontró el registro — guardar uno nuevo
+      await addDoc(collection(db,'interconsultas'),{
+        pacienteNombre:bk.nombre||'Sin nombre',fecha:bk.fecha,modo:bk.modo||'IC Nueva',
+        dx:bk.dx||'',riesgo:bk.riesgo||'',sub,obj,resp:res,trat:tra,nota:notaTexto,
+        estado:'respondida',_aiFormSnap:null,needsAI:false,creado:serverTimestamp()
+      });
+      toast('✅ Nota generada y guardada como nuevo registro');
+    }
+    // Eliminar backup local
+    eliminarBackup(key);
+  }catch(e){
+    console.error('generarNotaDesdeBackup:',e);
+    toast('❌ '+e.message);
+  }
+};
+
+window.verBackupsLocales_cerrar=function(){const m=document.getElementById('modal-backups');if(m)m.style.display='none';};
+
+window.eliminarBackup=function(key){
+  try{
+    localStorage.removeItem(key);
+    const bkList=JSON.parse(localStorage.getItem('ic_backups')||'[]');
+    localStorage.setItem('ic_backups',JSON.stringify(bkList.filter(k=>k!==key)));
+    actualizarBackupBadge();
+    const modal=document.getElementById('modal-backups');
+    if(modal&&modal.style.display!=='none')verBackupsLocales();
+    toast('🗑 Formulario descartado');
+  }catch(e){}
+};
+
+// Revisar backups al cargar
+setTimeout(actualizarBackupBadge, 2500);
+
 // Estos stubs capturan clics tempranos y los reintenta hasta que el módulo esté listo.
 (function(){
   function makeStub(name){
@@ -3464,7 +3618,7 @@ window.showTest=function(name){
   }
   ['guardarPaciente','editarPaciente','eliminarPaciente','guardarIC','eliminarIC',
    'verHistorialPorId','nuevaAnamnesisParaPaciente','abrirICParaPaciente','irTestsPaciente',
-   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad','sincronizarPendientes','generarNotasPendientesIA','generarPlanTratamiento','editarPlanTratamiento','guardarPlanEditado','copiarPlanTratamiento','cargarPlanTratamiento',
+   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad','sincronizarPendientes','generarNotasPendientesIA','generarPlanTratamiento','editarPlanTratamiento','verBackupsLocales','generarNotaDesdeBackup','eliminarBackup','guardarPlanEditado','copiarPlanTratamiento','cargarPlanTratamiento',
    'guardarAnamnesis','generarNotaAnamnesis','mhicNuevaNota','mhicCerrar',
    'mneCerrar','mneGuardar','mneEliminar','hpacNuevaNota','hpacVolverLista',
    'calcPHQ9','calcGAD7','calcHADS','calcMMSE','calcMoCA','calcCAM','calcSVACBCA','generarNotaSVACBCA','renderSVACBCA',
