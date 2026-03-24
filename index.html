@@ -2596,10 +2596,10 @@ window.guardarICFirebase=async()=>{
       // solo en nota para evitar duplicado al renderizar
     }
   }catch(ex){console.error('Error capturando datos de seguimiento:',ex);}
-  // Marcar needsAI si no hay nota IA generada (para sincronizar IA al reconectar)
+  // Siempre guardar snapshot del formulario si no hay nota IA — para poder regenerar desde cualquier dispositivo
   const sinNotaIA=!sub&&!obj&&!resp&&!trat&&icCurrentMode==='nueva';
-  const needsAI=sinNotaIA&&!navigator.onLine;
-  // Capturar datos del formulario para regenerar IA después si es necesario
+  const needsAI=sinNotaIA; // true siempre que no haya nota IA, no solo cuando no hay señal
+  // Capturar SIEMPRE los datos del formulario cuando no hay nota IA generada
   const _aiFormSnap=sinNotaIA?{
     edad:icv('ic-edad'),sexo:icv('ic-sexo'),dx:dx,hab:hab,riesgo:riesgo,
     sub:{emoc:icChipsBySubLabel('Estado emocional referido').join(', '),preoc:icChipsBySubLabel('Principales preocupaciones').join(', '),pens:icChipsBySubLabel('Pensamientos automáticos').join(', '),cita:icv('ic-sub-cita'),intens:icv('ic-sub-intensidad')},
@@ -2617,7 +2617,7 @@ window.guardarICFirebase=async()=>{
       fecha,nota:notaTexto,sub,obj,resp,trat,
       estado:'respondida',
       needsAI:needsAI||false,
-      ...(needsAI&&_aiFormSnap?{_aiFormSnap}:{}),
+      ...(_aiFormSnap?{_aiFormSnap}:{}),
       ...(getCapInlineData('ic')||{}),
       creado:serverTimestamp()
     });
@@ -4135,6 +4135,8 @@ function mhicRender(){
     const rColor=riesgo==='ALTO'?'var(--danger)':riesgo==='MEDIO'?'var(--warning)':'var(--success)';
     const rBadgeHtml=(riesgo&&riesgo!=='No clasificado'&&riesgo!=='SIN RIESGO')?'<span style="background:'+rColor+'22;color:'+rColor+';padding:2px 7px;border-radius:20px;font-size:0.68rem;font-weight:600">'+riesgo+'</span>':'';
     const respondidaBtn=(e.estado||'respondida')==='pendiente'?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacResponder('+ni+')">Respondida</button>':'';
+    const esModoConIA2=(e.modo==='IC Nueva'||e.modo==='Seguimiento'||e.modo==='Anamnesis');
+    const regenBtn=esModoConIA2?'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem;opacity:0.85" onclick="hpacGenerarNotaIA(\'' + e.id + '\','+ni+')" title="Regenerar con IA">✨ IA</button>':'';
     const editarBtn='<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="mhicEditar('+ni+')">Editar</button>';
     const subInfo=(e.hab||e.dx)?'<div style="font-size:0.72rem;color:var(--text3);margin-top:2px">'+(e.hab?'Hab. '+e.hab+' - ':'')+( e.dx||'')+'</div>':'';
     let camposHtml='<div style="font-size:0.78rem;color:var(--text3);font-style:italic;margin-top:8px">Sin texto guardado</div>';
@@ -4159,7 +4161,7 @@ function mhicRender(){
     partes.push('<div style="background:var(--surface2);border:1px solid var(--border);border-left:4px solid '+col+';border-radius:10px;padding:14px 16px;margin-bottom:12px">'
       +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">'
       +'<div><div style="font-weight:700;font-size:0.88rem">'+(e.modo||'Nota')+' - '+'<span style="color:'+col+'">'+(e.fecha||'Sin fecha')+'</span></div>'+subInfo+'</div>'
-      +'<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">'+rBadgeHtml+respondidaBtn+editarBtn+'</div>'
+      +'<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">'+rBadgeHtml+respondidaBtn+regenBtn+editarBtn+'</div>'
       +'</div>'+camposHtml+'</div>');
   }
   body.innerHTML=partes.join('');
@@ -4197,7 +4199,7 @@ window.mhicEditar=(ni)=>{
 let _hpacPacId=null;window._hpacPacId=null;
 
 
-// Generar nota IA para un registro guardado offline desde el historial
+// Generar/regenerar nota IA para cualquier registro desde el historial
 window.hpacGenerarNotaIA=async(docId, ni)=>{
   const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
   if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
@@ -4207,32 +4209,53 @@ window.hpacGenerarNotaIA=async(docId, ni)=>{
   const todos=[...(window.interconsultas||[]),...(window.anamnesisList||[])];
   const e=todos.find(x=>x.id===docId);
   if(!e)return toast('⚠️ No se encontró el registro');
-  const fd=e._aiFormSnap;
-  if(!fd)return toast('⚠️ No hay datos del formulario para regenerar');
-  toast('⏳ Generando nota IA…');
-  try{
-    const ctx='Paciente: '+(fd.edad||'')+(fd.sexo?' | '+fd.sexo:'')+'. Dx: '+(fd.dx||'—')+'. Riesgo: '+(fd.riesgo||'—')+'.';
-    const base='Psicólogo clínico hospitalario (TCC). Un párrafo completo, texto corrido, sin listas. No uses el nombre del paciente. Contexto: '+ctx;
-    const llamar=async(prompt)=>{
-      const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
-      });
-      const d=await r.json();
-      if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
-      return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
-    };
-    const [sub,obj,res,tra]=await Promise.all([
-      llamar(base+'\n\nAnálisis Subjetivo. Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos: '+(fd.sub?.pens||'—')+'. Cita: '+(fd.sub?.cita||'—')+'.'),
-      llamar(base+'\n\nAnálisis Objetivo con formulación CC. Afecto: '+(fd.obj?.afecto||'—')+'. Pensamiento: '+(fd.obj?.pens||'—')+'. Insight: '+(fd.obj?.insight||'—')+'. Regulación: '+(fd.obj?.regulacion||'—')+'. Ideación: '+(fd.obj?.ideacion||'niega')+'. Riesgo: '+(fd.obj?.riesgoN||'—')+'. Protectores: '+(fd.obj?.protectores||'—')+'.'),
-      llamar(base+'\n\nImpresión clínica. Tipo respuesta: '+(fd.resp?.tipoResp||'—')+'. Impresión: '+(fd.resp?.impresion||'—')+'.'),
-      llamar(base+'\n\nPlan de Tratamiento. Intervención: '+(fd.trat?.interv||'—')+'. Plan: '+(fd.trat?.plan||'—')+'. Frecuencia: '+(fd.trat?.freq||'—')+'.')
-    ]);
-    const notaTexto='ANÁLISIS SUBJETIVO\n'+sub+'\n\nANÁLISIS OBJETIVO\n'+obj+'\n\nRESPUESTA\n'+res+'\n\nTRATAMIENTO\n'+tra;
-    await updateDoc(doc(db,col,docId),{
-      sub,obj,resp:res,trat:tra,nota:notaTexto,
-      needsAI:false,_aiFormSnap:null
+
+  toast('⏳ Generando nota con IA…');
+
+  // Construir contexto desde _aiFormSnap si existe, o desde los campos guardados
+  const fd=e._aiFormSnap||{};
+  const ctx='Dx: '+(fd.dx||e.dx||'—')+'. Riesgo: '+(fd.riesgo||e.riesgo||'—')+'.';
+
+  // Si hay nota/campos existentes usarlos como base para mejorar
+  const notaExistente=(e.sub||e.obj||e.nota||'').slice(0,600);
+
+  const base='Eres psicólogo clínico hospitalario (TCC). UN SOLO PÁRRAFO, texto corrido, sin listas, no uses el nombre del paciente, lenguaje técnico-clínico. '+ctx;
+
+  const llamar=async(prompt)=>{
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
     });
+    const d=await r.json();
+    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+    return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+  };
+
+  try{
+    let sub,obj,res,tra;
+
+    if(e.modo==='Seguimiento'){
+      // Seguimiento: un párrafo único
+      const dataSeg='Estado emocional: '+(fd.sub?.emoc||e.nota?.slice(0,200)||'—')+'. Afecto: '+(fd.obj?.afecto||'—')+'. Riesgo: '+(fd.riesgo||e.riesgo||'—')+'. Intervención: '+(fd.trat?.interv||'—')+'. Plan: '+(fd.trat?.plan||'—')+'.';
+      obj=await llamar(base+'\n\nNota de seguimiento psicológico hospitalario. '+dataSeg);
+      sub=''; res=''; tra='';
+      await updateDoc(doc(db,col,docId),{obj,nota:obj,needsAI:false,_aiFormSnap:null});
+    } else {
+      // IC Nueva / Anamnesis: 4 campos paralelos
+      const dSub='Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos: '+(fd.sub?.pens||'—')+'. Cita: '+(fd.sub?.cita||'—')+'. Antecedentes: '+(e.nota?.slice(0,150)||'—')+'.';
+      const dObj='Afecto: '+(fd.obj?.afecto||'—')+'. Pensamiento: '+(fd.obj?.pens||'—')+'. Insight: '+(fd.obj?.insight||'—')+'. Regulación: '+(fd.obj?.regulacion||'—')+'. Ideación: '+(fd.obj?.ideacion||'niega')+'. Riesgo: '+(fd.riesgo||e.riesgo||'—')+'. Protectores: '+(fd.obj?.protectores||'—')+'.';
+      const dResp='Tipo respuesta: '+(fd.resp?.tipoResp||'—')+'. Impresión: '+(fd.resp?.impresion||'—')+'.';
+      const dTrat='Intervención: '+(fd.trat?.interv||'—')+'. Plan: '+(fd.trat?.plan||'—')+'. Frecuencia: '+(fd.trat?.freq||'—')+'.';
+      [sub,obj,res,tra]=await Promise.all([
+        llamar(base+'\n\nAnálisis SUBJETIVO (no repitas datos demográficos). '+dSub),
+        llamar(base+'\n\nAnálisis OBJETIVO — examen mental + formulación CC. '+dObj),
+        llamar(base+'\n\nRESPUESTA — impresión clínica, CIE-10 si aplica. '+dResp),
+        llamar(base+'\n\nTRATAMIENTO — intervención y plan. '+dTrat)
+      ]);
+      const notaTexto='ANÁLISIS SUBJETIVO\n'+sub+'\n\nANÁLISIS OBJETIVO\n'+obj+'\n\nRESPUESTA\n'+res+'\n\nTRATAMIENTO\n'+tra;
+      await updateDoc(doc(db,col,docId),{sub,obj,resp:res,trat:tra,nota:notaTexto,needsAI:false,_aiFormSnap:null});
+    }
+
     toast('✅ Nota generada y guardada');
     setTimeout(hpacRenderNotas,500);
   }catch(err){
@@ -4387,7 +4410,9 @@ window.hpacRenderNotas=()=>{
       }
       var camposHtml='';
       var esModoConIA=(modo==='IC Nueva'||modo==='Seguimiento'||modo==='Anamnesis');
-      var esPendienteIA=!cv.length&&esModoConIA; // Cualquier registro sin nota puede regenerarse
+      // Es pendiente si: no hay campos, o la nota es el placeholder, o tiene _aiFormSnap sin haber sido procesado
+      var notaEsPlaceholder=(e.nota||'').startsWith('[Nota no generada');
+      var esPendienteIA=esModoConIA&&(!cv.length||notaEsPlaceholder);
       if(cv.length){
         for(var j=0;j<cv.length;j++){
           camposHtml+='<div class="hpac-campo">'
@@ -4434,6 +4459,7 @@ window.hpacRenderNotas=()=>{
         +'</div>'
         +'<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">'
         +rBadgeHtml+respondidaBtn+genBtn
+        +(esModoConIA?'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem;opacity:0.85" onclick="hpacGenerarNotaIA(\'' + e.id + '\','+ni+')" title="Regenerar con IA">✨ IA</button>':'')
         +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacEditar('+ni+')">Editar</button>'
         +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacCopiar('+ni+')">Copiar</button>'
         +'</div></div>'
