@@ -408,7 +408,8 @@ input.toggle-cb{display:none}
     <div class="nav-item" onclick="goTo('tests');showTest('mmas4')"><span class="icon">💊</span>MMAS-4</div>
     <div class="nav-item" onclick="goTo('tests');showTest('duelo')"><span class="icon">🕊️</span>Duelo</div>
     <div class="nav-item" onclick="goTo('tests');showTest('pcl5')"><span class="icon">🌪️</span>PCL-5 (TEPT)</div>
-    <div class="nav-section">Valoraciones Especiales</div>
+    <div class="nav-section">Psicoeducación</div>
+    <div class="nav-item" onclick="goTo('psicoeducacion')"><span class="icon">📚</span>Guías Clínicas</div>
     <div class="nav-section">Historial</div>
     <div class="nav-item" onclick="goTo('historial-pac')"><span class="icon">📂</span>Historial Pacientes</div>
     <div class="nav-item" onclick="goTo('historial')"><span class="icon">📊</span>Historial Tests</div>
@@ -681,7 +682,7 @@ input.toggle-cb{display:none}
           <div class="ic-form-section">
             <div class="ic-form-head slate"><span class="ft">🛠️ Tratamiento — Intervención y plan</span><span class="ic-form-badge">TRATAMIENTO</span></div>
             <div class="ic-form-body">
-              <div class="ic-field"><div class="ic-sublabel">Intervención realizada hoy</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Escucha activa y validación emocional</span><span class="ic-chip" onclick="icTog(this)">Contención emocional</span><span class="ic-chip" onclick="icTog(this)">Psicoeducación sobre respuesta emocional al Dx</span><span class="ic-chip" onclick="icTog(this)">Psicoeducación sobre procesos hospitalarios</span><span class="ic-chip" onclick="icTog(this)">Reestructuración cognitiva</span><span class="ic-chip" onclick="icTog(this)">Técnicas de regulación emocional</span><span class="ic-chip" onclick="icTog(this)">Activación conductual</span><span class="ic-chip" onclick="icTog(this)">Técnicas de respiración / relajación</span><span class="ic-chip" onclick="icTog(this)">Reforzamiento de red de apoyo</span><span class="ic-chip" onclick="icTog(this)">Exploración de recursos y factores protectores</span><span class="ic-chip" onclick="icTog(this)">Orientación familiar</span><span class="ic-chip" onclick="icTog(this)">Evaluación y manejo de riesgo suicida</span><span class="ic-chip" onclick="icTog(this)">Intervención en duelo anticipatorio</span><span class="ic-chip" onclick="icTog(this)">Higiene del sueño adaptada a UCI</span><span class="ic-chip" onclick="icTog(this)">Manejo de incertidumbre diagnóstica</span></div></div>
+              <div class="ic-field"><div class="ic-sublabel">Intervención realizada hoy</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)" title="Acompañamiento sin juicio, reflejo empático del estado emocional y normalización de la respuesta afectiva ante la hospitalización.">Escucha activa y validación emocional</span><span class="ic-chip" onclick="icTog(this)" title="Intervención breve de estabilización ante crisis emocional aguda. Foco en regulación del sistema nervioso y reencuadre del momento presente.">Contención emocional</span><span class="ic-chip" onclick="icTog(this)" title="Explicación del impacto emocional esperable ante un diagnóstico nuevo o grave. Normaliza la ansiedad, tristeza o negación como respuestas adaptativas.">Psicoeducación sobre respuesta emocional al Dx</span><span class="ic-chip" onclick="icTog(this)" title="Información clara sobre procedimientos, tiempos y roles del equipo para reducir la ansiedad anticipatoria y la incertidumbre.">Psicoeducación sobre procesos hospitalarios</span><span class="ic-chip" onclick="icTog(this)" title="Identificación y cuestionamiento de pensamientos automáticos disfuncionales. En cama: "Si me intuban voy a morir" → explorar evidencia, ensayo cognitivo del procedimiento.">Reestructuración cognitiva</span><span class="ic-chip" onclick="icTog(this)" title="Estrategias para modular la intensidad emocional: respiración diafragmática, anclaje sensorial, tolerancia al malestar adaptada al contexto hospitalario.">Técnicas de regulación emocional</span><span class="ic-chip" onclick="icTog(this)" title="Estructuración del día en cama para romper la pasividad: horarios para comer, llamadas a familiares a hora fija, respiración cada 4 horas. Foco en pequeñas acciones con sentido.">Activación conductual</span><span class="ic-chip" onclick="icTog(this)" title="Respiración diafragmática, 4-7-8, o relajación muscular progresiva adaptada a movilidad reducida. Útil para dolor, ansiedad y procedimientos.">Técnicas de respiración / relajación</span><span class="ic-chip" onclick="icTog(this)" title="Identificación y activación de recursos relacionales del paciente. Coordinación con familia para visitas, videollamadas y apoyo emocional estructurado.">Reforzamiento de red de apoyo</span><span class="ic-chip" onclick="icTog(this)" title="Identificación de fortalezas, experiencias de afrontamiento previo, valores y motivaciones que sostienen al paciente durante la hospitalización.">Exploración de recursos y factores protectores</span><span class="ic-chip" onclick="icTog(this)" title="Psicoeducación a familiares sobre el estado emocional del paciente, cómo acompañar sin sobreproteger y señales de alerta para reportar.">Orientación familiar</span><span class="ic-chip" onclick="icTog(this)" title="Aplicación de C-SSRS, clasificación del riesgo y plan de seguridad inmediato coordinado con equipo tratante y psiquiatría si se requiere.">Evaluación y manejo de riesgo suicida</span><span class="ic-chip" onclick="icTog(this)" title="Acompañamiento ante pérdidas reales o anticipadas: funcionales, de rol, relacionales o vitales. Validación del proceso de duelo en contexto médico.">Intervención en duelo anticipatorio</span><span class="ic-chip" onclick="icTog(this)" title="Estrategias para mejorar el sueño en el ambiente hospitalario: control de estímulos, rutinas mínimas, manejo de ruido y luz, relajación breve.">Higiene del sueño adaptada a UCI</span><span class="ic-chip" onclick="icTog(this)" title="Trabajo cognitivo y emocional con la tolerancia a la incertidumbre. Foco en el momento presente y en lo que sí está bajo el control del paciente.">Manejo de incertidumbre diagnóstica</span><span class="ic-chip" onclick="icTog(this)" title="Para espera de procedimientos dolorosos: tarea cognitiva que consume atención (nombrar ciudades por letra, recordar canción) para reducir percepción del dolor durante curaciones.">Distracción cognitiva estructurada</span><span class="ic-chip" onclick="icTog(this)" title="Contrato simple de reforzadores adaptados a la cama: privacidad, control sobre luz/ventana, contacto familiar. "Si realizas los ejercicios, te ayudo con la videollamada."">Manejo de contingencias</span><span class="ic-chip" onclick="icTog(this)" title="Límites claros coordinados con enfermería para conductas de reaseguramiento. Ej: cambios de ropa de cama cada 4h, no a demanda. Combinado con técnicas de tolerancia al malestar.">Prevención de respuesta (TOC/Somatomorfo)</span><span class="ic-chip" onclick="icTog(this)" title="Para pacientes con delirio: anclajes concretos sin confrontar ideas delirantes. "Estamos en el hospital, es miércoles, estás seguro." Evitar discusión de contenido delirante.">Orientación a la realidad suave</span><span class="ic-chip" onclick="icTog(this)" title="Tono bajo, validación emocional, oferta de pequeño control ("¿prefieres que suba la persiana?"). Combinada con mindfulness breve: atención a sensaciones físicas presentes.">Desescalada verbal (agitación)</span><span class="ic-chip" onclick="icTog(this)" title="Imaginería guiada paso a paso del procedimiento médico temido: entrada a pabellón, sensaciones esperadas, uso de respiración. Reduce ansiedad anticipatoria y negativas.">Ensayo cognitivo de procedimiento</span><span class="ic-chip" onclick="icTog(this)" title="Explicar cómo el miedo genera tensión muscular que empeora el dolor, o cómo la hiperventilación empeora la disnea. A pie de cama, lenguaje sencillo, 5 minutos.">Psicoeducación circuito dolor-ansiedad</span></div></div>
               <div class="ic-g2">
                 <div class="ic-field"><div class="ic-sublabel">Plan</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Continúa seguimiento por psicología</span><span class="ic-chip" onclick="icTogR(this)">Remisión a psiquiatría</span><span class="ic-chip" onclick="icTog(this)">Orientación a trabajo social</span><span class="ic-chip" onclick="icTog(this)">Alta de psicología</span><span class="ic-chip" onclick="icTog(this)">Reinterconsulta si hay cambios</span></div></div>
                 <div class="ic-field"><div class="ic-sublabel">Frecuencia de seguimiento</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Diario</span><span class="ic-chip" onclick="icTog(this)">Cada 2 días</span><span class="ic-chip" onclick="icTog(this)">Interdiario</span><span class="ic-chip" onclick="icTog(this)">Cada 8 días</span><span class="ic-chip" onclick="icTog(this)">Cada 15 días</span><span class="ic-chip" onclick="icTog(this)">Semanal</span><span class="ic-chip" onclick="icTog(this)">Según evolución</span></div></div>
@@ -1703,6 +1704,50 @@ input.toggle-cb{display:none}
     </div>
 
     <!-- HISTORIAL TESTS -->
+
+
+    <!-- PSICOEDUCACIÓN -->
+    <div id="page-psicoeducacion" class="page">
+      <div class="section-header">
+        <h2>📚 Guías de Psicoeducación Clínica</h2>
+        <p style="font-size:0.82rem;color:var(--text3);margin-top:4px">ESE Hospital La María · Medellín, Antioquia · Adaptadas a contexto hospitalario de tercer nivel</p>
+      </div>
+
+      <!-- PRIORIDADES -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:20px">
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:12px 14px">
+          <div style="font-weight:700;font-size:0.82rem;color:#991b1b;margin-bottom:4px">🔴 Prioridad 1 — Alta complejidad</div>
+          <div style="font-size:0.75rem;color:#7f1d1d;line-height:1.5">Intervención urgente y presencial. Riesgo vital, negativa a tratamiento, cuidados paliativos, amputaciones, rechazo a diálisis o insulina.<br><strong>Tiempo:</strong> 15–20 min · <strong>Seguimiento:</strong> Diario o c/48h</div>
+        </div>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px 14px">
+          <div style="font-weight:700;font-size:0.82rem;color:#92400e;margin-bottom:4px">🟡 Prioridad 2 — Complejidad moderada</div>
+          <div style="font-size:0.75rem;color:#78350f;line-height:1.5">Psicoeducación focalizada 1–2 sesiones + material impreso. Diabetes complicada, pie diabético, osteomielitis, ACV, TCE, enf. crónicas con baja adherencia.<br><strong>Tiempo:</strong> 10–15 min</div>
+        </div>
+        <div style="background:#dcfce7;border:1px solid #86efac;border-radius:10px;padding:12px 14px">
+          <div style="font-weight:700;font-size:0.82rem;color:#166534;margin-bottom:4px">🟢 Prioridad 3 — Intervención breve</div>
+          <div style="font-size:0.75rem;color:#14532d;line-height:1.5">Sesión única 5–10 min + material impreso. Puede delegarse parcialmente a enfermería.<br><strong>Tiempo:</strong> 5–10 min</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+          <div style="font-weight:700;font-size:0.82rem;color:var(--text2);margin-bottom:4px">⚪ Prioridad 4 — No requiere psicología</div>
+          <div style="font-size:0.75rem;color:var(--text3);line-height:1.5">Delegar a enfermería o material impreso. Sin factores de riesgo psicosocial ni complicaciones emocionales.</div>
+        </div>
+      </div>
+
+      <!-- FILTRO -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+        <button class="btn btn-sm btn-secondary psico-filtro active" data-filtro="all" onclick="filtrarPsico('all',this)">Todas</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="p1" onclick="filtrarPsico('p1',this)">🔴 P1</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="p2" onclick="filtrarPsico('p2',this)">🟡 P2</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="p3" onclick="filtrarPsico('p3',this)">🟢 P3</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="diabetes" onclick="filtrarPsico('diabetes',this)">🩸 Diabetes</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="duelo" onclick="filtrarPsico('duelo',this)">🕊️ Duelo</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="oncologia" onclick="filtrarPsico('oncologia',this)">🎗️ Oncología</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="cardio" onclick="filtrarPsico('cardio',this)">❤️ Cardio/Neuro</button>
+      </div>
+
+      <!-- TARJETAS -->
+      <div id="psico-cards" style="display:grid;gap:10px"></div>
+    </div>
 
     <!-- HISTORIAL PACIENTES -->
     <div id="page-historial-pac" class="page">
@@ -3621,6 +3666,272 @@ window.eliminarBackup=function(key){
 // Revisar backups al cargar
 setTimeout(actualizarBackupBadge, 2500);
 
+
+// ── MÓDULO DE PSICOEDUCACIÓN ──────────────────────────────────────────
+const psicoGuias = [
+  // ── PRIORIDAD 1 ──
+  {id:'erc-dialisis', prio:'p1', tags:['p1'], servicio:'Nefrología',
+   titulo:'Enfermedad Renal Crónica — Inicio de hemodiálisis',
+   icono:'🫘', color:'#dc2626',
+   objetivo:'Adherencia a diálisis, manejo del miedo al procedimiento, adherencia a restricción hídrica, prevención de abandonos.',
+   contenido:[
+     {t:'¿Qué le digo al paciente?', c:'La diálisis es como un riñón externo que hace el trabajo que los tuyos ya no pueden hacer. Sin ella, los desechos se acumulan en la sangre y pueden ser fatales. El miedo es normal — es un procedimiento nuevo y desconocido.'},
+     {t:'Metáfora útil', c:'"Tu riñón es como un filtro de agua que se tapó. La diálisis es el filtro de repuesto. No es un castigo, es la solución."'},
+     {t:'Manejo de la restricción hídrica', c:'Explica la relación líquidos → hinchazón → dificultad respiratoria. Técnica: cubitos de hielo en la boca (controlan la sensación de sed sin acumular líquido). Registrar ingesta diaria.'},
+     {t:'Señales de alerta para reportar', c:'Cambios de humor extremos, llanto constante, negativa repetida al procedimiento, expresiones de "para qué vivir así".'},
+   ]},
+  {id:'vih-nuevo-dx', prio:'p1', tags:['p1','infectologia'],
+   servicio:'Infectología',
+   titulo:'VIH/SIDA — Nuevo diagnóstico o abandono de TAR',
+   icono:'🔴', color:'#dc2626',
+   objetivo:'Desmitificación, manejo del shock diagnóstico, adherencia a antirretrovirales, revelación a redes de apoyo.',
+   contenido:[
+     {t:'Fase inicial (primeros 15 min)', c:'No dar toda la información de golpe. Primero: "¿Cómo se siente ahora mismo?" Validar el impacto. Normalizar: incredulidad, negación, rabia son respuestas esperadas, no patológicas.'},
+     {t:'Desmitificación clave', c:'"El VIH hoy es una enfermedad crónica manejable, como la diabetes. Con el TAR correcto, la expectativa de vida es casi normal. No es una sentencia de muerte."'},
+     {t:'Adherencia al TAR', c:'Un comprimido al día, a la misma hora. La metáfora: "El virus es como una planta que crece si no la podas. El TAR es la poda diaria." Si falla un día, no detenerse — continuar al día siguiente.'},
+     {t:'Revelación a parejas/familia', c:'No obligar ni presionar. Explorar con quién podría contar. Psicoeducación sobre riesgo real de transmisión con TAR efectivo (indetectable = intransmisible).'},
+   ]},
+  {id:'cancer-rechazo-tto', prio:'p1', tags:['p1','oncologia'],
+   servicio:'Oncología',
+   titulo:'Cáncer — Rechazo de quimioterapia, cirugía o radioterapia',
+   icono:'🎗️', color:'#dc2626',
+   objetivo:'Manejo de miedos catastróficos, psicoeducación sobre beneficios/riesgos, apoyo en decisión compartida.',
+   contenido:[
+     {t:'Identificar el pensamiento catastrófico', c:'"¿Qué es lo que más le preocupa del tratamiento?" Escuchar completamente antes de informar. El error frecuente es dar información antes de entender el miedo específico.'},
+     {t:'Reestructuración cognitiva', c:'Pensamiento: "Si me opero voy a morir en el quirófano." Explorar evidencia: ¿Ha tenido cirugías antes? ¿Conoce a alguien que haya pasado por esto? ¿Qué dice el cirujano sobre el riesgo?'},
+     {t:'Ensayo cognitivo del procedimiento', c:'"Vamos a imaginarnos juntos cómo será el día de la quimioterapia: llegan, la preparan, le ponen el suero... ¿En qué parte siente más miedo? ¿Qué haría en ese momento para calmarse?"'},
+     {t:'Si el rechazo persiste', c:'Documentar la decisión informada. No coaccionar. Coordinar con el equipo médico para nueva valoración. Explorar si hay valores culturales, espirituales o familiares que están influyendo.'},
+   ]},
+  {id:'paliativos', prio:'p1', tags:['p1','duelo','oncologia'],
+   servicio:'Cuidados Paliativos',
+   titulo:'Cuidados Paliativos — Enfermedad terminal / Final de vida',
+   icono:'🕊️', color:'#dc2626',
+   objetivo:'Psicoeducación a paciente y familia sobre proceso de final de vida, duelo anticipatorio, manejo de ansiedad existencial.',
+   contenido:[
+     {t:'Principio fundamental', c:'No se trata de dar información, sino de acompañar. La pregunta más importante: "¿Qué es lo que más le preocupa en este momento?" — no asumir qué necesita saber.'},
+     {t:'Con el paciente', c:'Explorar deseos de cierre: conversaciones pendientes, asuntos no resueltos, deseos sobre el proceso. Validar el miedo a morir sin juzgarlo ni minimizarlo. "Es normal tener miedo. ¿Qué sería lo más difícil para usted?"'},
+     {t:'Con la familia', c:'Psicoeducación sobre las fases del proceso de morir: disminución de apetito, mayor sueño, retirada social. Estos son signos naturales, no de abandono. Preparar para el duelo anticipatorio.'},
+     {t:'Duelo anticipatorio familiar', c:'Normalizar la tristeza, el llanto, la rabia. Diferenciar el duelo anticipatorio del duelo patológico. Guiar en cómo acompañar: presencia, silencio, contacto físico — más que palabras.'},
+   ]},
+  {id:'amputacion-aguda', prio:'p1', tags:['p1','diabetes','cirugia'],
+   servicio:'Cirugía / Traumatología',
+   titulo:'Amputación — Preparación y duelo por pérdida del miembro',
+   icono:'🦿', color:'#dc2626',
+   objetivo:'Duelo por pérdida del miembro, manejo de imagen corporal, adherencia a rehabilitación.',
+   contenido:[
+     {t:'Antes de la amputación', c:'"¿Cómo se imagina su vida después de esto?" Explorar los miedos específicos (dependencia, trabajo, pareja). No minimizar ni sobredimensionar. Psicoeducación sobre prótesis y rehabilitación disponibles.'},
+     {t:'Después de la amputación', c:'El duelo por el miembro perdido es real y válido. Fases: incredulidad, rabia, tristeza, adaptación. No hay un tiempo fijo. La rabia hacia el equipo médico es frecuente — no tomarla personal.'},
+     {t:'Imagen corporal', c:'Explorar cómo se ve a sí mismo ahora. Trabajo cognitivo: "Su cuerpo salvó su vida sacrificando una parte. Eso es una fortaleza, no un defecto."'},
+     {t:'Adherencia a rehabilitación', c:'El dolor del muñón puede hacer que el paciente rechace la fisioterapia. Psicoeducación sobre el dolor de miembro fantasma (es real, no invención). Técnicas de distracción durante los ejercicios.'},
+   ]},
+
+  // ── PRIORIDAD 2 ──
+  {id:'diabetes-complicada', prio:'p2', tags:['p2','diabetes'],
+   servicio:'Medicina Interna / Cirugía',
+   titulo:'Diabetes Mellitus — Descompensación o complicaciones crónicas',
+   icono:'🩸', color:'#d97706',
+   objetivo:'Adherencia, manejo de la culpa, psicoeducación sobre relación estrés-glucosa, trabajo con familiares.',
+   contenido:[
+     {t:'Metáfora del carro', c:'"La diabetes es como un carro que no tiene suficiente gasolina para arrancar. La gasolina es el azúcar. La insulina es la llave. Sin la llave, el azúcar se queda atascada en la sangre."'},
+     {t:'Estrés y glucosa', c:'"Cuando se pone nervioso, su cuerpo libera cortisol (la hormona del estrés) que saca azúcar extra al torrente sanguíneo. Por eso es importante manejar el estrés — no es opcional, es parte del tratamiento."'},
+     {t:'Manejo de la culpa', c:'"La culpa no baja el azúcar. Lo que baja el azúcar es lo que usted hace a partir de hoy." Reencuadrar: complicaciones como señales del cuerpo pidiendo atención, no como castigos.'},
+     {t:'Técnica desde la cama', c:'5 respiraciones lentas antes de cada comida: inhalar contando hasta 3 (inflar la panza), exhalar contando hasta 5. Baja el cortisol y mejora la efectividad de la insulina.'},
+   ]},
+  {id:'pie-diabetico', prio:'p2', tags:['p2','diabetes','cirugia'],
+   servicio:'Cirugía / Medicina Interna',
+   titulo:'Pie Diabético — Úlceras e infecciones de partes blandas',
+   icono:'🦶', color:'#d97706',
+   objetivo:'Adherencia al reposo, curaciones, manejo de frustración por inmovilidad, prevención de amputación.',
+   contenido:[
+     {t:'¿Por qué no puedo caminar?', c:'"Cada vez que apoyas el pie sobre la herida, es como apretar una llaga repetidamente. La herida no puede cerrar si sigue con peso encima. El reposo no es comodidad — es el tratamiento."'},
+     {t:'El círculo del dolor', c:'"El dolor genera estrés, el estrés sube el azúcar, el azúcar alta empeora la cicatrización. Si manejamos el dolor bien, estamos tratando la herida también."'},
+     {t:'Adherencia a las curaciones', c:'Normalizar que el procedimiento duele. Técnica de distracción cognitiva: mientras hacen la curación, nombrar en silencio una ciudad por cada letra del abecedario.'},
+     {t:'Cuidados post-alta', c:'Revisar pies TODOS los días con espejo. No caminar descalzo nunca, ni en casa. Zapatos amplios sin costuras internas. Ante cualquier ampolla o enrojecimiento: no manipular y consultar inmediatamente.'},
+   ]},
+  {id:'osteomielitis', prio:'p2', tags:['p2','diabetes','cirugia'],
+   servicio:'Cirugía / Medicina Interna',
+   titulo:'Osteomielitis — Infección ósea y tratamiento prolongado',
+   icono:'🦴', color:'#d97706',
+   objetivo:'Adherencia al antibiótico prolongado, manejo de la desesperanza por evolución lenta, estructuración del día en cama.',
+   contenido:[
+     {t:'¿Por qué tanto tiempo?', c:'"El hueso es como una esponja dura. La infección se mete adentro y los antibióticos tardan semanas en llegar a todos los rincones. No es porque estés muy grave ahora — es porque el hueso necesita tiempo para limpiarse."'},
+     {t:'Manejo de la espera', c:'Estructurar el día: horarios para comidas, llamadas a familiares (máximo 10 min, a la misma hora), respiraciones cada 4 horas, radio o televisión. La pasividad alimenta la desesperanza.'},
+     {t:'Frase para la frustración', c:'"Estoy frustrado porque esto dura más de lo que quería, y eso es completamente normal. Pero estoy haciendo lo necesario para salvar mi pie/mi pierna." Decirla en voz alta ayuda.'},
+     {t:'Señales de alerta', c:'Aumento del dolor, fiebre, enrojecimiento que se extiende, mal olor en la herida. Reportar a enfermería inmediatamente.'},
+   ]},
+  {id:'iam', prio:'p2', tags:['p2','cardio'],
+   servicio:'Medicina Interna',
+   titulo:'Infarto Agudo de Miocardio (IAM)',
+   icono:'❤️', color:'#d97706',
+   objetivo:'Diferenciar dolor cardíaco de dolor ansioso, manejo del miedo a "otro infarto", adherencia a antiagregantes y rehabilitación.',
+   contenido:[
+     {t:'El miedo al próximo infarto', c:'"Es completamente normal estar hipervigilante después de un infarto. Su cuerpo aprendió que el dolor en el pecho puede ser peligroso. Pero ahora necesitamos entrenar a su cuerpo a distinguir cuándo es una alerta real y cuándo es ansiedad."'},
+     {t:'Diferenciando dolor cardíaco vs ansioso', c:'Cardíaco: opresión, irradia al brazo/mandíbula, dura más de 20 min, no mejora con posición. Ansioso: punzadas, localizado, mejora con respiración, asociado a pensamientos de miedo.'},
+     {t:'Rehabilitación cardíaca', c:'El miedo al esfuerzo es la barrera #1. Psicoeducación: el corazón se fortalece con el ejercicio gradual guiado — el reposo total lo debilita. Coordinar con fisioterapia.'},
+   ]},
+  {id:'acv', prio:'p2', tags:['p2','cardio','neuro'],
+   servicio:'Neurología / Neurocirugía',
+   titulo:'ACV / Ictus — Secuelas y rehabilitación',
+   icono:'🧠', color:'#d97706',
+   objetivo:'Psicoeducación a paciente y familia sobre secuelas (labilidad emocional, afasia, depresión post-ACV), adherencia a rehabilitación.',
+   contenido:[
+     {t:'Labilidad emocional post-ACV', c:'"El ACV dañó la parte del cerebro que regula las emociones. El paciente puede llorar o reírse sin motivo aparente — esto no es voluntario ni significa que está loco. Es una secuela neurológica directa."'},
+     {t:'Para la familia', c:'"No interprete el llanto como tristeza real ni la risa como que está bien. Es el cerebro reorganizándose. Responda con calma, no con preocupación ni con burla."'},
+     {t:'Depresión post-ACV', c:'Afecta al 30-40% de los pacientes. Señales: apatía que va más allá de la tristeza normal, rechazo a la rehabilitación, expresiones de no querer recuperarse. Reportar al médico para evaluación.'},
+     {t:'Adherencia a rehabilitación', c:'"Cada ejercicio de fisioterapia es como reabrir un camino en el cerebro. Cuanto más practica, más firme se vuelve ese camino. La recuperación no es lineal — habrá días malos y días buenos."'},
+   ]},
+  {id:'insuf-cardiaca', prio:'p2', tags:['p2','cardio'],
+   servicio:'Medicina Interna',
+   titulo:'Insuficiencia Cardíaca Descompensada',
+   icono:'💧', color:'#d97706',
+   objetivo:'Adherencia a restricción hídrica, manejo del pánico asociado a disnea, reentrenamiento respiratorio.',
+   contenido:[
+     {t:'¿Por qué no puedo tomar mucho líquido?', c:'"Su corazón en este momento no tiene fuerza suficiente para bombear todo el líquido. El líquido extra se acumula en los pulmones y eso es lo que le produce la sensación de ahogo."'},
+     {t:'Manejo del pánico por disnea', c:'La disnea genera miedo → el miedo genera hiperventilación → la hiperventilación empeora la disnea. Técnica: respiración con labios fruncidos (inhalar por nariz, exhalar por boca como silbando).'},
+     {t:'Señales de alerta en casa', c:'Aumento de peso de 2kg o más en 2 días (= retención de líquidos), hinchazón de tobillos que aumenta, disnea al acostarse. Estas señales requieren consulta antes de que se descompense.'},
+   ]},
+  {id:'epoc-neumonia', prio:'p2', tags:['p2','cardio'],
+   servicio:'Medicina Interna / Neumología',
+   titulo:'EPOC Agudizado / Asma Grave',
+   icono:'🫁', color:'#d97706',
+   objetivo:'Manejo del pánico por disnea, reentrenamiento respiratorio, identificar desencadenantes emocionales.',
+   contenido:[
+     {t:'El círculo disnea-pánico', c:'"Cuando le falta el aire, el miedo hace que respire más rápido y superficial, lo que empeora la sensación de ahogo. Necesitamos romper ese círculo."'},
+     {t:'Respiración con labios fruncidos', c:'Inhalar lentamente por la nariz (2 segundos), exhalar por la boca con los labios fruncidos como si fuera a silbar (4 segundos). Repetir 5 veces. Esta técnica reduce la frecuencia respiratoria y el trabajo del diafragma.'},
+     {t:'Desencadenantes emocionales del asma', c:'El estrés y la ansiedad intensa pueden precipitar o agravar una crisis. Identificar situaciones o pensamientos que generan ansiedad y trabajar técnicas de regulación emocional.'},
+   ]},
+
+  // ── PRIORIDAD 3 ──
+  {id:'hta', prio:'p3', tags:['p3','cardio'],
+   servicio:'Medicina Interna',
+   titulo:'Hipertensión Arterial Difícil de Controlar',
+   icono:'📈', color:'#16a34a',
+   objetivo:'Psicoeducación sobre papel del estrés e ira en picos hipertensivos, relajación muscular progresiva.',
+   contenido:[
+     {t:'Estrés e hipertensión', c:'"Cuando se estresa o se enoja, el cuerpo libera adrenalina que contrae los vasos sanguíneos — como apretar una manguera. Eso sube la presión. Manejar las emociones no es opcional, es parte del tratamiento de la hipertensión."'},
+     {t:'Técnica de relajación desde la cama', c:'Relajación muscular progresiva abreviada: apretar el puño derecho 5 segundos, soltar. Apretar el izquierdo, soltar. Levantar los hombros hacia las orejas, soltar. Esto activa el sistema parasimpático.'},
+   ]},
+  {id:'fractura-cadera', prio:'p3', tags:['p3'],
+   servicio:'Cirugía / Traumatología',
+   titulo:'Fractura de Cadera — Adulto Mayor',
+   icono:'🦴', color:'#16a34a',
+   objetivo:'Manejo del miedo a las caídas, adherencia a rehabilitación, prevención de delirio postoperatorio.',
+   contenido:[
+     {t:'Miedo a caerse de nuevo', c:'"Es normal tener miedo de volver a caer. Ese miedo es protector. Pero si el miedo es tan grande que no quiere moverse, se vuelve el problema. El objetivo de la rehabilitación es recuperar la confianza en su cuerpo."'},
+     {t:'Prevención de delirio', c:'Orientar al paciente frecuentemente: "Es de día, está en el hospital, su familia viene a visitarlo hoy". Mantener lentes y audífono disponibles. Familiar acompañante si es posible.'},
+   ]},
+  {id:'diabetes-nuevo-dx', prio:'p3', tags:['p3','diabetes'],
+   servicio:'Medicina Interna',
+   titulo:'Diabetes Tipo 2 — Diagnóstico Reciente sin Complicaciones',
+   icono:'💊', color:'#16a34a',
+   objetivo:'Psicoeducación básica sobre autocuidado, manejo de la ansiedad por diagnóstico, derivación a programa ambulatorio.',
+   contenido:[
+     {t:'Impacto emocional del diagnóstico', c:'"Un diagnóstico de diabetes cambia la forma en que uno se ve a sí mismo. Es normal sentir miedo, tristeza o enojo. Eso no significa que no va a poder manejarlo."'},
+     {t:'Mensaje clave', c:'"La diabetes no lo define, pero sí requiere que usted tome decisiones diferentes cada día. Cada decisión pequeña suma: lo que come, si camina, si toma la pastilla."'},
+     {t:'Derivación', c:'Coordinar con nutrición, programa de crónicos, y trabajo social para barreras de acceso. Proveer número de línea de atención de diabetes si existe en la ESE.'},
+   ]},
+
+  // ── DUELO ──
+  {id:'duelo-anticipatorio', prio:'p1', tags:['p1','duelo','oncologia'],
+   servicio:'Cuidados Paliativos / Oncología',
+   titulo:'Duelo Anticipatorio — Familia y Paciente Terminal',
+   icono:'🤍', color:'#dc2626',
+   objetivo:'Preparar a la familia para la pérdida, validar el proceso de duelo antes del fallecimiento, identificar duelo complicado.',
+   contenido:[
+     {t:'¿Qué es el duelo anticipatorio?', c:'"El duelo puede comenzar antes de la pérdida. La tristeza, el llanto, la rabia que sienten ahora, mientras el ser querido aún está vivo, es parte del proceso de duelo. No es señal de que ya lo están dando por muerto — es señal de amor."'},
+     {t:'Para la familia', c:'"No hay forma correcta de acompañar. Estar presentes, en silencio si es necesario, es suficiente. No tienen que tener las palabras perfectas. A veces el abrazo dice más que cualquier frase."'},
+     {t:'Señales de duelo complicado a monitorear', c:'Incapacidad de hablar sobre la enfermedad o la muerte, negación extrema que impide tomar decisiones, síntomas de ansiedad o depresión severa en el cuidador, conflictos familiares intensos sobre el cuidado.'},
+     {t:'Diferencias culturales en el duelo', c:'En el contexto antioqueño y de comunidades desplazadas: el duelo puede expresarse de forma colectiva, con rituales religiosos importantes. Respetar y no patologizar estas expresiones.'},
+   ]},
+  {id:'duelo-perinatal', prio:'p1', tags:['p1','duelo'],
+   servicio:'Ginecología / Urgencias',
+   titulo:'Duelo Perinatal — Pérdida Gestacional o Neonatal',
+   icono:'👶', color:'#dc2626',
+   objetivo:'Validación del duelo, psicoeducación a la familia, prevención de duelo complicado.',
+   contenido:[
+     {t:'Principio fundamental', c:'"Esta pérdida es real y el dolor es completamente válido, sin importar la edad gestacional. No hay un umbral de semanas a partir del cual el dolor \'cuenta\'. No compare ni minimice."'},
+     {t:'Para los padres', c:'"Lo que sienten — la rabia, la culpa, el vacío — es parte del duelo por un ser querido. No tienen que recuperarse rápido. No hay un tiempo correcto para sentirse mejor."'},
+     {t:'Culpa materna', c:'La culpa es la emoción más frecuente. Psicoeducación: la mayoría de las pérdidas gestacionales ocurren por causas cromosómicas o uterinas fuera del control de la madre. Ninguna emoción, estrés o acción cotidiana causa una pérdida.'},
+     {t:'Rituales de despedida', c:'Si el contexto lo permite, ofrecer la posibilidad de ver al bebé, tomar una fotografía, ponerle un nombre. Estos rituales ayudan a hacer real la pérdida y facilitan el proceso de duelo.'},
+   ]},
+  {id:'duelo-funcional', prio:'p2', tags:['p2','duelo'],
+   servicio:'Cirugía / Traumatología / Neurología',
+   titulo:'Duelo por Pérdida Funcional — Discapacidad Adquirida',
+   icono:'♿', color:'#d97706',
+   objetivo:'Validar el duelo por la pérdida de funciones, imagen corporal, rol familiar y laboral.',
+   contenido:[
+     {t:'El duelo que nadie reconoce', c:'"No solo perdió una función — perdió una parte de cómo se veía a sí mismo. El trabajador que ya no puede trabajar, el proveedor que ya no puede proveer, el deportista que ya no puede correr. Eso es una pérdida real."'},
+     {t:'Fases del duelo funcional', c:'Shock e incredulidad → rabia (hacia el cuerpo, el equipo médico, la situación) → negociación ("si me recupero, voy a...") → tristeza adaptativa → reorganización de identidad. No son lineales.'},
+     {t:'Trabajo de identidad', c:'"¿Quién soy ahora que no puedo hacer lo que hacía? Esta es la pregunta central. Explorar valores y roles que sí se mantienen: padre, esposo, amigo, persona con sabiduría y experiencia."'},
+   ]},
+  {id:'duelo-desplazamiento', prio:'p2', tags:['p2','duelo'],
+   servicio:'Cualquier servicio',
+   titulo:'Duelo por Desplazamiento y Pérdidas por Conflicto Armado',
+   icono:'🏡', color:'#d97706',
+   objetivo:'Validar pérdidas múltiples (tierra, familia, comunidad, proyecto de vida), duelo complicado por violencia.',
+   contenido:[
+     {t:'Contexto Medellín / Antioquia', c:'Muchos pacientes del Hospital La María provienen de comunidades con historia de desplazamiento forzado, pérdidas por conflicto armado o violencia urbana. Estas pérdidas son múltiples, acumuladas y frecuentemente no elaboradas.'},
+     {t:'Pérdidas que nadie ve', c:'"Perder la tierra es perder la identidad, la historia, el trabajo, la comunidad. Es un duelo que pocas veces se nombra pero que carga quien viene de lejos."'},
+     {t:'Señales de duelo complicado por trauma', c:'Pesadillas recurrentes, evitación de temas relacionados con el evento, hipervigilancia, anhedonia marcada. Considerar tamizaje con PCL-5 y derivación a salud mental especializada.'},
+     {t:'Intervención validante', c:'"Lo que perdió fue real. Su dolor tiene sentido. No tiene que estar \'bien\' ni perdonar. Lo que sí puede hacer es no cargar solo con esto." Explorar redes de apoyo comunitarias o espirituales.'},
+   ]},
+];
+
+window.renderPsicoCards = function(filtro){
+  const cont = document.getElementById('psico-cards');
+  if(!cont) return;
+  const guias = filtro === 'all' ? psicoGuias : psicoGuias.filter(g => g.tags.includes(filtro));
+  if(!guias.length){cont.innerHTML='<div class="empty"><p>No hay guías para este filtro.</p></div>';return;}
+  const prioColors = {p1:'#dc2626',p2:'#d97706',p3:'#16a34a'};
+  const prioLabels = {p1:'P1 · Alta complejidad',p2:'P2 · Complejidad moderada',p3:'P3 · Breve'};
+  cont.innerHTML = guias.map(g => `
+    <div class="psico-card" data-prio="${g.prio}" data-tags="${g.tags.join(' ')}"
+         style="background:var(--surface);border:1.5px solid var(--border);border-left:5px solid ${g.color};border-radius:10px;overflow:hidden">
+      <div style="padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:12px" onclick="togglePsicoCard(this)">
+        <span style="font-size:1.6rem;flex-shrink:0">${g.icono}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:0.88rem;color:var(--text)">${g.titulo}</div>
+          <div style="font-size:0.72rem;color:var(--text3);margin-top:2px">${g.servicio}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+          <span style="background:${g.color}22;color:${g.color};font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:20px">${prioLabels[g.prio]}</span>
+          <svg class="psico-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="transition:transform 0.2s;color:var(--text3)"><path d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+      <div class="psico-body" style="display:none;padding:0 16px 14px">
+        <div style="font-size:0.78rem;color:var(--text2);background:var(--surface2);border-radius:7px;padding:8px 12px;margin-bottom:10px;line-height:1.5">
+          🎯 <strong>Objetivo:</strong> ${g.objetivo}
+        </div>
+        ${g.contenido.map(c => `
+          <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <div style="font-size:0.75rem;font-weight:700;color:${g.color};text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">${c.t}</div>
+            <div style="font-size:0.8rem;color:var(--text2);line-height:1.6">${c.c}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+};
+
+window.togglePsicoCard = function(header){
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.psico-chevron');
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : '';
+  if(chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
+};
+
+window.filtrarPsico = function(filtro, btn){
+  document.querySelectorAll('.psico-filtro').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderPsicoCards(filtro);
+};
+
+// Render on page load and on navigation
+const _origGoTo = window.goTo;
+window.goTo = function(page){
+  _origGoTo(page);
+  if(page === 'psicoeducacion') setTimeout(() => renderPsicoCards('all'), 50);
+};
+
 // Estos stubs capturan clics tempranos y los reintenta hasta que el módulo esté listo.
 (function(){
   function makeStub(name){
@@ -3642,8 +3953,8 @@ setTimeout(actualizarBackupBadge, 2500);
   ].forEach(makeStub);
 })();
 // ── UI & NAVIGATION ──────────────────────────────────────────
-const pages=['dashboard','pacientes','consulta-externa','interconsultas','historial-ic','anamnesis','tests','capacidad','historial','historial-pac'];
-const titles={dashboard:'Inicio',pacientes:'Registro de Pacientes','consulta-externa':'Consulta Externa EPS',interconsultas:'Interconsultas','historial-ic':'Historial de Interconsultas',anamnesis:'Nueva Anamnesis',tests:'Tests Clínicos',capacidad:'Valoración de Capacidad Decisional',historial:'Historial de Tests','historial-pac':'Historial de Pacientes'};
+const pages=['dashboard','pacientes','consulta-externa','interconsultas','historial-ic','anamnesis','tests','capacidad','historial','historial-pac','psicoeducacion'];
+const titles={dashboard:'Inicio',pacientes:'Registro de Pacientes','consulta-externa':'Consulta Externa EPS',interconsultas:'Interconsultas','historial-ic':'Historial de Interconsultas',anamnesis:'Nueva Anamnesis',tests:'Tests Clínicos',capacidad:'Valoración de Capacidad Decisional',historial:'Historial de Tests',psicoeducacion:'Psicoeducación Clínica','historial-pac':'Historial de Pacientes'};
 
 window.goTo=(page)=>{
   pages.forEach(p=>document.getElementById('page-'+p).classList.toggle('active',p===page));
