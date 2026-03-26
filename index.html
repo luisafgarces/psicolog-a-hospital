@@ -3672,211 +3672,257 @@ const psicoGuias = [
   // ── PRIORIDAD 1 ──
   {id:'erc-dialisis', prio:'p1', tags:['p1'], servicio:'Nefrología',
    titulo:'Enfermedad Renal Crónica — Inicio de hemodiálisis',
-   icono:'🫘', color:'#dc2626',
-   objetivo:'Adherencia a diálisis, manejo del miedo al procedimiento, adherencia a restricción hídrica, prevención de abandonos.',
+   icono:'🫘', color:'#1a6b5a',
+   objetivo:'Adherencia a diálisis, manejo del miedo al procedimiento, restricción hídrica, prevención de abandonos.',
    contenido:[
-     {t:'¿Qué le digo al paciente?', c:'La diálisis es como un riñón externo que hace el trabajo que los tuyos ya no pueden hacer. Sin ella, los desechos se acumulan en la sangre y pueden ser fatales. El miedo es normal — es un procedimiento nuevo y desconocido.'},
+     {t:'¿Qué le digo al paciente?', c:'La diálisis es como un riñón externo que hace el trabajo que los tuyos ya no pueden hacer. Sin ella, los desechos se acumulan y pueden ser fatales. El miedo es normal.'},
      {t:'Metáfora útil', c:'"Tu riñón es como un filtro de agua que se tapó. La diálisis es el filtro de repuesto. No es un castigo, es la solución."'},
-     {t:'Manejo de la restricción hídrica', c:'Explica la relación líquidos → hinchazón → dificultad respiratoria. Técnica: cubitos de hielo en la boca (controlan la sensación de sed sin acumular líquido). Registrar ingesta diaria.'},
-     {t:'Señales de alerta para reportar', c:'Cambios de humor extremos, llanto constante, negativa repetida al procedimiento, expresiones de "para qué vivir así".'},
-   ]},
-  {id:'vih-nuevo-dx', prio:'p1', tags:['p1','infectologia'],
-   servicio:'Infectología',
-   titulo:'VIH/SIDA — Nuevo diagnóstico o abandono de TAR',
-   icono:'🔴', color:'#dc2626',
-   objetivo:'Desmitificación, manejo del shock diagnóstico, adherencia a antirretrovirales, revelación a redes de apoyo.',
+     {t:'Restricción hídrica', c:'Explica: líquidos → hinchazón → dificultad respiratoria. Técnica: cubitos de hielo en la boca. Registrar ingesta diaria.'},
+     {t:'Señales de alerta', c:'Cambios de humor extremos, llanto constante, negativa repetida al procedimiento, expresiones de "para qué vivir así".'},
+   ],
+   cartilla:{
+     quePasa: '¿Qué es la Enfermedad Renal Crónica?\n\nTus riñones son dos órganos que limpian la sangre, eliminan desechos y controlan el agua en tu cuerpo. En la Enfermedad Renal Crónica, los riñones han perdido gran parte de esa capacidad de manera permanente.\n\nCuando los riñones ya no pueden hacer su trabajo, los desechos y el exceso de líquido se acumulan en el cuerpo. Aquí es donde entra la hemodiálisis.',
+     queEs: '¿Qué es la hemodiálisis?\n\nEs un tratamiento que realiza el trabajo que los riñones ya no pueden hacer. Una máquina filtra tu sangre, elimina lo que el cuerpo no necesita y te la devuelve limpia. Generalmente se hace 3 veces por semana, entre 3 y 5 horas por sesión.\n\nNo es un castigo ni señal de haber hecho algo mal. Es un tratamiento médico que muchas personas reciben y que les permite seguir viviendo.',
+     sintomas: 'Síntomas físicos frecuentes:\n• Cansancio o fatiga (muy normal en las primeras sesiones)\n• Presión arterial baja o alta\n• Calambres musculares\n• Picazón en la piel\n• Náuseas o falta de apetito\n• Dificultad para dormir\n\nSíntomas emocionales frecuentes (tan reales y válidos como los físicos):\n• Tristeza o ganas de llorar sin razón aparente\n• Miedo al futuro\n• Sensación de pérdida de control\n• Irritabilidad o cambios de humor\n• Desesperanza o pensamientos de que "nada va a mejorar"',
+     conexion: 'La conexión entre tus pensamientos, emociones y cuerpo\n\nLo que pensamos influye en cómo nos sentimos, y cómo nos sentimos afecta cómo percibimos los síntomas físicos.\n\n🔴 "Esta máquina me da miedo, no voy a tolerarlo" → Ansiedad → Tensión, corazón acelerado, más malestar\n🟢 "Es difícil, pero puedo ir paso a paso" → Menor ansiedad → Menor tensión, mejor tolerancia\n\nTrabajar nuestros pensamientos no elimina la enfermedad, pero puede aliviar el sufrimiento que sentimos.',
+     hoy: '¿Qué puedo hacer para sentirme mejor hoy?\n• Prepara algo que te guste tener cerca durante la sesión: música, auriculares, una manta.\n• Permite que alguien te acompañe o te llame.\n• Cuéntale al equipo de salud cómo te sientes.\n• Toma el día de a poco: no tienes que resolver todo ahora.\n• Permítete descansar sin culpa. Tu cuerpo y tu mente lo necesitan.\n• Reconoce lo que lograste hoy — asistir a la sesión ya es un logro.',
+     pensamientos: ['"Esta máquina me da miedo"', '"No voy a poder con esto"', '"Soy una carga para mi familia"', '"¿Por qué me pasó esto a mí?"', '"Mi vida ya no va a ser normal"', '"No tiene sentido luchar"'],
+   }},
+  {id:'vih-nuevo-dx', prio:'p1', tags:['p1','infectologia'], servicio:'Infectología',
+   titulo:'VIH — Nuevo diagnóstico o abandono de tratamiento',
+   icono:'🔴', color:'#1a6b5a',
+   objetivo:'Desmitificación, manejo del shock diagnóstico, adherencia al tratamiento antirretroviral.',
    contenido:[
-     {t:'Fase inicial (primeros 15 min)', c:'No dar toda la información de golpe. Primero: "¿Cómo se siente ahora mismo?" Validar el impacto. Normalizar: incredulidad, negación, rabia son respuestas esperadas, no patológicas.'},
-     {t:'Desmitificación clave', c:'"El VIH hoy es una enfermedad crónica manejable, como la diabetes. Con el TAR correcto, la expectativa de vida es casi normal. No es una sentencia de muerte."'},
-     {t:'Adherencia al TAR', c:'Un comprimido al día, a la misma hora. La metáfora: "El virus es como una planta que crece si no la podas. El TAR es la poda diaria." Si falla un día, no detenerse — continuar al día siguiente.'},
-     {t:'Revelación a parejas/familia', c:'No obligar ni presionar. Explorar con quién podría contar. Psicoeducación sobre riesgo real de transmisión con TAR efectivo (indetectable = intransmisible).'},
-   ]},
-  {id:'cancer-rechazo-tto', prio:'p1', tags:['p1','oncologia'],
-   servicio:'Oncología',
-   titulo:'Cáncer — Rechazo de quimioterapia, cirugía o radioterapia',
-   icono:'🎗️', color:'#dc2626',
-   objetivo:'Manejo de miedos catastróficos, psicoeducación sobre beneficios/riesgos, apoyo en decisión compartida.',
+     {t:'Fase inicial', c:'No dar toda la información de golpe. Primero: "¿Cómo se siente ahora mismo?" Validar el impacto. La incredulidad, negación y rabia son respuestas esperadas.'},
+     {t:'Desmitificación clave', c:'"El VIH hoy es una enfermedad crónica manejable. Con el tratamiento correcto, la expectativa de vida es casi normal. No es una sentencia de muerte."'},
+     {t:'Adherencia al TAR', c:'"Un comprimido al día, a la misma hora. El virus es como una planta que crece si no la podas. El TAR es la poda diaria."'},
+     {t:'Revelación', c:'No obligar ni presionar. Explorar con quién podría contar. Psicoeducación: indetectable = intransmisible.'},
+   ],
+   cartilla:{
+     quePasa: '¿Qué significa este diagnóstico?\n\nRecibir un diagnóstico de VIH puede sentirse como un golpe muy fuerte. Es completamente normal sentir miedo, incredulidad, rabia o tristeza. No tienes que estar bien ahora mismo.\n\nLo más importante que debes saber: el VIH hoy es una enfermedad crónica manejable, como la diabetes o la hipertensión. Con el tratamiento adecuado, puedes tener una vida larga y plena.',
+     queEs: '¿Qué es el tratamiento antirretroviral (TAR)?\n\nSon medicamentos que controlan el virus en tu cuerpo, evitando que se multiplique. Generalmente es una sola pastilla al día, a la misma hora.\n\nCuando el tratamiento funciona bien, la cantidad de virus en tu sangre baja tanto que no se puede detectar. Esto protege tu salud y la de otros.',
+     sintomas: 'Reacciones emocionales frecuentes al diagnóstico:\n• Shock o incredulidad ("esto no puede estar pasando")\n• Miedo al futuro y a lo que dirá la gente\n• Rabia ("¿por qué a mí?")\n• Tristeza o sensación de pérdida\n• Vergüenza o culpa\n\nTodas estas emociones son válidas y esperadas. No significan que estás exagerando.',
+     conexion: 'Lo que piensas afecta cómo te cuidas\n\n🔴 "Ya no tiene sentido cuidarme" → No tomo el medicamento → El virus se multiplica → Me enfermo más\n🟢 "Esto es difícil pero tengo opciones" → Sigo el tratamiento → El virus se controla → Vivo bien\n\nCuidar tu mente es cuidar tu cuerpo.',
+     hoy: '¿Qué puedo hacer hoy?\n• Tomar el medicamento a la hora indicada, todos los días.\n• Hablar con alguien de confianza si lo sientes necesario — no tienes que cargarlo solo.\n• Preguntar al equipo médico cualquier duda, por pequeña que parezca.\n• Permitirte sentir lo que sientes, sin juzgarte.',
+     pensamientos: ['"Esto es una sentencia de muerte"', '"Ya nadie me va a querer"', '"Es mi culpa"', '"No tiene sentido seguir el tratamiento"'],
+   }},
+  {id:'cancer-rechazo-tto', prio:'p1', tags:['p1','oncologia'], servicio:'Oncología',
+   titulo:'Cáncer — Rechazo de tratamiento oncológico',
+   icono:'🎗️', color:'#1a6b5a',
+   objetivo:'Manejo de miedos catastróficos, psicoeducación sobre beneficios y riesgos, apoyo en decisión compartida.',
    contenido:[
-     {t:'Identificar el pensamiento catastrófico', c:'"¿Qué es lo que más le preocupa del tratamiento?" Escuchar completamente antes de informar. El error frecuente es dar información antes de entender el miedo específico.'},
-     {t:'Reestructuración cognitiva', c:'Pensamiento: "Si me opero voy a morir en el quirófano." Explorar evidencia: ¿Ha tenido cirugías antes? ¿Conoce a alguien que haya pasado por esto? ¿Qué dice el cirujano sobre el riesgo?'},
-     {t:'Ensayo cognitivo del procedimiento', c:'"Vamos a imaginarnos juntos cómo será el día de la quimioterapia: llegan, la preparan, le ponen el suero... ¿En qué parte siente más miedo? ¿Qué haría en ese momento para calmarse?"'},
-     {t:'Si el rechazo persiste', c:'Documentar la decisión informada. No coaccionar. Coordinar con el equipo médico para nueva valoración. Explorar si hay valores culturales, espirituales o familiares que están influyendo.'},
-   ]},
-  {id:'paliativos', prio:'p1', tags:['p1','duelo','oncologia'],
-   servicio:'Cuidados Paliativos',
-   titulo:'Cuidados Paliativos — Enfermedad terminal / Final de vida',
-   icono:'🕊️', color:'#dc2626',
-   objetivo:'Psicoeducación a paciente y familia sobre proceso de final de vida, duelo anticipatorio, manejo de ansiedad existencial.',
+     {t:'Identificar el miedo específico', c:'"¿Qué es lo que más le preocupa del tratamiento?" Escuchar antes de informar.'},
+     {t:'Reestructuración cognitiva', c:'"Si me opero voy a morir" → Explorar evidencia: ¿Ha tenido cirugías antes? ¿Qué dice el cirujano?'},
+     {t:'Ensayo cognitivo', c:'Imaginar paso a paso el procedimiento: llegada, preparación, qué va a sentir, cómo usará la respiración.'},
+     {t:'Si el rechazo persiste', c:'Documentar la decisión informada. No coaccionar. Explorar si hay valores culturales o espirituales que influyen.'},
+   ],
+   cartilla:{
+     quePasa: '¿Qué está pasando en mi cuerpo?\n\nEl cáncer es el crecimiento descontrolado de células anormales. El tratamiento — quimioterapia, radioterapia o cirugía — busca eliminar o controlar esas células para proteger tu vida y tu calidad de vida.\n\nEs completamente normal sentir miedo ante estos tratamientos. El miedo no significa que eres cobarde. Significa que te importa tu vida.',
+     queEs: 'Los tratamientos oncológicos\n\nCada tratamiento tiene un propósito específico que el equipo médico ha considerado para tu caso. Si tienes dudas sobre por qué te proponen ese tratamiento y no otro, tienes todo el derecho de preguntar y pedir que te expliquen con calma.',
+     sintomas: 'Reacciones emocionales frecuentes:\n• Miedo intenso antes de procedimientos\n• Pensamientos catastróficos ("voy a morir en el quirófano")\n• Negación o rechazo al tratamiento\n• Rabia ("¿por qué yo?")\n• Sensación de pérdida de control sobre tu cuerpo\n\nEstas reacciones son normales y no significan que estás exagerando.',
+     conexion: 'Tus pensamientos afectan cómo vives el tratamiento\n\n🔴 "Si me opero, me muero" → Miedo extremo → Rechazo al tratamiento → Mayor riesgo\n🟢 "Es un procedimiento difícil pero el equipo sabe lo que hace" → Menor ansiedad → Mejor tolerancia\n\nPreparar la mente para el procedimiento ayuda al cuerpo a tolerarlo mejor.',
+     hoy: '¿Qué puedo hacer antes del procedimiento?\n• Practicar la respiración tranquilizante varias veces al día.\n• Escribir las preguntas que tienes para el médico — todas tienen valor.\n• Llevar algo que te dé calma: una foto, música, una oración.\n• Decirle al equipo cómo te sientes — ellos están para ayudarte en todo.',
+     pensamientos: ['"Voy a morir en el quirófano"', '"No voy a aguantar el dolor"', '"El tratamiento me va a dejar peor"', '"Para qué tanto esfuerzo"'],
+   }},
+  {id:'paliativos', prio:'p1', tags:['p1','duelo','oncologia'], servicio:'Cuidados Paliativos',
+   titulo:'Cuidados Paliativos — Enfermedad terminal',
+   icono:'🕊️', color:'#1a6b5a',
+   objetivo:'Acompañamiento en el proceso de final de vida, duelo anticipatorio, manejo de ansiedad existencial.',
    contenido:[
-     {t:'Principio fundamental', c:'No se trata de dar información, sino de acompañar. La pregunta más importante: "¿Qué es lo que más le preocupa en este momento?" — no asumir qué necesita saber.'},
-     {t:'Con el paciente', c:'Explorar deseos de cierre: conversaciones pendientes, asuntos no resueltos, deseos sobre el proceso. Validar el miedo a morir sin juzgarlo ni minimizarlo. "Es normal tener miedo. ¿Qué sería lo más difícil para usted?"'},
-     {t:'Con la familia', c:'Psicoeducación sobre las fases del proceso de morir: disminución de apetito, mayor sueño, retirada social. Estos son signos naturales, no de abandono. Preparar para el duelo anticipatorio.'},
-     {t:'Duelo anticipatorio familiar', c:'Normalizar la tristeza, el llanto, la rabia. Diferenciar el duelo anticipatorio del duelo patológico. Guiar en cómo acompañar: presencia, silencio, contacto físico — más que palabras.'},
-   ]},
-  {id:'amputacion-aguda', prio:'p1', tags:['p1','diabetes','cirugia'],
-   servicio:'Cirugía / Traumatología',
+     {t:'Con el paciente', c:'"¿Qué es lo que más le preocupa en este momento?" Explorar deseos de cierre, conversaciones pendientes. No asumir qué necesita saber.'},
+     {t:'Con la familia', c:'Psicoeducación sobre las fases del proceso de morir: menos apetito, más sueño, retirada social. Son signos naturales.'},
+     {t:'Duelo anticipatorio', c:'Normalizar la tristeza y la rabia. Guiar en cómo acompañar: presencia, silencio, contacto físico.'},
+     {t:'Señal de duelo complicado', c:'Negación extrema que impide tomar decisiones, síntomas severos de ansiedad o depresión en el cuidador.'},
+   ],
+   cartilla:{
+     quePasa: 'Lo que estás viviendo\n\nEstás atravesando uno de los momentos más difíciles que puede vivir un ser humano. No existe una manera "correcta" de sentirse ante esto. El miedo, la tristeza, la rabia, la paz o la confusión — todas son respuestas válidas y humanas.\n\nNo tienes que estar "fuerte". No tienes que fingir que todo está bien.',
+     queEs: '¿Qué son los cuidados paliativos?\n\nSon la atención centrada en tu bienestar y calidad de vida. No buscan curar la enfermedad, sino acompañarte para que los días que tienes sean lo más confortables, dignos y llenos de sentido posible.\n\nIncluye manejo del dolor, apoyo emocional, y acompañamiento para ti y tu familia.',
+     sintomas: 'Lo que es normal sentir:\n• Miedo a lo desconocido\n• Tristeza por lo que vas a dejar\n• Rabia ("esto no debería pasarme")\n• Deseo de resolver cosas pendientes\n• Momentos de calma y aceptación\n• Necesidad de estar con personas queridas\n\nTodos estos estados pueden coexistir. No hay un orden ni un tiempo fijo.',
+     conexion: 'Lo que más importa ahora\n\nNo tienes que resolver todo ni despedirte de todo al mismo tiempo. Puedes ir de a poco.\n\nAlgunas personas encuentran alivio en hablar con un ser querido. Otras en la oración. Otras en simplemente estar acompañadas en silencio. No hay una manera correcta.',
+     hoy: '¿Qué puede ser importante para ti ahora?\n• ¿Hay algo que quieras decirle a alguien?\n• ¿Hay algo que quieras pedir o agradecer?\n• ¿Cómo quieres que sea este tiempo?\n\nEl equipo de psicología puede acompañarte a pensar en estas preguntas si lo deseas.',
+     pensamientos: ['"Tengo miedo de lo que viene"', '"No quiero que mi familia sufra"', '"¿Para qué hablar de esto?"', '"¿Hay algo después de esto?"'],
+   }},
+  {id:'amputacion-aguda', prio:'p1', tags:['p1','diabetes','cirugia'], servicio:'Cirugía / Traumatología',
    titulo:'Amputación — Preparación y duelo por pérdida del miembro',
-   icono:'🦿', color:'#dc2626',
-   objetivo:'Duelo por pérdida del miembro, manejo de imagen corporal, adherencia a rehabilitación.',
+   icono:'🦿', color:'#1a6b5a',
+   objetivo:'Duelo por pérdida del miembro, imagen corporal, adherencia a rehabilitación.',
    contenido:[
-     {t:'Antes de la amputación', c:'"¿Cómo se imagina su vida después de esto?" Explorar los miedos específicos (dependencia, trabajo, pareja). No minimizar ni sobredimensionar. Psicoeducación sobre prótesis y rehabilitación disponibles.'},
-     {t:'Después de la amputación', c:'El duelo por el miembro perdido es real y válido. Fases: incredulidad, rabia, tristeza, adaptación. No hay un tiempo fijo. La rabia hacia el equipo médico es frecuente — no tomarla personal.'},
-     {t:'Imagen corporal', c:'Explorar cómo se ve a sí mismo ahora. Trabajo cognitivo: "Su cuerpo salvó su vida sacrificando una parte. Eso es una fortaleza, no un defecto."'},
-     {t:'Adherencia a rehabilitación', c:'El dolor del muñón puede hacer que el paciente rechace la fisioterapia. Psicoeducación sobre el dolor de miembro fantasma (es real, no invención). Técnicas de distracción durante los ejercicios.'},
-   ]},
-
+     {t:'Antes de la amputación', c:'"¿Cómo se imagina su vida después de esto?" Explorar miedos específicos. Psicoeducación sobre prótesis y rehabilitación.'},
+     {t:'Después de la amputación', c:'El duelo por el miembro es real. Fases: incredulidad, rabia, tristeza, adaptación. La rabia hacia el equipo médico es frecuente.'},
+     {t:'Imagen corporal', c:'"Su cuerpo salvó su vida sacrificando una parte. Eso es una fortaleza, no un defecto."'},
+     {t:'Adherencia a rehabilitación', c:'El dolor del muñón puede generar rechazo a la fisioterapia. Psicoeducación sobre el dolor de miembro fantasma.'},
+   ],
+   cartilla:{
+     quePasa: 'Lo que estás viviendo\n\nPerder un miembro es una de las experiencias más difíciles que puede vivir una persona. No es solo una pérdida física — es también una pérdida de la imagen que tenías de ti mismo, de cómo te movías, de lo que podías hacer.\n\nEl dolor que sientes — la rabia, el llanto, la tristeza profunda — es completamente válido. Es duelo. Y el duelo necesita tiempo.',
+     queEs: 'Tu cuerpo salvó tu vida\n\nLa amputación se hizo porque era la única manera de proteger tu vida. Tu cuerpo tomó la decisión más difícil: sacrificar una parte para salvar el todo.\n\nEso no es una derrota. Es una fortaleza.',
+     sintomas: 'Lo que puedes sentir:\n• Rabia (hacia el médico, la enfermedad, la situación)\n• Tristeza profunda por lo perdido\n• Sensación de que tu cuerpo ya no te pertenece\n• Miedo al futuro y a la dependencia\n• Dolor en el miembro que ya no está (dolor de miembro fantasma — es real, no es imaginación)\n• Momentos de aceptación y esperanza',
+     conexion: 'Adaptarse lleva tiempo — y eso está bien\n\nNo tienes que "superarlo" rápido. No tienes que estar agradecido de estar vivo si ahora mismo solo sientes dolor. Todas las emociones tienen su tiempo.\n\nLo que sí puedes hacer es ir de a poco: hoy, un día a la vez.',
+     hoy: '¿Qué puedo hacer ahora?\n• Permitirte sentir lo que sientes, sin juzgarte.\n• Si el dolor físico es muy intenso, comunicárselo al equipo.\n• Cuando te sientas listo, participar en la rehabilitación — cada pequeño movimiento cuenta.\n• Hablar con alguien de confianza sobre cómo te sientes.',
+     pensamientos: ['"Ya no soy el mismo"', '"¿Quién me va a querer así?"', '"Prefería haberme muerto"', '"No voy a poder valerme solo"'],
+   }},
   // ── PRIORIDAD 2 ──
-  {id:'diabetes-complicada', prio:'p2', tags:['p2','diabetes'],
-   servicio:'Medicina Interna / Cirugía',
-   titulo:'Diabetes Mellitus — Descompensación o complicaciones crónicas',
-   icono:'🩸', color:'#d97706',
-   objetivo:'Adherencia, manejo de la culpa, psicoeducación sobre relación estrés-glucosa, trabajo con familiares.',
+  {id:'diabetes-complicada', prio:'p2', tags:['p2','diabetes'], servicio:'Medicina Interna / Cirugía',
+   titulo:'Diabetes Mellitus — Descompensación o complicaciones',
+   icono:'🩸', color:'#7b4f00',
+   objetivo:'Adherencia, manejo de la culpa, relación estrés-glucosa, trabajo con familiares.',
    contenido:[
-     {t:'Metáfora del carro', c:'"La diabetes es como un carro que no tiene suficiente gasolina para arrancar. La gasolina es el azúcar. La insulina es la llave. Sin la llave, el azúcar se queda atascada en la sangre."'},
-     {t:'Estrés y glucosa', c:'"Cuando se pone nervioso, su cuerpo libera cortisol (la hormona del estrés) que saca azúcar extra al torrente sanguíneo. Por eso es importante manejar el estrés — no es opcional, es parte del tratamiento."'},
-     {t:'Manejo de la culpa', c:'"La culpa no baja el azúcar. Lo que baja el azúcar es lo que usted hace a partir de hoy." Reencuadrar: complicaciones como señales del cuerpo pidiendo atención, no como castigos.'},
-     {t:'Técnica desde la cama', c:'5 respiraciones lentas antes de cada comida: inhalar contando hasta 3 (inflar la panza), exhalar contando hasta 5. Baja el cortisol y mejora la efectividad de la insulina.'},
-   ]},
-  {id:'pie-diabetico', prio:'p2', tags:['p2','diabetes','cirugia'],
-   servicio:'Cirugía / Medicina Interna',
-   titulo:'Pie Diabético — Úlceras e infecciones de partes blandas',
-   icono:'🦶', color:'#d97706',
+     {t:'Metáfora del carro', c:'"La diabetes es como un carro que no tiene suficiente gasolina. La insulina es la llave que permite que la azúcar entre a las células."'},
+     {t:'Estrés y glucosa', c:'"Cuando se estresa, el cortisol saca azúcar extra al torrente sanguíneo. Manejar las emociones es parte del tratamiento."'},
+     {t:'Manejo de la culpa', c:'"La culpa no baja el azúcar. Lo que baja el azúcar es lo que usted hace a partir de hoy."'},
+     {t:'Técnica desde la cama', c:'5 respiraciones lentas antes de cada comida. Baja el cortisol y mejora la efectividad de la insulina.'},
+   ],
+   cartilla:{
+     quePasa: '¿Qué es la diabetes?\n\nLa diabetes es como un carro que no tiene suficiente gasolina para arrancar. La gasolina es el azúcar (glucosa) que hay en tu sangre. Para que esa azúcar entre a las células de tu cuerpo y te dé energía, necesitas una "llave" que se llama insulina.\n\nEn la diabetes, tu cuerpo no produce suficiente insulina o la que produce no funciona bien.',
+     queEs: '¿Por qué sube el azúcar cuando estoy nervioso?\n\nCuando te pones nervioso, enojado o asustado, tu cuerpo libera cortisol — la hormona del estrés. El cortisol le dice al hígado: "saca azúcar a la sangre". Si no tienes suficiente insulina, esa azúcar se queda en la sangre y te sube la glucosa.\n\nEsto es importante: tus emociones afectan tu diabetes. Manejar el estrés no es opcional, es parte del tratamiento.',
+     sintomas: 'Señales de que el azúcar está alta:\n• Mucha sed\n• Ganas frecuentes de orinar\n• Cansancio o fatiga\n• Visión borrosa\n• Heridas que no cicatrizan\n\nSeñales de que el azúcar está baja:\n• Temblor o sudoración\n• Mareo o confusión\n• Hambre repentina\n• Palpitaciones',
+     conexion: 'La culpa no baja el azúcar\n\nMuchos pacientes sienten culpa cuando tienen una complicación. Esa culpa no ayuda — al contrario, genera más estrés, y el estrés sube más el azúcar.\n\nLo que sí ayuda es lo que haces a partir de hoy. Cada decisión pequeña suma.',
+     hoy: '¿Qué puedo hacer desde la cama?\n• 5 respiraciones lentas antes de cada comida (inhala contando 3, exhala contando 5). Esto baja el cortisol.\n• No saltarse comidas aunque no tenga hambre.\n• Tomar la insulina o pastillas en el horario indicado.\n• Preguntar a enfermería cualquier duda sobre tu tratamiento.',
+     pensamientos: ['"Esto me pasó porque no me cuidé"', '"Ya para qué curarme"', '"Soy una carga para mi familia"', '"Nunca voy a poder controlar esto"'],
+   }},
+  {id:'pie-diabetico', prio:'p2', tags:['p2','diabetes','cirugia'], servicio:'Cirugía / Medicina Interna',
+   titulo:'Pie Diabético — Úlceras e infecciones',
+   icono:'🦶', color:'#7b4f00',
    objetivo:'Adherencia al reposo, curaciones, manejo de frustración por inmovilidad, prevención de amputación.',
    contenido:[
-     {t:'¿Por qué no puedo caminar?', c:'"Cada vez que apoyas el pie sobre la herida, es como apretar una llaga repetidamente. La herida no puede cerrar si sigue con peso encima. El reposo no es comodidad — es el tratamiento."'},
-     {t:'El círculo del dolor', c:'"El dolor genera estrés, el estrés sube el azúcar, el azúcar alta empeora la cicatrización. Si manejamos el dolor bien, estamos tratando la herida también."'},
-     {t:'Adherencia a las curaciones', c:'Normalizar que el procedimiento duele. Técnica de distracción cognitiva: mientras hacen la curación, nombrar en silencio una ciudad por cada letra del abecedario.'},
-     {t:'Cuidados post-alta', c:'Revisar pies TODOS los días con espejo. No caminar descalzo nunca, ni en casa. Zapatos amplios sin costuras internas. Ante cualquier ampolla o enrojecimiento: no manipular y consultar inmediatamente.'},
-   ]},
-  {id:'osteomielitis', prio:'p2', tags:['p2','diabetes','cirugia'],
-   servicio:'Cirugía / Medicina Interna',
+     {t:'¿Por qué no puedo caminar?', c:'"Cada vez que apoyas el pie, es como apretar una llaga. La herida no puede cerrar con peso encima. El reposo es el tratamiento."'},
+     {t:'El círculo del dolor', c:'"El dolor genera estrés, el estrés sube el azúcar, el azúcar alta empeora la cicatrización. Rompamos ese círculo."'},
+     {t:'Adherencia a curaciones', c:'Distracción cognitiva: nombrar ciudades por letra del abecedario durante el procedimiento.'},
+     {t:'Post-alta', c:'Revisar pies todos los días con espejo. No caminar descalzo nunca. Zapatos amplios.'},
+   ],
+   cartilla:{
+     quePasa: '¿Por qué estoy hospitalizado por una herida en el pie?\n\nCon la diabetes, los pies pueden perder sensibilidad — no sientes cuando te lastimas. Además, la sangre no llega bien para curar las heridas.\n\nUna pequeña ampolla puede convertirse en una úlcera que no cicatriza. Si no se trata, puede infectar el hueso y llevar a una amputación.\n\nLa buena noticia: si sigues las indicaciones, puedes salvar tu pie.',
+     queEs: 'El tratamiento: por qué cada paso importa\n\nNo camines sin permiso del médico. Cada vez que apoyas el pie sobre la herida, es como apretar una llaga repetidamente. La herida no puede cerrar si sigue con peso encima.\n\nUsa el botón de llamada si necesitas algo — no te levantes solo.',
+     sintomas: 'Lo que puedes sentir:\n• Dolor en la herida (señal de que el cuerpo está trabajando)\n• Frustración por no poder moverse\n• Aburrimiento y desesperanza por la hospitalización prolongada\n• Miedo a perder el pie\n\nTodo esto es normal. No estás exagerando.',
+     conexion: 'El círculo que necesitamos romper\n\nDolor → Estrés → Sube el azúcar → Empeora la cicatrización → Más dolor\n\nSi manejamos el dolor, el estrés baja. Si el estrés baja, el azúcar se controla mejor. Si el azúcar está mejor, la herida cicatriza más rápido.',
+     hoy: 'Lo más importante ahora:\n• Mantener el pie elevado con la almohada que te dieron.\n• Respetar las curaciones aunque duelan — sacan la infección.\n• No mojar el vendaje.\n• Usar el botón de llamada, no bajarte solo.\n• Para el dolor durante las curaciones: nombra en silencio una ciudad por cada letra del abecedario.',
+     pensamientos: ['"Me voy a quedar sin el pie"', '"Para qué tanto sacrificio"', '"No aguanto más este dolor"', '"Prefiero irme a mi casa así"'],
+   }},
+  {id:'osteomielitis', prio:'p2', tags:['p2','diabetes','cirugia'], servicio:'Cirugía / Medicina Interna',
    titulo:'Osteomielitis — Infección ósea y tratamiento prolongado',
-   icono:'🦴', color:'#d97706',
-   objetivo:'Adherencia al antibiótico prolongado, manejo de la desesperanza por evolución lenta, estructuración del día en cama.',
+   icono:'🦴', color:'#7b4f00',
+   objetivo:'Adherencia al antibiótico prolongado, manejo de la desesperanza, estructuración del día en cama.',
    contenido:[
-     {t:'¿Por qué tanto tiempo?', c:'"El hueso es como una esponja dura. La infección se mete adentro y los antibióticos tardan semanas en llegar a todos los rincones. No es porque estés muy grave ahora — es porque el hueso necesita tiempo para limpiarse."'},
-     {t:'Manejo de la espera', c:'Estructurar el día: horarios para comidas, llamadas a familiares (máximo 10 min, a la misma hora), respiraciones cada 4 horas, radio o televisión. La pasividad alimenta la desesperanza.'},
-     {t:'Frase para la frustración', c:'"Estoy frustrado porque esto dura más de lo que quería, y eso es completamente normal. Pero estoy haciendo lo necesario para salvar mi pie/mi pierna." Decirla en voz alta ayuda.'},
-     {t:'Señales de alerta', c:'Aumento del dolor, fiebre, enrojecimiento que se extiende, mal olor en la herida. Reportar a enfermería inmediatamente.'},
-   ]},
-  {id:'iam', prio:'p2', tags:['p2','cardio'],
-   servicio:'Medicina Interna',
-   titulo:'Infarto Agudo de Miocardio (IAM)',
-   icono:'❤️', color:'#d97706',
-   objetivo:'Diferenciar dolor cardíaco de dolor ansioso, manejo del miedo a "otro infarto", adherencia a antiagregantes y rehabilitación.',
-   contenido:[
-     {t:'El miedo al próximo infarto', c:'"Es completamente normal estar hipervigilante después de un infarto. Su cuerpo aprendió que el dolor en el pecho puede ser peligroso. Pero ahora necesitamos entrenar a su cuerpo a distinguir cuándo es una alerta real y cuándo es ansiedad."'},
-     {t:'Diferenciando dolor cardíaco vs ansioso', c:'Cardíaco: opresión, irradia al brazo/mandíbula, dura más de 20 min, no mejora con posición. Ansioso: punzadas, localizado, mejora con respiración, asociado a pensamientos de miedo.'},
-     {t:'Rehabilitación cardíaca', c:'El miedo al esfuerzo es la barrera #1. Psicoeducación: el corazón se fortalece con el ejercicio gradual guiado — el reposo total lo debilita. Coordinar con fisioterapia.'},
-   ]},
-  {id:'acv', prio:'p2', tags:['p2','cardio','neuro'],
-   servicio:'Neurología / Neurocirugía',
-   titulo:'ACV / Ictus — Secuelas y rehabilitación',
-   icono:'🧠', color:'#d97706',
-   objetivo:'Psicoeducación a paciente y familia sobre secuelas (labilidad emocional, afasia, depresión post-ACV), adherencia a rehabilitación.',
-   contenido:[
-     {t:'Labilidad emocional post-ACV', c:'"El ACV dañó la parte del cerebro que regula las emociones. El paciente puede llorar o reírse sin motivo aparente — esto no es voluntario ni significa que está loco. Es una secuela neurológica directa."'},
-     {t:'Para la familia', c:'"No interprete el llanto como tristeza real ni la risa como que está bien. Es el cerebro reorganizándose. Responda con calma, no con preocupación ni con burla."'},
-     {t:'Depresión post-ACV', c:'Afecta al 30-40% de los pacientes. Señales: apatía que va más allá de la tristeza normal, rechazo a la rehabilitación, expresiones de no querer recuperarse. Reportar al médico para evaluación.'},
-     {t:'Adherencia a rehabilitación', c:'"Cada ejercicio de fisioterapia es como reabrir un camino en el cerebro. Cuanto más practica, más firme se vuelve ese camino. La recuperación no es lineal — habrá días malos y días buenos."'},
-   ]},
-  {id:'insuf-cardiaca', prio:'p2', tags:['p2','cardio'],
-   servicio:'Medicina Interna',
-   titulo:'Insuficiencia Cardíaca Descompensada',
-   icono:'💧', color:'#d97706',
-   objetivo:'Adherencia a restricción hídrica, manejo del pánico asociado a disnea, reentrenamiento respiratorio.',
-   contenido:[
-     {t:'¿Por qué no puedo tomar mucho líquido?', c:'"Su corazón en este momento no tiene fuerza suficiente para bombear todo el líquido. El líquido extra se acumula en los pulmones y eso es lo que le produce la sensación de ahogo."'},
-     {t:'Manejo del pánico por disnea', c:'La disnea genera miedo → el miedo genera hiperventilación → la hiperventilación empeora la disnea. Técnica: respiración con labios fruncidos (inhalar por nariz, exhalar por boca como silbando).'},
-     {t:'Señales de alerta en casa', c:'Aumento de peso de 2kg o más en 2 días (= retención de líquidos), hinchazón de tobillos que aumenta, disnea al acostarse. Estas señales requieren consulta antes de que se descompense.'},
-   ]},
-  {id:'epoc-neumonia', prio:'p2', tags:['p2','cardio'],
-   servicio:'Medicina Interna / Neumología',
-   titulo:'EPOC Agudizado / Asma Grave',
-   icono:'🫁', color:'#d97706',
-   objetivo:'Manejo del pánico por disnea, reentrenamiento respiratorio, identificar desencadenantes emocionales.',
-   contenido:[
-     {t:'El círculo disnea-pánico', c:'"Cuando le falta el aire, el miedo hace que respire más rápido y superficial, lo que empeora la sensación de ahogo. Necesitamos romper ese círculo."'},
-     {t:'Respiración con labios fruncidos', c:'Inhalar lentamente por la nariz (2 segundos), exhalar por la boca con los labios fruncidos como si fuera a silbar (4 segundos). Repetir 5 veces. Esta técnica reduce la frecuencia respiratoria y el trabajo del diafragma.'},
-     {t:'Desencadenantes emocionales del asma', c:'El estrés y la ansiedad intensa pueden precipitar o agravar una crisis. Identificar situaciones o pensamientos que generan ansiedad y trabajar técnicas de regulación emocional.'},
-   ]},
-
-  // ── PRIORIDAD 3 ──
-  {id:'hta', prio:'p3', tags:['p3','cardio'],
-   servicio:'Medicina Interna',
-   titulo:'Hipertensión Arterial Difícil de Controlar',
-   icono:'📈', color:'#16a34a',
-   objetivo:'Psicoeducación sobre papel del estrés e ira en picos hipertensivos, relajación muscular progresiva.',
-   contenido:[
-     {t:'Estrés e hipertensión', c:'"Cuando se estresa o se enoja, el cuerpo libera adrenalina que contrae los vasos sanguíneos — como apretar una manguera. Eso sube la presión. Manejar las emociones no es opcional, es parte del tratamiento de la hipertensión."'},
-     {t:'Técnica de relajación desde la cama', c:'Relajación muscular progresiva abreviada: apretar el puño derecho 5 segundos, soltar. Apretar el izquierdo, soltar. Levantar los hombros hacia las orejas, soltar. Esto activa el sistema parasimpático.'},
-   ]},
-  {id:'fractura-cadera', prio:'p3', tags:['p3'],
-   servicio:'Cirugía / Traumatología',
-   titulo:'Fractura de Cadera — Adulto Mayor',
-   icono:'🦴', color:'#16a34a',
-   objetivo:'Manejo del miedo a las caídas, adherencia a rehabilitación, prevención de delirio postoperatorio.',
-   contenido:[
-     {t:'Miedo a caerse de nuevo', c:'"Es normal tener miedo de volver a caer. Ese miedo es protector. Pero si el miedo es tan grande que no quiere moverse, se vuelve el problema. El objetivo de la rehabilitación es recuperar la confianza en su cuerpo."'},
-     {t:'Prevención de delirio', c:'Orientar al paciente frecuentemente: "Es de día, está en el hospital, su familia viene a visitarlo hoy". Mantener lentes y audífono disponibles. Familiar acompañante si es posible.'},
-   ]},
-  {id:'diabetes-nuevo-dx', prio:'p3', tags:['p3','diabetes'],
-   servicio:'Medicina Interna',
-   titulo:'Diabetes Tipo 2 — Diagnóstico Reciente sin Complicaciones',
-   icono:'💊', color:'#16a34a',
-   objetivo:'Psicoeducación básica sobre autocuidado, manejo de la ansiedad por diagnóstico, derivación a programa ambulatorio.',
-   contenido:[
-     {t:'Impacto emocional del diagnóstico', c:'"Un diagnóstico de diabetes cambia la forma en que uno se ve a sí mismo. Es normal sentir miedo, tristeza o enojo. Eso no significa que no va a poder manejarlo."'},
-     {t:'Mensaje clave', c:'"La diabetes no lo define, pero sí requiere que usted tome decisiones diferentes cada día. Cada decisión pequeña suma: lo que come, si camina, si toma la pastilla."'},
-     {t:'Derivación', c:'Coordinar con nutrición, programa de crónicos, y trabajo social para barreras de acceso. Proveer número de línea de atención de diabetes si existe en la ESE.'},
-   ]},
-
+     {t:'¿Por qué tanto tiempo?', c:'"El hueso es como una esponja dura. La infección se mete adentro y los antibióticos tardan semanas. No es porque estés muy grave — el hueso necesita tiempo."'},
+     {t:'Manejo de la espera', c:'Estructurar el día: comidas, llamadas, respiraciones cada 4h, televisión. La pasividad alimenta la desesperanza.'},
+     {t:'Frase para la frustración', c:'"Estoy frustrado porque esto dura más de lo que quería, y eso es normal. Estoy haciendo lo necesario."'},
+     {t:'Señales de alerta', c:'Aumento del dolor, fiebre, enrojecimiento que se extiende, mal olor. Reportar inmediatamente.'},
+   ],
+   cartilla:{
+     quePasa: '¿Qué es la osteomielitis?\n\nEs una infección que llegó hasta el hueso. Puede venir de una herida en el pie (si tienes diabetes), de una fractura que se infectó, o de una cirugía que se complicó.',
+     queEs: '¿Por qué me van a tener tanto tiempo hospitalizado?\n\nEl hueso es como una esponja dura. La infección se mete adentro y los antibióticos tardan en llegar a todos los rincones.\n\nPor eso necesitas antibióticos por vena durante 4 a 6 semanas, a veces más. No es porque estés "muy grave" en este momento — es porque el hueso necesita tiempo para limpiarse.',
+     sintomas: 'Lo más difícil: la espera\n\nMuchos pacientes se desesperan porque ven que la herida no mejora rápido o porque llevan semanas hospitalizados.\n\nEsto es normal. La osteomielitis mejora lentamente. Tu cuerpo está trabajando, aunque no lo veas.',
+     conexion: 'Cómo manejar la espera\n\nEstructura tu día en la cama:\n• Horarios para las comidas\n• Una llamada al día a un familiar (10 minutos, a la misma hora)\n• Respiraciones cada 4 horas\n• Algo que te entretenga: radio, televisión, audiolibros\n\nRomper la pasividad ayuda a manejar la desesperanza.',
+     hoy: 'Frase para cuando te sientas frustrado:\n\n"Estoy frustrado porque esto dura más de lo que quería. Eso es completamente normal. Pero estoy haciendo lo necesario para salvar mi pie/mi pierna."\n\nPuedes decirla en voz alta. Ayuda.\n\nSeñales de alerta — avisa a enfermería si:\n• Aumenta el dolor\n• Tienes fiebre o escalofríos\n• Hay enrojecimiento que se extiende\n• La herida huele mal',
+     pensamientos: ['"Esto no va a mejorar nunca"', '"Ya no aguanto más aquí"', '"Para qué tanto antibiótico si no veo mejoría"', '"Prefiero irme a mi casa"'],
+   }},
   // ── DUELO ──
-  {id:'duelo-anticipatorio', prio:'p1', tags:['p1','duelo','oncologia'],
-   servicio:'Cuidados Paliativos / Oncología',
+  {id:'duelo-anticipatorio', prio:'p1', tags:['p1','duelo','oncologia'], servicio:'Cuidados Paliativos / Oncología',
    titulo:'Duelo Anticipatorio — Familia y Paciente Terminal',
-   icono:'🤍', color:'#dc2626',
-   objetivo:'Preparar a la familia para la pérdida, validar el proceso de duelo antes del fallecimiento, identificar duelo complicado.',
+   icono:'🤍', color:'#1a6b5a',
+   objetivo:'Preparar a la familia, validar el duelo antes del fallecimiento, identificar duelo complicado.',
    contenido:[
-     {t:'¿Qué es el duelo anticipatorio?', c:'"El duelo puede comenzar antes de la pérdida. La tristeza, el llanto, la rabia que sienten ahora, mientras el ser querido aún está vivo, es parte del proceso de duelo. No es señal de que ya lo están dando por muerto — es señal de amor."'},
-     {t:'Para la familia', c:'"No hay forma correcta de acompañar. Estar presentes, en silencio si es necesario, es suficiente. No tienen que tener las palabras perfectas. A veces el abrazo dice más que cualquier frase."'},
-     {t:'Señales de duelo complicado a monitorear', c:'Incapacidad de hablar sobre la enfermedad o la muerte, negación extrema que impide tomar decisiones, síntomas de ansiedad o depresión severa en el cuidador, conflictos familiares intensos sobre el cuidado.'},
-     {t:'Diferencias culturales en el duelo', c:'En el contexto antioqueño y de comunidades desplazadas: el duelo puede expresarse de forma colectiva, con rituales religiosos importantes. Respetar y no patologizar estas expresiones.'},
-   ]},
-  {id:'duelo-perinatal', prio:'p1', tags:['p1','duelo'],
-   servicio:'Ginecología / Urgencias',
-   titulo:'Duelo Perinatal — Pérdida Gestacional o Neonatal',
-   icono:'👶', color:'#dc2626',
+     {t:'¿Qué es el duelo anticipatorio?', c:'"El duelo puede comenzar antes de la pérdida. La tristeza y el llanto que sienten ahora es parte del proceso. No es que ya lo estén dando por muerto — es señal de amor."'},
+     {t:'Para la familia', c:'"No hay forma correcta de acompañar. Estar presentes, en silencio si es necesario, es suficiente."'},
+     {t:'Señales de duelo complicado', c:'Negación extrema que impide decisiones, ansiedad severa en el cuidador, conflictos familiares intensos.'},
+     {t:'Diferencias culturales', c:'En contexto antioqueño: el duelo puede expresarse colectivamente, con rituales religiosos importantes. Respetar y no patologizar.'},
+   ],
+   cartilla:{
+     quePasa: 'El duelo que empieza antes de la pérdida\n\nEl duelo puede comenzar mucho antes de que alguien se vaya. La tristeza, el llanto, la rabia que sientes ahora, mientras tu ser querido aún está vivo, es parte del proceso de duelo.\n\nNo significa que ya lo estás dando por muerto. Significa que lo amas.',
+     queEs: 'Lo que está pasando en tu familia\n\nCada persona en la familia puede estar viviendo el duelo de manera diferente. Unos lloran. Otros se ocupan haciendo cosas. Otros no pueden hablar del tema. Ninguna forma es incorrecta.\n\nA veces las diferencias generan conflicto familiar — eso también es normal.',
+     sintomas: 'Lo que puede estar sintiendo cada uno:\n• Tristeza profunda y ganas de llorar\n• Rabia ("esto no debería estar pasando")\n• Culpa ("¿hice suficiente?")\n• Agotamiento físico y emocional\n• Momentos de paz y aceptación mezclados con dolor\n• Dificultad para hablar de lo que se siente',
+     conexion: 'Cómo acompañar sin palabras perfectas\n\nNo hay palabras perfectas. No tienes que decir "todo va a estar bien" ni "fue la voluntad de Dios" si no es lo que quieres decir.\n\nA veces lo que más ayuda es simplemente estar. Un abrazo. Una mano. Sentarse en silencio al lado.',
+     hoy: 'Lo que puedes hacer:\n• Preguntarle a tu familiar qué necesita, en lugar de asumir.\n• Permitirte llorar, sola o con otros — no tienes que ser fuerte todo el tiempo.\n• Cuidarte también a ti: comer, dormir, descansar. No puedes acompañar bien si te desmoronas.\n• Si sientes que el peso es demasiado grande, pedir apoyo al equipo de psicología.',
+     pensamientos: ['"Tengo que ser fuerte por mi familia"', '"No puedo hablar de esto sin llorar"', '"¿Por qué Dios permite esto?"', '"¿Qué voy a hacer sin él/ella?"'],
+   }},
+  {id:'duelo-perinatal', prio:'p1', tags:['p1','duelo'], servicio:'Ginecología / Urgencias',
+   titulo:'Duelo Perinatal — Pérdida gestacional o neonatal',
+   icono:'👶', color:'#1a6b5a',
    objetivo:'Validación del duelo, psicoeducación a la familia, prevención de duelo complicado.',
    contenido:[
-     {t:'Principio fundamental', c:'"Esta pérdida es real y el dolor es completamente válido, sin importar la edad gestacional. No hay un umbral de semanas a partir del cual el dolor \'cuenta\'. No compare ni minimice."'},
-     {t:'Para los padres', c:'"Lo que sienten — la rabia, la culpa, el vacío — es parte del duelo por un ser querido. No tienen que recuperarse rápido. No hay un tiempo correcto para sentirse mejor."'},
-     {t:'Culpa materna', c:'La culpa es la emoción más frecuente. Psicoeducación: la mayoría de las pérdidas gestacionales ocurren por causas cromosómicas o uterinas fuera del control de la madre. Ninguna emoción, estrés o acción cotidiana causa una pérdida.'},
-     {t:'Rituales de despedida', c:'Si el contexto lo permite, ofrecer la posibilidad de ver al bebé, tomar una fotografía, ponerle un nombre. Estos rituales ayudan a hacer real la pérdida y facilitan el proceso de duelo.'},
-   ]},
-  {id:'duelo-funcional', prio:'p2', tags:['p2','duelo'],
-   servicio:'Cirugía / Traumatología / Neurología',
+     {t:'Principio fundamental', c:'"Esta pérdida es real y el dolor es completamente válido, sin importar la edad gestacional. No minimice."'},
+     {t:'Culpa materna', c:'La mayoría de las pérdidas ocurren por causas fuera del control de la madre. Ninguna emoción ni acción cotidiana las causa.'},
+     {t:'Rituales de despedida', c:'Ofrecer la posibilidad de ver al bebé, tomar una fotografía, ponerle un nombre. Facilitan el proceso de duelo.'},
+     {t:'Para los padres', c:'"No tienen que recuperarse rápido. No hay un tiempo correcto para sentirse mejor."'},
+   ],
+   cartilla:{
+     quePasa: 'Lo que estás viviendo es real\n\nPerdiste a tu bebé. Esta pérdida es real y tu dolor es completamente válido, sin importar en qué semana del embarazo ocurrió, sin importar si llegaste a conocerlo.\n\nNo hay un umbral de semanas a partir del cual el dolor "cuenta". Cuenta siempre.',
+     queEs: '¿Por qué pasó esto?\n\nLa gran mayoría de las pérdidas gestacionales ocurren por causas que están completamente fuera de tu control — alteraciones cromosómicas, problemas en el desarrollo, factores del útero.\n\nNinguna emoción que hayas sentido causó esta pérdida. Ninguna actividad cotidiana. Ningún pensamiento.',
+     sintomas: 'Lo que puedes sentir:\n• Shock e incredulidad\n• Tristeza profunda\n• Culpa ("¿qué hice mal?")\n• Rabia hacia tu cuerpo, hacia la situación\n• Sensación de vacío\n• Envidia hacia otras madres o familias\n• Dificultad para hablar o para no poder parar de hablar\n\nTodas estas emociones son válidas.',
+     conexion: 'Tu pareja también está de duelo\n\nAmbes están sufriendo, pero pueden estarlo de maneras diferentes. Eso no significa que uno sienta más que el otro. Significa que cada persona procesa el dolor a su manera.\n\nIntenten no estar solos en esto, aunque sea difícil hablar.',
+     hoy: 'No tienes que recuperarte rápido\n\nNo hay un tiempo correcto para sentirse mejor. No tienes que volver a la normalidad en dos semanas ni "seguir adelante" cuando aún duele.\n\nPermítete el tiempo que necesitas. Pide ayuda cuando la necesites. Habla con el equipo de psicología si el dolor se vuelve insoportable.',
+     pensamientos: ['"Es mi culpa"', '"Mi cuerpo me falló"', '"Nunca voy a poder superarlo"', '"¿Para qué intentar de nuevo?"'],
+   }},
+  {id:'duelo-funcional', prio:'p2', tags:['p2','duelo'], servicio:'Cirugía / Traumatología / Neurología',
    titulo:'Duelo por Pérdida Funcional — Discapacidad Adquirida',
-   icono:'♿', color:'#d97706',
-   objetivo:'Validar el duelo por la pérdida de funciones, imagen corporal, rol familiar y laboral.',
+   icono:'♿', color:'#7b4f00',
+   objetivo:'Validar el duelo por pérdida de funciones, imagen corporal, rol familiar y laboral.',
    contenido:[
-     {t:'El duelo que nadie reconoce', c:'"No solo perdió una función — perdió una parte de cómo se veía a sí mismo. El trabajador que ya no puede trabajar, el proveedor que ya no puede proveer, el deportista que ya no puede correr. Eso es una pérdida real."'},
-     {t:'Fases del duelo funcional', c:'Shock e incredulidad → rabia (hacia el cuerpo, el equipo médico, la situación) → negociación ("si me recupero, voy a...") → tristeza adaptativa → reorganización de identidad. No son lineales.'},
-     {t:'Trabajo de identidad', c:'"¿Quién soy ahora que no puedo hacer lo que hacía? Esta es la pregunta central. Explorar valores y roles que sí se mantienen: padre, esposo, amigo, persona con sabiduría y experiencia."'},
-   ]},
-  {id:'duelo-desplazamiento', prio:'p2', tags:['p2','duelo'],
-   servicio:'Cualquier servicio',
-   titulo:'Duelo por Desplazamiento y Pérdidas por Conflicto Armado',
-   icono:'🏡', color:'#d97706',
-   objetivo:'Validar pérdidas múltiples (tierra, familia, comunidad, proyecto de vida), duelo complicado por violencia.',
+     {t:'El duelo que nadie reconoce', c:'"No solo perdió una función — perdió la imagen que tenía de sí mismo: el trabajador, el proveedor, el deportista."'},
+     {t:'Fases del duelo funcional', c:'Shock → rabia → negociación → tristeza adaptativa → reorganización de identidad. No son lineales.'},
+     {t:'Trabajo de identidad', c:'"¿Quién soy ahora que no puedo hacer lo que hacía?" Explorar valores y roles que sí se mantienen.'},
+     {t:'Señal de alerta', c:'Rechazo total a la rehabilitación, aislamiento extremo, expresiones de no querer recuperarse.'},
+   ],
+   cartilla:{
+     quePasa: 'Una pérdida que va más allá del cuerpo\n\nCuando el cuerpo pierde una función — ya no puedes caminar igual, hablar igual, moverte igual — no solo pierdes esa capacidad física.\n\nPierdes también la imagen que tenías de ti mismo. El trabajador que ya no puede trabajar. El proveedor que ya no puede proveer. El deportista que ya no puede correr. Eso es una pérdida real, y merece ser reconocida.',
+     queEs: 'Lo que estás viviendo es duelo\n\nEl duelo no es solo por la muerte de alguien. También se puede sentir duelo por la pérdida de una función, de una imagen de uno mismo, de un proyecto de vida.\n\nEste duelo es válido aunque los demás no lo nombren así.',
+     sintomas: 'Lo que puedes sentir:\n• Rabia (hacia el cuerpo, la situación, el equipo médico)\n• Negación ("esto es temporal, voy a volver a ser el mismo")\n• Tristeza profunda\n• Miedo a la dependencia\n• Sensación de que ya no eres el mismo\n• Vergüenza o incomodidad con tu nuevo cuerpo',
+     conexion: 'Adaptarse no significa resignarse\n\nAdaptarse significa encontrar una nueva manera de ser tú. No mejor ni peor — diferente.\n\nAlgunas cosas van a cambiar. Otras van a seguir igual o incluso fortalecerse. No puedes saber cuáles son todavía. Eso se descubre de a poco.',
+     hoy: '¿Qué puedo hacer hoy?\n• Participar en la rehabilitación, aunque sea difícil — cada movimiento cuenta.\n• Hablar con alguien de confianza sobre cómo te sientes.\n• Reconocer lo que sí puedes hacer, aunque parezca pequeño.\n• Pedir apoyo al equipo de psicología si el peso emocional es muy grande.',
+     pensamientos: ['"Ya no soy el mismo"', '"Soy una carga"', '"¿Para qué rehabilitarme?"', '"Mi vida terminó cuando pasó esto"'],
+   }},
+  {id:'duelo-desplazamiento', prio:'p2', tags:['p2','duelo'], servicio:'Cualquier servicio',
+   titulo:'Pérdidas por Desplazamiento y Conflicto Armado',
+   icono:'🏡', color:'#7b4f00',
+   objetivo:'Validar pérdidas múltiples, duelo complicado por violencia, contexto antioqueño.',
    contenido:[
-     {t:'Contexto Medellín / Antioquia', c:'Muchos pacientes del Hospital La María provienen de comunidades con historia de desplazamiento forzado, pérdidas por conflicto armado o violencia urbana. Estas pérdidas son múltiples, acumuladas y frecuentemente no elaboradas.'},
-     {t:'Pérdidas que nadie ve', c:'"Perder la tierra es perder la identidad, la historia, el trabajo, la comunidad. Es un duelo que pocas veces se nombra pero que carga quien viene de lejos."'},
-     {t:'Señales de duelo complicado por trauma', c:'Pesadillas recurrentes, evitación de temas relacionados con el evento, hipervigilancia, anhedonia marcada. Considerar tamizaje con PCL-5 y derivación a salud mental especializada.'},
-     {t:'Intervención validante', c:'"Lo que perdió fue real. Su dolor tiene sentido. No tiene que estar \'bien\' ni perdonar. Lo que sí puede hacer es no cargar solo con esto." Explorar redes de apoyo comunitarias o espirituales.'},
-   ]},
+     {t:'Contexto', c:'Muchos pacientes del Hospital La María tienen historia de desplazamiento forzado o pérdidas por conflicto. Son pérdidas múltiples, acumuladas y frecuentemente no elaboradas.'},
+     {t:'Pérdidas invisibles', c:'"Perder la tierra es perder la identidad, la historia, el trabajo, la comunidad. Un duelo que pocas veces se nombra."'},
+     {t:'Señales de duelo complicado', c:'Pesadillas, evitación de temas, hipervigilancia, anhedonia marcada. Considerar PCL-5.'},
+     {t:'Intervención validante', c:'"Lo que perdió fue real. Su dolor tiene sentido. No tiene que cargar solo con esto."'},
+   ],
+   cartilla:{
+     quePasa: 'Lo que cargamos sin que nadie lo nombre\n\nCuando una persona tuvo que salir de su tierra, de su casa, de su comunidad, no solo perdió un lugar. Perdió su historia. Su trabajo. Sus vecinos. El sonido familiar de su barrio. Las tumbas de sus muertos.\n\nEsa pérdida es enorme. Y muchas veces nunca se llora, porque había que sobrevivir.',
+     queEs: 'Estás aquí ahora, pero cargas mucho\n\nMuchas personas que llegan al Hospital La María vienen cargando no solo la enfermedad de hoy, sino pérdidas de hace años que nunca pudieron procesar.\n\nA veces una hospitalización, un dolor físico o una enfermedad grave reactiva todo ese dolor acumulado. Eso no es debilidad. Es el cuerpo y la mente pidiendo ser escuchados.',
+     sintomas: 'Lo que puedes estar sintiendo:\n• Tristeza que no tiene explicación clara\n• Pesadillas o recuerdos que regresan\n• Sensación de peligro aunque estés en un lugar seguro\n• Dificultad para confiar en otros\n• Dolor físico que empeora con el estrés emocional\n• Sensación de que el pasado está siempre presente',
+     conexion: 'No tienes que cargarlo solo\n\nLo que viviste fue real. Tu dolor tiene sentido. No tienes que perdonar nada si no quieres. No tienes que olvidar.\n\nLo que sí puedes hacer es hablar de ello, si hay alguien en quien confíes. O hablar con el equipo de psicología del hospital.',
+     hoy: '¿Qué puede ayudar hoy?\n• Hablar sobre lo que sientes, aunque sea poco a poco.\n• Reconocer que lo que viviste fue difícil y que tienes derecho a sentir lo que sientes.\n• Si tienes pesadillas frecuentes o recuerdos muy perturbadores, contárselo al médico o al psicólogo — hay formas de ayudar.',
+     pensamientos: ['"Nadie entiende lo que yo viví"', '"Para qué hablar de esto"', '"Ya no hay nada que hacer"', '"No merezco estar bien"'],
+   }},
+  // ── PRIORIDAD 3 ──
+  {id:'hta', prio:'p3', tags:['p3','cardio'], servicio:'Medicina Interna',
+   titulo:'Hipertensión Arterial Difícil de Controlar',
+   icono:'📈', color:'#1a5c38',
+   objetivo:'Papel del estrés en la hipertensión, relajación muscular progresiva.',
+   contenido:[
+     {t:'Estrés e hipertensión', c:'"Cuando se estresa o enoja, la adrenalina contrae los vasos sanguíneos — como apretar una manguera. Eso sube la presión."'},
+     {t:'Técnica desde la cama', c:'Relajación muscular abreviada: apretar el puño derecho 5 segundos, soltar. Repetir con cada grupo muscular.'},
+   ],
+   cartilla:{
+     quePasa: 'La presión arterial y tus emociones\n\nLa hipertensión no es solo un problema del corazón. También tiene una relación directa con el estrés, la rabia y la ansiedad.\n\nCuando te enojas o te asustas, tu cuerpo libera adrenalina que contrae los vasos sanguíneos — como apretar una manguera. Eso sube la presión.',
+     queEs: 'El tratamiento no es solo la pastilla\n\nLos medicamentos son importantes, pero no son suficientes solos. El manejo del estrés es parte del tratamiento de la hipertensión.\n\nNo es que "todo sea psicológico". Es que la mente y el cuerpo están conectados, y cuidar ambos da mejores resultados.',
+     sintomas: 'Lo que puedes sentir:\n• Dolor de cabeza\n• Sensación de calor o enrojecimiento en la cara\n• Palpitaciones\n• Zumbido en los oídos\n• Cansancio o dificultad para concentrarse',
+     conexion: 'Cómo el estrés sube la presión\n\nEstrés → Adrenalina → Vasos sanguíneos contraídos → Presión alta → Más preocupación por la presión → Más estrés\n\nRomper ese círculo con técnicas de relajación ayuda tanto como la medicación.',
+     hoy: 'Técnica de relajación desde la cama:\n\n1. Aprieta el puño derecho fuerte, cuenta hasta 5, suéltalo. Siente la diferencia.\n2. Haz lo mismo con el puño izquierdo.\n3. Sube los hombros hacia las orejas, cuenta 5, suéltalos.\n4. Aprieta los ojos, cuenta 5, suéltalos.\n\nRepite 2 veces. Esta técnica activa el sistema de relajación del cuerpo.',
+     pensamientos: ['"La presión no va a bajar nunca"', '"Soy un enfermo de por vida"', '"Todo me afecta"', '"No puedo controlar nada"'],
+   }},
+  {id:'iam', prio:'p2', tags:['p2','cardio'], servicio:'Medicina Interna',
+   titulo:'Infarto Agudo de Miocardio (IAM)',
+   icono:'❤️', color:'#7b4f00',
+   objetivo:'Miedo a "otro infarto", diferenciación dolor cardíaco vs ansioso, adherencia a rehabilitación.',
+   contenido:[
+     {t:'El miedo al próximo infarto', c:'"Es normal estar hipervigilante después de un infarto. Necesitamos entrenar al cuerpo a distinguir cuándo es alerta real y cuándo es ansiedad."'},
+     {t:'Diferenciando los dolores', c:'Cardíaco: opresión, irradia al brazo/mandíbula, dura más de 20 min. Ansioso: punzadas, localizado, mejora con respiración.'},
+     {t:'Rehabilitación', c:'"El corazón se fortalece con el ejercicio gradual guiado — el reposo total lo debilita."'},
+   ],
+   cartilla:{
+     quePasa: 'Lo que pasó y lo que sientes ahora\n\nTuviste un infarto. Eso es una experiencia muy fuerte, no solo físicamente sino emocionalmente. Es completamente normal que ahora estés muy pendiente de cada sensación en el pecho, cada palpitación, cada momento de cansancio.\n\nTu cuerpo aprendió que el pecho puede doler de manera peligrosa. Ahora está en alerta.',
+     queEs: '¿Cómo diferenciar el dolor cardíaco del dolor por ansiedad?\n\nDolor cardíaco: sensación de opresión o peso, puede irradiar al brazo izquierdo o la mandíbula, dura más de 20 minutos, no mejora al cambiar de posición.\n\nDolor por ansiedad: sensación de punzada o presión breve, localizado en un punto, mejora con respiración profunda, asociado a pensamientos de miedo.\n\nSi tienes duda, avisa siempre al equipo médico.',
+     sintomas: 'Lo que puedes estar sintiendo:\n• Miedo a que se repita el infarto\n• Hipervigilancia con cada sensación del cuerpo\n• Ansiedad cuando haces cualquier esfuerzo físico\n• Tristeza o sensación de que ya no eres el mismo\n• Miedo a quedarte solo',
+     conexion: 'El corazón necesita movimiento\n\nUno de los miedos más frecuentes después de un infarto es que el ejercicio sea peligroso. Pero ocurre lo contrario: el corazón se fortalece con el movimiento gradual y guiado.\n\nEl reposo total debilita el corazón. La rehabilitación cardíaca, hecha con acompañamiento, lo fortalece.',
+     hoy: '¿Qué puedo hacer hoy?\n• Participar en la rehabilitación cardíaca cuando el equipo lo indique.\n• Practicar la respiración tranquilizante cuando sientas ansiedad.\n• Contarle al médico si tienes mucho miedo — hay formas de ayudar.\n• No tomar decisiones importantes en los primeros días: el miedo y la tristeza pueden distorsionar la perspectiva.',
+     pensamientos: ['"Me va a dar otro infarto"', '"Ya no puedo hacer nada"', '"Soy un enfermo de por vida"', '"¿Y si me muero y dejo solo a mi familia?"'],
+   }},
 ];
-
 window.renderPsicoCards = function(filtro){
   const cont = document.getElementById('psico-cards');
   if(!cont) return;
@@ -3938,152 +3984,153 @@ window.goTo = function(page){
 window.generarPDFPsico = function(guiaId){
   const guia = psicoGuias.find(g => g.id === guiaId);
   if(!guia) return toast('⚠️ Guía no encontrada');
+  if(!guia.cartilla) return toast('⚠️ Esta guía no tiene cartilla para paciente aún');
 
-  // Pedir nombre del paciente
-  const nombre = prompt('Nombre del paciente (opcional, para el documento):') || '';
-  const fecha = new Date().toLocaleDateString('es-CO', {day:'2-digit', month:'long', year:'numeric'});
+  const c = guia.cartilla;
+  const nombre = prompt('Nombre del paciente (dejar en blanco si no aplica):') || '';
+  const fecha = new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
+  const color = guia.color || '#1a6b5a';
 
-  // Construir HTML del documento
-  const prioColors = {p1:'#dc2626', p2:'#d97706', p3:'#16a34a'};
-  const color = prioColors[guia.prio] || '#2d5a4e';
+  // Convertir saltos de línea en párrafos HTML
+  const nl2p = txt => txt.split('\n\n').map(p => {
+    // detectar listas con •
+    if(p.includes('\n•') || p.startsWith('•')){
+      const items = p.split('\n').filter(Boolean);
+      const titulo = items[0].startsWith('•') ? '' : `<p style="margin:0 0 6px;font-weight:600">${items[0]}</p>`;
+      const lista = items.filter(i=>i.startsWith('•')).map(i=>`<li>${i.slice(1).trim()}</li>`).join('');
+      return titulo + `<ul style="padding-left:18px;margin:0">${lista}</ul>`;
+    }
+    // detectar líneas con 🔴 🟢 →
+    if(p.includes('\n🔴') || p.includes('\n🟢') || p.startsWith('🔴') || p.startsWith('🟢')){
+      return p.split('\n').filter(Boolean).map(l=>`<p style="margin:0 0 5px">${l}</p>`).join('');
+    }
+    return `<p style="margin:0 0 8px">${p.replace(/\n/g,'<br>')}</p>`;
+  }).join('');
 
-  const seccionesHTML = guia.contenido.map(c => `
-    <div class="seccion">
-      <div class="seccion-titulo">${c.t}</div>
-      <div class="seccion-cuerpo">${c.c}</div>
-    </div>`).join('');
+  const pensamientosHTML = (c.pensamientos||[]).map(p=>
+    `<div style="background:#fef9ec;border:1.5px solid #f0d060;border-radius:7px;padding:8px 12px;font-size:11.5pt;color:#7b4f00;font-style:italic;text-align:center">${p}</div>`
+  ).join('');
 
   const docHTML = `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Guía para el paciente — ${guia.titulo}</title>
+<title>Cartilla — ${guia.titulo}</title>
 <style>
-  @page { size: letter; margin: 18mm 15mm 15mm 15mm; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13pt; color: #1a1714; background: #fff; line-height: 1.5; }
-
-  .header { border-bottom: 4px solid ${color}; padding-bottom: 10px; margin-bottom: 14px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-  .hospital { font-size: 9pt; color: #666; line-height: 1.4; }
-  .hospital strong { font-size: 10pt; color: #1a1714; }
-  .titulo-doc { text-align: right; }
-  .titulo-doc .icono { font-size: 36pt; line-height: 1; }
-  .titulo-doc h1 { font-size: 14pt; font-weight: 800; color: ${color}; margin-top: 4px; line-height: 1.2; max-width: 280px; }
-
-  .info-paciente { background: ${color}11; border: 1.5px solid ${color}44; border-radius: 8px; padding: 8px 14px; margin-bottom: 14px; font-size: 10.5pt; }
-  .info-paciente strong { color: ${color}; }
-
-  .objetivo { background: #f8f9fa; border-left: 5px solid ${color}; padding: 8px 12px; margin-bottom: 16px; font-size: 10.5pt; color: #444; border-radius: 0 6px 6px 0; }
-  .objetivo strong { color: ${color}; display: block; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
-
-  .seccion { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #e5e7eb; }
-  .seccion:last-child { border-bottom: none; }
-  .seccion-titulo { font-size: 11pt; font-weight: 700; color: ${color}; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
-  .seccion-titulo::before { content: '▶'; font-size: 8pt; }
-  .seccion-cuerpo { font-size: 12pt; color: #2d2d2d; line-height: 1.6; }
-
-  .compromisos { margin-top: 18px; background: ${color}08; border: 2px solid ${color}; border-radius: 10px; padding: 14px 16px; page-break-inside: avoid; }
-  .compromisos h3 { font-size: 12pt; font-weight: 800; color: ${color}; margin-bottom: 10px; }
-  .compromiso-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
-  .check-box { width: 22px; height: 22px; border: 2.5px solid ${color}; border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
-  .compromiso-texto { font-size: 12pt; color: #1a1714; line-height: 1.5; }
-
-  .alertas { margin-top: 14px; background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 8px; padding: 12px 14px; page-break-inside: avoid; }
-  .alertas h3 { font-size: 11pt; font-weight: 700; color: #dc2626; margin-bottom: 8px; }
-  .alertas ul { padding-left: 18px; }
-  .alertas li { font-size: 11.5pt; color: #1a1714; margin-bottom: 5px; line-height: 1.5; }
-
-  .footer { margin-top: 20px; padding-top: 10px; border-top: 1.5px solid #e5e7eb; display: flex; justify-content: space-between; align-items: flex-end; font-size: 9pt; color: #888; }
-  .firma-linea { border-top: 1.5px solid #666; width: 160px; padding-top: 4px; text-align: center; color: #444; font-size: 9pt; }
-
-  @media print {
-    body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-    .no-print { display: none; }
-  }
+  @page{size:letter;margin:14mm 15mm 14mm 15mm}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;font-size:12.5pt;color:#1a1714;background:#fff;line-height:1.6}
+  h2{font-size:13pt;font-weight:800;color:${color};margin:0 0 8px}
+  p{margin:0 0 8px}
+  ul{margin:0 0 8px;padding-left:20px}
+  li{margin-bottom:4px}
+  .bloque{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #e5e7eb}
+  .bloque:last-of-type{border-bottom:none}
+  .caja{border-radius:9px;padding:13px 16px;margin-bottom:14px;page-break-inside:avoid}
+  .check{width:18px;height:18px;border:2.5px solid ${color};border-radius:4px;flex-shrink:0;margin-top:3px;display:inline-block}
+  .fila-check{display:flex;gap:10px;margin-bottom:9px;align-items:flex-start;font-size:12pt}
+  @media print{.barra{display:none};body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
 </style>
 </head>
 <body>
 
-<div class="no-print" style="background:#1a1714;color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;font-family:sans-serif;font-size:13px">
-  <span>📄 Documento listo — ESE Hospital La María</span>
-  <div style="display:flex;gap:10px">
-    <button onclick="window.print()" style="background:#2d5a4e;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;cursor:pointer;font-weight:600">🖨️ Imprimir / Guardar PDF</button>
-    <button onclick="window.close()" style="background:#444;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:13px;cursor:pointer">✕ Cerrar</button>
+<!-- barra -->
+<div class="barra" style="background:#1a1714;color:#fff;padding:9px 16px;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-family:sans-serif">
+  <span>📄 ${guia.titulo}</span>
+  <div style="display:flex;gap:8px">
+    <button onclick="window.print()" style="background:#2d5a4e;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;cursor:pointer;font-weight:600">🖨️ Imprimir / Guardar PDF</button>
+    <button onclick="window.close()" style="background:#555;color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;cursor:pointer">✕</button>
   </div>
 </div>
 
-<div style="padding:0">
-  <!-- ENCABEZADO -->
-  <div class="header">
-    <div class="hospital">
-      <strong>ESE Hospital La María</strong><br>
-      Medellín, Antioquia<br>
-      Servicio de Psicología Hospitalaria<br>
-      <span style="font-size:9pt;color:#888">${fecha}</span>
+<!-- portada -->
+<div style="border-bottom:5px solid ${color};padding-bottom:12px;margin-bottom:16px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div style="font-size:9pt;color:#666;line-height:1.5">
+      <strong style="font-size:10pt;color:#1a1714;display:block">ESE Hospital La María</strong>
+      Medellín, Antioquia · Servicio de Psicología Hospitalaria<br>${fecha}
     </div>
-    <div class="titulo-doc">
-      <div class="icono">${guia.icono}</div>
-      <h1>${guia.titulo}</h1>
-    </div>
+    <span style="background:${color};color:#fff;font-size:8pt;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.05em;text-transform:uppercase">Cartilla Psicoeducativa</span>
   </div>
-
-  <!-- INFO PACIENTE -->
-  ${nombre ? `<div class="info-paciente"><strong>Paciente:</strong> ${nombre}</div>` : ''}
-
-  <!-- OBJETIVO -->
-  <div class="objetivo">
-    <strong>🎯 ¿Para qué es esta guía?</strong>
-    ${guia.objetivo}
+  <div style="margin-top:10px">
+    <div style="font-size:2.6rem;line-height:1">${guia.icono}</div>
+    <div style="font-size:18pt;font-weight:900;color:${color};line-height:1.2;margin-top:6px">${guia.titulo}</div>
+    <div style="font-size:10.5pt;color:#666;margin-top:3px;font-style:italic">Una guía para entender lo que vives y cuidar también tu mente</div>
   </div>
-
-  <!-- SECCIONES -->
-  ${seccionesHTML}
-
-  <!-- COMPROMISOS -->
-  <div class="compromisos">
-    <h3>✅ Mis compromisos para hoy</h3>
-    <div class="compromiso-item"><div class="check-box"></div><div class="compromiso-texto">Voy a poner en práctica al menos una de las recomendaciones de esta guía hoy.</div></div>
-    <div class="compromiso-item"><div class="check-box"></div><div class="compromiso-texto">Si me siento muy mal emocionalmente, voy a decírselo a la enfermera o al médico.</div></div>
-    <div class="compromiso-item"><div class="check-box"></div><div class="compromiso-texto">Voy a guardar esta guía y releerla cuando lo necesite.</div></div>
-    <div style="margin-top:10px;display:flex;gap:30px;flex-wrap:wrap">
-      <div>Fecha: ____________________</div>
-      <div>Firma del paciente: ____________________</div>
-    </div>
-  </div>
-
-  <!-- SEÑALES DE ALERTA -->
-  <div class="alertas">
-    <h3>🚨 Cuándo buscar ayuda inmediata</h3>
-    <ul>
-      <li>Si tiene pensamientos de hacerse daño o de no querer seguir viviendo</li>
-      <li>Si siente que no puede manejar solo lo que está viviendo</li>
-      <li>Si hay un cambio brusco en su estado de ánimo o comportamiento</li>
-      <li>Puede llamar al botón de enfermería o pedirle al equipo médico que avise a Psicología</li>
-    </ul>
-  </div>
-
-  <!-- PIE DE PÁGINA -->
-  <div class="footer">
-    <div>
-      <div>ESE Hospital La María · Servicio de Psicología · ${fecha}</div>
-      <div style="margin-top:2px;color:#aaa">Este documento es de apoyo educativo, no reemplaza la consulta con su equipo de salud.</div>
-    </div>
-    <div class="firma-linea">
-      Psicóloga<br>Servicio de Psicología Hospitalaria
-    </div>
+  <div style="margin-top:10px;background:${color}11;border-left:5px solid ${color};padding:9px 14px;border-radius:0 8px 8px 0;font-size:11.5pt;color:#333;line-height:1.6">
+    Esta cartilla ha sido preparada con cariño para ti.${nombre?' Es para <strong>'+nombre+'</strong>.':''} Es normal sentir miedo, tristeza o agotamiento. Aquí encontrarás información clara y herramientas para cuidar tu mente mientras cuidas tu cuerpo.
   </div>
 </div>
 
-<scr'+'ipt>
-  // Auto-print dialog on load (optional)
-  // window.onload = () => setTimeout(() => window.print(), 500);
-</scr'+'ipt>
-</body>
-</html>`;
+<!-- secciones -->
+<div class="bloque"><h2>¿Qué está pasando?</h2>${nl2p(c.quePasa)}</div>
+<div class="bloque"><h2>${guia.icono} Lo que debes saber</h2>${nl2p(c.queEs)}</div>
+<div class="bloque"><h2>💙 Lo que puedes sentir</h2>${nl2p(c.sintomas)}</div>
+<div class="bloque"><h2>🔗 Cómo todo se conecta</h2>${nl2p(c.conexion)}</div>
+<div class="bloque"><h2>🌿 Lo que puedes hacer hoy</h2>${nl2p(c.hoy)}</div>
 
-  // Abrir en nueva ventana
-  const win = window.open('', '_blank', 'width=850,height=1100,scrollbars=yes');
-  if(!win){ toast('⚠️ Permite las ventanas emergentes para generar el PDF'); return; }
+<!-- pensamientos -->
+${pensamientosHTML.length ? `<div class="bloque">
+  <h2 style="margin-bottom:10px">💭 Pensamientos que pueden aparecer</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">${pensamientosHTML}</div>
+  <p style="font-size:12pt">Reconocer estos pensamientos es el primer paso. <strong>No eres tus pensamientos.</strong> Puedes aprender a relacionarte con ellos de otra manera.</p>
+</div>` : ''}
+
+<!-- estrategias -->
+<div class="bloque">
+  <h2 style="margin-bottom:12px">🛠️ Estrategias que pueden ayudarte</h2>
+  <div style="display:flex;gap:10px;margin-bottom:10px"><div style="font-size:1.5rem;width:32px;flex-shrink:0;text-align:center">🫁</div><div><div style="font-weight:700;color:${color};margin-bottom:3px">Respiración tranquilizante</div><div style="font-size:12pt">Inhala por la nariz contando hasta 4 → Aguanta 2 segundos → Exhala por la boca contando hasta 6. Repite 5 veces. Úsala antes, durante o después de cualquier procedimiento difícil.</div></div></div>
+  <div style="display:flex;gap:10px;margin-bottom:10px"><div style="font-size:1.5rem;width:32px;flex-shrink:0;text-align:center">🧠</div><div><div style="font-weight:700;color:${color};margin-bottom:3px">Cuestiona el pensamiento</div><div style="font-size:12pt">Cuando tengas un pensamiento que te angustie, pregúntate: ¿Esto que pienso es completamente cierto? ¿Qué le diría a un amigo que pensara esto?</div></div></div>
+  <div style="display:flex;gap:10px"><div style="font-size:1.5rem;width:32px;flex-shrink:0;text-align:center">💬</div><div><div style="font-weight:700;color:${color};margin-bottom:3px">Frases de apoyo</div><div style="font-size:12pt">"Puedo hacer esto. Lo he hecho antes." &nbsp;·&nbsp; "Esto es difícil, pero no es para siempre." &nbsp;·&nbsp; "Pedir ayuda es una señal de fortaleza."</div></div></div>
+</div>
+
+<!-- compromisos -->
+<div class="caja" style="background:${color}09;border:2px solid ${color}">
+  <h2 style="margin-bottom:10px">✅ Mis compromisos para hoy</h2>
+  <div class="fila-check"><span class="check"></span><span>Voy a poner en práctica al menos una de las recomendaciones de esta cartilla hoy.</span></div>
+  <div class="fila-check"><span class="check"></span><span>Si me siento muy mal emocionalmente, voy a decírselo a la enfermera o al médico.</span></div>
+  <div class="fila-check"><span class="check"></span><span>Voy a guardar esta cartilla y releerla cuando lo necesite.</span></div>
+  <div style="display:flex;gap:40px;margin-top:12px;font-size:10.5pt;flex-wrap:wrap">
+    <span>Fecha: ______________________</span>
+    <span>Firma: ______________________</span>
+  </div>
+</div>
+
+<!-- alertas -->
+<div class="caja" style="background:#fef2f2;border:1.5px solid #fca5a5;margin-top:0">
+  <div style="font-size:12pt;font-weight:700;color:#dc2626;margin-bottom:8px">🚨 Cuándo buscar ayuda de inmediato</div>
+  <div style="font-size:12pt;margin-bottom:5px">⚠️ Si tienes pensamientos de hacerte daño o de no querer seguir viviendo</div>
+  <div style="font-size:12pt;margin-bottom:5px">⚠️ Si sientes que no puedes manejar solo lo que estás viviendo</div>
+  <div style="font-size:12pt;margin-bottom:5px">⚠️ Si hay un cambio brusco en tu estado de ánimo o comportamiento</div>
+  <div style="font-size:12pt;color:#166534">✅ Usa el botón de llamada o pídele al equipo que avise a Psicología</div>
+</div>
+
+<!-- mensaje final -->
+<div class="caja" style="background:${color};color:#fff;margin-top:0">
+  <div style="font-size:12pt;font-weight:800;margin-bottom:8px">Un mensaje para ti</div>
+  <div style="font-size:12pt;line-height:1.7;opacity:.95">Lo que estás viviendo es real, es difícil y merece ser reconocido. No tienes que estar "fuerte" todo el tiempo ni fingir que todo está bien. Muchas personas han pasado por este camino y han encontrado formas de adaptarse y seguir conectadas con lo que aman. <strong>Pedir ayuda es un acto de valentía.</strong></div>
+</div>
+
+<!-- familia -->
+<div class="caja" style="background:#f8f9fa;border:1.5px solid #d1d5db;margin-top:0">
+  <div style="font-size:12pt;font-weight:700;color:#374151;margin-bottom:8px">💛 Para familiares y cuidadores</div>
+  <div style="font-size:11.5pt;margin-bottom:5px">✔ Escuche sin minimizar — evite frases como "tú puedes" o "no es para tanto". Simplemente acompañe.</div>
+  <div style="font-size:11.5pt;margin-bottom:5px">✔ Pregunte cómo puede ayudar en lugar de asumir lo que necesita.</div>
+  <div style="font-size:11.5pt;margin-bottom:5px">✔ Cuídese también usted — cuidar a alguien con una enfermedad genera agotamiento emocional.</div>
+  <div style="font-size:11.5pt">✔ Si nota cambios importantes en el estado de ánimo, comuníquelo al equipo de salud.</div>
+</div>
+
+<!-- footer -->
+<div style="margin-top:14px;padding-top:10px;border-top:1.5px solid #e5e7eb;display:flex;justify-content:space-between;align-items:flex-end;font-size:8.5pt;color:#888">
+  <div>Elaborado por el Servicio de Psicología Clínica · ESE Hospital La María · Medellín, Antioquia<br>
+  <span style="color:#bbb">Este material es de apoyo educativo y no reemplaza la consulta con su equipo de salud.</span></div>
+  <div style="border-top:1.5px solid #666;width:150px;padding-top:3px;text-align:center;color:#444;font-size:9pt">Psicóloga Hospitalaria<br>Servicio de Psicología</div>
+</div>
+
+</body></html>`;
+
+  const win = window.open('','_blank','width=870,height=1100,scrollbars=yes');
+  if(!win){toast('⚠️ Permite las ventanas emergentes para generar la cartilla');return;}
   win.document.write(docHTML);
   win.document.close();
 };
