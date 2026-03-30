@@ -549,8 +549,20 @@ input.toggle-cb{display:none}
           <div class="ic-pat-field"><label>Hab.</label><input type="text" id="ic-hab" placeholder="304B"></div>
           <div class="ic-pat-field"><label>Nombre del paciente</label><input type="text" id="ic-pnombre" placeholder="Nombre completo"></div>
           <div class="ic-pat-field"><label>Edad / Sexo</label><input type="text" id="ic-edad" placeholder="42 años, F"></div>
-          <div class="ic-pat-field"><label>Diagnóstico médico / Motivo IC</label><input type="text" id="ic-pdx" placeholder="Ca. de mama, impacto emocional dx reciente"></div>
+          <div class="ic-pat-field"><label>Diagnóstico médico / Motivo IC</label><input type="text" id="ic-pdx" placeholder="Ca. de mama, impacto emocional dx reciente" oninput="const w=document.getElementById('ic-orientacion-wrap');if(w&&this.value.length>5)w.style.display='';"></div>
           <div class="ic-pat-field"><label>Fecha</label><input type="date" id="ic-pfecha"></div>
+        </div>
+        <!-- ORIENTACIÓN DE VALORACIÓN CON IA -->
+        <div id="ic-orientacion-wrap" style="display:none;margin-bottom:10px;background:var(--surface);border:1.5px solid var(--accent2);border-radius:10px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--accent2)11;border-bottom:1px solid var(--accent2)33">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:1rem">🧭</span>
+              <span style="font-size:0.82rem;font-weight:700;color:var(--accent2)">Orientación de valoración</span>
+              <span style="font-size:0.72rem;color:var(--text3)">— qué explorar en este encuentro</span>
+            </div>
+            <button onclick="generarOrientacionIC()" style="background:var(--accent2);color:#fff;border:none;border-radius:6px;padding:4px 11px;font-size:0.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px" id="ic-orientacion-btn">✨ Generar guía</button>
+          </div>
+          <div id="ic-orientacion-out" style="padding:12px 14px;font-size:0.78rem;color:var(--text2);line-height:1.7;white-space:pre-wrap;min-height:40px;display:none"></div>
         </div>
         <div class="risk-alert-bar" id="ic-risk-alert">⚠️ RIESGO ALTO — Verificar protocolo de seguridad antes de cerrar la nota</div>
         <!-- MODO IC NUEVA + SEGUIMIENTO -->
@@ -2347,6 +2359,16 @@ window.selectICPaciente=(id)=>{
   // Auto-set mode based on patient estado
   if(p.estado==='nueva-interconsulta-pendiente')setICMode('nueva');
   else if(p.estado==='seguimiento')setICMode('seg');
+  // Mostrar bloque de orientación si hay motivo
+  if(p.motivo||(dx&&dx.value)){
+    const wrap=document.getElementById('ic-orientacion-wrap');
+    if(wrap)wrap.style.display='';
+    // Reset output
+    const out=document.getElementById('ic-orientacion-out');
+    if(out){out.style.display='none';out.textContent='';}
+    const btn=document.getElementById('ic-orientacion-btn');
+    if(btn){btn.textContent='✨ Generar guía';btn.disabled=false;}
+  }
 };
 
 window.abrirICParaPaciente=(id)=>{
@@ -4161,6 +4183,65 @@ ${pensamientosHTML.length ? `<div class="bloque">
   win.document.close();
 };
 
+
+// ── ORIENTACIÓN DE VALORACIÓN CON IA ────────────────────────────────
+window.generarOrientacionIC = async function(){
+  const apiKey = typeof getGeminiKey==='function' ? getGeminiKey() : '';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+
+  const motivo = document.getElementById('ic-pdx')?.value?.trim() || '';
+  const nombre = document.getElementById('ic-pnombre')?.value?.trim() || '';
+  const edad   = document.getElementById('ic-edad')?.value?.trim() || '';
+
+  if(!motivo) return toast('⚠️ Ingresa el diagnóstico / motivo de interconsulta primero');
+
+  const btn = document.getElementById('ic-orientacion-btn');
+  const out  = document.getElementById('ic-orientacion-out');
+  if(btn){ btn.textContent='⏳ Generando…'; btn.disabled=true; }
+  if(out){ out.style.display=''; out.textContent='Generando guía de valoración…'; }
+
+  const prompt = `Eres una psicóloga clínica hospitalaria experta en interconsultas de agudos. 
+Recibes la siguiente solicitud de interconsulta:
+
+PACIENTE: ${nombre||'Sin nombre'} · ${edad||'edad no especificada'}
+MOTIVO DE INTERCONSULTA / DIAGNÓSTICO: ${motivo}
+
+Tu tarea es generar una guía de orientación clínica BREVE y PRÁCTICA para la valoración inicial de este paciente. Estructura tu respuesta así:
+
+**FOCO PRINCIPAL DE LA VALORACIÓN**
+Una o dos frases sobre el objetivo central del encuentro.
+
+**PREGUNTAS CLAVE A EXPLORAR**
+Lista de 5 a 7 preguntas concretas, ordenadas por prioridad, que debes hacer o indagar en este encuentro. Usa lenguaje directo como si le hablaras a la psicóloga.
+
+**ASPECTOS A OBSERVAR**
+3 o 4 elementos del examen mental o conductuales que son especialmente relevantes dado el motivo.
+
+**SEÑALES DE ALERTA A DESCARTAR**
+Las 2 o 3 más importantes para este caso específico.
+
+**INTERVENCIÓN INICIAL SUGERIDA**
+Una o dos frases sobre qué tipo de intervención es más probable que necesites hacer en este primer encuentro.
+
+Sé concreta, clínica y directa. Máximo 250 palabras en total. Adapta todo al contexto hospitalario intra-hospitalario, no ambulatorio.`;
+
+  try{
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.3, maxOutputTokens:1000}})
+    });
+    const d = await r.json();
+    if(!r.ok||d.error) throw new Error(d.error?.message||'Error API');
+    const texto = (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    if(out){ out.textContent = texto; }
+    if(btn){ btn.textContent='↻ Regenerar'; btn.disabled=false; }
+  }catch(e){
+    if(out){ out.textContent='❌ '+e.message; }
+    if(btn){ btn.textContent='✨ Generar guía'; btn.disabled=false; }
+    toast('❌ '+e.message);
+  }
+};
+
 // Estos stubs capturan clics tempranos y los reintenta hasta que el módulo esté listo.
 (function(){
   function makeStub(name){
@@ -4173,7 +4254,7 @@ ${pensamientosHTML.length ? `<div class="bloque">
   }
   ['guardarPaciente','editarPaciente','eliminarPaciente','guardarIC','eliminarIC',
    'verHistorialPorId','nuevaAnamnesisParaPaciente','abrirICParaPaciente','irTestsPaciente',
-   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad','sincronizarPendientes','generarNotasPendientesIA','generarPlanTratamiento','editarPlanTratamiento','verBackupsLocales','generarNotaDesdeBackup','eliminarBackup','guardarPlanEditado','copiarPlanTratamiento','cargarPlanTratamiento',
+   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad','sincronizarPendientes','generarNotasPendientesIA','generarPlanTratamiento','editarPlanTratamiento','verBackupsLocales','generarNotaDesdeBackup','eliminarBackup','generarOrientacionIC','guardarPlanEditado','copiarPlanTratamiento','cargarPlanTratamiento',
    'guardarAnamnesis','generarNotaAnamnesis','mhicNuevaNota','mhicCerrar',
    'mneCerrar','mneGuardar','mneEliminar','hpacNuevaNota','hpacVolverLista',
    'calcPHQ9','calcGAD7','calcHADS','calcMMSE','calcMoCA','calcCAM','calcSVACBCA','generarNotaSVACBCA','renderSVACBCA',
