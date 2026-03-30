@@ -4199,39 +4199,62 @@ ${pensamientosHTML.length ? `<div class="bloque">
 
 // ── ORIENTACIÓN DE VALORACIÓN CON IA ────────────────────────────────
 window.generarOrientacionIC = async function(){
-  // Leer API key directamente — getGeminiKey puede no estar disponible en este scope
   const apiKey = (typeof getGeminiKey==='function' ? getGeminiKey() : null)
     || localStorage.getItem('gemini_api_key') || '';
-  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini en Interconsultas primero');
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
 
   const btn = document.getElementById('ic-orientacion-btn');
   const out  = document.getElementById('ic-orientacion-out');
 
-  // Leer motivo desde campo de diagnóstico o desde motivo de interconsulta
   const motivo = (document.getElementById('ic-pdx')?.value||'').trim()
                ||(document.getElementById('ic-motivo')?.value||'').trim();
   const nombre = (document.getElementById('ic-pnombre')?.value||'').trim();
   const edad   = (document.getElementById('ic-edad')?.value||'').trim();
+  const modo   = (document.getElementById('ic-btn-seg')?.classList.contains('active')) ? 'seguimiento' : 'inicial';
 
-  if(!motivo){
-    toast('⚠️ Escribe el diagnóstico o motivo de interconsulta arriba primero');
-    return;
-  }
+  if(!motivo){ toast('⚠️ Escribe el diagnóstico o motivo de interconsulta primero'); return; }
 
   if(btn){ btn.textContent='⏳ Generando…'; btn.disabled=true; }
-  if(out){ out.style.display=''; out.textContent='Generando guía de valoración…'; }
+  if(out){ out.style.display=''; out.innerHTML='<em style="color:var(--text3)">Generando guía de valoración…</em>'; }
 
+  // Construir contexto del historial previo si es seguimiento
+  let historialCtx = '';
+  if(modo==='seguimiento' && nombre && window.interconsultas){
+    const previas = (window.interconsultas||[])
+      .filter(ic => ic.pacienteNombre === nombre && (ic.sub||ic.obj||ic.nota))
+      .sort((a,b)=>{
+        const ta = a.creado?.seconds||0, tb = b.creado?.seconds||0;
+        return ta - tb;
+      })
+      .slice(-5); // últimas 5 notas
+    if(previas.length){
+      historialCtx = '\n\nHISTORIAL CLÍNICO PREVIO (últimas '+previas.length+' notas):\n'
+        + previas.map((ic,i)=>{
+          const fecha = ic.fecha||'sin fecha';
+          const tipo = ic.modo||'IC';
+          const texto = [ic.sub,ic.obj,ic.resp,ic.trat,ic.nota].filter(Boolean).join(' | ').slice(0,300);
+          return (i+1)+'. ['+tipo+' '+fecha+'] '+texto;
+        }).join('\n');
+    }
+  }
+
+  const esSeguimiento = modo === 'seguimiento';
   const prompt = 'Eres una psicóloga clínica hospitalaria experta en interconsultas de agudos.'
-    + ' Recibes esta solicitud: Paciente: ' + (nombre||'sin nombre') + ', ' + (edad||'edad no especificada') + '.'
-    + ' Motivo de interconsulta: ' + motivo + '.'
-    + ' Genera una guía de orientación clínica BREVE y PRÁCTICA para la valoración inicial.'
-    + ' Estructura tu respuesta con estas secciones exactas:\n\n'
-    + '**FOCO DE LA VALORACIÓN**\n(1-2 frases sobre el objetivo central del encuentro)\n\n'
-    + '**PREGUNTAS CLAVE A EXPLORAR**\n(5-7 preguntas concretas en orden de prioridad, lenguaje directo)\n\n'
-    + '**QUÉ OBSERVAR EN EL EXAMEN MENTAL**\n(3-4 elementos especialmente relevantes para este caso)\n\n'
-    + '**SEÑALES DE ALERTA A DESCARTAR**\n(2-3 señales críticas para este caso específico)\n\n'
-    + '**INTERVENCIÓN INICIAL SUGERIDA**\n(1-2 frases sobre qué hacer en este primer encuentro)\n\n'
-    + 'Máximo 250 palabras. Contexto: hospital de tercer nivel, interconsulta intrahospitalaria, tiempo limitado.';
+    + ' Paciente: ' + (nombre||'sin nombre') + ', ' + (edad||'edad no especificada') + '.'
+    + ' Motivo / diagnóstico: ' + motivo + '.'
+    + (esSeguimiento ? ' Es una visita de SEGUIMIENTO (no valoración inicial).' : ' Es una VALORACIÓN INICIAL.')
+    + historialCtx
+    + '\n\nGenera una guía de orientación clínica PRÁCTICA para este encuentro.'
+    + ' Estructura con estas secciones:\n\n'
+    + '**FOCO DEL ENCUENTRO**\n(1-2 frases sobre el objetivo central)\n\n'
+    + (esSeguimiento
+      ? '**EVOLUCIÓN A EXPLORAR**\n(¿Qué cambió desde la última visita? 4-5 preguntas concretas)\n\n'
+        + '**VERIFICAR INTERVENCIONES PREVIAS**\n(Qué revisar de lo trabajado antes)\n\n'
+      : '**PREGUNTAS CLAVE**\n(5-6 preguntas concretas en orden de prioridad)\n\n')
+    + '**QUÉ OBSERVAR EN EL EXAMEN MENTAL**\n(3-4 elementos relevantes para este caso)\n\n'
+    + '**SEÑALES DE ALERTA**\n(2-3 señales críticas para este caso)\n\n'
+    + '**INTERVENCIÓN SUGERIDA**\n(1-2 frases sobre qué hacer hoy)\n\n'
+    + 'Máximo 300 palabras. Sé concreta y directa. Contexto: hospital tercer nivel, tiempo limitado.';
 
   try{
     const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
@@ -4239,26 +4262,25 @@ window.generarOrientacionIC = async function(){
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.3, maxOutputTokens:1000}
+        generationConfig:{temperature:0.3, maxOutputTokens:2000}
       })
     });
     const d = await r.json();
     if(!r.ok||d.error) throw new Error(d.error?.message||'Error API');
     const texto = (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
     if(out){
-      // Renderizar markdown básico
       const html = texto
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--accent);display:block;margin-top:10px;margin-bottom:3px">$1</strong>')
         .replace(/\*(.+?)\*/g,'<em>$1</em>')
         .replace(/\n/g,'<br>');
       out.innerHTML = html;
     }
-    if(btn){ btn.textContent='↻ Regenerar'; btn.disabled=false; }
+    if(btn){ btn.textContent='\u21bb Regenerar'; btn.disabled=false; }
   }catch(e){
-    if(out){ out.textContent='❌ '+e.message; }
-    if(btn){ btn.textContent='✨ Generar guía'; btn.disabled=false; }
-    toast('❌ '+e.message);
+    if(out){ out.innerHTML='<span style="color:var(--danger)">\u274c '+e.message+'</span>'; }
+    if(btn){ btn.textContent='\u2728 Generar guía'; btn.disabled=false; }
+    toast('\u274c '+e.message);
   }
 };
 
