@@ -880,6 +880,19 @@ input.toggle-cb{display:none}
             <div class="form-group"><label>Sesión #</label><input type="number" id="seg-num" min="1" placeholder="—" style="width:80px;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem"></div>
           </div>
 
+          <!-- ORIENTACIÓN DE SEGUIMIENTO CON IA -->
+          <div style="background:var(--surface);border:1.5px solid var(--accent2);border-radius:10px;overflow:hidden;margin-bottom:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--accent2)11;border-bottom:1px solid var(--accent2)33">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:1rem">🧭</span>
+                <span style="font-size:0.82rem;font-weight:700;color:var(--accent2)">Orientación del seguimiento</span>
+                <span style="font-size:0.72rem;color:var(--text3)">— basada en el historial clínico del paciente</span>
+              </div>
+              <button onclick="generarOrientacionSeg()" id="seg-orientacion-btn" style="background:var(--accent2);color:#fff;border:none;border-radius:6px;padding:4px 11px;font-size:0.72rem;font-weight:600;cursor:pointer">✨ Generar guía</button>
+            </div>
+            <div id="seg-orientacion-out" style="display:none;padding:12px 14px;font-size:0.78rem;color:var(--text2);line-height:1.7;white-space:pre-wrap"></div>
+          </div>
+
           <!-- I. DATOS CLAVES -->
           <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
             <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">I. Datos claves de la sesión</div>
@@ -4239,6 +4252,85 @@ window.generarOrientacionIC = async function(){
   }
 };
 
+
+// ── ORIENTACIÓN DE SEGUIMIENTO CON IA ───────────────────────────────
+window.generarOrientacionSeg = async function(){
+  const apiKey = typeof getGeminiKey==='function' ? getGeminiKey() : '';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+
+  const btn = document.getElementById('seg-orientacion-btn');
+  const out  = document.getElementById('seg-orientacion-out');
+
+  // Obtener paciente seleccionado
+  const selPac = document.getElementById('seg-pac-sel');
+  const pacId = selPac?.value || null;
+  const pac = pacId ? (window.pacientes||[]).find(p=>p.id===pacId) : null;
+  const nombre = pac?.nombre || (document.getElementById('ic-pnombre')?.value||'').trim();
+
+  if(!nombre && !pacId) return toast('⚠️ Selecciona un paciente primero');
+
+  if(btn){ btn.textContent='⏳ Generando…'; btn.disabled=true; }
+  if(out){ out.style.display=''; out.textContent='Leyendo historial y generando orientación…'; }
+
+  // Construir resumen del historial del paciente
+  const ics = (window.interconsultas||[])
+    .filter(ic => ic.pacienteId===pacId || ic.pacienteNombre===nombre)
+    .sort((a,b) => {
+      const ta = a.creado?.seconds||0, tb = b.creado?.seconds||0;
+      return ta - tb;
+    });
+
+  const dx = pac?.motivo || pac?.dxpsi || ics[0]?.dx || 'No especificado';
+  const riesgo = pac?.riesgo || 'No especificado';
+  const sesNum = ics.length + 1;
+
+  // Resumen de notas previas (últimas 3)
+  const notasPrevias = ics.slice(-3).map((ic, i) => {
+    const modo = ic.modo || 'IC';
+    const fecha = ic.fecha || '';
+    const nota = ic.obj || ic.nota || ic.sub || '';
+    const resumen = nota.slice(0, 200).replace(/\n/g,' ');
+    return 'Sesi\u00f3n '+fecha+' ('+modo+'): '+resumen+(nota.length>200?'\u2026':'');
+  }).join('\n');
+
+
+  const prompt = 'Eres una psicóloga clínica hospitalaria experta en seguimiento de pacientes.'
+    + ' Tienes el siguiente historial clínico:\n\n'
+    + 'PACIENTE: ' + nombre + '\n'
+    + 'DIAGNÓSTICO / MOTIVO: ' + dx + '\n'
+    + 'RIESGO ACTUAL: ' + riesgo + '\n'
+    + 'SESIÓN NÚMERO: ' + sesNum + '\n'
+    + (notasPrevias ? 'NOTAS PREVIAS:\n' + notasPrevias + '\n\n' : '(Sin notas previas registradas)\n\n')
+    + 'Genera una guía de orientación clínica BREVE y PRÁCTICA para ESTA sesión de seguimiento.'
+    + ' Estructura tu respuesta así:\n\n'
+    + '**FOCO DE ESTA SESIÓN**\n(1-2 frases sobre qué debe priorizarse hoy dado el historial)\n\n'
+    + '**PREGUNTAS CLAVE A EXPLORAR**\n(5-6 preguntas concretas en orden de prioridad, considerando evolución previa)\n\n'
+    + '**QUÉ MONITOREAR**\n(3-4 aspectos a evaluar dado el historial — cambios, retrocesos, señales de alarma)\n\n'
+    + '**SEÑALES DE ALERTA**\n(2-3 señales que indicarían deterioro o cambio de plan)\n\n'
+    + '**AJUSTE DE INTERVENCIÓN SUGERIDO**\n(1-2 frases sobre si mantener, ajustar o intensificar el abordaje)\n\n'
+    + 'Máximo 280 palabras. Sé concreta y directa. Contexto: hospital tercer nivel, sesión en cama, tiempo limitado.';
+
+  try{
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{parts:[{text:prompt}]}],
+        generationConfig:{temperature:0.3, maxOutputTokens:1200}
+      })
+    });
+    const d = await r.json();
+    if(!r.ok||d.error) throw new Error(d.error?.message||'Error API');
+    const texto = (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    if(out){ out.textContent = texto; }
+    if(btn){ btn.textContent='↻ Regenerar'; btn.disabled=false; }
+  }catch(e){
+    if(out){ out.textContent='❌ '+e.message; }
+    if(btn){ btn.textContent='✨ Generar guía'; btn.disabled=false; }
+    toast('❌ '+e.message);
+  }
+};
+
 // Estos stubs capturan clics tempranos y los reintenta hasta que el módulo esté listo.
 (function(){
   function makeStub(name){
@@ -4251,7 +4343,7 @@ window.generarOrientacionIC = async function(){
   }
   ['guardarPaciente','editarPaciente','eliminarPaciente','guardarIC','eliminarIC',
    'verHistorialPorId','nuevaAnamnesisParaPaciente','abrirICParaPaciente','irTestsPaciente',
-   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad','sincronizarPendientes','generarNotasPendientesIA','generarPlanTratamiento','editarPlanTratamiento','verBackupsLocales','generarNotaDesdeBackup','eliminarBackup','generarOrientacionIC','guardarPlanEditado','copiarPlanTratamiento','cargarPlanTratamiento',
+   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad','sincronizarPendientes','generarNotasPendientesIA','generarPlanTratamiento','editarPlanTratamiento','verBackupsLocales','generarNotaDesdeBackup','eliminarBackup','generarOrientacionIC','generarOrientacionSeg','guardarPlanEditado','copiarPlanTratamiento','cargarPlanTratamiento',
    'guardarAnamnesis','generarNotaAnamnesis','mhicNuevaNota','mhicCerrar',
    'mneCerrar','mneGuardar','mneEliminar','hpacNuevaNota','hpacVolverLista',
    'calcPHQ9','calcGAD7','calcHADS','calcMMSE','calcMoCA','calcCAM','calcSVACBCA','generarNotaSVACBCA','renderSVACBCA',
