@@ -5122,17 +5122,18 @@ let _hpacPacId=null;window._hpacPacId=null;
 window.hpacGenerarNotaIA=async(docId, ni)=>{
   const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
   if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
-  const m=_hMap[ni];
-  if(!m)return toast('⚠️ Registro no encontrado');
-  const col=m.col||'interconsultas';
+
   const todos=[...(window.interconsultas||[]),...(window.anamnesisList||[])];
   const e=todos.find(x=>x.id===docId);
   if(!e)return toast('⚠️ No se encontró el registro');
 
+  // Determinar colección
+  const col=(window.anamnesisList||[]).find(x=>x.id===docId)?'anamnesis':'interconsultas';
+
   toast('⏳ Generando nota con IA…');
 
-  // Construir contexto desde _aiFormSnap si existe, o desde los campos guardados
-  const fd=e._aiFormSnap||{};
+  // Usar formulario (campo permanente) o _aiFormSnap como fallback
+  const fd=e.formulario||e._aiFormSnap||{};
   const ctx='Dx: '+(fd.dx||e.dx||'—')+'. Riesgo: '+(fd.riesgo||e.riesgo||'—')+'.';
 
   // Si hay nota/campos existentes usarlos como base para mejorar
