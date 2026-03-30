@@ -1937,6 +1937,11 @@ const db = initializeFirestore(app, {
   localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
 });
 window.db=db;
+window._updateDoc=updateDoc;
+window._doc=doc;
+window._addDoc=addDoc;
+window._collection=collection;
+window._serverTimestamp=serverTimestamp;
 window._fdb={collection,addDoc,deleteDoc,doc,updateDoc,serverTimestamp,query,orderBy};
 let pacientes=[],interconsultas=[],anamnesisList=[],testHistory=[];
 window.pacientes=pacientes;window.interconsultas=interconsultas;window.anamnesisList=anamnesisList;window.testHistory=testHistory;
@@ -5168,7 +5173,7 @@ window.hpacGenerarNotaIA=async(docId, ni)=>{
       const dataSeg='Estado emocional: '+(fd.sub?.emoc||e.nota?.slice(0,200)||'—')+'. Afecto: '+(fd.obj?.afecto||'—')+'. Riesgo: '+(fd.riesgo||e.riesgo||'—')+'. Intervención: '+(fd.trat?.interv||'—')+'. Plan: '+(fd.trat?.plan||'—')+'.';
       obj=await llamar(base+'\n\nNota de seguimiento psicológico hospitalario. '+dataSeg);
       sub=''; res=''; tra='';
-      await updateDoc(doc(db,col,docId),{obj,nota:obj,needsAI:false,_aiFormSnap:null});
+      await window._updateDoc(window._doc(window.db,col,docId),{obj,nota:obj,needsAI:false,_aiFormSnap:null});
     } else {
       // IC Nueva / Anamnesis: 4 campos paralelos
       const dSub='Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos: '+(fd.sub?.pens||'—')+'. Cita: '+(fd.sub?.cita||'—')+'. Antecedentes: '+(e.nota?.slice(0,150)||'—')+'.';
@@ -5182,7 +5187,7 @@ window.hpacGenerarNotaIA=async(docId, ni)=>{
         llamar(base+'\n\nTRATAMIENTO — intervención y plan. '+dTrat)
       ]);
       const notaTexto='ANÁLISIS SUBJETIVO\n'+sub+'\n\nANÁLISIS OBJETIVO\n'+obj+'\n\nRESPUESTA\n'+res+'\n\nTRATAMIENTO\n'+tra;
-      await updateDoc(doc(db,col,docId),{sub,obj,resp:res,trat:tra,nota:notaTexto,needsAI:false,_aiFormSnap:null});
+      await window._updateDoc(window._doc(window.db,col,docId),{sub,obj,resp:res,trat:tra,nota:notaTexto,needsAI:false,_aiFormSnap:null});
     }
 
     toast('✅ Nota generada y guardada');
