@@ -562,7 +562,7 @@ input.toggle-cb{display:none}
             </div>
             <button onclick="if(typeof window.generarOrientacionIC==='function'){window.generarOrientacionIC();}else{alert('Función no cargada aún — recarga la página');}" style="background:var(--accent2);color:#fff;border:none;border-radius:6px;padding:4px 11px;font-size:0.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px" id="ic-orientacion-btn">✨ Generar guía</button>
           </div>
-          <div id="ic-orientacion-out" style="padding:12px 14px;font-size:0.78rem;color:var(--text2);line-height:1.7;white-space:pre-wrap;min-height:40px;display:none"></div>
+          <div id="ic-orientacion-out" style="padding:12px 14px;font-size:0.78rem;color:var(--text2);line-height:1.7;display:none"></div>
         </div>
         <div class="risk-alert-bar" id="ic-risk-alert">⚠️ RIESGO ALTO — Verificar protocolo de seguridad antes de cerrar la nota</div>
         <!-- MODO IC NUEVA + SEGUIMIENTO -->
@@ -4245,7 +4245,15 @@ window.generarOrientacionIC = async function(){
     const d = await r.json();
     if(!r.ok||d.error) throw new Error(d.error?.message||'Error API');
     const texto = (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
-    if(out){ out.textContent = texto; }
+    if(out){
+      // Renderizar markdown básico
+      const html = texto
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g,'<em>$1</em>')
+        .replace(/\n/g,'<br>');
+      out.innerHTML = html;
+    }
     if(btn){ btn.textContent='↻ Regenerar'; btn.disabled=false; }
   }catch(e){
     if(out){ out.textContent='❌ '+e.message; }
