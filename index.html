@@ -5120,7 +5120,11 @@ let _hpacPacId=null;window._hpacPacId=null;
 
 // Generar/regenerar nota IA para cualquier registro desde el historial
 window.hpacGenerarNotaIA=async(docId, ni)=>{
-  const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
+  // Leer key de múltiples fuentes
+  const apiKey=(typeof getGeminiKey==='function'?getGeminiKey():null)
+    ||localStorage.getItem('gemini_api_key')
+    ||(document.getElementById('gemini-api-key')?.value||'')
+    ||(document.getElementById('an-gemini-key')?.value||'');
   if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
 
   const todos=[...(window.interconsultas||[]),...(window.anamnesisList||[])];
@@ -5142,12 +5146,17 @@ window.hpacGenerarNotaIA=async(docId, ni)=>{
   const base='Eres psicólogo clínico hospitalario (TCC). UN SOLO PÁRRAFO, texto corrido, sin listas, no uses el nombre del paciente, lenguaje técnico-clínico. '+ctx;
 
   const llamar=async(prompt)=>{
-    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
-    });
+    let r;
+    try{
+      r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
+      });
+    }catch(fetchErr){
+      throw new Error('Error de red al contactar Gemini: '+fetchErr.message+'. Verifica que tienes conexión a internet.');
+    }
     const d=await r.json();
-    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+    if(!r.ok||d.error)throw new Error('Gemini error '+r.status+': '+(d.error?.message||JSON.stringify(d.error)||'Error desconocido'));
     return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
   };
 
