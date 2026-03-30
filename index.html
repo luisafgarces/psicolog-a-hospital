@@ -560,7 +560,7 @@ input.toggle-cb{display:none}
               <span style="font-size:0.82rem;font-weight:700;color:var(--accent2)">Orientación de valoración</span>
               <span style="font-size:0.72rem;color:var(--text3)">— basada en el diagnóstico / motivo ingresado arriba</span>
             </div>
-            <button onclick="generarOrientacionIC()" style="background:var(--accent2);color:#fff;border:none;border-radius:6px;padding:4px 11px;font-size:0.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px" id="ic-orientacion-btn">✨ Generar guía</button>
+            <button onclick="if(typeof window.generarOrientacionIC==='function'){window.generarOrientacionIC();}else{alert('Función no cargada aún — recarga la página');}" style="background:var(--accent2);color:#fff;border:none;border-radius:6px;padding:4px 11px;font-size:0.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px" id="ic-orientacion-btn">✨ Generar guía</button>
           </div>
           <div id="ic-orientacion-out" style="padding:12px 14px;font-size:0.78rem;color:var(--text2);line-height:1.7;white-space:pre-wrap;min-height:40px;display:none"></div>
         </div>
@@ -4199,8 +4199,10 @@ ${pensamientosHTML.length ? `<div class="bloque">
 
 // ── ORIENTACIÓN DE VALORACIÓN CON IA ────────────────────────────────
 window.generarOrientacionIC = async function(){
-  const apiKey = typeof getGeminiKey==='function' ? getGeminiKey() : '';
-  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+  // Leer API key directamente — getGeminiKey puede no estar disponible en este scope
+  const apiKey = (typeof getGeminiKey==='function' ? getGeminiKey() : null)
+    || localStorage.getItem('gemini_api_key') || '';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini en Interconsultas primero');
 
   const btn = document.getElementById('ic-orientacion-btn');
   const out  = document.getElementById('ic-orientacion-out');
@@ -4334,6 +4336,8 @@ window.generarOrientacionSeg = async function(){
 // Estos stubs capturan clics tempranos y los reintenta hasta que el módulo esté listo.
 (function(){
   function makeStub(name){
+    // No sobreescribir si la función ya está definida en este script
+    if(typeof window[name]==='function')return;
     window[name]=function stub(...args){
       // Si el módulo ya reemplazó el stub, llamar la versión real
       if(window[name]!==stub)return window[name](...args);
