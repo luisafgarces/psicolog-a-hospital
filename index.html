@@ -2657,17 +2657,42 @@ window.guardarICFirebase=async()=>{
       // solo en nota para evitar duplicado al renderizar
     }
   }catch(ex){console.error('Error capturando datos de seguimiento:',ex);}
-  // Siempre guardar snapshot del formulario si no hay nota IA — para poder regenerar desde cualquier dispositivo
+  // Capturar SIEMPRE todos los campos del formulario — independiente de si hay nota IA o no
   const sinNotaIA=!sub&&!obj&&!resp&&!trat&&icCurrentMode==='nueva';
-  const needsAI=sinNotaIA; // true siempre que no haya nota IA, no solo cuando no hay señal
-  // Capturar SIEMPRE los datos del formulario cuando no hay nota IA generada
-  const _aiFormSnap=sinNotaIA?{
+  const needsAI=sinNotaIA;
+  const formulario=icCurrentMode==='nueva'?{
     edad:icv('ic-edad'),sexo:icv('ic-sexo'),dx:dx,hab:hab,riesgo:riesgo,
-    sub:{emoc:icChipsBySubLabel('Estado emocional referido').join(', '),preoc:icChipsBySubLabel('Principales preocupaciones').join(', '),pens:icChipsBySubLabel('Pensamientos automáticos').join(', '),cita:icv('ic-sub-cita'),intens:icv('ic-sub-intensidad')},
-    obj:{orient:icChipsBySubLabel('Orientación').join(', '),conc:icChipsBySubLabel('Conciencia / Colaboración').join(', '),afecto:icChipsBySubLabel('Afecto').join(', '),pens:icChipsBySubLabel('Pensamiento').join(', '),insight:icChipsBySubLabel('Lenguaje / Insight').join(', '),regulacion:icChipsBySubLabel('Regulación emocional').join(', '),ideacion:icChipsBySubLabel('Ideación actual').join(', '),riesgoN:riesgo,protectores:icChipsBySubLabel('Factores protectores').join(', ')},
-    resp:{tipoResp:icChipsBySubLabel('Tipo de respuesta emocional').join(', '),impresion:icChipsBySubLabel('Impresión clínica').join(', ')},
-    trat:{interv:icChipsBySubLabel('Intervención realizada hoy').join(', '),plan:icChipsBySubLabel('Plan').join(', '),freq:icChipsBySubLabel('Frecuencia de seguimiento').join(', ')}
+    sub:{
+      emoc:icChipsBySubLabel('Estado emocional referido').join(', '),
+      preoc:icChipsBySubLabel('Principales preocupaciones').join(', '),
+      pens:icChipsBySubLabel('Pensamientos automáticos').join(', '),
+      distorsiones:icChipsBySubLabel('Distorsiones cognitivas').join(', '),
+      irracionales:icChipsBySubLabel('Ideas irracionales').join(', '),
+      cita:icv('ic-sub-cita'),intens:icv('ic-sub-intensidad')
+    },
+    obj:{
+      orient:icChipsBySubLabel('Orientación').join(', '),
+      conc:icChipsBySubLabel('Conciencia / Colaboración').join(', '),
+      afecto:icChipsBySubLabel('Afecto').join(', '),
+      pens:icChipsBySubLabel('Pensamiento').join(', '),
+      insight:icChipsBySubLabel('Lenguaje / Insight').join(', '),
+      regulacion:icChipsBySubLabel('Regulación emocional').join(', '),
+      ideacion:icChipsBySubLabel('Ideación actual').join(', '),
+      riesgoN:riesgo,
+      protectores:icChipsBySubLabel('Factores protectores').join(', '),
+      notasRiesgo:icv('ic-riesgo-notas')
+    },
+    resp:{
+      tipoResp:icChipsBySubLabel('Tipo de respuesta emocional').join(', '),
+      impresion:icChipsBySubLabel('Impresión clínica').join(', ')
+    },
+    trat:{
+      interv:icChipsBySubLabel('Intervención realizada hoy').join(', '),
+      plan:icChipsBySubLabel('Plan').join(', '),
+      freq:icChipsBySubLabel('Frecuencia de seguimiento').join(', ')
+    }
   }:null;
+  const _aiFormSnap=formulario; // mantener compatibilidad
   // Guardar snapshot en localStorage como respaldo antes de intentar Firebase
   if(sinNotaIA&&_aiFormSnap){
     try{
@@ -2693,6 +2718,7 @@ window.guardarICFirebase=async()=>{
       estado:'respondida',
       needsAI:needsAI||false,
       ...(_aiFormSnap?{_aiFormSnap}:{}),
+      ...(formulario?{formulario}:{}),
       ...(getCapInlineData('ic')||{}),
       creado:serverTimestamp()
     });
@@ -5132,6 +5158,48 @@ window.hpacRenderNotas=()=>{
       var genBtn=esPendienteIA
         ?'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacGenerarNotaIA(\'' + e.id + '\','+ni+')">✨ Generar nota</button>'
         :'';
+      // Panel del formulario diligenciado — siempre visible si existe
+      var fd2=e.formulario||e._aiFormSnap||null;
+      var formHtml='';
+      if(fd2&&modo==='IC Nueva'){
+        var fRows=[];
+        if(fd2.dx)fRows.push(['Diagnóstico',fd2.dx]);
+        if(fd2.riesgo)fRows.push(['Riesgo',fd2.riesgo]);
+        if(fd2.sub){
+          if(fd2.sub.emoc)fRows.push(['Estado emocional',fd2.sub.emoc]);
+          if(fd2.sub.preoc)fRows.push(['Preocupaciones',fd2.sub.preoc]);
+          if(fd2.sub.pens&&fd2.sub.pens!=='no identificados')fRows.push(['Pensamientos automáticos',fd2.sub.pens]);
+          if(fd2.sub.distorsiones)fRows.push(['Distorsiones cognitivas',fd2.sub.distorsiones]);
+          if(fd2.sub.irracionales)fRows.push(['Ideas irracionales',fd2.sub.irracionales]);
+          if(fd2.sub.cita)fRows.push(['Cita textual','"'+fd2.sub.cita+'"']);
+        }
+        if(fd2.obj){
+          if(fd2.obj.afecto)fRows.push(['Afecto',fd2.obj.afecto]);
+          if(fd2.obj.pens)fRows.push(['Pensamiento',fd2.obj.pens]);
+          if(fd2.obj.regulacion)fRows.push(['Regulación emocional',fd2.obj.regulacion]);
+          if(fd2.obj.ideacion)fRows.push(['Ideación suicida',fd2.obj.ideacion]);
+          if(fd2.obj.protectores)fRows.push(['Factores protectores',fd2.obj.protectores]);
+          if(fd2.obj.notasRiesgo)fRows.push(['Notas de riesgo',fd2.obj.notasRiesgo]);
+        }
+        if(fd2.resp){
+          if(fd2.resp.tipoResp)fRows.push(['Tipo de respuesta',fd2.resp.tipoResp]);
+          if(fd2.resp.impresion)fRows.push(['Impresión clínica',fd2.resp.impresion]);
+        }
+        if(fd2.trat){
+          if(fd2.trat.interv)fRows.push(['Intervención realizada',fd2.trat.interv]);
+          if(fd2.trat.plan)fRows.push(['Plan',fd2.trat.plan]);
+          if(fd2.trat.freq)fRows.push(['Frecuencia',fd2.trat.freq]);
+        }
+        if(fRows.length){
+          formHtml='<details style="margin-top:10px;border-top:1px dashed var(--border);padding-top:8px">'
+            +'<summary style="font-size:0.72rem;font-weight:700;color:var(--accent2);cursor:pointer;user-select:none;letter-spacing:.04em">📋 Ver formulario diligenciado</summary>'
+            +'<div style="margin-top:8px;display:grid;grid-template-columns:minmax(110px,auto) 1fr;gap:4px 12px;font-size:0.73rem">'
+            +fRows.map(function(r){return'<span style="font-weight:600;color:var(--text2)">'+r[0]+':</span><span style="color:var(--text)">'+r[1]+'</span>';}).join('')
+            +'</div>'
+            +'<div style="margin-top:8px"><button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem" data-id="'+e.id+'" data-ni="'+ni+'" onclick="hpacGenerarNotaIA(this.dataset.id, parseInt(this.dataset.ni))">✨ Generar nota desde este formulario</button></div>'
+            +'</details>';
+        }
+      }
       notasParts.push(
         '<div class="hpac-nota">'
         +'<div class="hpac-nota-head '+cls+'">'
@@ -5146,7 +5214,7 @@ window.hpacRenderNotas=()=>{
         +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacEditar('+ni+')">Editar</button>'
         +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacCopiar('+ni+')">Copiar</button>'
         +'</div></div>'
-        +'<div class="hpac-nota-body">'+camposHtml+'</div>'
+        +'<div class="hpac-nota-body">'+camposHtml+formHtml+'</div>'
         +'</div>'
       );
     }
