@@ -553,12 +553,12 @@ input.toggle-cb{display:none}
           <div class="ic-pat-field"><label>Fecha</label><input type="date" id="ic-pfecha"></div>
         </div>
         <!-- ORIENTACIÓN DE VALORACIÓN CON IA -->
-        <div id="ic-orientacion-wrap" style="display:none;margin-bottom:10px;background:var(--surface);border:1.5px solid var(--accent2);border-radius:10px;overflow:hidden">
+        <div id="ic-orientacion-wrap" style="margin-bottom:10px;background:var(--surface);border:1.5px solid var(--accent2);border-radius:10px;overflow:hidden">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--accent2)11;border-bottom:1px solid var(--accent2)33">
             <div style="display:flex;align-items:center;gap:8px">
               <span style="font-size:1rem">🧭</span>
               <span style="font-size:0.82rem;font-weight:700;color:var(--accent2)">Orientación de valoración</span>
-              <span style="font-size:0.72rem;color:var(--text3)">— qué explorar en este encuentro</span>
+              <span style="font-size:0.72rem;color:var(--text3)">— basada en el diagnóstico / motivo ingresado arriba</span>
             </div>
             <button onclick="generarOrientacionIC()" style="background:var(--accent2);color:#fff;border:none;border-radius:6px;padding:4px 11px;font-size:0.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px" id="ic-orientacion-btn">✨ Generar guía</button>
           </div>
@@ -4189,46 +4189,43 @@ window.generarOrientacionIC = async function(){
   const apiKey = typeof getGeminiKey==='function' ? getGeminiKey() : '';
   if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
 
-  const motivo = document.getElementById('ic-pdx')?.value?.trim() || '';
-  const nombre = document.getElementById('ic-pnombre')?.value?.trim() || '';
-  const edad   = document.getElementById('ic-edad')?.value?.trim() || '';
-
-  if(!motivo) return toast('⚠️ Ingresa el diagnóstico / motivo de interconsulta primero');
-
   const btn = document.getElementById('ic-orientacion-btn');
   const out  = document.getElementById('ic-orientacion-out');
+
+  // Leer motivo desde campo de diagnóstico o desde motivo de interconsulta
+  const motivo = (document.getElementById('ic-pdx')?.value||'').trim()
+               ||(document.getElementById('ic-motivo')?.value||'').trim();
+  const nombre = (document.getElementById('ic-pnombre')?.value||'').trim();
+  const edad   = (document.getElementById('ic-edad')?.value||'').trim();
+
+  if(!motivo){
+    toast('⚠️ Escribe el diagnóstico o motivo de interconsulta arriba primero');
+    return;
+  }
+
   if(btn){ btn.textContent='⏳ Generando…'; btn.disabled=true; }
   if(out){ out.style.display=''; out.textContent='Generando guía de valoración…'; }
 
-  const prompt = `Eres una psicóloga clínica hospitalaria experta en interconsultas de agudos. 
-Recibes la siguiente solicitud de interconsulta:
-
-PACIENTE: ${nombre||'Sin nombre'} · ${edad||'edad no especificada'}
-MOTIVO DE INTERCONSULTA / DIAGNÓSTICO: ${motivo}
-
-Tu tarea es generar una guía de orientación clínica BREVE y PRÁCTICA para la valoración inicial de este paciente. Estructura tu respuesta así:
-
-**FOCO PRINCIPAL DE LA VALORACIÓN**
-Una o dos frases sobre el objetivo central del encuentro.
-
-**PREGUNTAS CLAVE A EXPLORAR**
-Lista de 5 a 7 preguntas concretas, ordenadas por prioridad, que debes hacer o indagar en este encuentro. Usa lenguaje directo como si le hablaras a la psicóloga.
-
-**ASPECTOS A OBSERVAR**
-3 o 4 elementos del examen mental o conductuales que son especialmente relevantes dado el motivo.
-
-**SEÑALES DE ALERTA A DESCARTAR**
-Las 2 o 3 más importantes para este caso específico.
-
-**INTERVENCIÓN INICIAL SUGERIDA**
-Una o dos frases sobre qué tipo de intervención es más probable que necesites hacer en este primer encuentro.
-
-Sé concreta, clínica y directa. Máximo 250 palabras en total. Adapta todo al contexto hospitalario intra-hospitalario, no ambulatorio.`;
+  const prompt = 'Eres una psicóloga clínica hospitalaria experta en interconsultas de agudos.'
+    + ' Recibes esta solicitud: Paciente: ' + (nombre||'sin nombre') + ', ' + (edad||'edad no especificada') + '.'
+    + ' Motivo de interconsulta: ' + motivo + '.'
+    + ' Genera una guía de orientación clínica BREVE y PRÁCTICA para la valoración inicial.'
+    + ' Estructura tu respuesta con estas secciones exactas:\n\n'
+    + '**FOCO DE LA VALORACIÓN**\n(1-2 frases sobre el objetivo central del encuentro)\n\n'
+    + '**PREGUNTAS CLAVE A EXPLORAR**\n(5-7 preguntas concretas en orden de prioridad, lenguaje directo)\n\n'
+    + '**QUÉ OBSERVAR EN EL EXAMEN MENTAL**\n(3-4 elementos especialmente relevantes para este caso)\n\n'
+    + '**SEÑALES DE ALERTA A DESCARTAR**\n(2-3 señales críticas para este caso específico)\n\n'
+    + '**INTERVENCIÓN INICIAL SUGERIDA**\n(1-2 frases sobre qué hacer en este primer encuentro)\n\n'
+    + 'Máximo 250 palabras. Contexto: hospital de tercer nivel, interconsulta intrahospitalaria, tiempo limitado.';
 
   try{
     const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.3, maxOutputTokens:1000}})
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{parts:[{text:prompt}]}],
+        generationConfig:{temperature:0.3, maxOutputTokens:1000}
+      })
     });
     const d = await r.json();
     if(!r.ok||d.error) throw new Error(d.error?.message||'Error API');
@@ -6079,6 +6076,11 @@ window.limpiarFormIC=function(confirm_=true){
   var ra=document.getElementById('ic-risk-alert');if(ra)ra.classList.remove('show');
   // Resetear notas generadas
   var wrap=document.getElementById('ic-output-wrap');if(wrap)wrap.style.display='none';
+  // Resetear orientación IA
+  var orientOut=document.getElementById('ic-orientacion-out');
+  if(orientOut){orientOut.style.display='none';orientOut.textContent='';}
+  var orientBtn=document.getElementById('ic-orientacion-btn');
+  if(orientBtn){orientBtn.textContent='✨ Generar guía';orientBtn.disabled=false;}
   var outSeg=document.getElementById('ic-out-seg-texto');
   if(outSeg){outSeg.textContent='Genera la nota para ver el contenido…';outSeg.classList.add('ph');}
   var segOut=document.getElementById('ic-out-seg');if(segOut)segOut.style.display='none';
