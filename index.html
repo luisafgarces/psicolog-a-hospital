@@ -4257,7 +4257,7 @@ window.generarOrientacionIC = async function(){
     + '**QUÉ OBSERVAR EN EL EXAMEN MENTAL**\n(3-4 elementos relevantes para este caso)\n\n'
     + '**SEÑALES DE ALERTA**\n(2-3 señales críticas para este caso)\n\n'
     + '**INTERVENCIÓN SUGERIDA**\n(1-2 frases sobre qué hacer hoy)\n\n'
-    + 'Máximo 300 palabras. Sé concreta y directa. Contexto: hospital tercer nivel, tiempo limitado.';
+    + 'IMPORTANTE: Completa TODAS las secciones sin truncar. Sé concreta y directa. Contexto: hospital tercer nivel, tiempo limitado por visita.';
 
   try{
     const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
@@ -4265,7 +4265,7 @@ window.generarOrientacionIC = async function(){
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.3, maxOutputTokens:2000}
+        generationConfig:{temperature:0.3, maxOutputTokens:4000}
       })
     });
     const d = await r.json();
