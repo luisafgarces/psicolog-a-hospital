@@ -562,7 +562,7 @@ input.toggle-cb{display:none}
             </div>
             <button onclick="if(typeof window.generarOrientacionIC==='function'){window.generarOrientacionIC();}else{alert('Función no cargada aún — recarga la página');}" style="background:var(--accent2);color:#fff;border:none;border-radius:6px;padding:4px 11px;font-size:0.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px" id="ic-orientacion-btn">✨ Generar guía</button>
           </div>
-          <div id="ic-orientacion-out" style="padding:12px 14px;font-size:0.78rem;color:var(--text2);line-height:1.7;display:none"></div>
+          <div id="ic-orientacion-out" style="padding:12px 14px;font-size:0.78rem;color:var(--text2);line-height:1.7;display:none;max-height:none;overflow:visible"></div>
         </div>
         <div class="risk-alert-bar" id="ic-risk-alert">⚠️ RIESGO ALTO — Verificar protocolo de seguridad antes de cerrar la nota</div>
         <!-- MODO IC NUEVA + SEGUIMIENTO -->
@@ -4210,7 +4210,10 @@ window.generarOrientacionIC = async function(){
                ||(document.getElementById('ic-motivo')?.value||'').trim();
   const nombre = (document.getElementById('ic-pnombre')?.value||'').trim();
   const edad   = (document.getElementById('ic-edad')?.value||'').trim();
-  const modo   = (document.getElementById('ic-btn-seg')?.classList.contains('active')) ? 'seguimiento' : 'inicial';
+  // Detectar modo: seguimiento si el botón de seguimiento está activo
+  const btnSeg = document.getElementById('ic-btn-seg');
+  const btnNueva = document.getElementById('ic-btn-nueva');
+  const modo = (btnSeg && btnSeg.classList.contains('active')) ? 'seguimiento' : 'inicial';
 
   if(!motivo){ toast('⚠️ Escribe el diagnóstico o motivo de interconsulta primero'); return; }
 
@@ -4271,12 +4274,15 @@ window.generarOrientacionIC = async function(){
     if(out){
       const html = texto
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--accent);display:block;margin-top:10px;margin-bottom:3px">$1</strong>')
+        .replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--accent2);display:block;margin-top:10px;margin-bottom:2px;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em">$1</strong>')
         .replace(/\*(.+?)\*/g,'<em>$1</em>')
+        .replace(/\n- /g,'<br>• ')
         .replace(/\n/g,'<br>');
       out.innerHTML = html;
+      out.style.display = '';
+      setTimeout(()=>out.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
     }
-    if(btn){ btn.textContent='\u21bb Regenerar'; btn.disabled=false; }
+    if(btn){ btn.textContent='↻ Regenerar'; btn.disabled=false; }
   }catch(e){
     if(out){ out.innerHTML='<span style="color:var(--danger)">\u274c '+e.message+'</span>'; }
     if(btn){ btn.textContent='\u2728 Generar guía'; btn.disabled=false; }
