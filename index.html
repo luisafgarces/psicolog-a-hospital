@@ -2096,6 +2096,16 @@ input.toggle-cb{display:none}
         </div>
         <div id="ps-plan-texto" style="font-size:0.78rem;color:#1e4d8c;line-height:1.6;white-space:pre-wrap"></div>
       </div>
+
+      <!-- NOTAS RÁPIDAS -->
+      <div style="margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em">📝 Notas rápidas</span>
+          <button class="btn btn-sm btn-primary" style="font-size:0.68rem;padding:2px 10px" onclick="guardarNotaRapida(window._psPacId)">💾 Guardar</button>
+        </div>
+        <textarea id="ps-nota-rapida" rows="3" placeholder="Información adicional post-sesión, eventos relevantes, comunicaciones del equipo…" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.8rem;resize:vertical;background:var(--surface)"></textarea>
+        <div id="ps-notas-historial" style="margin-top:8px;max-height:140px;overflow-y:auto"></div>
+      </div>
     </div>
     <div class="pac-sheet-actions" id="ps-actions"></div>
   </div>
@@ -2168,7 +2178,7 @@ input.toggle-cb{display:none}
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, updateDoc, serverTimestamp, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, limit, updateDoc, serverTimestamp, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyCsqumG_BRCWwnFEOcoNfLXtfaUlzvPqYE",
@@ -2188,6 +2198,11 @@ window._doc=doc;
 window._addDoc=addDoc;
 window._collection=collection;
 window._serverTimestamp=serverTimestamp;
+window._getDocs=getDocs;
+window._query=query;
+window._where=where;
+window._orderBy=orderBy;
+window._limit=limit;
 window._fdb={collection,addDoc,deleteDoc,doc,updateDoc,serverTimestamp,query,orderBy};
 let pacientes=[],interconsultas=[],anamnesisList=[],testHistory=[];
 window.pacientes=pacientes;window.interconsultas=interconsultas;window.anamnesisList=anamnesisList;window.testHistory=testHistory;
@@ -4585,8 +4600,8 @@ window.generarOrientacionIC = async function(){
 
   try{
     const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:3000}})});
-    const data=await resp.json();
-    if(!resp.ok||data.error)throw new Error(data.error?.message||'Error de API');
+    const data=await r.json();
+    if(!r.ok||data.error)throw new Error(data.error?.message||'Error de API');
     const texto=(data.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
     if(!texto)throw new Error('Respuesta vacía de Gemini');
     if(outEl)outEl.textContent=texto;
@@ -4715,6 +4730,163 @@ window.buscarPacientesLocal=(q)=>{
   renderPacientes();
 };
 window.formatDate=(d)=>{if(!d)return'';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;};
+
+// ── IMPRESIÓN DIAGNÓSTICA IA ─────────────────────────────────────────
+function _dxLlamar(apiKey, prompt){
+  return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:3000}})
+  }).then(function(r){return r.json().then(function(d){
+    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+    return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+  });});
+}
+
+function _dxRenderOutput(out, texto){
+  out.innerHTML = texto
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--accent2);display:block;margin-top:10px;margin-bottom:2px;font-size:0.79rem;text-transform:uppercase;letter-spacing:0.05em">$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/\n/g,'<br>');
+}
+
+function _dxPrompt(sintomas, contexto, tipo){
+  return 'Eres psicólogo clínico hospitalario experto en diagnóstico diferencial CIE-11 y DSM-5. '
+    + contexto
+    + '\n\nSíntomas presentes:\n' + sintomas.map(function(s,i){return (i+1)+'. '+s;}).join('\n')
+    + '\n\nGenera la impresión diagnóstica:\n\n'
+    + '**DIAGNÓSTICO PRINCIPAL**\n(Nombre CIE-11 + código. Justificación en 2-3 frases.)\n\n'
+    + (tipo==='seguimiento'
+      ? '**DIAGNÓSTICOS DIFERENCIALES**\n(2-3 alternativas.)\n\n**EVOLUCIÓN CLÍNICA**\n(Cómo se presentan los síntomas en esta sesión.)\n\n'
+      : '**DIAGNÓSTICOS DIFERENCIALES**\n(2-3 alternativas con criterio diferenciador.)\n\n**CRITERIOS CUMPLIDOS**\n(Criterios DSM-5/CIE-11 que se satisfacen.)\n\n**CRITERIOS PENDIENTES**\n(Qué falta para confirmar.)\n\n')
+    + '**CONSIDERACIÓN CLÍNICA**\n(Una frase sobre el contexto médico.)\n\nSé técnico y directo.';
+}
+
+window.generarImpresionDx = function(){
+  var apiKey = (typeof getGeminiKey==='function'?getGeminiKey():null)||localStorage.getItem('gemini_api_key')||'';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+  var btn=document.getElementById('ic-dx-btn');
+  var out=document.getElementById('ic-dx-out');
+  var sintomas=[];
+  document.querySelectorAll('#ic-dx-chips .ic-chip.on,#ic-dx-chips .ic-chip.on-r,#ic-dx-chips .ic-chip.on-a').forEach(function(c){sintomas.push(c.textContent.trim());});
+  if(sintomas.length<2){toast('⚠️ Selecciona al menos 2 síntomas');return;}
+  var dx=document.getElementById('ic-pdx')?.value||'—';
+  var riesgo=document.getElementById('ic-riesgo-nivel')?.value||'—';
+  var ctx='Contexto hospitalario. Dx médico: '+dx+'. Riesgo: '+riesgo+'.';
+  if(btn){btn.textContent='⏳ Generando…';btn.disabled=true;}
+  if(out){out.style.display='';out.innerHTML='<em style="color:var(--text3)">Analizando síntomas…</em>';}
+  _dxLlamar(apiKey, _dxPrompt(sintomas, ctx, 'inicial'))
+    .then(function(texto){
+      if(out) _dxRenderOutput(out, texto);
+      var h=document.getElementById('ic-impresion-hidden');if(h)h.value=texto;
+      if(btn){btn.textContent='↻ Regenerar';btn.disabled=false;}
+      toast('✅ Impresión diagnóstica generada');
+    }).catch(function(e){
+      if(out)out.innerHTML='<span style="color:var(--danger)">❌ '+e.message+'</span>';
+      if(btn){btn.textContent='✨ Generar impresión diagnóstica';btn.disabled=false;}
+      toast('❌ '+e.message);
+    });
+};
+
+window.generarImpresionDxAn = function(){
+  var apiKey = (typeof getGeminiKey==='function'?getGeminiKey():null)||localStorage.getItem('gemini_api_key')||'';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+  var btn=document.getElementById('an-dx-btn');
+  var out=document.getElementById('an-dx-out');
+  var sintomas=[];
+  document.querySelectorAll('#an-sintomas-chips .ic-chip.on,#an-sintomas-chips .ic-chip.on-r,#an-sintomas-chips .ic-chip.on-a').forEach(function(c){sintomas.push(c.textContent.trim());});
+  if(sintomas.length<2){toast('⚠️ Selecciona al menos 2 síntomas');return;}
+  var ctx='Contexto: anamnesis psicológica hospitalaria.';
+  if(btn){btn.textContent='⏳ Generando…';btn.disabled=true;}
+  if(out){out.style.display='';out.innerHTML='<em style="color:var(--text3)">Analizando síntomas…</em>';}
+  _dxLlamar(apiKey, _dxPrompt(sintomas, ctx, 'inicial'))
+    .then(function(texto){
+      if(out) _dxRenderOutput(out, texto);
+      var h=document.getElementById('an-impresion-hidden');if(h)h.value=texto;
+      if(btn){btn.textContent='↻ Regenerar';btn.disabled=false;}
+      toast('✅ Impresión diagnóstica generada');
+    }).catch(function(e){
+      if(out)out.innerHTML='<span style="color:var(--danger)">❌ '+e.message+'</span>';
+      if(btn){btn.textContent='✨ Generar impresión diagnóstica';btn.disabled=false;}
+      toast('❌ '+e.message);
+    });
+};
+
+window.generarImpresionDxSeg = function(){
+  var apiKey = (typeof getGeminiKey==='function'?getGeminiKey():null)||localStorage.getItem('gemini_api_key')||'';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+  var btn=document.getElementById('seg-dx-btn');
+  var out=document.getElementById('seg-dx-out');
+  var sintomas=[];
+  document.querySelectorAll('#seg-sintomas-chips .ic-chip.on,#seg-sintomas-chips .ic-chip.on-r,#seg-sintomas-chips .ic-chip.on-a').forEach(function(c){sintomas.push(c.textContent.trim());});
+  if(sintomas.length<2){toast('⚠️ Selecciona al menos 2 síntomas');return;}
+  var dx=document.getElementById('ic-pdx')?.value||'—';
+  var ctx='Contexto: seguimiento psicológico hospitalario. Dx médico: '+dx+'.';
+  if(btn){btn.textContent='⏳ Generando…';btn.disabled=true;}
+  if(out){out.style.display='';out.innerHTML='<em style="color:var(--text3)">Analizando síntomas actuales…</em>';}
+  _dxLlamar(apiKey, _dxPrompt(sintomas, ctx, 'seguimiento'))
+    .then(function(texto){
+      if(out) _dxRenderOutput(out, texto);
+      var h=document.getElementById('seg-impresion-hidden');if(h)h.value=texto;
+      if(btn){btn.textContent='↻ Regenerar';btn.disabled=false;}
+      toast('✅ Impresión actualizada');
+    }).catch(function(e){
+      if(out)out.innerHTML='<span style="color:var(--danger)">❌ '+e.message+'</span>';
+      if(btn){btn.textContent='✨ Actualizar impresión diagnóstica';btn.disabled=false;}
+      toast('❌ '+e.message);
+    });
+};
+
+window.toggleSidebar=function(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('sidebar-overlay');
+  if(sb)sb.classList.toggle('open');
+  if(ov)ov.classList.toggle('open');
+};
+
+
+// ── NOTAS RÁPIDAS DE PACIENTE ────────────────────────────────────────
+window.guardarNotaRapida = async function(pacId){
+  if(!pacId) return toast('⚠️ No hay paciente seleccionado');
+  const txt = (document.getElementById('ps-nota-rapida')?.value||'').trim();
+  if(!txt) return toast('⚠️ Escribe algo antes de guardar');
+  const fecha = new Date().toLocaleString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  try{
+    await window._addDoc(window._collection(window.db,'notas_rapidas'),{
+      pacienteId: pacId,
+      texto: txt,
+      fecha: fecha,
+      creado: window._serverTimestamp()
+    });
+    document.getElementById('ps-nota-rapida').value = '';
+    toast('✅ Nota guardada');
+    cargarNotasRapidas(pacId);
+  }catch(e){ toast('❌ '+e.message); }
+};
+
+window.cargarNotasRapidas = async function(pacId){
+  if(!pacId) return;
+  const cont = document.getElementById('ps-notas-historial');
+  if(!cont) return;
+  try{
+    const snap = await window._getDocs(
+      window._query(window._collection(window.db,'notas_rapidas'),
+        window._where('pacienteId','==',pacId),
+        window._orderBy('creado','desc'),
+        window._limit(10)
+      )
+    );
+    if(snap.empty){ cont.innerHTML='<p style="font-size:0.72rem;color:var(--text3);font-style:italic">Sin notas rápidas aún.</p>'; return; }
+    cont.innerHTML = snap.docs.map(d=>{
+      const n=d.data();
+      return `<div style="border-top:1px solid var(--border);padding:6px 0;font-size:0.75rem">
+        <span style="color:var(--text3);font-size:0.68rem">${n.fecha||''}</span>
+        <div style="color:var(--text);margin-top:2px;line-height:1.5">${n.texto}</div>
+      </div>`;
+    }).join('');
+  }catch(e){ cont.innerHTML='<p style="font-size:0.72rem;color:var(--text3)">—</p>'; }
+};
+
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
 // ── HISTORIAL IC POR PACIENTE ──
@@ -5337,6 +5509,7 @@ window.abrirPacSheet=async(id)=>{
   `;
   // Cargar plan existente si hay
   cargarPlanTratamiento(id);
+  cargarNotasRapidas(id);
   document.getElementById('pac-sheet-overlay').classList.add('open');
   document.body.style.overflow='hidden';
 };
