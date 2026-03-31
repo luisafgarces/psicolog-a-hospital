@@ -4254,11 +4254,49 @@ window.filtrarPsico = function(filtro, btn){
   renderPsicoCards(filtro);
 };
 
-// Render on page load and on navigation
-const _origGoTo = window.goTo;
+// ── NAVIGATION ─────────────────────────────────────────────────────
 window.goTo = function(page){
-  _origGoTo(page);
-  if(page === 'psicoeducacion') setTimeout(() => renderPsicoCards('all'), 50);
+  const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
+    'historial-ic','anamnesis','tests','capacidad','historial','historial-pac',
+    'psicoeducacion'];
+  const titles = {
+    dashboard:'Inicio', pacientes:'Registro de Pacientes',
+    'consulta-externa':'Consulta Externa EPS',
+    interconsultas:'Interconsultas Hospitalarias',
+    'historial-ic':'Historial de Interconsultas',
+    anamnesis:'Nueva Anamnesis', tests:'Tests Clínicos',
+    capacidad:'Valoración de Capacidad Decisional',
+    historial:'Historial de Tests',
+    'historial-pac':'Historial de Pacientes',
+    psicoeducacion:'Psicoeducación Clínica'
+  };
+  // Hide all pages, show target
+  pages.forEach(function(p){
+    var el = document.getElementById('page-'+p);
+    if(el) el.classList.remove('active');
+  });
+  var target = document.getElementById('page-'+page);
+  if(target) target.classList.add('active');
+  // Update topbar title
+  var titleEl = document.getElementById('topbar-title');
+  if(titleEl) titleEl.textContent = titles[page] || page;
+  // Update nav-item active state
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  // Close sidebar on mobile
+  if(window.innerWidth < 768){
+    var sb = document.getElementById('sidebar');
+    if(sb) sb.classList.remove('open');
+  }
+  // Render page content
+  if(page==='pacientes') renderPacientes && renderPacientes();
+  if(page==='consulta-externa') renderConsultaExterna && renderConsultaExterna();
+  if(page==='dashboard') renderDashboard && renderDashboard();
+  if(page==='interconsultas') renderIC && renderIC();
+  if(page==='historial-ic') renderIC && renderIC();
+  if(page==='historial') renderHistorial && renderHistorial();
+  if(page==='historial-pac'){ hpacRenderLista && hpacRenderLista(); }
+  if(page==='psicoeducacion') setTimeout(function(){ renderPsicoCards && renderPsicoCards('all'); }, 50);
+  if(page==='tests') document.getElementById('topbar-title').textContent='Tests Clínicos';
 };
 
 
