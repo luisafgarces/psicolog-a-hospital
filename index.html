@@ -378,6 +378,13 @@ input.toggle-cb{display:none}
   content:'';position:absolute;bottom:calc(100% + 1px);left:50%;transform:translateX(-50%);
   border:5px solid transparent;border-top-color:#1a1714;z-index:999;
 }
+
+/* Categorías diagnósticas colapsables */
+.ic-dx-cat{border:1px solid var(--border);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.ic-dx-cat-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;font-size:0.78rem;font-weight:600;color:var(--text2);background:var(--surface2);user-select:none;gap:8px}
+.ic-dx-cat-head:hover{background:var(--border)}
+.ic-dx-cat-head .dx-chev{transition:transform 0.2s;flex-shrink:0}
+.ic-dx-cat-body{padding:10px 12px}
 </style>
 </head>
 <body>
@@ -564,6 +571,7 @@ input.toggle-cb{display:none}
           </div>
           <div id="ic-orientacion-out" style="padding:12px 14px;font-size:0.78rem;color:var(--text2);line-height:1.7;display:none;max-height:none;overflow:visible"></div>
         </div>
+        <input type="hidden" id="ic-impresion-hidden" value="">
         <div class="risk-alert-bar" id="ic-risk-alert">⚠️ RIESGO ALTO — Verificar protocolo de seguridad antes de cerrar la nota</div>
         <!-- MODO IC NUEVA + SEGUIMIENTO -->
         <div id="ic-mode-nueva">
@@ -679,15 +687,257 @@ input.toggle-cb{display:none}
               <div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Sin interferencia identificada</span><span class="ic-chip" onclick="icTogR(this)">Rechazo de procedimientos</span><span class="ic-chip" onclick="icTog(this)">Negación del Dx</span><span class="ic-chip" onclick="icTog(this)">Desmotivación para el tratamiento</span><span class="ic-chip" onclick="icTog(this)">Ansiedad anticipatoria a exámenes</span><span class="ic-chip" onclick="icTog(this)">Dependencia emocional del personal</span><span class="ic-chip" onclick="icTogA(this)">No adherencia a indicaciones</span></div>
             </div>
           </div>
-          <div class="ic-form-section">
-            <div class="ic-form-head green"><span class="ft">🎯 Respuesta — Impresión clínica CC</span><span class="ic-form-badge green">RESPUESTA</span></div>
+          <div class="ic-form-section" id="ic-dx-section">
+            <div class="ic-form-head green"><span class="ft">🎯 Respuesta — Síntomas e Impresión Diagnóstica</span><span class="ic-form-badge green">RESPUESTA</span></div>
             <div class="ic-form-body">
-              <div class="ic-g2">
+
+              <!-- Tipo de respuesta (se mantiene) -->
+              <div class="ic-g2" style="margin-bottom:10px">
                 <div class="ic-field"><div class="ic-sublabel">Tipo de respuesta emocional</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Esperable / adaptativa</span><span class="ic-chip" onclick="icTogA(this)">Desproporcionada al estímulo</span><span class="ic-chip" onclick="icTogR(this)">Patológica — requiere intervención</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Impresión clínica</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Respuesta adaptativa al estrés médico</span><span class="ic-chip" onclick="icTog(this)">Trastorno adaptativo</span><span class="ic-chip" onclick="icTog(this)">Síntomas depresivos reactivos</span><span class="ic-chip" onclick="icTog(this)">Sintomatología ansiosa</span><span class="ic-chip" onclick="icTog(this)">Distorsiones cognitivas relevantes</span><span class="ic-chip" onclick="icTogR(this)">Cuadro depresivo mayor</span><span class="ic-chip" onclick="icTog(this)">Reacción de duelo</span></div></div>
+                <div class="ic-field"><div class="ic-sublabel">Esquema cognitivo predominante</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Sin esquema disfuncional</span><span class="ic-chip" onclick="icTogR(this)">Responsabilidad / cuidado del otro</span><span class="ic-chip" onclick="icTogR(this)">Vulnerabilidad / fragilidad</span><span class="ic-chip" onclick="icTogR(this)">Insuficiencia / incompetencia</span><span class="ic-chip" onclick="icTogR(this)">Abandono / desamparo</span><span class="ic-chip" onclick="icTogA(this)">Intolerancia a la incertidumbre</span><span class="ic-chip" onclick="icTogA(this)">Perfeccionismo / exigencia</span></div></div>
               </div>
-              <div class="ic-field"><div class="ic-sublabel">Análisis cognitivo-conductual</div><textarea id="ic-resp-analisis" placeholder="Describir relación pensamientos automáticos, emociones y conductas. Ej: Se identifica patrón de catastrofización centrado en pronóstico que genera evitación..." rows="3"></textarea></div>
-              <div class="ic-field"><div class="ic-sublabel">Esquema cognitivo predominante</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Sin esquema disfuncional predominante</span><span class="ic-chip" onclick="icTogR(this)">Responsabilidad / cuidado del otro</span><span class="ic-chip" onclick="icTogR(this)">Vulnerabilidad / fragilidad</span><span class="ic-chip" onclick="icTogR(this)">Insuficiencia / incompetencia</span><span class="ic-chip" onclick="icTogR(this)">Abandono / desamparo</span><span class="ic-chip" onclick="icTogA(this)">Intolerancia a la incertidumbre</span><span class="ic-chip" onclick="icTogA(this)">Control excesivo</span><span class="ic-chip" onclick="icTogA(this)">Perfeccionismo / exigencia</span></div></div>
+
+              <!-- SÍNTOMAS POR CATEGORÍA DIAGNÓSTICA -->
+              <div style="margin-bottom:6px">
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent2);margin-bottom:8px">🩺 Síntomas presentes — CIE-11 / DSM-5</div>
+                <div style="font-size:0.7rem;color:var(--text3);margin-bottom:10px">Selecciona los síntomas observados. La IA generará la impresión diagnóstica y diferenciales.</div>
+
+                <!-- Cat 1: Estado de ánimo -->
+                <div class="ic-dx-cat">
+                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
+                    <span>😔 Estado de ánimo — Depresión / Bipolar</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
+                  </div>
+                  <div class="ic-dx-cat-body" style="display:none">
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogR(this)">Ánimo deprimido persistente (&gt;2 sem)</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Anhedonia</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Pérdida significativa de peso/apetito</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Insomnio / hipersomnia</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Agitación o enlentecimiento psicomotor</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Fatiga o pérdida de energía</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Sentimientos de inutilidad o culpa excesiva</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Dificultad para concentrarse</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Pensamientos recurrentes de muerte / ideación suicida</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Ánimo elevado / eufórico</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Grandiosidad / autoestima inflada</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Disminución necesidad de sueño</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Logorrea / pensamiento acelerado</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Desinhibición / conducta impulsiva</span>
+                      <span class="ic-chip" onclick="icTog(this)">Labilidad emocional</span>
+                      <span class="ic-chip" onclick="icTog(this)">Disforia</span>
+                      <span class="ic-chip" onclick="icTog(this)">Síntomas depresivos reactivos al contexto médico</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cat 2: Ansiedad -->
+                <div class="ic-dx-cat">
+                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
+                    <span>⚡ Ansiedad — TAG / Pánico / TOC / Fobia</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
+                  </div>
+                  <div class="ic-dx-cat-body" style="display:none">
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogR(this)">Ansiedad / preocupación excesiva difícil de controlar</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Tensión muscular</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Irritabilidad</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Dificultad para concentrarse</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Ataques de pánico (palpitaciones, disnea, miedo a morir)</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Evitación fóbica</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Obsesiones (pensamientos intrusivos recurrentes)</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Compulsiones (rituales para reducir ansiedad)</span>
+                      <span class="ic-chip" onclick="icTog(this)">Ansiedad anticipatoria a procedimientos médicos</span>
+                      <span class="ic-chip" onclick="icTog(this)">Hipervigilancia somática</span>
+                      <span class="ic-chip" onclick="icTog(this)">Ansiedad por salud (hipocondría)</span>
+                      <span class="ic-chip" onclick="icTog(this)">Insomnio por preocupación</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cat 3: Trauma / Estrés -->
+                <div class="ic-dx-cat">
+                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
+                    <span>🌪️ Trauma y Estrés — TEPT / Ajuste</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
+                  </div>
+                  <div class="ic-dx-cat-body" style="display:none">
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogR(this)">Reexperimentación / flashbacks</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Pesadillas recurrentes relacionadas con el trauma</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Evitación de estímulos relacionados con el trauma</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Hiperactivación / sobresalto exagerado</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Distorsiones cognitivas negativas persistentes post-trauma</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Disociación / despersonalización</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Entumecimiento emocional</span>
+                      <span class="ic-chip" onclick="icTog(this)">Respuesta emocional desproporcionada al estrésor identificable</span>
+                      <span class="ic-chip" onclick="icTog(this)">Dificultad de adaptación al diagnóstico médico</span>
+                      <span class="ic-chip" onclick="icTog(this)">Duelo complicado / patológico</span>
+                      <span class="ic-chip" onclick="icTog(this)">Síntomas dentro de los 3 meses del estresor</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cat 4: Psicosis -->
+                <div class="ic-dx-cat">
+                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
+                    <span>🧠 Espectro Psicótico</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
+                  </div>
+                  <div class="ic-dx-cat-body" style="display:none">
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogR(this)">Ideas delirantes (persecución, referencia, grandeza, control)</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Alucinaciones auditivas</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Alucinaciones visuales</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Pensamiento desorganizado / incoherente</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Comportamiento desorganizado o catatónico</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Síntomas negativos (alogia, abulia, aplanamiento afectivo)</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Ideas delirantes congruentes con el estado de ánimo</span>
+                      <span class="ic-chip" onclick="icTog(this)">Insight deteriorado</span>
+                      <span class="ic-chip" onclick="icTog(this)">Suspicacia / desconfianza marcada</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cat 5: Cognitivo -->
+                <div class="ic-dx-cat">
+                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
+                    <span>🌀 Cognitivo — Delirium / Demencia / TCE</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
+                  </div>
+                  <div class="ic-dx-cat-body" style="display:none">
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogR(this)">Alteración aguda del nivel de conciencia</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Desorientación (tiempo, espacio, persona)</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Fluctuación del estado mental a lo largo del día</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Agitación nocturna</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Deterioro de memoria reciente</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Deterioro cognitivo progresivo y global</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Apraxia / agnosia / afasia</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Deterioro de funciones ejecutivas</span>
+                      <span class="ic-chip" onclick="icTog(this)">Labilidad emocional post-TCE</span>
+                      <span class="ic-chip" onclick="icTog(this)">Desinhibición conductual</span>
+                      <span class="ic-chip" onclick="icTog(this)">Dificultad de concentración y atención</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cat 6: Personalidad -->
+                <div class="ic-dx-cat">
+                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
+                    <span>🔷 Trastornos de Personalidad</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
+                  </div>
+                  <div class="ic-dx-cat-body" style="display:none">
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogR(this)">Inestabilidad emocional intensa y reactiva</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Patrón persistente de relaciones inestables / idealizacion-devaluación</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Impulsividad dañina</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Conductas autolesivas recurrentes</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Miedo intenso al abandono</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Desconfianza y suspicacia generalizadas (paranoide)</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Grandiosidad / falta de empatía (narcisista)</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Patrón perfeccionista / rígido (obsesivo)</span>
+                      <span class="ic-chip" onclick="icTog(this)">Patrón de inicio en adolescencia/adultez temprana</span>
+                      <span class="ic-chip" onclick="icTog(this)">Inflexible y generalizado en múltiples contextos</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cat 7: Sustancias -->
+                <div class="ic-dx-cat">
+                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
+                    <span>💊 Uso de Sustancias</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
+                  </div>
+                  <div class="ic-dx-cat-body" style="display:none">
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogR(this)">Consumo a pesar de consecuencias negativas</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Tolerancia (necesidad de mayor cantidad)</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Abstinencia (síntomas al dejar)</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Craving / deseo intenso</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Pérdida de control sobre el consumo</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Intoxicación aguda</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Síndrome de abstinencia activo</span>
+                      <span class="ic-chip" onclick="icTog(this)">Consumo problemático de alcohol</span>
+                      <span class="ic-chip" onclick="icTog(this)">Consumo problemático de cocaína / bazuco</span>
+                      <span class="ic-chip" onclick="icTog(this)">Consumo problemático de cannabis</span>
+                      <span class="ic-chip" onclick="icTog(this)">Consumo problemático de benzodiacepinas / opioides</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cat 8: Somático / Dolor -->
+                <div class="ic-dx-cat">
+                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
+                    <span>🩹 Somático y Dolor Crónico</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
+                  </div>
+                  <div class="ic-dx-cat-body" style="display:none">
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogR(this)">Síntomas somáticos angustiantes desproporcionados</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Pensamientos excesivos sobre gravedad de síntomas</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Alto nivel de ansiedad centrada en la salud</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Tiempo/energía excesivos dedicados a síntomas</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Síntomas neurológicos sin causa orgánica (conversión)</span>
+                      <span class="ic-chip" onclick="icTog(this)">Dolor crónico con componente emocional significativo</span>
+                      <span class="ic-chip" onclick="icTog(this)">Catastrofización del dolor</span>
+                      <span class="ic-chip" onclick="icTog(this)">Conducta de enfermedad mantenida</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cat 9: Sueño -->
+                <div class="ic-dx-cat">
+                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
+                    <span>😴 Trastornos del Sueño</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
+                  </div>
+                  <div class="ic-dx-cat-body" style="display:none">
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogR(this)">Insomnio de inicio (&gt;30 min para dormir)</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Insomnio de mantenimiento (despertares frecuentes)</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Despertar precoz sin poder volver a dormir</span>
+                      <span class="ic-chip" onclick="icTog(this)">Hipersomnia diurna</span>
+                      <span class="ic-chip" onclick="icTog(this)">Pesadillas frecuentes</span>
+                      <span class="ic-chip" onclick="icTog(this)">Sueño no reparador</span>
+                      <span class="ic-chip" onclick="icTog(this)">Higiene del sueño inadecuada</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cat 10: Suicidio -->
+                <div class="ic-dx-cat">
+                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)" style="color:var(--danger)">
+                    <span>🔴 Suicidio y Autolesión</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
+                  </div>
+                  <div class="ic-dx-cat-body" style="display:none">
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogR(this)">Ideación suicida pasiva (deseo de morir)</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Ideación suicida activa sin plan</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Ideación suicida con plan estructurado</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Intento de suicidio reciente (&lt;1 mes)</span>
+                      <span class="ic-chip" onclick="icTogR(this)">Antecedente de intentos previos</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Autolesiones sin intención suicida</span>
+                      <span class="ic-chip" onclick="icTogA(this)">Desesperanza marcada</span>
+                      <span class="ic-chip" onclick="icTog(this)">Acceso a medios letales</span>
+                      <span class="ic-chip" onclick="icTog(this)">Aislamiento social reciente</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- BOTÓN IMPRESIÓN DIAGNÓSTICA IA -->
+              <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <button onclick="generarImpresionDx()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:0.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px" id="ic-dx-btn">✨ Generar impresión diagnóstica y diferenciales</button>
+                <span style="font-size:0.72rem;color:var(--text3)">Basada en los síntomas seleccionados + datos del examen mental</span>
+              </div>
+              <div id="ic-dx-out" style="display:none;margin-top:10px;background:var(--accent-light);border:1.5px solid var(--accent2);border-radius:10px;padding:14px 16px;font-size:0.78rem;line-height:1.7;color:var(--text)"></div>
+
+              <!-- ANÁLISIS CC -->
+              <div class="ic-field" style="margin-top:10px"><div class="ic-sublabel">Análisis cognitivo-conductual</div><textarea id="ic-resp-analisis" placeholder="Describir relación pensamientos automáticos, emociones y conductas..." rows="3"></textarea></div>
               <div class="ic-field"><div class="ic-sublabel">Red de apoyo funcional</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Presente y activa</span><span class="ic-chip" onclick="icTogA(this)">Presente pero ambivalente</span><span class="ic-chip" onclick="icTogR(this)">Ausente</span><span class="ic-chip" onclick="icTog(this)">Conflictos familiares activos</span></div></div>
             </div>
           </div>
@@ -2054,7 +2304,7 @@ async function generarNotasPendientesIA(){
         const [sub,obj,res,tra]=await Promise.all([
           llamar(base+'\n\nAnálisis Subjetivo de interconsulta hospitalaria. Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos automáticos: '+(fd.sub?.pens||'—')+'. Cita textual: '+(fd.sub?.cita||'—')+'.'  ),
           llamar(base+'\n\nAnálisis Objetivo con formulación CC. Orientación: '+(fd.obj?.orient||'—')+'. Afecto: '+(fd.obj?.afecto||'—')+'. Pensamiento: '+(fd.obj?.pens||'—')+'. Insight: '+(fd.obj?.insight||'—')+'. Regulación emocional: '+(fd.obj?.regulacion||'—')+'. Ideación: '+(fd.obj?.ideacion||'niega')+'. Riesgo: '+(fd.obj?.riesgoN||'—')+'. Factores protectores: '+(fd.obj?.protectores||'—')+'.'  ),
-          llamar(base+'\n\nImpresión clínica y Respuesta. Tipo de respuesta: '+(fd.resp?.tipoResp||'—')+'. Impresión: '+(fd.resp?.impresion||'—')+'.'  ),
+          llamar(base+'\n\nImpresión clínica y Respuesta. Tipo de respuesta: '+(fd.resp?.tipoResp||'—')+'. Impresión clínica previa: '+(fd.resp?.impresion||'—')+'. Síntomas seleccionados: '+(fd.resp?.sintomasDx||'—')+'. Impresión diagnóstica IA: '+(fd.resp?.impresionIA||'no disponible')+'.'  ),
           llamar(base+'\n\nPlan de Tratamiento. Intervención: '+(fd.trat?.interv||'—')+'. Plan: '+(fd.trat?.plan||'—')+'. Frecuencia: '+(fd.trat?.freq||'—')+'.'  )
         ]);
         const notaTexto='ANÁLISIS SUBJETIVO\n'+sub+'\n\nANÁLISIS OBJETIVO\n'+obj+'\n\nRESPUESTA\n'+res+'\n\nTRATAMIENTO\n'+tra;
@@ -2724,7 +2974,9 @@ window.guardarICFirebase=async()=>{
     },
     resp:{
       tipoResp:icChipsBySubLabel('Tipo de respuesta emocional').join(', '),
-      impresion:icChipsBySubLabel('Impresión clínica').join(', ')
+      impresion:icChipsBySubLabel('Impresión clínica').join(', '),
+      sintomasDx:(()=>{const ch=[];document.querySelectorAll('#ic-dx-section .ic-chip.on,#ic-dx-section .ic-chip.on-r,#ic-dx-section .ic-chip.on-a').forEach(c=>ch.push(c.textContent.trim()));return ch.join(', ');})()||'',
+      impresionIA:(document.getElementById('ic-impresion-hidden')?.value||'')
     },
     trat:{
       interv:icChipsBySubLabel('Intervención realizada hoy').join(', '),
@@ -4374,6 +4626,90 @@ window.generarOrientacionSeg = async function(){
   }
 };
 
+
+// ── CATEGORÍAS DIAGNÓSTICAS COLAPSABLES ─────────────────────────────
+window.toggleDxCat = function(head){
+  const body = head.nextElementSibling;
+  const chev = head.querySelector('.dx-chev');
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : '';
+  if(chev) chev.style.transform = open ? '' : 'rotate(180deg)';
+};
+
+// ── GENERADOR DE IMPRESIÓN DIAGNÓSTICA ──────────────────────────────
+window.generarImpresionDx = async function(){
+  const apiKey = (typeof getGeminiKey==='function' ? getGeminiKey() : null)
+    || localStorage.getItem('gemini_api_key') || '';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+
+  const btn = document.getElementById('ic-dx-btn');
+  const out  = document.getElementById('ic-dx-out');
+
+  // Recopilar síntomas seleccionados
+  const sintomasSeleccionados = [];
+  document.querySelectorAll('#ic-dx-section .ic-chip.on, #ic-dx-section .ic-chip.on-r, #ic-dx-section .ic-chip.on-a').forEach(chip => {
+    sintomasSeleccionados.push(chip.textContent.trim());
+  });
+
+  if(sintomasSeleccionados.length < 2){
+    toast('⚠️ Selecciona al menos 2 síntomas primero');
+    return;
+  }
+
+  // Recopilar contexto del examen mental
+  const afecto    = icChipsBySubLabel('Afecto').join(', ') || '—';
+  const ideacion  = icChipsBySubLabel('Ideación actual').join(', ') || 'Niega';
+  const pens      = icChipsBySubLabel('Pensamiento').join(', ') || '—';
+  const emoc      = icChipsBySubLabel('Estado emocional referido').join(', ') || '—';
+  const dx        = document.getElementById('ic-pdx')?.value || '—';
+  const riesgo    = document.getElementById('ic-riesgo-nivel')?.value || '—';
+  const tiempo    = document.getElementById('ic-resp-analisis')?.value || '';
+
+  if(btn){ btn.textContent='⏳ Generando…'; btn.disabled=true; }
+  if(out){ out.style.display=''; out.innerHTML='<em style="color:var(--text3)">Analizando síntomas…</em>'; }
+
+  const prompt = 'Eres un psicólogo clínico hospitalario experto en diagnóstico diferencial (CIE-11 y DSM-5).'
+    + ' Contexto hospitalario intrahospitalario. Diagnóstico médico de base: ' + dx + '.'
+    + ' Riesgo: ' + riesgo + '.'
+    + ' Examen mental: afecto=' + afecto + ', pensamiento=' + pens + ', ideación=' + ideacion + ', estado emocional=' + emoc + '.'
+    + (tiempo ? ' Análisis CC: ' + tiempo.slice(0,200) + '.' : '')
+    + '\n\nSíntomas presentes seleccionados:\n' + sintomasSeleccionados.map((s,i)=>(i+1)+'. '+s).join('\n')
+    + '\n\nGenera la impresión diagnóstica con esta estructura exacta:\n\n'
+    + '**DIAGNÓSTICO PRINCIPAL**\n(Nombre CIE-11 + código. Justificación en 2-3 frases basada en síntomas seleccionados.)\n\n'
+    + '**DIAGNÓSTICOS DIFERENCIALES**\n(2-3 diagnósticos alternativos con criterio diferenciador breve.)\n\n'
+    + '**CRITERIOS CUMPLIDOS**\n(Criterios DSM-5/CIE-11 que se satisfacen con los síntomas reportados.)\n\n'
+    + '**CRITERIOS PENDIENTES**\n(Qué falta para confirmar o descartar el diagnóstico principal.)\n\n'
+    + '**CONSIDERACIÓN CLÍNICA**\n(Una frase sobre el contexto médico y cómo influye en la presentación.)\n\n'
+    + 'Sé técnico y directo. No inventes síntomas no mencionados.';
+  try{
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.2, maxOutputTokens:3000}})
+    });
+    const d = await r.json();
+    if(!r.ok||d.error) throw new Error(d.error?.message||'Error API');
+    const texto = (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    if(out){
+      const html = texto
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--accent);display:block;margin-top:10px;margin-bottom:3px;font-size:0.79rem;text-transform:uppercase;letter-spacing:0.05em">$1</strong>')
+        .replace(/\*(.+?)\*/g,'<em>$1</em>')
+        .replace(/\n- /g,'<br>• ')
+        .replace(/\n/g,'<br>');
+      out.innerHTML = html;
+      // Guardar en formulario para que lo use la IA de nota
+      const hiddenImpresion = document.getElementById('ic-impresion-hidden');
+      if(hiddenImpresion) hiddenImpresion.value = texto;
+    }
+    if(btn){ btn.textContent='↻ Regenerar'; btn.disabled=false; }
+    toast('✅ Impresión diagnóstica generada');
+  }catch(e){
+    if(out){ out.innerHTML='<span style="color:var(--danger)">❌ '+e.message+'</span>'; }
+    if(btn){ btn.textContent='✨ Generar impresión diagnóstica y diferenciales'; btn.disabled=false; }
+    toast('❌ '+e.message);
+  }
+};
+
 // Estos stubs capturan clics tempranos y los reintenta hasta que el módulo esté listo.
 (function(){
   function makeStub(name){
@@ -4388,7 +4724,7 @@ window.generarOrientacionSeg = async function(){
   }
   ['guardarPaciente','editarPaciente','eliminarPaciente','guardarIC','eliminarIC',
    'verHistorialPorId','nuevaAnamnesisParaPaciente','abrirICParaPaciente','irTestsPaciente',
-   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad','sincronizarPendientes','generarNotasPendientesIA','generarPlanTratamiento','editarPlanTratamiento','verBackupsLocales','generarNotaDesdeBackup','eliminarBackup','generarOrientacionIC','generarOrientacionSeg','guardarPlanEditado','copiarPlanTratamiento','cargarPlanTratamiento',
+   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad','sincronizarPendientes','generarNotasPendientesIA','generarPlanTratamiento','editarPlanTratamiento','verBackupsLocales','generarNotaDesdeBackup','eliminarBackup','generarOrientacionIC','generarOrientacionSeg','generarImpresionDx','toggleDxCat','guardarPlanEditado','copiarPlanTratamiento','cargarPlanTratamiento',
    'guardarAnamnesis','generarNotaAnamnesis','mhicNuevaNota','mhicCerrar',
    'mneCerrar','mneGuardar','mneEliminar','hpacNuevaNota','hpacVolverLista',
    'calcPHQ9','calcGAD7','calcHADS','calcMMSE','calcMoCA','calcCAM','calcSVACBCA','generarNotaSVACBCA','renderSVACBCA',
@@ -5178,7 +5514,7 @@ window.hpacGenerarNotaIA=async(docId, ni)=>{
       // IC Nueva / Anamnesis: 4 campos paralelos
       const dSub='Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos: '+(fd.sub?.pens||'—')+'. Cita: '+(fd.sub?.cita||'—')+'. Antecedentes: '+(e.nota?.slice(0,150)||'—')+'.';
       const dObj='Afecto: '+(fd.obj?.afecto||'—')+'. Pensamiento: '+(fd.obj?.pens||'—')+'. Insight: '+(fd.obj?.insight||'—')+'. Regulación: '+(fd.obj?.regulacion||'—')+'. Ideación: '+(fd.obj?.ideacion||'niega')+'. Riesgo: '+(fd.riesgo||e.riesgo||'—')+'. Protectores: '+(fd.obj?.protectores||'—')+'.';
-      const dResp='Tipo respuesta: '+(fd.resp?.tipoResp||'—')+'. Impresión: '+(fd.resp?.impresion||'—')+'.';
+      const dResp='Tipo respuesta: '+(fd.resp?.tipoResp||'—')+'. Síntomas: '+(fd.resp?.sintomasDx||fd.resp?.impresion||'—')+'. Impresión diagnóstica: '+(fd.resp?.impresionIA||'—')+'.';
       const dTrat='Intervención: '+(fd.trat?.interv||'—')+'. Plan: '+(fd.trat?.plan||'—')+'. Frecuencia: '+(fd.trat?.freq||'—')+'.';
       [sub,obj,res,tra]=await Promise.all([
         llamar(base+'\n\nAnálisis SUBJETIVO (no repitas datos demográficos). '+dSub),
