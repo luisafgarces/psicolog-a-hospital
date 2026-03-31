@@ -905,7 +905,7 @@ input.toggle-cb{display:none}
         <!-- GEMINI API KEY -->
         <div style="margin-top:16px;background:#f0fdf4;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <span style="font-size:0.78rem;font-weight:700;color:#1e4d8c;white-space:nowrap">🤖 IA Clínica — Anthropic Claude</span>
-          <input type="password" id="gemini-api-key" placeholder="Pega tu API Key de Anthropic (sk-ant-…)" style="flex:1;min-width:200px;padding:7px 11px;border:1px solid #bfdbfe;border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('anthropic_api_key',this.value);document.getElementById('gemini-key-status').textContent='✅ API key guardada';">
+          <input type="password" id="gemini-api-key" placeholder="Pega tu API Key de Google Gemini…" style="flex:1;min-width:200px;padding:7px 11px;border:1px solid #bfdbfe;border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('gemini_api_key',this.value);document.getElementById('gemini-key-status').textContent='✅ API key guardada';">
           <span id="gemini-key-status" style="font-size:0.72rem;color:#1e4d8c;white-space:nowrap">Guardada en este dispositivo</span>
         </div>
         <!-- BOTONES -->
@@ -1510,7 +1510,7 @@ input.toggle-cb{display:none}
             <div id="nota-output" class="nota-output">Completa los campos y presiona "Generar nota clínica"…</div>
             <div style="margin:10px 0;background:#f0fdf4;border:1px solid #bfdbfe;border-radius:8px;padding:9px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
               <span style="font-size:0.75rem;font-weight:700;color:#1e4d8c;white-space:nowrap">🤖 IA Clínica — Anthropic Claude</span>
-              <input type="password" id="an-gemini-key" placeholder="API Key de Anthropic (sk-ant-…)" style="flex:1;min-width:160px;padding:5px 9px;border:1px solid #bfdbfe;border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('anthropic_api_key',this.value);document.getElementById('an-key-status').textContent='✅ Guardada';">
+              <input type="password" id="an-gemini-key" placeholder="API Key de Google Gemini…" style="flex:1;min-width:160px;padding:5px 9px;border:1px solid #bfdbfe;border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('gemini_api_key',this.value);document.getElementById('an-key-status').textContent='✅ Guardada';">
               <span id="an-key-status" style="font-size:0.7rem;color:#1e4d8c;white-space:nowrap">Guardada en este dispositivo</span>
             </div>
             <div class="flex gap-2 mt-4" style="flex-wrap:wrap">
@@ -2216,9 +2216,9 @@ async function sincronizarPendientes(){
             // Llamar directamente al endpoint con los datos guardados
             const ctx=`Paciente: ${data._formData.edad||''}${data._formData.sexo?' | '+data._formData.sexo:''}. Dx: ${data._formData.dx||'—'}. Riesgo: ${data._formData.riesgo||'—'}.`;
             const llamar=async(prompt)=>{
-              const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
+              const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
               const d=await r.json();
-              return(d.content?.[0]?.text||'').trim();
+              return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
             };
             const base='Psicólogo clínico hospitalario (TCC). Un párrafo completo, texto corrido, sin listas. No uses el nombre del paciente. Contexto: '+ctx;
             const fd=data._formData;
@@ -2270,9 +2270,9 @@ async function generarNotasPendientesIA(){
         const ctx='Paciente: '+(fd.edad||'')+(fd.sexo?' | '+fd.sexo:'')+'. Dx: '+(fd.dx||'—')+'. Riesgo: '+(fd.riesgo||'—')+'.';
         const base='Psicólogo clínico hospitalario (TCC). Un párrafo completo, texto corrido, sin listas. No uses el nombre del paciente. Contexto: '+ctx;
         const llamar=async(prompt)=>{
-          const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
+          const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
           const d=await r.json();
-          return(d.content?.[0]?.text||'').trim();
+          return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
         };
         const [sub,obj,res,tra]=await Promise.all([
           llamar(base+'\n\nAnálisis Subjetivo de interconsulta hospitalaria. Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos automáticos: '+(fd.sub?.pens||'—')+'. Cita textual: '+(fd.sub?.cita||'—')+'.'  ),
@@ -2617,6 +2617,32 @@ window.abrirICParaPaciente=(id)=>{
   setTimeout(()=>{
     const sel=document.getElementById('ic-paciente-sel');
     if(sel){sel.value=id;selectICPaciente(id);}
+  },200);
+};
+
+window.nuevaAnamnesisParaPaciente=(id)=>{
+  goTo('anamnesis');
+  setTimeout(()=>{
+    const p=pacientes.find(x=>x.id===id);
+    if(!p)return;
+    const el=id=>document.getElementById(id);
+    if(el('an-nombre'))el('an-nombre').value=p.nombre||'';
+    if(el('an-cedula'))el('an-cedula').value=p.cedula||'';
+    if(el('an-edad'))el('an-edad').value=p.edad||'';
+    if(el('an-hab'))el('an-hab').value=p.hab||'';
+    if(el('an-paciente-sel'))el('an-paciente-sel').value=id;
+  },200);
+};
+
+window.irTestsPaciente=(id)=>{
+  goTo('tests');
+  setTimeout(()=>{
+    const p=pacientes.find(x=>x.id===id);
+    if(!p)return;
+    const nom=document.getElementById('test-pac-nombre');
+    const sel=document.getElementById('test-pac-sel');
+    if(nom)nom.value=p.nombre||'';
+    if(sel)sel.value=id;
   },200);
 };
 
@@ -3376,7 +3402,7 @@ window.populateAnamPacientes=()=>{
 setSyncStatus('syncing');
 ['p-fecha','ic-fecha','an-fecha','ic-pfecha'].forEach(id=>{try{document.getElementById(id).value=new Date().toISOString().split('T')[0];}catch(e){}});
 // Poblar campos de API key desde localStorage al cargar
-const _savedKey=localStorage.getItem('anthropic_api_key')||localStorage.getItem('gemini_api_key')||'';
+const _savedKey=localStorage.getItem('gemini_api_key')||'';
 if(_savedKey){
   ['gemini-api-key','an-gemini-key'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=_savedKey;});
   const s1=document.getElementById('gemini-key-status'),s2=document.getElementById('an-key-status');
@@ -3466,7 +3492,7 @@ window.cargarPlanTratamiento=function(pacId){
 
 window.generarPlanTratamiento=async function(pacId){
   const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
-  if(!apiKey)return toast('⚠️ Configura tu API Key de Anthropic (sk-ant-…) en el campo de IA');
+  if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
   const pac=(window.pacientes||[]).find(p=>p.id===pacId);
   if(!pac)return toast('⚠️ Paciente no encontrado');
 
@@ -3537,10 +3563,10 @@ AHORA genera el plan para este paciente con ese mismo nivel de especificidad cl�
 ${ctx}`;
 
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
     const d=await r.json();
-    if(!r.ok||d.type==='error')throw new Error(d.error?.message||d.message||'Error API');
-    const plan=(d.content?.[0]?.text||'').trim();
+    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+    const plan=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
     if(!plan)throw new Error('Respuesta vacía');
 
     // Guardar en Firebase como campo del paciente
@@ -3761,7 +3787,7 @@ window.calcSVACBCA = async function(){
 
 window.generarNotaSVACBCA = async function(ponderado, level, interp, detalle){
   const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
-  if(!apiKey)return toast('⚠️ Configura tu API Key de Anthropic (sk-ant-…) en el campo de IA');
+  if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
   const notaDiv=document.getElementById('sva-nota-ia');
   if(notaDiv){notaDiv.style.display='';notaDiv.textContent='⏳ Generando nota narrativa…';}
 
@@ -3792,10 +3818,10 @@ ${relato?'- Resumen del relato: '+relato:''}
 Genera la nota clínica ahora:`;
 
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
     const d=await r.json();
-    if(!r.ok||d.type==='error')throw new Error(d.error?.message||d.message||'Error API');
-    const nota=(d.content?.[0]?.text||'').trim();
+    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+    const nota=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
     if(notaDiv){notaDiv.textContent=nota;}
     // Guardar nota junto con resultado
     const pacNombreReal=document.getElementById('test-pac-nombre')?.value||'';
@@ -3877,7 +3903,7 @@ window.verBackupsLocales=function(){
 
 window.generarNotaDesdeBackup=async function(key){
   const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
-  if(!apiKey)return toast('⚠️ Configura tu API Key de Anthropic (sk-ant-…) en el campo de IA');
+  if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
   try{
     const bk=JSON.parse(localStorage.getItem(key)||'null');
     if(!bk)return toast('⚠️ Backup no encontrado');
@@ -3888,10 +3914,10 @@ window.generarNotaDesdeBackup=async function(key){
     const ctx='Dx: '+(fd.dx||bk.dx||'—')+'. Riesgo: '+(bk.riesgo||'—')+'.';
     const base='Eres psicólogo clínico hospitalario (TCC). UN SOLO PÁRRAFO, texto corrido, sin listas, no uses el nombre del paciente. '+ctx;
     const llamar=async(p)=>{
-      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:p}]})});
+      const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:p}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
       const d=await r.json();
-      if(!r.ok||d.type==='error')throw new Error(d.error?.message||d.message||'Error API');
-      return(d.content?.[0]?.text||'').trim();
+      if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+      return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
     };
 
     const dSub='Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos: '+(fd.sub?.pens||'—')+'. Cita: '+(fd.sub?.cita||'—')+'.';
@@ -4459,8 +4485,8 @@ ${pensamientosHTML.length ? `<div class="bloque">
 // ── ORIENTACIÓN DE VALORACIÓN CON IA ────────────────────────────────
 window.generarOrientacionIC = async function(){
   const apiKey = (typeof getGeminiKey==='function' ? getGeminiKey() : null)
-    || localStorage.getItem('anthropic_api_key')||localStorage.getItem('gemini_api_key') || '';
-  if(!apiKey) return toast('⚠️ Configura tu API Key de Anthropic (sk-ant-…) en el campo de IA');
+    || localStorage.getItem('gemini_api_key') || '';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
 
   const btn = document.getElementById('ic-orientacion-btn');
   const out  = document.getElementById('ic-orientacion-out');
@@ -4519,7 +4545,7 @@ window.generarOrientacionIC = async function(){
     + 'IMPORTANTE: Completa TODAS las secciones sin truncar. Sé concreta y directa. Contexto: hospital tercer nivel, tiempo limitado por visita.';
 
   try{
-    const r = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:3000,messages:[{role:'user',content:prompt}]})});
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:3000}})});
     const data=await resp.json();
     if(!resp.ok||data.error)throw new Error(data.error?.message||'Error de API');
     const texto=(data.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
@@ -4653,45 +4679,7 @@ window.formatDate=(d)=>{if(!d)return'';const[y,m,day]=d.split('-');return`${day}
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
 // ── HISTORIAL IC POR PACIENTE ──
-window.verHistorialIC=(pacId,pacNombre)=>{
-  const ics=interconsultas.filter(ic=>ic.pacienteId===pacId||ic.pacienteNombre===pacNombre);
-  // Crear/reusar modal historial
-  let modal=document.getElementById('modal-historial-ic');
-  if(!modal){
-    modal=document.createElement('div');
-    modal.id='modal-historial-ic';
-    modal.className='modal-overlay';
-    modal.innerHTML=`
-      <div class="modal" style="max-width:680px;max-height:85vh;overflow-y:auto">
-        <div class="modal-header">
-          <h3 id="mhic-title">Historial IC</h3>
-          <button class="modal-close" onclick="closeModal('modal-historial-ic')">
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
-          </button>
-        </div>
-        <div class="modal-body" id="mhic-body"></div>
-      </div>`;
-    document.body.appendChild(modal);
-  }
-  document.getElementById('mhic-title').textContent=`📂 Historial IC — ${pacNombre}`;
-  const body=document.getElementById('mhic-body');
-  if(!ics.length){
-    body.innerHTML='<div class="empty"><p>No hay interconsultas registradas para este paciente.</p></div>';
-  } else {
-    const sorted=[...ics].sort((a,b)=>_sk(b)-_sk(a));
-    const riskBadge=(r)=>{if(!r||r==='No clasificado')return'';const c=r==='ALTO'?'badge-red':r==='MEDIO'?'badge-yellow':'badge-green';return`<span class="badge ${c}">⚠ ${r}</span>`;};
-    body.innerHTML=sorted.map((ic,i)=>`
-      <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:10px;padding:14px;margin-bottom:10px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px">${ic.modo||'IC'} — ${ic.fecha||'Sin fecha'}</div>
-          <div style="display:flex;gap:5px">${riskBadge(ic.riesgo)}<span class="badge ${ic.estado==='pendiente'?'badge-yellow':'badge-green'}">${ic.estado||'pendiente'}</span></div>
-        </div>
-        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">🏥 ${ic.hab||'—'} · ${ic.dx||'Sin dx'}</div>
-        ${ic.nota?`<details style="margin-top:6px"><summary style="font-size:12px;cursor:pointer;color:var(--primary)">Ver nota clínica completa</summary><pre style="white-space:pre-wrap;font-size:11px;color:var(--text2);margin-top:8px;background:var(--surface);padding:10px;border-radius:6px;border:1px solid var(--border)">${ic.nota}</pre></details>`:'<div style="font-size:12px;color:var(--text3)">Sin nota guardada</div>'}
-      </div>`).join('');
-  }
-  openModal('modal-historial-ic');
-};
+
 
 // ── ESCOLARIDAD ──────────────────────────────────────────────
 
@@ -4842,10 +4830,10 @@ let _hpacPacId=null;window._hpacPacId=null;
 window.hpacGenerarNotaIA=async(docId, ni)=>{
   // Leer key de múltiples fuentes
   const apiKey=(typeof getGeminiKey==='function'?getGeminiKey():null)
-    ||localStorage.getItem('anthropic_api_key')||localStorage.getItem('gemini_api_key')
+    ||localStorage.getItem('gemini_api_key')
     ||(document.getElementById('gemini-api-key')?.value||'')
     ||(document.getElementById('an-gemini-key')?.value||'');
-  if(!apiKey)return toast('⚠️ Configura tu API Key de Anthropic (sk-ant-…) en el campo de IA');
+  if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
 
   const todos=[...(window.interconsultas||[]),...(window.anamnesisList||[])];
   const e=todos.find(x=>x.id===docId);
@@ -4868,13 +4856,13 @@ window.hpacGenerarNotaIA=async(docId, ni)=>{
   const llamar=async(prompt)=>{
     let r;
     try{
-      r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
+      r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
     }catch(fetchErr){
-      throw new Error('Error de red al contactar la IA: '+fetchErr.message+'. Verifica que tienes conexión a internet.');
+      throw new Error('Error de red al contactar Gemini: '+fetchErr.message+'. Verifica que tienes conexión a internet.');
     }
     const d=await r.json();
-    if(!r.ok||d.type==='error')throw new Error('Claude error '+r.status+': '+(d.error?.message||d.message||'Error desconocido'));
-    return(d.content?.[0]?.text||'').trim();
+    if(!r.ok||d.error)throw new Error('Gemini error '+r.status+': '+(d.error?.message||'Error desconocido'));
+    return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
   };
 
   try{
@@ -5409,9 +5397,9 @@ function getGeminiKey(){
     if(v.trim()){fromDom=v.trim();break;}
   }
   // Prioridad: anthropic_api_key > gemini_api_key
-  var fromStorage=localStorage.getItem('anthropic_api_key')||localStorage.getItem('anthropic_api_key')||localStorage.getItem('gemini_api_key')||'';
+  var fromStorage=localStorage.getItem('gemini_api_key')||'';
   if(fromDom){
-    if(fromDom!==fromStorage)localStorage.setItem('anthropic_api_key',fromDom);
+    if(fromDom!==fromStorage)localStorage.setItem('gemini_api_key',fromDom);
     ids.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value)el.value=fromDom;});
     return fromDom;
   }
@@ -5524,10 +5512,10 @@ async function generarNotaIcConGemini(apiKey){
 
   // Helper para llamar Gemini con tokens configurables
   async function llamarGemini(prompt, tokens){
-    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
+    var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
     var d=await r.json();
-    if(!r.ok||d.type==='error')throw new Error(d.error?.message||d.message||'Error API');
-    return(d.content?.[0]?.text||'').trim();
+    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+    return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
   }
 
   // Instrucción base compartida — los datos demográficos van UNA SOLA VEZ en ctx
@@ -5834,7 +5822,7 @@ ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
   if(wrap){wrap.style.display='';wrap.scrollIntoView({behavior:'smooth',block:'start'});}
 
   try{
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
+    var resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
     var data=await resp.json();
     console.log('[SEG] Gemini full response:', JSON.stringify(data).slice(0,800));
     if(!resp.ok||data.error)throw new Error(data.error?.message||'Error de API');
@@ -6295,7 +6283,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderPCL5Questions();
   try{document.getElementById('an-fecha').value=new Date().toISOString().split('T')[0];}catch(e){}
   try{
-    var savedKey=localStorage.getItem('anthropic_api_key')||localStorage.getItem('gemini_api_key')||'';
+    var savedKey=localStorage.getItem('gemini_api_key')||'';
     var keyInput=document.getElementById('gemini-api-key');
     var keyStatus=document.getElementById('gemini-key-status');
     if(savedKey&&keyInput){
