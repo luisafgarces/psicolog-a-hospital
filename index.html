@@ -690,255 +690,101 @@ input.toggle-cb{display:none}
           <div class="ic-form-section" id="ic-dx-section">
             <div class="ic-form-head green"><span class="ft">🎯 Respuesta — Síntomas e Impresión Diagnóstica</span><span class="ic-form-badge green">RESPUESTA</span></div>
             <div class="ic-form-body">
-
-              <!-- Tipo de respuesta (se mantiene) -->
-              <div class="ic-g2" style="margin-bottom:10px">
-                <div class="ic-field"><div class="ic-sublabel">Tipo de respuesta emocional</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Esperable / adaptativa</span><span class="ic-chip" onclick="icTogA(this)">Desproporcionada al estímulo</span><span class="ic-chip" onclick="icTogR(this)">Patológica — requiere intervención</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Esquema cognitivo predominante</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Sin esquema disfuncional</span><span class="ic-chip" onclick="icTogR(this)">Responsabilidad / cuidado del otro</span><span class="ic-chip" onclick="icTogR(this)">Vulnerabilidad / fragilidad</span><span class="ic-chip" onclick="icTogR(this)">Insuficiencia / incompetencia</span><span class="ic-chip" onclick="icTogR(this)">Abandono / desamparo</span><span class="ic-chip" onclick="icTogA(this)">Intolerancia a la incertidumbre</span><span class="ic-chip" onclick="icTogA(this)">Perfeccionismo / exigencia</span></div></div>
+              <div class="ic-g2" style="margin-bottom:8px">
+                <div class="ic-field"><div class="ic-sublabel">Tipo de respuesta</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Esperable / adaptativa</span><span class="ic-chip" onclick="icTogA(this)">Desproporcionada</span><span class="ic-chip" onclick="icTogR(this)">Patológica</span></div></div>
+                <div class="ic-field"><div class="ic-sublabel">Red de apoyo</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Presente y activa</span><span class="ic-chip" onclick="icTogA(this)">Ambivalente</span><span class="ic-chip" onclick="icTogR(this)">Ausente</span><span class="ic-chip" onclick="icTog(this)">Conflictos familiares</span></div></div>
               </div>
 
-              <!-- SÍNTOMAS POR CATEGORÍA DIAGNÓSTICA -->
-              <div style="margin-bottom:6px">
-                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent2);margin-bottom:8px">🩺 Síntomas presentes — CIE-11 / DSM-5</div>
-                <div style="font-size:0.7rem;color:var(--text3);margin-bottom:10px">Selecciona los síntomas observados. La IA generará la impresión diagnóstica y diferenciales.</div>
-
-                <!-- Cat 1: Estado de ánimo -->
-                <div class="ic-dx-cat">
-                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
-                    <span>😔 Estado de ánimo — Depresión / Bipolar</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                  <div class="ic-dx-cat-body" style="display:none">
-                    <div class="ic-chips">
-                      <span class="ic-chip" onclick="icTogR(this)">Ánimo deprimido persistente (&gt;2 sem)</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Anhedonia</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Pérdida significativa de peso/apetito</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Insomnio / hipersomnia</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Agitación o enlentecimiento psicomotor</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Fatiga o pérdida de energía</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Sentimientos de inutilidad o culpa excesiva</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Dificultad para concentrarse</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Pensamientos recurrentes de muerte / ideación suicida</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Ánimo elevado / eufórico</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Grandiosidad / autoestima inflada</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Disminución necesidad de sueño</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Logorrea / pensamiento acelerado</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Desinhibición / conducta impulsiva</span>
-                      <span class="ic-chip" onclick="icTog(this)">Labilidad emocional</span>
-                      <span class="ic-chip" onclick="icTog(this)">Disforia</span>
-                      <span class="ic-chip" onclick="icTog(this)">Síntomas depresivos reactivos al contexto médico</span>
-                    </div>
-                  </div>
+              <div class="ic-field">
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent2);margin-bottom:8px">🩺 Síntomas presentes — selecciona todos los que aplican</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogR(this)">Ánimo deprimido persistente (&gt;2 sem)</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Anhedonia</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Pérdida de apetito / peso</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Insomnio</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Hipersomnia</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Fatiga / pérdida de energía</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Agitación psicomotora</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Enlentecimiento psicomotor</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Culpa excesiva / inutilidad</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Dificultad para concentrarse</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Pensamientos recurrentes de muerte</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Ideación suicida pasiva</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Ideación suicida activa sin plan</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Ideación suicida con plan</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Intento de suicidio reciente</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Intentos previos relevantes</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Autolesiones sin intención suicida</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Desesperanza marcada</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Ánimo elevado / eufórico</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Grandiosidad / autoestima inflada</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Disminución necesidad de sueño</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Logorrea / pensamiento acelerado</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Desinhibición / impulsividad</span>
+                  <span class="ic-chip" onclick="icTog(this)">Labilidad emocional</span>
+                  <span class="ic-chip" onclick="icTog(this)">Disforia</span>
+                  <span class="ic-chip" onclick="icTog(this)">Irritabilidad</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Ansiedad / preocupación excesiva difícil de controlar</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Ataques de pánico</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Evitación fóbica</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Tensión muscular</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Obsesiones (pensamientos intrusivos recurrentes)</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Compulsiones (rituales para reducir ansiedad)</span>
+                  <span class="ic-chip" onclick="icTog(this)">Ansiedad anticipatoria a procedimientos</span>
+                  <span class="ic-chip" onclick="icTog(this)">Hipervigilancia somática</span>
+                  <span class="ic-chip" onclick="icTog(this)">Miedo intenso a la muerte / pronóstico</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Reexperimentación / flashbacks</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Pesadillas recurrentes</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Evitación de estímulos relacionados con el trauma</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Hiperactivación / sobresalto exagerado</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Disociación / despersonalización</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Entumecimiento emocional</span>
+                  <span class="ic-chip" onclick="icTog(this)">Respuesta desproporcionada a estresor identificable</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Ideas delirantes (persecución, referencia, grandeza)</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Alucinaciones auditivas</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Alucinaciones visuales</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Pensamiento desorganizado / incoherente</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Comportamiento desorganizado o catatónico</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Síntomas negativos (alogia, abulia, aplanamiento)</span>
+                  <span class="ic-chip" onclick="icTog(this)">Insight deteriorado</span>
+                  <span class="ic-chip" onclick="icTog(this)">Suspicacia / desconfianza marcada</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Alteración aguda del nivel de conciencia</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Desorientación (tiempo / espacio / persona)</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Fluctuación del estado mental en el día</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Agitación nocturna</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Deterioro de memoria reciente</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Deterioro cognitivo progresivo y global</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Deterioro de funciones ejecutivas</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Inestabilidad emocional intensa y reactiva</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Impulsividad dañina</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Relaciones inestables / idealización-devaluación</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Miedo intenso al abandono</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Grandiosidad / falta de empatía</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Patrón perfeccionista / rígido</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Desconfianza y suspicacia generalizadas</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Consumo problemático a pesar de consecuencias</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Tolerancia (necesita más cantidad)</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Síndrome de abstinencia activo</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Craving / deseo intenso de consumir</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Síntomas somáticos angustiantes desproporcionados</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Preocupación excesiva por síntomas físicos</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Síntomas neurológicos sin causa orgánica</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Dolor crónico con componente emocional</span>
+                  <span class="ic-chip" onclick="icTog(this)">Catastrofización del dolor</span>
+                  <span class="ic-chip" onclick="icTog(this)">Insomnio de inicio (&gt;30 min para dormir)</span>
+                  <span class="ic-chip" onclick="icTog(this)">Insomnio de mantenimiento</span>
+                  <span class="ic-chip" onclick="icTog(this)">Sueño no reparador</span>
                 </div>
-
-                <!-- Cat 2: Ansiedad -->
-                <div class="ic-dx-cat">
-                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
-                    <span>⚡ Ansiedad — TAG / Pánico / TOC / Fobia</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                  <div class="ic-dx-cat-body" style="display:none">
-                    <div class="ic-chips">
-                      <span class="ic-chip" onclick="icTogR(this)">Ansiedad / preocupación excesiva difícil de controlar</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Tensión muscular</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Irritabilidad</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Dificultad para concentrarse</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Ataques de pánico (palpitaciones, disnea, miedo a morir)</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Evitación fóbica</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Obsesiones (pensamientos intrusivos recurrentes)</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Compulsiones (rituales para reducir ansiedad)</span>
-                      <span class="ic-chip" onclick="icTog(this)">Ansiedad anticipatoria a procedimientos médicos</span>
-                      <span class="ic-chip" onclick="icTog(this)">Hipervigilancia somática</span>
-                      <span class="ic-chip" onclick="icTog(this)">Ansiedad por salud (hipocondría)</span>
-                      <span class="ic-chip" onclick="icTog(this)">Insomnio por preocupación</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Cat 3: Trauma / Estrés -->
-                <div class="ic-dx-cat">
-                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
-                    <span>🌪️ Trauma y Estrés — TEPT / Ajuste</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                  <div class="ic-dx-cat-body" style="display:none">
-                    <div class="ic-chips">
-                      <span class="ic-chip" onclick="icTogR(this)">Reexperimentación / flashbacks</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Pesadillas recurrentes relacionadas con el trauma</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Evitación de estímulos relacionados con el trauma</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Hiperactivación / sobresalto exagerado</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Distorsiones cognitivas negativas persistentes post-trauma</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Disociación / despersonalización</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Entumecimiento emocional</span>
-                      <span class="ic-chip" onclick="icTog(this)">Respuesta emocional desproporcionada al estrésor identificable</span>
-                      <span class="ic-chip" onclick="icTog(this)">Dificultad de adaptación al diagnóstico médico</span>
-                      <span class="ic-chip" onclick="icTog(this)">Duelo complicado / patológico</span>
-                      <span class="ic-chip" onclick="icTog(this)">Síntomas dentro de los 3 meses del estresor</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Cat 4: Psicosis -->
-                <div class="ic-dx-cat">
-                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
-                    <span>🧠 Espectro Psicótico</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                  <div class="ic-dx-cat-body" style="display:none">
-                    <div class="ic-chips">
-                      <span class="ic-chip" onclick="icTogR(this)">Ideas delirantes (persecución, referencia, grandeza, control)</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Alucinaciones auditivas</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Alucinaciones visuales</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Pensamiento desorganizado / incoherente</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Comportamiento desorganizado o catatónico</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Síntomas negativos (alogia, abulia, aplanamiento afectivo)</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Ideas delirantes congruentes con el estado de ánimo</span>
-                      <span class="ic-chip" onclick="icTog(this)">Insight deteriorado</span>
-                      <span class="ic-chip" onclick="icTog(this)">Suspicacia / desconfianza marcada</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Cat 5: Cognitivo -->
-                <div class="ic-dx-cat">
-                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
-                    <span>🌀 Cognitivo — Delirium / Demencia / TCE</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                  <div class="ic-dx-cat-body" style="display:none">
-                    <div class="ic-chips">
-                      <span class="ic-chip" onclick="icTogR(this)">Alteración aguda del nivel de conciencia</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Desorientación (tiempo, espacio, persona)</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Fluctuación del estado mental a lo largo del día</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Agitación nocturna</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Deterioro de memoria reciente</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Deterioro cognitivo progresivo y global</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Apraxia / agnosia / afasia</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Deterioro de funciones ejecutivas</span>
-                      <span class="ic-chip" onclick="icTog(this)">Labilidad emocional post-TCE</span>
-                      <span class="ic-chip" onclick="icTog(this)">Desinhibición conductual</span>
-                      <span class="ic-chip" onclick="icTog(this)">Dificultad de concentración y atención</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Cat 6: Personalidad -->
-                <div class="ic-dx-cat">
-                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
-                    <span>🔷 Trastornos de Personalidad</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                  <div class="ic-dx-cat-body" style="display:none">
-                    <div class="ic-chips">
-                      <span class="ic-chip" onclick="icTogR(this)">Inestabilidad emocional intensa y reactiva</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Patrón persistente de relaciones inestables / idealizacion-devaluación</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Impulsividad dañina</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Conductas autolesivas recurrentes</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Miedo intenso al abandono</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Desconfianza y suspicacia generalizadas (paranoide)</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Grandiosidad / falta de empatía (narcisista)</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Patrón perfeccionista / rígido (obsesivo)</span>
-                      <span class="ic-chip" onclick="icTog(this)">Patrón de inicio en adolescencia/adultez temprana</span>
-                      <span class="ic-chip" onclick="icTog(this)">Inflexible y generalizado en múltiples contextos</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Cat 7: Sustancias -->
-                <div class="ic-dx-cat">
-                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
-                    <span>💊 Uso de Sustancias</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                  <div class="ic-dx-cat-body" style="display:none">
-                    <div class="ic-chips">
-                      <span class="ic-chip" onclick="icTogR(this)">Consumo a pesar de consecuencias negativas</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Tolerancia (necesidad de mayor cantidad)</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Abstinencia (síntomas al dejar)</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Craving / deseo intenso</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Pérdida de control sobre el consumo</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Intoxicación aguda</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Síndrome de abstinencia activo</span>
-                      <span class="ic-chip" onclick="icTog(this)">Consumo problemático de alcohol</span>
-                      <span class="ic-chip" onclick="icTog(this)">Consumo problemático de cocaína / bazuco</span>
-                      <span class="ic-chip" onclick="icTog(this)">Consumo problemático de cannabis</span>
-                      <span class="ic-chip" onclick="icTog(this)">Consumo problemático de benzodiacepinas / opioides</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Cat 8: Somático / Dolor -->
-                <div class="ic-dx-cat">
-                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
-                    <span>🩹 Somático y Dolor Crónico</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                  <div class="ic-dx-cat-body" style="display:none">
-                    <div class="ic-chips">
-                      <span class="ic-chip" onclick="icTogR(this)">Síntomas somáticos angustiantes desproporcionados</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Pensamientos excesivos sobre gravedad de síntomas</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Alto nivel de ansiedad centrada en la salud</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Tiempo/energía excesivos dedicados a síntomas</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Síntomas neurológicos sin causa orgánica (conversión)</span>
-                      <span class="ic-chip" onclick="icTog(this)">Dolor crónico con componente emocional significativo</span>
-                      <span class="ic-chip" onclick="icTog(this)">Catastrofización del dolor</span>
-                      <span class="ic-chip" onclick="icTog(this)">Conducta de enfermedad mantenida</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Cat 9: Sueño -->
-                <div class="ic-dx-cat">
-                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)">
-                    <span>😴 Trastornos del Sueño</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                  <div class="ic-dx-cat-body" style="display:none">
-                    <div class="ic-chips">
-                      <span class="ic-chip" onclick="icTogR(this)">Insomnio de inicio (&gt;30 min para dormir)</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Insomnio de mantenimiento (despertares frecuentes)</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Despertar precoz sin poder volver a dormir</span>
-                      <span class="ic-chip" onclick="icTog(this)">Hipersomnia diurna</span>
-                      <span class="ic-chip" onclick="icTog(this)">Pesadillas frecuentes</span>
-                      <span class="ic-chip" onclick="icTog(this)">Sueño no reparador</span>
-                      <span class="ic-chip" onclick="icTog(this)">Higiene del sueño inadecuada</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Cat 10: Suicidio -->
-                <div class="ic-dx-cat">
-                  <div class="ic-dx-cat-head" onclick="toggleDxCat(this)" style="color:var(--danger)">
-                    <span>🔴 Suicidio y Autolesión</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dx-chev"><path d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                  <div class="ic-dx-cat-body" style="display:none">
-                    <div class="ic-chips">
-                      <span class="ic-chip" onclick="icTogR(this)">Ideación suicida pasiva (deseo de morir)</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Ideación suicida activa sin plan</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Ideación suicida con plan estructurado</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Intento de suicidio reciente (&lt;1 mes)</span>
-                      <span class="ic-chip" onclick="icTogR(this)">Antecedente de intentos previos</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Autolesiones sin intención suicida</span>
-                      <span class="ic-chip" onclick="icTogA(this)">Desesperanza marcada</span>
-                      <span class="ic-chip" onclick="icTog(this)">Acceso a medios letales</span>
-                      <span class="ic-chip" onclick="icTog(this)">Aislamiento social reciente</span>
-                    </div>
-                  </div>
-                </div>
-
               </div>
 
-              <!-- BOTÓN IMPRESIÓN DIAGNÓSTICA IA -->
-              <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                <button onclick="generarImpresionDx()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:0.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px" id="ic-dx-btn">✨ Generar impresión diagnóstica y diferenciales</button>
-                <span style="font-size:0.72rem;color:var(--text3)">Basada en los síntomas seleccionados + datos del examen mental</span>
+              <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <button onclick="generarImpresionDx()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.78rem;font-weight:700;cursor:pointer" id="ic-dx-btn">✨ Generar impresión diagnóstica</button>
+                <span style="font-size:0.7rem;color:var(--text3)">CIE-11 + diferenciales según síntomas seleccionados</span>
               </div>
-              <div id="ic-dx-out" style="display:none;margin-top:10px;background:var(--accent-light);border:1.5px solid var(--accent2);border-radius:10px;padding:14px 16px;font-size:0.78rem;line-height:1.7;color:var(--text)"></div>
+              <div id="ic-dx-out" style="display:none;margin-top:8px;background:var(--accent-light);border:1.5px solid var(--accent2);border-radius:10px;padding:12px 14px;font-size:0.78rem;line-height:1.7;color:var(--text)"></div>
 
-              <!-- ANÁLISIS CC -->
-              <div class="ic-field" style="margin-top:10px"><div class="ic-sublabel">Análisis cognitivo-conductual</div><textarea id="ic-resp-analisis" placeholder="Describir relación pensamientos automáticos, emociones y conductas..." rows="3"></textarea></div>
-              <div class="ic-field"><div class="ic-sublabel">Red de apoyo funcional</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Presente y activa</span><span class="ic-chip" onclick="icTogA(this)">Presente pero ambivalente</span><span class="ic-chip" onclick="icTogR(this)">Ausente</span><span class="ic-chip" onclick="icTog(this)">Conflictos familiares activos</span></div></div>
+              <div class="ic-field" style="margin-top:8px"><div class="ic-sublabel">Esquema cognitivo predominante</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Sin esquema disfuncional</span><span class="ic-chip" onclick="icTogR(this)">Vulnerabilidad / fragilidad</span><span class="ic-chip" onclick="icTogR(this)">Insuficiencia / incompetencia</span><span class="ic-chip" onclick="icTogR(this)">Abandono / desamparo</span><span class="ic-chip" onclick="icTogA(this)">Intolerancia a la incertidumbre</span><span class="ic-chip" onclick="icTogA(this)">Responsabilidad excesiva</span></div></div>
+              <div class="ic-field"><div class="ic-sublabel">Notas clínicas libres</div><textarea id="ic-resp-analisis" placeholder="Análisis CC, formulación, observaciones relevantes..." rows="2"></textarea></div>
             </div>
           </div>
           <div class="ic-form-section">
@@ -1058,8 +904,8 @@ input.toggle-cb{display:none}
         </div>
         <!-- GEMINI API KEY -->
         <div style="margin-top:16px;background:#f0fdf4;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="font-size:0.78rem;font-weight:700;color:#1e4d8c;white-space:nowrap">🤖 IA Clínica</span>
-          <input type="password" id="gemini-api-key" placeholder="Pega tu API Key de Google Gemini…" style="flex:1;min-width:200px;padding:7px 11px;border:1px solid #bfdbfe;border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('gemini_api_key',this.value);document.getElementById('gemini-key-status').textContent='✅ API key guardada';">
+          <span style="font-size:0.78rem;font-weight:700;color:#1e4d8c;white-space:nowrap">🤖 IA Clínica — Anthropic Claude</span>
+          <input type="password" id="gemini-api-key" placeholder="Pega tu API Key de Anthropic (sk-ant-…)" style="flex:1;min-width:200px;padding:7px 11px;border:1px solid #bfdbfe;border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('anthropic_api_key',this.value);document.getElementById('gemini-key-status').textContent='✅ API key guardada';">
           <span id="gemini-key-status" style="font-size:0.72rem;color:#1e4d8c;white-space:nowrap">Guardada en este dispositivo</span>
         </div>
         <!-- BOTONES -->
@@ -1272,6 +1118,59 @@ input.toggle-cb{display:none}
             </div>
           </div>
 
+
+          <!-- SÍNTOMAS SEGUIMIENTO -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:18px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:8px">🩺 Síntomas actuales — CIE-11 / DSM-5</div>
+            <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px">Selecciona los síntomas presentes en esta sesión para actualizar la impresión diagnóstica.</div>
+            <div class="ic-chips" id="seg-sintomas-chips">
+              <span class="ic-chip" onclick="icTog(this)">Ánimo deprimido persistente</span>
+              <span class="ic-chip" onclick="icTog(this)">Anhedonia</span>
+              <span class="ic-chip" onclick="icTog(this)">Pérdida de apetito / peso</span>
+              <span class="ic-chip" onclick="icTog(this)">Insomnio</span>
+              <span class="ic-chip" onclick="icTog(this)">Hipersomnia</span>
+              <span class="ic-chip" onclick="icTog(this)">Fatiga / pérdida de energía</span>
+              <span class="ic-chip" onclick="icTog(this)">Agitación psicomotora</span>
+              <span class="ic-chip" onclick="icTog(this)">Enlentecimiento psicomotor</span>
+              <span class="ic-chip" onclick="icTog(this)">Culpa excesiva / inutilidad</span>
+              <span class="ic-chip" onclick="icTog(this)">Dificultad para concentrarse</span>
+              <span class="ic-chip" onclick="icTog(this)">Pensamientos recurrentes de muerte</span>
+              <span class="ic-chip" onclick="icTog(this)">Ideación suicida pasiva</span>
+              <span class="ic-chip" onclick="icTog(this)">Ideación suicida activa sin plan</span>
+              <span class="ic-chip" onclick="icTog(this)">Ideación suicida con plan</span>
+              <span class="ic-chip" onclick="icTog(this)">Desesperanza marcada</span>
+              <span class="ic-chip" onclick="icTog(this)">Autolesiones sin intención suicida</span>
+              <span class="ic-chip" onclick="icTog(this)">Labilidad emocional</span>
+              <span class="ic-chip" onclick="icTog(this)">Irritabilidad</span>
+              <span class="ic-chip" onclick="icTog(this)">Ánimo elevado / eufórico</span>
+              <span class="ic-chip" onclick="icTog(this)">Grandiosidad / impulsividad</span>
+              <span class="ic-chip" onclick="icTog(this)">Logorrea / pensamiento acelerado</span>
+              <span class="ic-chip" onclick="icTog(this)">Ansiedad / preocupación excesiva</span>
+              <span class="ic-chip" onclick="icTog(this)">Ataques de pánico</span>
+              <span class="ic-chip" onclick="icTog(this)">Evitación fóbica</span>
+              <span class="ic-chip" onclick="icTog(this)">Obsesiones / compulsiones</span>
+              <span class="ic-chip" onclick="icTog(this)">Reexperimentación / flashbacks</span>
+              <span class="ic-chip" onclick="icTog(this)">Hiperactivación / sobresalto</span>
+              <span class="ic-chip" onclick="icTog(this)">Disociación / entumecimiento</span>
+              <span class="ic-chip" onclick="icTog(this)">Ideas delirantes</span>
+              <span class="ic-chip" onclick="icTog(this)">Alucinaciones</span>
+              <span class="ic-chip" onclick="icTog(this)">Pensamiento desorganizado</span>
+              <span class="ic-chip" onclick="icTog(this)">Desorientación / delirium</span>
+              <span class="ic-chip" onclick="icTog(this)">Deterioro cognitivo</span>
+              <span class="ic-chip" onclick="icTog(this)">Inestabilidad emocional intensa</span>
+              <span class="ic-chip" onclick="icTog(this)">Conductas impulsivas / autolesivas</span>
+              <span class="ic-chip" onclick="icTog(this)">Consumo problemático activo</span>
+              <span class="ic-chip" onclick="icTog(this)">Síntomas somáticos desproporcionados</span>
+              <span class="ic-chip" onclick="icTog(this)">Insomnio de inicio / mantenimiento</span>
+              <span class="ic-chip" onclick="icTog(this)">Sueño no reparador</span>
+            </div>
+            <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <button onclick="generarImpresionDxSeg()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.78rem;font-weight:700;cursor:pointer" id="seg-dx-btn">✨ Actualizar impresión diagnóstica</button>
+              <span style="font-size:0.7rem;color:var(--text3)">CIE-11 + diferenciales según síntomas actuales</span>
+            </div>
+            <div id="seg-dx-out" style="display:none;margin-top:8px;background:var(--accent-light);border:1.5px solid var(--accent2);border-radius:10px;padding:12px 14px;font-size:0.78rem;line-height:1.7;color:var(--text)"></div>
+            <input type="hidden" id="seg-impresion-hidden" value="">
+          </div>
           <!-- V. ESCALAS -->
           <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:18px">
             <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">V. Escalas de medición <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3)">(Opcional)</span></div>
@@ -1442,6 +1341,86 @@ input.toggle-cb{display:none}
           </div></div>
         </div>
         <div class="anamnesis-section">
+
+        <!-- SÍNTOMAS ANAMNESIS -->
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🩺</span><h4>Síntomas presentes — CIE-11 / DSM-5</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body">
+            <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px">Selecciona todos los síntomas presentes. La IA generará la impresión diagnóstica y diferenciales CIE-11.</div>
+            <div class="ic-chips" id="an-sintomas-chips">
+              <span class="ic-chip" onclick="icTog(this)">Ánimo deprimido persistente (&gt;2 sem)</span>
+              <span class="ic-chip" onclick="icTog(this)">Anhedonia</span>
+              <span class="ic-chip" onclick="icTog(this)">Pérdida de apetito / peso</span>
+              <span class="ic-chip" onclick="icTog(this)">Insomnio</span>
+              <span class="ic-chip" onclick="icTog(this)">Hipersomnia</span>
+              <span class="ic-chip" onclick="icTog(this)">Fatiga / pérdida de energía</span>
+              <span class="ic-chip" onclick="icTog(this)">Agitación psicomotora</span>
+              <span class="ic-chip" onclick="icTog(this)">Enlentecimiento psicomotor</span>
+              <span class="ic-chip" onclick="icTog(this)">Culpa excesiva / inutilidad</span>
+              <span class="ic-chip" onclick="icTog(this)">Dificultad para concentrarse</span>
+              <span class="ic-chip" onclick="icTog(this)">Pensamientos recurrentes de muerte</span>
+              <span class="ic-chip" onclick="icTog(this)">Ideación suicida pasiva</span>
+              <span class="ic-chip" onclick="icTog(this)">Ideación suicida activa sin plan</span>
+              <span class="ic-chip" onclick="icTog(this)">Ideación suicida con plan</span>
+              <span class="ic-chip" onclick="icTog(this)">Intento de suicidio reciente</span>
+              <span class="ic-chip" onclick="icTog(this)">Intentos previos relevantes</span>
+              <span class="ic-chip" onclick="icTog(this)">Autolesiones sin intención suicida</span>
+              <span class="ic-chip" onclick="icTog(this)">Desesperanza marcada</span>
+              <span class="ic-chip" onclick="icTog(this)">Ánimo elevado / eufórico</span>
+              <span class="ic-chip" onclick="icTog(this)">Grandiosidad / autoestima inflada</span>
+              <span class="ic-chip" onclick="icTog(this)">Disminución necesidad de sueño</span>
+              <span class="ic-chip" onclick="icTog(this)">Logorrea / pensamiento acelerado</span>
+              <span class="ic-chip" onclick="icTog(this)">Desinhibición / impulsividad</span>
+              <span class="ic-chip" onclick="icTog(this)">Labilidad emocional</span>
+              <span class="ic-chip" onclick="icTog(this)">Irritabilidad</span>
+              <span class="ic-chip" onclick="icTog(this)">Ansiedad / preocupación excesiva</span>
+              <span class="ic-chip" onclick="icTog(this)">Ataques de pánico</span>
+              <span class="ic-chip" onclick="icTog(this)">Evitación fóbica</span>
+              <span class="ic-chip" onclick="icTog(this)">Tensión muscular</span>
+              <span class="ic-chip" onclick="icTog(this)">Obsesiones (pensamientos intrusivos)</span>
+              <span class="ic-chip" onclick="icTog(this)">Compulsiones (rituales)</span>
+              <span class="ic-chip" onclick="icTog(this)">Ansiedad anticipatoria a procedimientos</span>
+              <span class="ic-chip" onclick="icTog(this)">Hipervigilancia somática</span>
+              <span class="ic-chip" onclick="icTog(this)">Reexperimentación / flashbacks</span>
+              <span class="ic-chip" onclick="icTog(this)">Pesadillas recurrentes</span>
+              <span class="ic-chip" onclick="icTog(this)">Evitación de estímulos traumáticos</span>
+              <span class="ic-chip" onclick="icTog(this)">Hiperactivación / sobresalto exagerado</span>
+              <span class="ic-chip" onclick="icTog(this)">Disociación / despersonalización</span>
+              <span class="ic-chip" onclick="icTog(this)">Entumecimiento emocional</span>
+              <span class="ic-chip" onclick="icTog(this)">Respuesta desproporcionada a estresor</span>
+              <span class="ic-chip" onclick="icTog(this)">Ideas delirantes</span>
+              <span class="ic-chip" onclick="icTog(this)">Alucinaciones auditivas</span>
+              <span class="ic-chip" onclick="icTog(this)">Alucinaciones visuales</span>
+              <span class="ic-chip" onclick="icTog(this)">Pensamiento desorganizado</span>
+              <span class="ic-chip" onclick="icTog(this)">Comportamiento desorganizado / catatónico</span>
+              <span class="ic-chip" onclick="icTog(this)">Síntomas negativos (alogia, abulia, aplanamiento)</span>
+              <span class="ic-chip" onclick="icTog(this)">Insight deteriorado</span>
+              <span class="ic-chip" onclick="icTog(this)">Alteración aguda de conciencia</span>
+              <span class="ic-chip" onclick="icTog(this)">Desorientación</span>
+              <span class="ic-chip" onclick="icTog(this)">Fluctuación del estado mental</span>
+              <span class="ic-chip" onclick="icTog(this)">Agitación nocturna</span>
+              <span class="ic-chip" onclick="icTog(this)">Deterioro de memoria reciente</span>
+              <span class="ic-chip" onclick="icTog(this)">Deterioro cognitivo progresivo</span>
+              <span class="ic-chip" onclick="icTog(this)">Inestabilidad emocional intensa</span>
+              <span class="ic-chip" onclick="icTog(this)">Impulsividad dañina</span>
+              <span class="ic-chip" onclick="icTog(this)">Relaciones inestables / idealización-devaluación</span>
+              <span class="ic-chip" onclick="icTog(this)">Miedo intenso al abandono</span>
+              <span class="ic-chip" onclick="icTog(this)">Consumo problemático a pesar de consecuencias</span>
+              <span class="ic-chip" onclick="icTog(this)">Síndrome de abstinencia activo</span>
+              <span class="ic-chip" onclick="icTog(this)">Síntomas somáticos desproporcionados</span>
+              <span class="ic-chip" onclick="icTog(this)">Dolor crónico con componente emocional</span>
+              <span class="ic-chip" onclick="icTog(this)">Insomnio de inicio</span>
+              <span class="ic-chip" onclick="icTog(this)">Insomnio de mantenimiento</span>
+              <span class="ic-chip" onclick="icTog(this)">Sueño no reparador</span>
+            </div>
+            <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <button onclick="generarImpresionDxAn()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.78rem;font-weight:700;cursor:pointer" id="an-dx-btn">✨ Generar impresión diagnóstica</button>
+              <span style="font-size:0.7rem;color:var(--text3)">CIE-11 + diferenciales según síntomas</span>
+            </div>
+            <div id="an-dx-out" style="display:none;margin-top:8px;background:var(--accent-light);border:1.5px solid var(--accent2);border-radius:10px;padding:12px 14px;font-size:0.78rem;line-height:1.7;color:var(--text)"></div>
+            <input type="hidden" id="an-impresion-hidden" value="">
+          </div>
+        </div>
           <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🎯</span><h4>Impresión diagnóstica y plan</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
           <div class="anamnesis-section-body"><div class="form-grid">
             <div class="form-group full"><label>Diagnóstico</label><div class="checkgroup" id="an-dx"><label><input type="checkbox" value="Trastorno adaptativo"><span>T. adaptativo</span></label><label><input type="checkbox" value="Trastorno depresivo leve"><span>Dep. leve</span></label><label><input type="checkbox" value="Trastorno depresivo moderado"><span>Dep. moderado</span></label><label><input type="checkbox" value="Trastorno depresivo grave"><span>Dep. grave</span></label><label><input type="checkbox" value="TAG"><span>TAG</span></label><label><input type="checkbox" value="Trastorno de pánico"><span>Pánico</span></label><label><input type="checkbox" value="TEPT"><span>TEPT</span></label><label><input type="checkbox" value="TOC"><span>TOC</span></label></div></div>
@@ -1530,8 +1509,8 @@ input.toggle-cb{display:none}
           <div class="anamnesis-section-body open">
             <div id="nota-output" class="nota-output">Completa los campos y presiona "Generar nota clínica"…</div>
             <div style="margin:10px 0;background:#f0fdf4;border:1px solid #bfdbfe;border-radius:8px;padding:9px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <span style="font-size:0.75rem;font-weight:700;color:#1e4d8c;white-space:nowrap">🤖 IA Clínica</span>
-              <input type="password" id="an-gemini-key" placeholder="API Key de Google Gemini…" style="flex:1;min-width:160px;padding:5px 9px;border:1px solid #bfdbfe;border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('gemini_api_key',this.value);document.getElementById('an-key-status').textContent='✅ Guardada';">
+              <span style="font-size:0.75rem;font-weight:700;color:#1e4d8c;white-space:nowrap">🤖 IA Clínica — Anthropic Claude</span>
+              <input type="password" id="an-gemini-key" placeholder="API Key de Anthropic (sk-ant-…)" style="flex:1;min-width:160px;padding:5px 9px;border:1px solid #bfdbfe;border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('anthropic_api_key',this.value);document.getElementById('an-key-status').textContent='✅ Guardada';">
               <span id="an-key-status" style="font-size:0.7rem;color:#1e4d8c;white-space:nowrap">Guardada en este dispositivo</span>
             </div>
             <div class="flex gap-2 mt-4" style="flex-wrap:wrap">
@@ -2237,12 +2216,9 @@ async function sincronizarPendientes(){
             // Llamar directamente al endpoint con los datos guardados
             const ctx=`Paciente: ${data._formData.edad||''}${data._formData.sexo?' | '+data._formData.sexo:''}. Dx: ${data._formData.dx||'—'}. Riesgo: ${data._formData.riesgo||'—'}.`;
             const llamar=async(prompt)=>{
-              const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-                method:'POST',headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
-              });
+              const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
               const d=await r.json();
-              return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+              return(d.content?.[0]?.text||'').trim();
             };
             const base='Psicólogo clínico hospitalario (TCC). Un párrafo completo, texto corrido, sin listas. No uses el nombre del paciente. Contexto: '+ctx;
             const fd=data._formData;
@@ -2294,12 +2270,9 @@ async function generarNotasPendientesIA(){
         const ctx='Paciente: '+(fd.edad||'')+(fd.sexo?' | '+fd.sexo:'')+'. Dx: '+(fd.dx||'—')+'. Riesgo: '+(fd.riesgo||'—')+'.';
         const base='Psicólogo clínico hospitalario (TCC). Un párrafo completo, texto corrido, sin listas. No uses el nombre del paciente. Contexto: '+ctx;
         const llamar=async(prompt)=>{
-          const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-            method:'POST',headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
-          });
+          const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
           const d=await r.json();
-          return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+          return(d.content?.[0]?.text||'').trim();
         };
         const [sub,obj,res,tra]=await Promise.all([
           llamar(base+'\n\nAnálisis Subjetivo de interconsulta hospitalaria. Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos automáticos: '+(fd.sub?.pens||'—')+'. Cita textual: '+(fd.sub?.cita||'—')+'.'  ),
@@ -3403,7 +3376,7 @@ window.populateAnamPacientes=()=>{
 setSyncStatus('syncing');
 ['p-fecha','ic-fecha','an-fecha','ic-pfecha'].forEach(id=>{try{document.getElementById(id).value=new Date().toISOString().split('T')[0];}catch(e){}});
 // Poblar campos de API key desde localStorage al cargar
-const _savedKey=localStorage.getItem('gemini_api_key')||'';
+const _savedKey=localStorage.getItem('anthropic_api_key')||localStorage.getItem('gemini_api_key')||'';
 if(_savedKey){
   ['gemini-api-key','an-gemini-key'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=_savedKey;});
   const s1=document.getElementById('gemini-key-status'),s2=document.getElementById('an-key-status');
@@ -3493,7 +3466,7 @@ window.cargarPlanTratamiento=function(pacId){
 
 window.generarPlanTratamiento=async function(pacId){
   const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
-  if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
+  if(!apiKey)return toast('⚠️ Configura tu API Key de Anthropic (sk-ant-…) en el campo de IA');
   const pac=(window.pacientes||[]).find(p=>p.id===pacId);
   if(!pac)return toast('⚠️ Paciente no encontrado');
 
@@ -3564,13 +3537,10 @@ AHORA genera el plan para este paciente con ese mismo nivel de especificidad cl�
 ${ctx}`;
 
   try{
-    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.4,maxOutputTokens:4000}})
-    });
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
-    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
-    const plan=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    if(!r.ok||d.type==='error')throw new Error(d.error?.message||d.message||'Error API');
+    const plan=(d.content?.[0]?.text||'').trim();
     if(!plan)throw new Error('Respuesta vacía');
 
     // Guardar en Firebase como campo del paciente
@@ -3791,7 +3761,7 @@ window.calcSVACBCA = async function(){
 
 window.generarNotaSVACBCA = async function(ponderado, level, interp, detalle){
   const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
-  if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
+  if(!apiKey)return toast('⚠️ Configura tu API Key de Anthropic (sk-ant-…) en el campo de IA');
   const notaDiv=document.getElementById('sva-nota-ia');
   if(notaDiv){notaDiv.style.display='';notaDiv.textContent='⏳ Generando nota narrativa…';}
 
@@ -3822,13 +3792,10 @@ ${relato?'- Resumen del relato: '+relato:''}
 Genera la nota clínica ahora:`;
 
   try{
-    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
-    });
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
-    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
-    const nota=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    if(!r.ok||d.type==='error')throw new Error(d.error?.message||d.message||'Error API');
+    const nota=(d.content?.[0]?.text||'').trim();
     if(notaDiv){notaDiv.textContent=nota;}
     // Guardar nota junto con resultado
     const pacNombreReal=document.getElementById('test-pac-nombre')?.value||'';
@@ -3910,7 +3877,7 @@ window.verBackupsLocales=function(){
 
 window.generarNotaDesdeBackup=async function(key){
   const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
-  if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
+  if(!apiKey)return toast('⚠️ Configura tu API Key de Anthropic (sk-ant-…) en el campo de IA');
   try{
     const bk=JSON.parse(localStorage.getItem(key)||'null');
     if(!bk)return toast('⚠️ Backup no encontrado');
@@ -3921,13 +3888,10 @@ window.generarNotaDesdeBackup=async function(key){
     const ctx='Dx: '+(fd.dx||bk.dx||'—')+'. Riesgo: '+(bk.riesgo||'—')+'.';
     const base='Eres psicólogo clínico hospitalario (TCC). UN SOLO PÁRRAFO, texto corrido, sin listas, no uses el nombre del paciente. '+ctx;
     const llamar=async(p)=>{
-      const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({contents:[{parts:[{text:p}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
-      });
+      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:p}]})});
       const d=await r.json();
-      if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
-      return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+      if(!r.ok||d.type==='error')throw new Error(d.error?.message||d.message||'Error API');
+      return(d.content?.[0]?.text||'').trim();
     };
 
     const dSub='Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos: '+(fd.sub?.pens||'—')+'. Cita: '+(fd.sub?.cita||'—')+'.';
@@ -4457,8 +4421,8 @@ ${pensamientosHTML.length ? `<div class="bloque">
 // ── ORIENTACIÓN DE VALORACIÓN CON IA ────────────────────────────────
 window.generarOrientacionIC = async function(){
   const apiKey = (typeof getGeminiKey==='function' ? getGeminiKey() : null)
-    || localStorage.getItem('gemini_api_key') || '';
-  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+    || localStorage.getItem('anthropic_api_key')||localStorage.getItem('gemini_api_key') || '';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Anthropic (sk-ant-…) en el campo de IA');
 
   const btn = document.getElementById('ic-orientacion-btn');
   const out  = document.getElementById('ic-orientacion-out');
@@ -4517,637 +4481,14 @@ window.generarOrientacionIC = async function(){
     + 'IMPORTANTE: Completa TODAS las secciones sin truncar. Sé concreta y directa. Contexto: hospital tercer nivel, tiempo limitado por visita.';
 
   try{
-    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.3, maxOutputTokens:4000}
-      })
-    });
-    const d = await r.json();
-    if(!r.ok||d.error) throw new Error(d.error?.message||'Error API');
-    const texto = (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
-    if(out){
-      const html = texto
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--accent2);display:block;margin-top:10px;margin-bottom:2px;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em">$1</strong>')
-        .replace(/\*(.+?)\*/g,'<em>$1</em>')
-        .replace(/\n- /g,'<br>• ')
-        .replace(/\n/g,'<br>');
-      out.innerHTML = html;
-      out.style.display = '';
-      setTimeout(()=>out.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
-    }
-    if(btn){ btn.textContent='↻ Regenerar'; btn.disabled=false; }
-  }catch(e){
-    if(out){ out.innerHTML='<span style="color:var(--danger)">\u274c '+e.message+'</span>'; }
-    if(btn){ btn.textContent='\u2728 Generar guía'; btn.disabled=false; }
-    toast('\u274c '+e.message);
-  }
-};
-
-
-// ── ORIENTACIÓN DE SEGUIMIENTO CON IA ───────────────────────────────
-window.generarOrientacionSeg = async function(){
-  const apiKey = typeof getGeminiKey==='function' ? getGeminiKey() : '';
-  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
-
-  const btn = document.getElementById('seg-orientacion-btn');
-  const out  = document.getElementById('seg-orientacion-out');
-
-  // Obtener paciente seleccionado
-  const selPac = document.getElementById('seg-pac-sel');
-  const pacId = selPac?.value || null;
-  const pac = pacId ? (window.pacientes||[]).find(p=>p.id===pacId) : null;
-  const nombre = pac?.nombre || (document.getElementById('ic-pnombre')?.value||'').trim();
-
-  if(!nombre && !pacId) return toast('⚠️ Selecciona un paciente primero');
-
-  if(btn){ btn.textContent='⏳ Generando…'; btn.disabled=true; }
-  if(out){ out.style.display=''; out.textContent='Leyendo historial y generando orientación…'; }
-
-  // Construir resumen del historial del paciente
-  const ics = (window.interconsultas||[])
-    .filter(ic => ic.pacienteId===pacId || ic.pacienteNombre===nombre)
-    .sort((a,b) => {
-      const ta = a.creado?.seconds||0, tb = b.creado?.seconds||0;
-      return ta - tb;
-    });
-
-  const dx = pac?.motivo || pac?.dxpsi || ics[0]?.dx || 'No especificado';
-  const riesgo = pac?.riesgo || 'No especificado';
-  const sesNum = ics.length + 1;
-
-  // Resumen de notas previas (últimas 3)
-  const notasPrevias = ics.slice(-3).map((ic, i) => {
-    const modo = ic.modo || 'IC';
-    const fecha = ic.fecha || '';
-    const nota = ic.obj || ic.nota || ic.sub || '';
-    const resumen = nota.slice(0, 200).replace(/\n/g,' ');
-    return 'Sesi\u00f3n '+fecha+' ('+modo+'): '+resumen+(nota.length>200?'\u2026':'');
-  }).join('\n');
-
-
-  const prompt = 'Eres una psicóloga clínica hospitalaria experta en seguimiento de pacientes.'
-    + ' Tienes el siguiente historial clínico:\n\n'
-    + 'PACIENTE: ' + nombre + '\n'
-    + 'DIAGNÓSTICO / MOTIVO: ' + dx + '\n'
-    + 'RIESGO ACTUAL: ' + riesgo + '\n'
-    + 'SESIÓN NÚMERO: ' + sesNum + '\n'
-    + (notasPrevias ? 'NOTAS PREVIAS:\n' + notasPrevias + '\n\n' : '(Sin notas previas registradas)\n\n')
-    + 'Genera una guía de orientación clínica BREVE y PRÁCTICA para ESTA sesión de seguimiento.'
-    + ' Estructura tu respuesta así:\n\n'
-    + '**FOCO DE ESTA SESIÓN**\n(1-2 frases sobre qué debe priorizarse hoy dado el historial)\n\n'
-    + '**PREGUNTAS CLAVE A EXPLORAR**\n(5-6 preguntas concretas en orden de prioridad, considerando evolución previa)\n\n'
-    + '**QUÉ MONITOREAR**\n(3-4 aspectos a evaluar dado el historial — cambios, retrocesos, señales de alarma)\n\n'
-    + '**SEÑALES DE ALERTA**\n(2-3 señales que indicarían deterioro o cambio de plan)\n\n'
-    + '**AJUSTE DE INTERVENCIÓN SUGERIDO**\n(1-2 frases sobre si mantener, ajustar o intensificar el abordaje)\n\n'
-    + 'Máximo 280 palabras. Sé concreta y directa. Contexto: hospital tercer nivel, sesión en cama, tiempo limitado.';
-
-  try{
-    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.3, maxOutputTokens:1200}
-      })
-    });
-    const d = await r.json();
-    if(!r.ok||d.error) throw new Error(d.error?.message||'Error API');
-    const texto = (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
-    if(out){ out.textContent = texto; }
-    if(btn){ btn.textContent='↻ Regenerar'; btn.disabled=false; }
-  }catch(e){
-    if(out){ out.textContent='❌ '+e.message; }
-    if(btn){ btn.textContent='✨ Generar guía'; btn.disabled=false; }
-    toast('❌ '+e.message);
-  }
-};
-
-
-// ── CATEGORÍAS DIAGNÓSTICAS COLAPSABLES ─────────────────────────────
-window.toggleDxCat = function(head){
-  const body = head.nextElementSibling;
-  const chev = head.querySelector('.dx-chev');
-  const open = body.style.display !== 'none';
-  body.style.display = open ? 'none' : '';
-  if(chev) chev.style.transform = open ? '' : 'rotate(180deg)';
-};
-
-// ── GENERADOR DE IMPRESIÓN DIAGNÓSTICA ──────────────────────────────
-window.generarImpresionDx = async function(){
-  const apiKey = (typeof getGeminiKey==='function' ? getGeminiKey() : null)
-    || localStorage.getItem('gemini_api_key') || '';
-  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
-
-  const btn = document.getElementById('ic-dx-btn');
-  const out  = document.getElementById('ic-dx-out');
-
-  // Recopilar síntomas seleccionados
-  const sintomasSeleccionados = [];
-  document.querySelectorAll('#ic-dx-section .ic-chip.on, #ic-dx-section .ic-chip.on-r, #ic-dx-section .ic-chip.on-a').forEach(chip => {
-    sintomasSeleccionados.push(chip.textContent.trim());
-  });
-
-  if(sintomasSeleccionados.length < 2){
-    toast('⚠️ Selecciona al menos 2 síntomas primero');
-    return;
-  }
-
-  // Recopilar contexto del examen mental
-  const afecto    = icChipsBySubLabel('Afecto').join(', ') || '—';
-  const ideacion  = icChipsBySubLabel('Ideación actual').join(', ') || 'Niega';
-  const pens      = icChipsBySubLabel('Pensamiento').join(', ') || '—';
-  const emoc      = icChipsBySubLabel('Estado emocional referido').join(', ') || '—';
-  const dx        = document.getElementById('ic-pdx')?.value || '—';
-  const riesgo    = document.getElementById('ic-riesgo-nivel')?.value || '—';
-  const tiempo    = document.getElementById('ic-resp-analisis')?.value || '';
-
-  if(btn){ btn.textContent='⏳ Generando…'; btn.disabled=true; }
-  if(out){ out.style.display=''; out.innerHTML='<em style="color:var(--text3)">Analizando síntomas…</em>'; }
-
-  const prompt = 'Eres un psicólogo clínico hospitalario experto en diagnóstico diferencial (CIE-11 y DSM-5).'
-    + ' Contexto hospitalario intrahospitalario. Diagnóstico médico de base: ' + dx + '.'
-    + ' Riesgo: ' + riesgo + '.'
-    + ' Examen mental: afecto=' + afecto + ', pensamiento=' + pens + ', ideación=' + ideacion + ', estado emocional=' + emoc + '.'
-    + (tiempo ? ' Análisis CC: ' + tiempo.slice(0,200) + '.' : '')
-    + '\n\nSíntomas presentes seleccionados:\n' + sintomasSeleccionados.map((s,i)=>(i+1)+'. '+s).join('\n')
-    + '\n\nGenera la impresión diagnóstica con esta estructura exacta:\n\n'
-    + '**DIAGNÓSTICO PRINCIPAL**\n(Nombre CIE-11 + código. Justificación en 2-3 frases basada en síntomas seleccionados.)\n\n'
-    + '**DIAGNÓSTICOS DIFERENCIALES**\n(2-3 diagnósticos alternativos con criterio diferenciador breve.)\n\n'
-    + '**CRITERIOS CUMPLIDOS**\n(Criterios DSM-5/CIE-11 que se satisfacen con los síntomas reportados.)\n\n'
-    + '**CRITERIOS PENDIENTES**\n(Qué falta para confirmar o descartar el diagnóstico principal.)\n\n'
-    + '**CONSIDERACIÓN CLÍNICA**\n(Una frase sobre el contexto médico y cómo influye en la presentación.)\n\n'
-    + 'Sé técnico y directo. No inventes síntomas no mencionados.';
-  try{
-    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.2, maxOutputTokens:3000}})
-    });
-    const d = await r.json();
-    if(!r.ok||d.error) throw new Error(d.error?.message||'Error API');
-    const texto = (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
-    if(out){
-      const html = texto
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--accent);display:block;margin-top:10px;margin-bottom:3px;font-size:0.79rem;text-transform:uppercase;letter-spacing:0.05em">$1</strong>')
-        .replace(/\*(.+?)\*/g,'<em>$1</em>')
-        .replace(/\n- /g,'<br>• ')
-        .replace(/\n/g,'<br>');
-      out.innerHTML = html;
-      // Guardar en formulario para que lo use la IA de nota
-      const hiddenImpresion = document.getElementById('ic-impresion-hidden');
-      if(hiddenImpresion) hiddenImpresion.value = texto;
-    }
-    if(btn){ btn.textContent='↻ Regenerar'; btn.disabled=false; }
-    toast('✅ Impresión diagnóstica generada');
-  }catch(e){
-    if(out){ out.innerHTML='<span style="color:var(--danger)">❌ '+e.message+'</span>'; }
-    if(btn){ btn.textContent='✨ Generar impresión diagnóstica y diferenciales'; btn.disabled=false; }
-    toast('❌ '+e.message);
-  }
-};
-
-// Estos stubs capturan clics tempranos y los reintenta hasta que el módulo esté listo.
-(function(){
-  function makeStub(name){
-    // No sobreescribir si la función ya está definida en este script
-    if(typeof window[name]==='function')return;
-    window[name]=function stub(...args){
-      // Si el módulo ya reemplazó el stub, llamar la versión real
-      if(window[name]!==stub)return window[name](...args);
-      // Si no, reintentar en 200ms
-      setTimeout(()=>{if(window[name]!==stub)window[name](...args);else window[name](...args);},200);
-    };
-  }
-  ['guardarPaciente','editarPaciente','eliminarPaciente','guardarIC','eliminarIC',
-   'verHistorialPorId','nuevaAnamnesisParaPaciente','abrirICParaPaciente','irTestsPaciente',
-   'guardarICFirebase','generarNotaIC','guardarCapacidadFirebase','limpiarCapacidad','sincronizarPendientes','generarNotasPendientesIA','generarPlanTratamiento','editarPlanTratamiento','verBackupsLocales','generarNotaDesdeBackup','eliminarBackup','generarOrientacionIC','generarOrientacionSeg','generarImpresionDx','toggleDxCat','guardarPlanEditado','copiarPlanTratamiento','cargarPlanTratamiento',
-   'guardarAnamnesis','generarNotaAnamnesis','mhicNuevaNota','mhicCerrar',
-   'mneCerrar','mneGuardar','mneEliminar','hpacNuevaNota','hpacVolverLista',
-   'calcPHQ9','calcGAD7','calcHADS','calcMMSE','calcMoCA','calcCAM','calcSVACBCA','generarNotaSVACBCA','renderSVACBCA',
-   'calcCSSRS','calcMMAS4','calcDuelo','calcPCL5','renderConsultaExterna',
-   'setDashMode','toggleDashView','dashNavDia','dashNavHoy','populateICPacientes','populateAnamPacientes'
-  ].forEach(makeStub);
-})();
-// ── UI & NAVIGATION ──────────────────────────────────────────
-const pages=['dashboard','pacientes','consulta-externa','interconsultas','historial-ic','anamnesis','tests','capacidad','historial','historial-pac','psicoeducacion'];
-const titles={dashboard:'Inicio',pacientes:'Registro de Pacientes','consulta-externa':'Consulta Externa EPS',interconsultas:'Interconsultas','historial-ic':'Historial de Interconsultas',anamnesis:'Nueva Anamnesis',tests:'Tests Clínicos',capacidad:'Valoración de Capacidad Decisional',historial:'Historial de Tests',psicoeducacion:'Psicoeducación Clínica','historial-pac':'Historial de Pacientes'};
-
-window.goTo=(page)=>{
-  pages.forEach(p=>document.getElementById('page-'+p).classList.toggle('active',p===page));
-  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
-  document.getElementById('topbar-title').textContent=titles[page]||page;
-  if(page==='pacientes'&&typeof renderPacientes==='function')renderPacientes();
-  if(page==='consulta-externa'&&typeof renderConsultaExterna==='function')renderConsultaExterna();
-  if(page==='interconsultas'){populateICPacientes();if(typeof renderIC==='function')renderIC();}
-  if(page==='historial-ic'&&typeof renderIC==='function')renderIC();
-  if(page==='tests')populateICPacientes();
-  if(page==='capacidad'){populateICPacientes();const fd=document.getElementById('cap-fecha');if(fd&&!fd.value)fd.value=new Date().toISOString().split('T')[0];}
-  if(page==='dashboard'&&typeof renderDashboard==='function')renderDashboard();
-  if(page==='historial'&&typeof renderHistorial==='function')renderHistorial();
-  if(page==='historial-pac')hpacRenderLista();
-  // Cerrar sidebar en móvil al navegar
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('open');
-  // Cerrar buscador
-  closeSrDrop();
-  const gs=document.getElementById('global-search');if(gs)gs.blur();
-};
-
-window.toggleSidebar=()=>{
-  const isMobile=window.innerWidth<=1024;
-  if(isMobile){
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebar-overlay').classList.toggle('open');
-  } else {
-    const sb=document.getElementById('sidebar');
-    const mn=document.querySelector('.main');
-    const collapsed=sb.classList.toggle('collapsed');
-    mn.style.marginLeft=collapsed?'0':'240px';
-  }
-};
-window.openModal=(id)=>{document.getElementById(id).classList.add('open');if(id==='modal-ic')populateICPacientes();if(id==='modal-paciente'){setPTipo('hospitalizado');document.getElementById('p-estado').value='seguimiento';['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-dxpsi','p-riesgo-obs','p-notas','p-proxsesion'].forEach(fid=>{const el=document.getElementById(fid);if(el)el.value='';});document.getElementById('p-riesgo').value='';document.getElementById('p-sexo').value='';document.getElementById('p-fecha').value=new Date().toISOString().split('T')[0];document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>b.classList.remove('sel'));const btn=document.querySelector('#modal-paciente .btn-primary');if(btn){btn.textContent='Registrar';btn.onclick=guardarPaciente;}}};
-window.closeModal=(id)=>document.getElementById(id).classList.remove('open');
-document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open')}));
-window.nuevaAnamnesisParaPaciente=(id)=>{goTo('anamnesis');setTimeout(()=>{document.getElementById('anamnesis-paciente-sel').value=id;selectAnamPaciente(id);},200);};
-window.nuevaICParaPaciente=(id)=>{abrirICParaPaciente(id);};
-window.irTestsPaciente=(id)=>{
-  const p=pacientes.find(x=>x.id===id);
-  if(p){
-    document.getElementById('test-pac-nombre').value=p.nombre;
-    if(p.edad)document.getElementById('test-pac-edad').value=p.edad;
-    window._testPacienteId=p.id;
-  }
-  goTo('tests');
-  setTimeout(()=>{
-    const sel=document.getElementById('test-pac-sel');
-    if(sel)sel.value=id;
-  },200);
-};
-window.abrirCapacidadPaciente=(id)=>{
-  goTo('capacidad');
-  setTimeout(()=>{
-    const sel=document.getElementById('cap-pac-sel');
-    if(sel){sel.value=id;selectCapPaciente(id);}
-  },200);
-};
-window.selectAnamPaciente=(id)=>{if(!id||typeof pacientes==='undefined')return;const p=pacientes.find(x=>x.id===id);if(!p)return;document.getElementById('an-nombre').value=p.nombre;document.getElementById('an-cedula').value=p.cedula;if(p.edad)document.getElementById('an-edad').value=p.edad;if(p.motivo)document.getElementById('an-motivo').value=p.motivo;};
-window.clearAnamnesis=()=>{document.getElementById('form-anamnesis').reset();document.getElementById('anamnesis-paciente-sel').value='';document.getElementById('an-riesgo').value='';document.querySelectorAll('.risk-btn').forEach(b=>b.classList.remove('sel'));document.getElementById('nota-output').textContent='Completa los campos y presiona "Generar nota clínica"…';document.getElementById('an-intens-val').textContent='5';};
-
-// ── ANAMNESIS TABS & SESIONES ────────────────────────────────
-window.anamSwitchTab=function(tab){
-  // Update tab styles
-  ['primera','sesion','historial'].forEach(t=>{
-    const btn=document.getElementById('anam-tab-'+t);
-    if(!btn)return;
-    btn.style.color=t===tab?'var(--accent)':'var(--text2)';
-    btn.style.borderBottomColor=t===tab?'var(--accent)':'transparent';
-    btn.style.fontWeight=t===tab?'600':'500';
-  });
-  // Show/hide panels
-  const form=document.getElementById('form-anamnesis');
-  const panelSeg=document.getElementById('anam-panel-sesion');
-  const panelHist=document.getElementById('anam-panel-historial');
-  const timerBar=document.querySelector('#page-anamnesis .timer-bar');
-  if(form)form.style.display=tab==='primera'?'':'none';
-  if(timerBar)timerBar.style.display=tab==='primera'?'':'none';
-  if(panelSeg)panelSeg.style.display=tab==='sesion'?'':'none';
-  if(panelHist){
-    panelHist.style.display=tab==='historial'?'':'none';
-    if(tab==='historial'){
-      const sel=document.getElementById('seg-historial-pac-sel');
-      if(sel&&sel.value)anamHistorialRender(sel.value);
-    }
-  }
-  // Auto-sync patient selection across tabs
-  if(tab==='sesion'){
-    const mainSel=document.getElementById('anamnesis-paciente-sel');
-    const segSel=document.getElementById('seg-pac-sel');
-    if(mainSel&&segSel&&mainSel.value&&!segSel.value)segSel.value=mainSel.value;
-    // Set today's date if empty
-    const fd=document.getElementById('seg-fecha');
-    if(fd&&!fd.value)fd.value=new Date().toISOString().split('T')[0];
-    // Auto-set session number
-    anamSegAutoNum();
-  }
-  if(tab==='historial'){
-    const mainSel=document.getElementById('anamnesis-paciente-sel');
-    const histSel=document.getElementById('seg-historial-pac-sel');
-    if(mainSel&&histSel&&mainSel.value&&!histSel.value){
-      histSel.value=mainSel.value;
-      anamHistorialRender(mainSel.value);
-    }
-  }
-};
-
-window.anamSegSelectPac=function(id){
-  if(!id)return;
-  anamSegAutoNum();
-};
-
-window.anamSegAutoNum=function(){
-  const sel=document.getElementById('seg-pac-sel');
-  const numEl=document.getElementById('seg-num');
-  if(!sel||!sel.value||!numEl||numEl.value)return;
-  const pacId=sel.value;
-  const pacNombre=(window.pacientes||[]).find(p=>p.id===pacId)?.nombre||'';
-  const prevSesiones=(window.anamnesisList||[]).filter(a=>
-    (a.pacienteId===pacId||a.pacienteNombre===pacNombre)&&a.modo==='Seguimiento'
-  );
-  numEl.value=prevSesiones.length+2; // +1 for anamnesis inicial, +1 for this
-};
-
-window.anamSegLimpiar=function(){
-  const ids=['seg-num','seg-eventos','seg-dificultades','seg-pensamiento','seg-ajustes',
-    'seg-obj-corto','seg-obj-largo','seg-tec-psico-tema','seg-tec-otras-cual','seg-tec-reest-ef',
-    'seg-tec-expos-nivel','seg-tarea-dbt2-cual','seg-tarea-otra2-cual','seg-dist-otra-cual',
-    'seg-riesgo-otro-cual','seg-humor-escala','seg-phq-ini','seg-phq-act','seg-gad-ini',
-    'seg-gad-act','seg-impuls','seg-proxcita'];
-  ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  const cbs=['seg-humor-estable','seg-humor-ansioso','seg-humor-depresivo','seg-humor-irritable',
-    'seg-tarea-completa','seg-tarea-parcial','seg-tarea-no','seg-tec-reest','seg-tec-expos',
-    'seg-tec-dbt','seg-tec-dbt-tol','seg-tec-dbt-reg','seg-tec-psico','seg-tec-otras',
-    'seg-dist-catas','seg-dist-person','seg-dist-polar','seg-dist-sobre','seg-dist-filtr',
-    'seg-dist-otra','seg-tarea-reg','seg-tarea-dbt2','seg-tarea-otra2','seg-riesgo-ideacion',
-    'seg-riesgo-autolesion','seg-riesgo-otro','seg-rec-insight','seg-rec-motiv','seg-rec-apoyo'];
-  cbs.forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
-  document.querySelectorAll('input[name="seg-modalidad"]').forEach(r=>r.checked=false);
-  const rEl=document.getElementById('seg-riesgo');if(rEl)rEl.value='';
-  const fd=document.getElementById('seg-fecha');if(fd)fd.value=new Date().toISOString().split('T')[0];
-  // Reset nota output
-  const outEl=document.getElementById('ic-out-seg-texto');
-  if(outEl){outEl.textContent='Genera la nota para ver el contenido…';outEl.classList.add('ph');}
-  const segOut=document.getElementById('ic-out-seg');
-  if(segOut)segOut.style.display='none';
-  const wrap=document.getElementById('ic-output-wrap');
-  if(wrap)wrap.style.display='none';
-};
-
-window.anamSegGuardar=async function(){
-  const pacId=document.getElementById('seg-pac-sel').value;
-  if(!pacId)return toast('⚠️ Selecciona un paciente');
-  const pac=(window.pacientes||[]).find(p=>p.id===pacId);
-  if(!pac)return toast('⚠️ Paciente no encontrado');
-  const gv=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
-  const gc=id=>{const el=document.getElementById(id);return el?el.checked:false;};
-  // Build structured summary fields
-  const humor=[gc('seg-humor-estable')&&'Estable',gc('seg-humor-ansioso')&&'Ansioso',
-    gc('seg-humor-depresivo')&&'Depresivo',gc('seg-humor-irritable')&&'Irritable'].filter(Boolean);
-  const humorEsc=gv('seg-humor-escala');
-  const subParts=[];
-  if(humor.length)subParts.push('Humor: '+humor.join(', ')+(humorEsc?' ('+humorEsc+'/5)':''));
-  if(gv('seg-eventos'))subParts.push('Eventos desde última sesión: '+gv('seg-eventos'));
-  const tareaRev=[gc('seg-tarea-completa')&&'Completa',gc('seg-tarea-parcial')&&'Parcial',gc('seg-tarea-no')&&'No realizada'].filter(Boolean);
-  if(tareaRev.length)subParts.push('Revisión de tarea: '+tareaRev.join(', '));
-  if(gv('seg-dificultades'))subParts.push('Dificultades: '+gv('seg-dificultades'));
-  const tecnicas=[];
-  if(gc('seg-tec-reest'))tecnicas.push('Reestructuración cognitiva'+(gv('seg-tec-reest-ef')?' (ef. '+gv('seg-tec-reest-ef')+'/5)':''));
-  if(gc('seg-tec-expos'))tecnicas.push('Exposición gradual'+(gv('seg-tec-expos-nivel')?' (ansiedad máx. '+gv('seg-tec-expos-nivel')+'/10)':''));
-  if(gc('seg-tec-dbt')){let dbt='Habilidades DBT';const sub2=[];if(gc('seg-tec-dbt-tol'))sub2.push('Tolerancia al malestar');if(gc('seg-tec-dbt-reg'))sub2.push('Regulación emocional');if(sub2.length)dbt+=' ('+sub2.join(', ')+')';tecnicas.push(dbt);}
-  if(gc('seg-tec-psico')&&gv('seg-tec-psico-tema'))tecnicas.push('Psicoeducación: '+gv('seg-tec-psico-tema'));
-  if(gc('seg-tec-otras')&&gv('seg-tec-otras-cual'))tecnicas.push(gv('seg-tec-otras-cual'));
-  const resp=tecnicas.length?'Técnicas: '+tecnicas.join(' | '):'' ;
-  const cogParts=[];
-  if(gv('seg-pensamiento'))cogParts.push('Pensamiento automático: "'+gv('seg-pensamiento')+'"');
-  const dist=[gc('seg-dist-catas')&&'Catastrofismo',gc('seg-dist-person')&&'Personalización',
-    gc('seg-dist-polar')&&'Pensamiento polarizado',gc('seg-dist-sobre')&&'Sobregeneralización',
-    gc('seg-dist-filtr')&&'Filtro mental',gc('seg-dist-otra')&&gv('seg-dist-otra-cual')].filter(Boolean);
-  if(dist.length)cogParts.push('Distorsiones: '+dist.join(', '));
-  const objParts=[];
-  const tareas=[];
-  if(gc('seg-tarea-reg'))tareas.push('Registro de pensamientos');
-  if(gc('seg-tarea-dbt2')&&gv('seg-tarea-dbt2-cual'))tareas.push('Práctica DBT: '+gv('seg-tarea-dbt2-cual'));
-  if(gc('seg-tarea-otra2')&&gv('seg-tarea-otra2-cual'))tareas.push(gv('seg-tarea-otra2-cual'));
-  if(tareas.length)objParts.push('Tareas: '+tareas.join(' | '));
-  if(gv('seg-obj-corto'))objParts.push('Corto plazo: '+gv('seg-obj-corto'));
-  if(gv('seg-obj-largo'))objParts.push('Largo plazo: '+gv('seg-obj-largo'));
-  const notasParts=[];
-  const riesgosD=[gc('seg-riesgo-ideacion')&&'Ideación suicida',gc('seg-riesgo-autolesion')&&'Autolesiones',
-    gc('seg-riesgo-otro')&&gv('seg-riesgo-otro-cual')].filter(Boolean);
-  if(riesgosD.length)notasParts.push('Riesgos: '+riesgosD.join(', '));
-  const recursos=[gc('seg-rec-insight')&&'Insight',gc('seg-rec-motiv')&&'Motivación',gc('seg-rec-apoyo')&&'Apoyo social'].filter(Boolean);
-  if(recursos.length)notasParts.push('Recursos: '+recursos.join(', '));
-  if(gv('seg-ajustes'))notasParts.push('Ajustes terapéuticos: '+gv('seg-ajustes'));
-  const escalasParts=[];
-  if(gv('seg-phq-ini')||gv('seg-phq-act'))escalasParts.push('PHQ-9: inicial='+gv('seg-phq-ini')+' actual='+gv('seg-phq-act'));
-  if(gv('seg-gad-ini')||gv('seg-gad-act'))escalasParts.push('GAD-7: inicial='+gv('seg-gad-ini')+' actual='+gv('seg-gad-act'));
-  if(gv('seg-impuls'))escalasParts.push('Impulsividad TLP: '+gv('seg-impuls')+'/10');
-  if(escalasParts.length)notasParts.push('Escalas: '+escalasParts.join(' | '));
-  const modalidad=document.querySelector('input[name="seg-modalidad"]:checked')?.value||'';
-  const proxcita=gv('seg-proxcita');
-  if(proxcita)notasParts.push('Próxima cita: '+proxcita+(modalidad?' ('+modalidad+')':''));
-  const sub=subParts.join('\n');
-  const obj=cogParts.join('\n');
-  const trat=objParts.join('\n');
-  const nota=notasParts.join('\n');
-  if(!sub&&!obj&&!resp&&!trat&&!nota)return toast('⚠️ Completa al menos un campo de la sesión');
-  const riesgo=document.getElementById('seg-riesgo').value;
-  const numSesion=gv('seg-num');
-  const fecha=gv('seg-fecha')||new Date().toISOString().split('T')[0];
-  setSyncStatus('syncing');
-  try{
-    const {collection,addDoc,serverTimestamp}=window._fdb||{};
-    await addDoc(collection(window.db,'anamnesis'),{
-      pacienteId:pac.id,pacienteNombre:pac.nombre,pacienteCedula:pac.cedula||'',
-      fecha,numSesion:numSesion?parseInt(numSesion):null,modo:'Seguimiento',
-      riesgo:riesgo||'',sub,obj,resp,trat,nota,
-      creado:serverTimestamp()
-    });
-    toast('✅ Nota de sesión guardada');setSyncStatus('online');
-    anamSegLimpiar();anamSegAutoNum();
-  }catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
-};
-
-window.anamHistorialRender=function(pacId){
-  const cont=document.getElementById('seg-historial-lista');
-  const countEl=document.getElementById('seg-historial-count');
-  if(!cont)return;
-  if(!pacId){cont.innerHTML='';if(countEl)countEl.textContent='';return;}
-  const pac=(window.pacientes||[]).find(p=>p.id===pacId);
-  const nombre=pac?.nombre||'';
-  // Get all anamnesis records for this patient (initial + sessions)
-  const todos=(window.anamnesisList||[]).filter(a=>
-    a.pacienteId===pacId||a.pacienteNombre===nombre
-  ).sort((a,b)=>_sk(b)-_sk(a));
-  if(countEl)countEl.textContent=todos.length+' registro'+(todos.length!==1?'s':'');
-  if(!todos.length){
-    cont.innerHTML='<div class="empty"><p>Sin sesiones registradas para este paciente.</p></div>';return;
-  }
-  const modoColor={Seguimiento:'#1a56db',Anamnesis:'#7b1fa2'};
-  const modoIcon={Seguimiento:'📝',Anamnesis:'📋'};
-  const noNA=v=>v&&!v.startsWith('N/A')&&!v.startsWith('Genera');
-  cont.innerHTML=todos.map((e,i)=>{
-    const col=modoColor[e.modo]||'var(--accent2)';
-    const ico=modoIcon[e.modo]||'📄';
-    const modo=e.modo||'Nota';
-    const sesLabel=e.numSesion?'Sesión '+e.numSesion:'';
-    const riesgo=e.riesgo;
-    const rColor=riesgo==='ALTO'?'var(--danger)':riesgo==='MEDIO'?'var(--warning)':'var(--success)';
-    const rBadge=(riesgo&&riesgo!=='No clasificado'&&riesgo!=='SIN RIESGO'&&riesgo!=='')?
-      `<span style="background:${rColor}22;color:${rColor};padding:2px 8px;border-radius:20px;font-size:0.68rem;font-weight:600">${riesgo}</span>`:'';
-    const campos=[];
-    const labelSeg={sub:'I. Estado del paciente / Datos de sesión',obj:'II. Cogniciones identificadas',resp:'II. Técnicas aplicadas',trat:'III. Plan de acción',nota:'IV. Notas clínicas'};
-    const labelGen={sub:'Análisis Subjetivo',obj:'Análisis Objetivo',resp:'Respuesta / Impresión clínica',trat:'Tratamiento / Plan',nota:'Notas adicionales'};
-    const isSeg=e.modo==='Seguimiento';
-    const lMap=isSeg?labelSeg:labelGen;
-    if(noNA(e.sub))campos.push({l:lMap.sub,v:e.sub});
-    if(noNA(e.obj))campos.push({l:lMap.obj,v:e.obj});
-    if(noNA(e.resp))campos.push({l:lMap.resp,v:e.resp});
-    if(noNA(e.trat))campos.push({l:lMap.trat,v:e.trat});
-    if(noNA(e.nota))campos.push({l:lMap.nota,v:e.nota});
-    if(!campos.length&&e.nota)campos.push({l:'Nota clínica',v:e.nota});
-    const camposHtml=campos.length
-      ?campos.map(c=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px">
-          <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:4px">${c.l}</div>
-          <div style="font-size:0.8rem;line-height:1.6;white-space:pre-wrap">${c.v}</div></div>`).join('')
-      :'<p style="color:var(--text3);font-size:0.8rem;font-style:italic">Sin texto guardado.</p>';
-    return `<div style="background:var(--surface2);border:1px solid var(--border);border-left:4px solid ${col};border-radius:10px;padding:14px 16px;margin-bottom:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-        <div>
-          <span style="font-weight:700;font-size:0.88rem">${ico} ${modo}</span>
-          ${sesLabel?`<span style="margin-left:8px;background:var(--accent-light);color:var(--accent);padding:1px 8px;border-radius:20px;font-size:0.72rem;font-weight:600">${sesLabel}</span>`:''}
-          <span style="font-size:0.82rem;color:var(--text2);margin-left:8px">${e.fecha||'Sin fecha'}</span>
-        </div>
-        <div style="display:flex;gap:6px;align-items:center">${rBadge}</div>
-      </div>
-      ${camposHtml}
-    </div>`;
-  }).join('');
-};
-window.setRisk=(level,el)=>{document.querySelectorAll('.risk-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');document.getElementById('an-riesgo').value=level;};
-window.setPRisk=(level,el)=>{document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');document.getElementById('p-riesgo').value=level;};
-window.getChecked=(id)=>[...document.querySelectorAll(`#${id} input:checked`)].map(i=>i.value).join(', ');
-window.getRadio=(name)=>{const el=document.querySelector(`input[name="${name}"]:checked`);return el?el.value:'';};
-window.generarNota=async ()=>{
-  const apiKey=getGeminiKey();
-  if(!apiKey){
-    toast('⚠️ Agrega tu API key de Gemini para generar la nota con IA.');
-    document.getElementById('an-gemini-key')?.focus();
-    return;
-  }
-  await generarAnamnesisConGemini(apiKey);
-};
-
-async function generarAnamnesisConGemini(apiKey){
-  const v=id=>document.getElementById(id)?.value||'';
-  const getChecked=w=>{const c=document.getElementById(w);if(!c)return'—';return Array.from(c.querySelectorAll('input:checked')).map(i=>i.value).join(', ')||'—';};
-  const getRadio=w=>{const r=document.querySelector('input[name="'+w+'"]:checked');return r?r.value:'—';};
-
-  const datos=`
-DATOS DE IDENTIFICACIÓN:
-- Nombre: Paciente (omitir nombre en la nota)
-- Edad: ${v('an-edad')} años | Estado civil: ${v('an-ecivil')} | Escolaridad: ${v('an-esc')}
-- Ocupación: ${v('an-ocupacion')} | Remitido por: ${v('an-remitido')}
-
-MOTIVO DE CONSULTA:
-${v('an-motivo')||'No registrado'}
-
-HISTORIA DEL PROBLEMA ACTUAL:
-- Inicio: ${getRadio('an-inicio')} | Evolución: ${v('an-evolucion')} | Intensidad: ${v('an-intens')}/10
-- Desencadenantes: ${getChecked('an-desenc')}
-- Síntomas: ${getChecked('an-sint')}
-- Impacto funcional: ${getChecked('an-impacto')}
-- Descripción libre: ${v('an-descripcion')||'—'}
-
-ANTECEDENTES DE SALUD MENTAL:
-- Tto. psicológico previo: ${getRadio('an-tpsi')} ${v('an-tpsi-cuando')}
-- Tto. psiquiátrico previo: ${getRadio('an-tpsiq')} ${v('an-tpsiq-dx')}
-- Diagnósticos previos: ${getChecked('an-dx-previos')}
-- Hospitalizaciones psiquiátricas: ${getRadio('an-hosp-psiq')} ${v('an-hosp-psiq-det')}
-- Ideación suicida previa: ${getRadio('an-is-prev')} | Intentos: ${getRadio('an-is')} ${v('an-is-det')}
-- Autolesiones: ${getChecked('an-autolesion')}
-- Medicación psiquiátrica actual: ${v('an-meds')||'Ninguna'}
-- Enfermedades médicas: ${v('an-enf')||'Ninguna'}
-- Red de apoyo: ${getRadio('an-red')}
-
-HISTORIA DE VIOLENCIA:
-${getChecked('an-violencia')} ${v('an-violencia-obs')}
-
-ANTECEDENTES FAMILIARES:
-- Trastorno mental familiar: ${getRadio('an-fam-tmh')} ${v('an-fam-quien')}
-- Suicidio familiar: ${getRadio('an-fam-suicidio')} ${v('an-fam-suicidio-quien')}
-
-HISTORIA PERSONAL Y SOCIAL:
-- Vive con: ${v('an-convive')} | Dinámica familiar: ${getChecked('an-dinamica')}
-- Relaciones interpersonales: ${getRadio('an-relaciones')} | Pareja: ${getRadio('an-pareja')}
-- Rendimiento escolar/laboral: ${getRadio('an-rendimiento')}
-
-HÁBITOS:
-- Alimentación: ${getChecked('an-alimentacion')}
-- Sueño: ${getChecked('an-sueno')} | Horas: ${v('an-horas-sueno')} | Calidad: ${v('an-calidad-sueno')}/10
-- Sustancias: ${getChecked('an-sustancias')} | Frecuencia: ${getRadio('an-freq-sust')}
-
-EXAMEN MENTAL:
-- Orientación: ${getChecked('an-orient')}
-- Afecto: ${getChecked('an-afecto')}
-- Pensamiento — Curso: ${getRadio('an-pcurso')}
-- Insight: ${getChecked('an-insight')}
-- Memoria y atención: ${getRadio('an-mem')}
-
-RIESGO SUICIDA:
-- Ideación actual: ${getRadio('an-ideacion')} | Clasificación: ${v('an-riesgo')}
-- Notas: ${v('an-riesgo-notas')||'—'}
-
-IMPRESIÓN DIAGNÓSTICA:
-- Diagnóstico: ${getChecked('an-dx')} ${v('an-cie')?'('+v('an-cie')+')':''}
-- Observaciones: ${v('an-dx-obs')||'—'}
-
-PLAN TERAPÉUTICO:
-- Enfoque: ${getChecked('an-enfoque')}
-- Remisiones: ${getChecked('an-remisiones')}
-- Próxima cita: ${v('an-proxcita')||'—'}
-${(()=>{const _anPacId=(document.getElementById('anamnesis-paciente-sel')||{}).value||null;const _anNombre=(document.getElementById('an-nombre')||{}).value||'';const _anTests=getTestsResumenPaciente(_anPacId,_anNombre);const _anCap=getCapInlineTexto('an');return (_anTests?'\n'+_anTests:'')+(_anCap?'\n'+_anCap:'');})()}
-`.trim();
-
-  const prompt=`Eres un psicólogo clínico experto con enfoque cognitivo-conductual. Redacta una nota clínica de anamnesis psicológica de alta calidad a partir de los datos de evaluación.
-
-INSTRUCCIONES CRÍTICAS:
-1. Redacta en TEXTO CORRIDO, sin listas, sin viñetas, sin guiones. Todo en párrafos narrativos fluidos.
-2. NO uses el nombre del paciente. Usa "el paciente" o "la paciente" según corresponda.
-3. Organiza la nota en estas secciones con sus títulos exactos en mayúsculas seguidos de dos puntos:
-   MOTIVO DE CONSULTA:
-   HISTORIA DEL PROBLEMA ACTUAL:
-   ANTECEDENTES:
-   HISTORIA PERSONAL Y SOCIAL:
-   HÁBITOS:
-   EXAMEN MENTAL:
-   EVALUACIÓN DE RIESGO:
-   IMPRESIÓN DIAGNÓSTICA:
-   PLAN TERAPÉUTICO:
-4. Cada sección es un párrafo narrativo profundo, no una lista de datos.
-5. En HISTORIA DEL PROBLEMA ACTUAL integra la formulación cognitivo-conductual: identifica el patrón de pensamientos, emociones y conductas.
-6. En IMPRESIÓN DIAGNÓSTICA justifica el diagnóstico clínicamente con código CIE-10 si aplica, y realiza descarte diferencial si es pertinente.
-7. El nivel de escritura debe ser el de un psicólogo clínico de alto nivel, técnico pero legible.
-8. Si algún dato no fue completado, omítelo naturalmente.
-9. NO incluyas fecha, nombre del profesional ni encabezados decorativos.
-
-DATOS DE LA EVALUACIÓN:
-${datos}
-
-Genera la nota clínica de anamnesis ahora:`;
-
-  const outEl=document.getElementById('nota-output');
-  if(outEl){outEl.textContent='⏳ Generando anamnesis con IA clínica…';}
-
-  try{
-    const resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.4,maxOutputTokens:3000}
-      })
-    });
+    const r = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:3000,messages:[{role:'user',content:prompt}]})});
     const data=await resp.json();
     if(!resp.ok||data.error)throw new Error(data.error?.message||'Error de API');
     const texto=(data.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
     if(!texto)throw new Error('Respuesta vacía de Gemini');
     if(outEl)outEl.textContent=texto;
   }catch(e){
-    console.error('Gemini anamnesis error:',e);
+    console.error('IA anamnesis error:',e);
     if(outEl)outEl.textContent='❌ Error al generar con Gemini: '+e.message+'. Verifica tu API key e intenta de nuevo.';
     toast('❌ Error Gemini: '+e.message);
   }
@@ -5463,10 +4804,10 @@ let _hpacPacId=null;window._hpacPacId=null;
 window.hpacGenerarNotaIA=async(docId, ni)=>{
   // Leer key de múltiples fuentes
   const apiKey=(typeof getGeminiKey==='function'?getGeminiKey():null)
-    ||localStorage.getItem('gemini_api_key')
+    ||localStorage.getItem('anthropic_api_key')||localStorage.getItem('gemini_api_key')
     ||(document.getElementById('gemini-api-key')?.value||'')
     ||(document.getElementById('an-gemini-key')?.value||'');
-  if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
+  if(!apiKey)return toast('⚠️ Configura tu API Key de Anthropic (sk-ant-…) en el campo de IA');
 
   const todos=[...(window.interconsultas||[]),...(window.anamnesisList||[])];
   const e=todos.find(x=>x.id===docId);
@@ -5489,16 +4830,13 @@ window.hpacGenerarNotaIA=async(docId, ni)=>{
   const llamar=async(prompt)=>{
     let r;
     try{
-      r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
-      });
+      r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
     }catch(fetchErr){
-      throw new Error('Error de red al contactar Gemini: '+fetchErr.message+'. Verifica que tienes conexión a internet.');
+      throw new Error('Error de red al contactar la IA: '+fetchErr.message+'. Verifica que tienes conexión a internet.');
     }
     const d=await r.json();
-    if(!r.ok||d.error)throw new Error('Gemini error '+r.status+': '+(d.error?.message||JSON.stringify(d.error)||'Error desconocido'));
-    return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    if(!r.ok||d.type==='error')throw new Error('Claude error '+r.status+': '+(d.error?.message||d.message||'Error desconocido'));
+    return(d.content?.[0]?.text||'').trim();
   };
 
   try{
@@ -6025,22 +5363,21 @@ function icList(arr){
 }
 
 function getGeminiKey(){
-  // Leer de cualquier campo de API key visible en el DOM
+  // Lee API key de Anthropic (o Gemini como fallback)
   var ids=['gemini-api-key','an-gemini-key'];
   var fromDom='';
   for(var i=0;i<ids.length;i++){
     var v=(document.getElementById(ids[i])||{}).value||'';
     if(v.trim()){fromDom=v.trim();break;}
   }
-  var fromStorage=localStorage.getItem('gemini_api_key')||'';
+  // Prioridad: anthropic_api_key > gemini_api_key
+  var fromStorage=localStorage.getItem('anthropic_api_key')||localStorage.getItem('anthropic_api_key')||localStorage.getItem('gemini_api_key')||'';
   if(fromDom){
-    if(fromDom!==fromStorage)localStorage.setItem('gemini_api_key',fromDom);
-    // Sincronizar todos los campos con el valor actual
+    if(fromDom!==fromStorage)localStorage.setItem('anthropic_api_key',fromDom);
     ids.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value)el.value=fromDom;});
     return fromDom;
   }
   if(fromStorage){
-    // Poblar campos vacíos con el valor del storage
     ids.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value)el.value=fromStorage;});
   }
   return fromStorage;
@@ -6149,13 +5486,10 @@ async function generarNotaIcConGemini(apiKey){
 
   // Helper para llamar Gemini con tokens configurables
   async function llamarGemini(prompt, tokens){
-    var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:tokens||2000}})
-    });
+    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
     var d=await r.json();
-    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
-    return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    if(!r.ok||d.type==='error')throw new Error(d.error?.message||d.message||'Error API');
+    return(d.content?.[0]?.text||'').trim();
   }
 
   // Instrucción base compartida — los datos demográficos van UNA SOLA VEZ en ctx
@@ -6462,14 +5796,7 @@ ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
   if(wrap){wrap.style.display='';wrap.scrollIntoView({behavior:'smooth',block:'start'});}
 
   try{
-    var resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.4,maxOutputTokens:4000}
-      })
-    });
+    var resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
     var data=await resp.json();
     console.log('[SEG] Gemini full response:', JSON.stringify(data).slice(0,800));
     if(!resp.ok||data.error)throw new Error(data.error?.message||'Error de API');
@@ -6930,7 +6257,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderPCL5Questions();
   try{document.getElementById('an-fecha').value=new Date().toISOString().split('T')[0];}catch(e){}
   try{
-    var savedKey=localStorage.getItem('gemini_api_key')||'';
+    var savedKey=localStorage.getItem('anthropic_api_key')||localStorage.getItem('gemini_api_key')||'';
     var keyInput=document.getElementById('gemini-api-key');
     var keyStatus=document.getElementById('gemini-key-status');
     if(savedKey&&keyInput){
