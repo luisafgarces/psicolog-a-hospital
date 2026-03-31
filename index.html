@@ -4822,6 +4822,13 @@ window.generarImpresionDxSeg = function(){
     });
 };
 
+window.toggleSidebar=function(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('sidebar-overlay');
+  if(sb)sb.classList.toggle('open');
+  if(ov)ov.classList.toggle('open');
+};
+
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
 // ── HISTORIAL IC POR PACIENTE ──
