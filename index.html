@@ -695,20 +695,94 @@ input.toggle-cb{display:none}
                 <div class="ic-field"><div class="ic-sublabel">Red de apoyo</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Presente y activa</span><span class="ic-chip" onclick="icTogA(this)">Ambivalente</span><span class="ic-chip" onclick="icTogR(this)">Ausente</span><span class="ic-chip" onclick="icTog(this)">Conflictos familiares</span></div></div>
               </div>
 
-              <div class="ic-field">
-                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent2);margin-bottom:8px">🩺 Síntomas presentes — selecciona todos los que aplican</div>
+              <div class="ic-field" id="ic-dx-chips">
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent2);margin-bottom:8px">🩺 Síntomas presentes — CIE-11 / DSM-5</div>
+
+                <div style="font-size:0.7rem;font-weight:600;color:#1d6fa4;margin:6px 0 4px">Afectivos — Depresión / Bipolar</div>
                 <div class="ic-chips">
-                  <span class="ic-chip" onclick="icTogR(this)">Ánimo deprimido persistente (&gt;2 sem)</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Ánimo deprimido persistente</span>
                   <span class="ic-chip" onclick="icTogR(this)">Anhedonia</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Fatiga / pérdida de energía</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Culpa excesiva / inutilidad</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Dificultad para concentrarse</span>
                   <span class="ic-chip" onclick="icTogR(this)">Pérdida de apetito / peso</span>
                   <span class="ic-chip" onclick="icTogR(this)">Insomnio</span>
                   <span class="ic-chip" onclick="icTogR(this)">Hipersomnia</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Fatiga / pérdida de energía</span>
                   <span class="ic-chip" onclick="icTogR(this)">Agitación psicomotora</span>
                   <span class="ic-chip" onclick="icTogR(this)">Enlentecimiento psicomotor</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Culpa excesiva / inutilidad</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Dificultad para concentrarse</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Pensamientos recurrentes de muerte</span>
+                  <span class="ic-chip" onclick="icTog(this)">Labilidad emocional</span>
+                  <span class="ic-chip" onclick="icTog(this)">Disforia / irritabilidad</span>
+                  <span class="ic-chip" onclick="icTog(this)">Reactivo al contexto médico</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Ánimo elevado / eufórico</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Grandiosidad / autoestima inflada</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Disminución necesidad de sueño</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Logorrea / pensamiento acelerado</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Desinhibición / impulsividad</span>
+                </div>
+
+                <div style="font-size:0.7rem;font-weight:600;color:#1d6fa4;margin:8px 0 4px">Ansiosos — TAG / Pánico / TOC / Fobia</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogR(this)">Ansiedad / preocupación excesiva</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Ataques de pánico</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Evitación fóbica</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Tensión muscular</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Obsesiones (pensamientos intrusivos)</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Compulsiones (rituales)</span>
+                  <span class="ic-chip" onclick="icTog(this)">Ansiedad anticipatoria a procedimientos</span>
+                  <span class="ic-chip" onclick="icTog(this)">Hipervigilancia somática</span>
+                  <span class="ic-chip" onclick="icTog(this)">Miedo intenso a muerte / pronóstico</span>
+                </div>
+
+                <div style="font-size:0.7rem;font-weight:600;color:#1d6fa4;margin:8px 0 4px">Traumáticos — TEPT / Trastorno de ajuste</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogR(this)">Reexperimentación / flashbacks</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Pesadillas recurrentes</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Evitación de estímulos traumáticos</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Hiperactivación / sobresalto exagerado</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Disociación / despersonalización</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Entumecimiento emocional</span>
+                  <span class="ic-chip" onclick="icTog(this)">Respuesta desproporcionada a estresor</span>
+                </div>
+
+                <div style="font-size:0.7rem;font-weight:600;color:#1d6fa4;margin:8px 0 4px">Psicóticos</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogR(this)">Ideas delirantes</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Alucinaciones auditivas</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Alucinaciones visuales</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Pensamiento desorganizado</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Comportamiento desorganizado / catatónico</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Síntomas negativos (alogia, abulia, aplanamiento)</span>
+                  <span class="ic-chip" onclick="icTog(this)">Insight deteriorado</span>
+                  <span class="ic-chip" onclick="icTog(this)">Suspicacia / desconfianza marcada</span>
+                </div>
+
+                <div style="font-size:0.7rem;font-weight:600;color:#1d6fa4;margin:8px 0 4px">Cognitivos — Delirium / Demencia / TCE</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogR(this)">Alteración aguda de conciencia</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Desorientación (tiempo / espacio / persona)</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Fluctuación del estado mental</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Agitación nocturna</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Deterioro de memoria reciente</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Deterioro cognitivo progresivo</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Deterioro de funciones ejecutivas</span>
+                  <span class="ic-chip" onclick="icTog(this)">Labilidad post-TCE / desinhibición</span>
+                </div>
+
+                <div style="font-size:0.7rem;font-weight:600;color:#1d6fa4;margin:8px 0 4px">Personalidad / Somáticos / Sustancias</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogR(this)">Inestabilidad emocional intensa y reactiva</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Impulsividad dañina</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Relaciones inestables / idealización-devaluación</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Miedo intenso al abandono</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Síntomas somáticos desproporcionados</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Síntomas neurológicos sin causa orgánica</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Dolor crónico con componente emocional</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Consumo problemático activo</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Síndrome de abstinencia activo</span>
+                </div>
+
+                <div style="font-size:0.7rem;font-weight:600;color:#c0392b;margin:8px 0 4px">Suicidio / Autolesión</div>
+                <div class="ic-chips">
                   <span class="ic-chip" onclick="icTogR(this)">Ideación suicida pasiva</span>
                   <span class="ic-chip" onclick="icTogR(this)">Ideación suicida activa sin plan</span>
                   <span class="ic-chip" onclick="icTogR(this)">Ideación suicida con plan</span>
@@ -716,64 +790,7 @@ input.toggle-cb{display:none}
                   <span class="ic-chip" onclick="icTogR(this)">Intentos previos relevantes</span>
                   <span class="ic-chip" onclick="icTogA(this)">Autolesiones sin intención suicida</span>
                   <span class="ic-chip" onclick="icTogA(this)">Desesperanza marcada</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Ánimo elevado / eufórico</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Grandiosidad / autoestima inflada</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Disminución necesidad de sueño</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Logorrea / pensamiento acelerado</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Desinhibición / impulsividad</span>
-                  <span class="ic-chip" onclick="icTog(this)">Labilidad emocional</span>
-                  <span class="ic-chip" onclick="icTog(this)">Disforia</span>
-                  <span class="ic-chip" onclick="icTog(this)">Irritabilidad</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Ansiedad / preocupación excesiva difícil de controlar</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Ataques de pánico</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Evitación fóbica</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Tensión muscular</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Obsesiones (pensamientos intrusivos recurrentes)</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Compulsiones (rituales para reducir ansiedad)</span>
-                  <span class="ic-chip" onclick="icTog(this)">Ansiedad anticipatoria a procedimientos</span>
-                  <span class="ic-chip" onclick="icTog(this)">Hipervigilancia somática</span>
-                  <span class="ic-chip" onclick="icTog(this)">Miedo intenso a la muerte / pronóstico</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Reexperimentación / flashbacks</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Pesadillas recurrentes</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Evitación de estímulos relacionados con el trauma</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Hiperactivación / sobresalto exagerado</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Disociación / despersonalización</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Entumecimiento emocional</span>
-                  <span class="ic-chip" onclick="icTog(this)">Respuesta desproporcionada a estresor identificable</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Ideas delirantes (persecución, referencia, grandeza)</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Alucinaciones auditivas</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Alucinaciones visuales</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Pensamiento desorganizado / incoherente</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Comportamiento desorganizado o catatónico</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Síntomas negativos (alogia, abulia, aplanamiento)</span>
-                  <span class="ic-chip" onclick="icTog(this)">Insight deteriorado</span>
-                  <span class="ic-chip" onclick="icTog(this)">Suspicacia / desconfianza marcada</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Alteración aguda del nivel de conciencia</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Desorientación (tiempo / espacio / persona)</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Fluctuación del estado mental en el día</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Agitación nocturna</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Deterioro de memoria reciente</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Deterioro cognitivo progresivo y global</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Deterioro de funciones ejecutivas</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Inestabilidad emocional intensa y reactiva</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Impulsividad dañina</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Relaciones inestables / idealización-devaluación</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Miedo intenso al abandono</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Grandiosidad / falta de empatía</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Patrón perfeccionista / rígido</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Desconfianza y suspicacia generalizadas</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Consumo problemático a pesar de consecuencias</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Tolerancia (necesita más cantidad)</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Síndrome de abstinencia activo</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Craving / deseo intenso de consumir</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Síntomas somáticos angustiantes desproporcionados</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Preocupación excesiva por síntomas físicos</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Síntomas neurológicos sin causa orgánica</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Dolor crónico con componente emocional</span>
-                  <span class="ic-chip" onclick="icTog(this)">Catastrofización del dolor</span>
-                  <span class="ic-chip" onclick="icTog(this)">Insomnio de inicio (&gt;30 min para dormir)</span>
-                  <span class="ic-chip" onclick="icTog(this)">Insomnio de mantenimiento</span>
-                  <span class="ic-chip" onclick="icTog(this)">Sueño no reparador</span>
+                  <span class="ic-chip" onclick="icTog(this)">Pensamientos recurrentes de muerte</span>
                 </div>
               </div>
 
@@ -2645,6 +2662,28 @@ window.irTestsPaciente=(id)=>{
     if(sel)sel.value=id;
   },200);
 };
+
+window.openModal=(id)=>{
+  const m=document.getElementById(id);
+  if(!m)return;
+  m.classList.add('open');
+  // Reset patient modal fields if opening patient modal
+  if(id==='modal-paciente'){
+    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-dxpsi','p-riesgo-obs','p-notas','p-proxsesion'].forEach(fid=>{
+      const el=document.getElementById(fid);if(el)el.value='';
+    });
+    document.getElementById('p-riesgo').value='';
+    document.getElementById('p-sexo').value='';
+    document.getElementById('p-fecha').value=new Date().toISOString().split('T')[0];
+    document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>b.classList.remove('sel'));
+    const btn=document.querySelector('#modal-paciente .btn-primary');
+    if(btn){btn.textContent='Registrar';btn.onclick=guardarPaciente;}
+    setPTipo('hospitalizado');
+    document.getElementById('p-estado').value='seguimiento';
+  }
+  if(id==='modal-ic') populateICPacientes && populateICPacientes();
+};
+window.closeModal=(id)=>{const m=document.getElementById(id);if(m)m.classList.remove('open');};
 
 window.editarPaciente=(id)=>{
   const p=pacientes.find(x=>x.id===id);
