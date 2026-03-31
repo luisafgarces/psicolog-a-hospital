@@ -4715,6 +4715,113 @@ window.buscarPacientesLocal=(q)=>{
   renderPacientes();
 };
 window.formatDate=(d)=>{if(!d)return'';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;};
+
+// ── IMPRESIÓN DIAGNÓSTICA IA ─────────────────────────────────────────
+function _dxLlamar(apiKey, prompt){
+  return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:3000}})
+  }).then(function(r){return r.json().then(function(d){
+    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+    return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+  });});
+}
+
+function _dxRenderOutput(out, texto){
+  out.innerHTML = texto
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--accent2);display:block;margin-top:10px;margin-bottom:2px;font-size:0.79rem;text-transform:uppercase;letter-spacing:0.05em">$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/\n/g,'<br>');
+}
+
+function _dxPrompt(sintomas, contexto, tipo){
+  return 'Eres psicólogo clínico hospitalario experto en diagnóstico diferencial CIE-11 y DSM-5. '
+    + contexto
+    + '\n\nSíntomas presentes:\n' + sintomas.map(function(s,i){return (i+1)+'. '+s;}).join('\n')
+    + '\n\nGenera la impresión diagnóstica:\n\n'
+    + '**DIAGNÓSTICO PRINCIPAL**\n(Nombre CIE-11 + código. Justificación en 2-3 frases.)\n\n'
+    + (tipo==='seguimiento'
+      ? '**DIAGNÓSTICOS DIFERENCIALES**\n(2-3 alternativas.)\n\n**EVOLUCIÓN CLÍNICA**\n(Cómo se presentan los síntomas en esta sesión.)\n\n'
+      : '**DIAGNÓSTICOS DIFERENCIALES**\n(2-3 alternativas con criterio diferenciador.)\n\n**CRITERIOS CUMPLIDOS**\n(Criterios DSM-5/CIE-11 que se satisfacen.)\n\n**CRITERIOS PENDIENTES**\n(Qué falta para confirmar.)\n\n')
+    + '**CONSIDERACIÓN CLÍNICA**\n(Una frase sobre el contexto médico.)\n\nSé técnico y directo.';
+}
+
+window.generarImpresionDx = function(){
+  var apiKey = (typeof getGeminiKey==='function'?getGeminiKey():null)||localStorage.getItem('gemini_api_key')||'';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+  var btn=document.getElementById('ic-dx-btn');
+  var out=document.getElementById('ic-dx-out');
+  var sintomas=[];
+  document.querySelectorAll('#ic-dx-chips .ic-chip.on,#ic-dx-chips .ic-chip.on-r,#ic-dx-chips .ic-chip.on-a').forEach(function(c){sintomas.push(c.textContent.trim());});
+  if(sintomas.length<2){toast('⚠️ Selecciona al menos 2 síntomas');return;}
+  var dx=document.getElementById('ic-pdx')?.value||'—';
+  var riesgo=document.getElementById('ic-riesgo-nivel')?.value||'—';
+  var ctx='Contexto hospitalario. Dx médico: '+dx+'. Riesgo: '+riesgo+'.';
+  if(btn){btn.textContent='⏳ Generando…';btn.disabled=true;}
+  if(out){out.style.display='';out.innerHTML='<em style="color:var(--text3)">Analizando síntomas…</em>';}
+  _dxLlamar(apiKey, _dxPrompt(sintomas, ctx, 'inicial'))
+    .then(function(texto){
+      if(out) _dxRenderOutput(out, texto);
+      var h=document.getElementById('ic-impresion-hidden');if(h)h.value=texto;
+      if(btn){btn.textContent='↻ Regenerar';btn.disabled=false;}
+      toast('✅ Impresión diagnóstica generada');
+    }).catch(function(e){
+      if(out)out.innerHTML='<span style="color:var(--danger)">❌ '+e.message+'</span>';
+      if(btn){btn.textContent='✨ Generar impresión diagnóstica';btn.disabled=false;}
+      toast('❌ '+e.message);
+    });
+};
+
+window.generarImpresionDxAn = function(){
+  var apiKey = (typeof getGeminiKey==='function'?getGeminiKey():null)||localStorage.getItem('gemini_api_key')||'';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+  var btn=document.getElementById('an-dx-btn');
+  var out=document.getElementById('an-dx-out');
+  var sintomas=[];
+  document.querySelectorAll('#an-sintomas-chips .ic-chip.on,#an-sintomas-chips .ic-chip.on-r,#an-sintomas-chips .ic-chip.on-a').forEach(function(c){sintomas.push(c.textContent.trim());});
+  if(sintomas.length<2){toast('⚠️ Selecciona al menos 2 síntomas');return;}
+  var ctx='Contexto: anamnesis psicológica hospitalaria.';
+  if(btn){btn.textContent='⏳ Generando…';btn.disabled=true;}
+  if(out){out.style.display='';out.innerHTML='<em style="color:var(--text3)">Analizando síntomas…</em>';}
+  _dxLlamar(apiKey, _dxPrompt(sintomas, ctx, 'inicial'))
+    .then(function(texto){
+      if(out) _dxRenderOutput(out, texto);
+      var h=document.getElementById('an-impresion-hidden');if(h)h.value=texto;
+      if(btn){btn.textContent='↻ Regenerar';btn.disabled=false;}
+      toast('✅ Impresión diagnóstica generada');
+    }).catch(function(e){
+      if(out)out.innerHTML='<span style="color:var(--danger)">❌ '+e.message+'</span>';
+      if(btn){btn.textContent='✨ Generar impresión diagnóstica';btn.disabled=false;}
+      toast('❌ '+e.message);
+    });
+};
+
+window.generarImpresionDxSeg = function(){
+  var apiKey = (typeof getGeminiKey==='function'?getGeminiKey():null)||localStorage.getItem('gemini_api_key')||'';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+  var btn=document.getElementById('seg-dx-btn');
+  var out=document.getElementById('seg-dx-out');
+  var sintomas=[];
+  document.querySelectorAll('#seg-sintomas-chips .ic-chip.on,#seg-sintomas-chips .ic-chip.on-r,#seg-sintomas-chips .ic-chip.on-a').forEach(function(c){sintomas.push(c.textContent.trim());});
+  if(sintomas.length<2){toast('⚠️ Selecciona al menos 2 síntomas');return;}
+  var dx=document.getElementById('ic-pdx')?.value||'—';
+  var ctx='Contexto: seguimiento psicológico hospitalario. Dx médico: '+dx+'.';
+  if(btn){btn.textContent='⏳ Generando…';btn.disabled=true;}
+  if(out){out.style.display='';out.innerHTML='<em style="color:var(--text3)">Analizando síntomas actuales…</em>';}
+  _dxLlamar(apiKey, _dxPrompt(sintomas, ctx, 'seguimiento'))
+    .then(function(texto){
+      if(out) _dxRenderOutput(out, texto);
+      var h=document.getElementById('seg-impresion-hidden');if(h)h.value=texto;
+      if(btn){btn.textContent='↻ Regenerar';btn.disabled=false;}
+      toast('✅ Impresión actualizada');
+    }).catch(function(e){
+      if(out)out.innerHTML='<span style="color:var(--danger)">❌ '+e.message+'</span>';
+      if(btn){btn.textContent='✨ Actualizar impresión diagnóstica';btn.disabled=false;}
+      toast('❌ '+e.message);
+    });
+};
+
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
 // ── HISTORIAL IC POR PACIENTE ──
