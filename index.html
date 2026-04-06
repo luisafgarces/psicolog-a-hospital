@@ -477,7 +477,7 @@ input.toggle-cb{display:none}
           <button class="btn btn-primary btn-sm" id="btn-hoy-dash" onclick="dashNavHoy()">Hoy</button>
           <button class="btn btn-secondary btn-sm" id="btn-sem-dash" onclick="setDashMode('semana')" style="opacity:.5">Semana</button>
           <button class="btn btn-secondary btn-sm" id="btn-mes-dash" onclick="setDashMode('mes')" style="opacity:.5">Mes</button>
-          <button class="btn btn-secondary btn-sm" onclick="renderDashboard()" title="Actualizar">↺</button>
+          <button class="btn btn-secondary btn-sm" onclick="window.renderDashboard&&window.renderDashboard()" title="Actualizar">↺</button>
         </div>
       </div>
       <div id="ronda-pisos"></div>
@@ -1129,7 +1129,13 @@ input.toggle-cb{display:none}
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
               <div class="form-group"><label>Nivel de riesgo suicida</label>
-                <select id="seg-riesgo"><option value="">Sin cambios / No aplica</option><option value="SIN RIESGO">SIN RIESGO</option><option value="BAJO">BAJO</option><option value="MEDIO">MEDIO</option><option value="ALTO">ALTO</option></select>
+                <div class="sev-row" style="margin-top:5px">
+                  <div class="sev-btn" onclick="setSegRiesgo(this,'SIN RIESGO')" style="color:var(--success)">SIN RIESGO</div>
+                  <div class="sev-btn bajo" onclick="setSegRiesgo(this,'BAJO')">BAJO</div>
+                  <div class="sev-btn medio" onclick="setSegRiesgo(this,'MEDIO')">MEDIO</div>
+                  <div class="sev-btn alto" onclick="setSegRiesgo(this,'ALTO')">ALTO</div>
+                </div>
+                <input type="hidden" id="seg-riesgo" value="">
               </div>
               <div class="form-group"><label>Ajustes terapéuticos</label><textarea id="seg-ajustes" rows="2" placeholder='Ej: "Reducir velocidad por crisis actual"...'></textarea></div>
             </div>
@@ -2336,20 +2342,20 @@ setTimeout(()=>{
 onSnapshot(query(collection(db,'pacientes'),orderBy('creado','desc')),snap=>{
   pacientes=snap.docs.map(d=>({id:d.id,...d.data()}));window.pacientes=pacientes;
   setSyncStatus('online');updateBadges();updateStats();populateAnamPacientes();populateICPacientes();
-  if(document.getElementById('page-pacientes').classList.contains('active'))renderPacientes();
-  if(document.getElementById('page-consulta-externa').classList.contains('active'))renderConsultaExterna();
-  if(document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();
+  if(document.getElementById('page-pacientes').classList.contains('active'))(window.renderPacientes&&window.renderPacientes());
+  if(document.getElementById('page-consulta-externa').classList.contains('active'))(window.renderConsultaExterna&&window.renderConsultaExterna());
+  if(document.getElementById('page-dashboard').classList.contains('active'))(window.renderDashboard&&window.renderDashboard)();
 });
 onSnapshot(query(collection(db,'interconsultas'),orderBy('creado','desc')),snap=>{
   interconsultas=snap.docs.map(d=>({id:d.id,...d.data()}));window.interconsultas=interconsultas;
   updateBadges();updateStats();
-  if(document.getElementById('page-interconsultas').classList.contains('active')||document.getElementById('page-historial-ic').classList.contains('active'))renderIC();
-  if(document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();
+  if(document.getElementById('page-interconsultas').classList.contains('active')||document.getElementById('page-historial-ic').classList.contains('active'))(window.renderIC&&window.renderIC)();
+  if(document.getElementById('page-dashboard').classList.contains('active'))(window.renderDashboard&&window.renderDashboard)();
 });
 onSnapshot(query(collection(db,'anamnesis'),orderBy('creado','desc')),snap=>{
   anamnesisList=snap.docs.map(d=>({id:d.id,...d.data()}));window.anamnesisList=anamnesisList;
   updateStats();
-  if(document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();
+  if(document.getElementById('page-dashboard').classList.contains('active'))(window.renderDashboard&&window.renderDashboard)();
   // Refresh historial sesiones si está abierto
   const histPanel=document.getElementById('anam-panel-historial');
   if(histPanel&&histPanel.style.display!=='none'){
@@ -2360,9 +2366,9 @@ onSnapshot(query(collection(db,'anamnesis'),orderBy('creado','desc')),snap=>{
 onSnapshot(query(collection(db,'test_resultados'),orderBy('creado','desc')),snap=>{
   testHistory=snap.docs.map(d=>({id:d.id,...d.data()}));window.testHistory=testHistory;
   updateStats();
-  if(document.getElementById('page-historial').classList.contains('active'))renderHistorial();
-  if(document.getElementById('page-dashboard').classList.contains('active'))renderDashboard();
-  if(document.getElementById('page-historial-pac').classList.contains('active')){hpacRenderLista();if(window._hpacPacId)hpacRenderNotas();}
+  if(document.getElementById('page-historial').classList.contains('active'))(window.renderHistorial&&window.renderHistorial)();
+  if(document.getElementById('page-dashboard').classList.contains('active'))(window.renderDashboard&&window.renderDashboard)();
+  if(document.getElementById('page-historial-pac').classList.contains('active')){(window.hpacRenderLista&&window.hpacRenderLista)();if(window._hpacPacId)hpacRenderNotas();}
 });
 
 let capacidadList=[];window.capacidadList=capacidadList;
@@ -2457,7 +2463,7 @@ window.renderPacientes=(lista)=>{
     if(diff<=7) return`<div style="display:flex;flex-direction:column;gap:2px"><span style="background:#0e2d3a;color:#38BDF8;border-radius:6px;padding:3px 8px;font-size:11px">En ${diff} días</span><span style="font-size:11px;color:#38BDF8">${label}</span></div>`;
     return`<span style="font-size:12px;color:var(--text2)">${label}</span>`;
   };
-  let html=q?`<tr><td colspan="8" style="background:#1a3a2a;font-size:0.75rem;color:#34D399;padding:7px 14px;">🔍 Mostrando ${filtered.length} resultado${filtered.length>1?'s':''} para "<strong>${q}</strong>" — <a href="#" onclick="window._searchQ='';document.getElementById('global-search').value='';renderPacientes();return false;" style="color:#34D399">Limpiar</a></td></tr>`:'';
+  let html=q?`<tr><td colspan="8" style="background:#1a3a2a;font-size:0.75rem;color:#34D399;padding:7px 14px;">🔍 Mostrando ${filtered.length} resultado${filtered.length>1?'s':''} para "<strong>${q}</strong>" — <a href="#" onclick="window._searchQ='';document.getElementById('global-search').value='';(window.renderPacientes&&window.renderPacientes)();return false;" style="color:#34D399">Limpiar</a></td></tr>`:'';
   pisoOrder.forEach(piso=>{
     if(!q)html+=`<tr><td colspan="8" style="background:var(--surface2);font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;padding:7px 14px;">🏢 ${piso}</td></tr>`;
     html+=grouped[piso].map(p=>`<tr><td><strong>${p.nombre}</strong><div class="td-sub">${p.hab?'Hab. '+p.hab:''} ${p.fecha?'· '+formatDate(p.fecha):''}</div></td><td>${p.cedula}</td><td>${p.edad?p.edad+' a.':''} ${p.sexo?p.sexo.charAt(0):''}</td><td>${p.motivo?p.motivo.slice(0,40)+(p.motivo.length>40?'…':''):'—'}</td><td>${riskBadge(p.riesgo)}</td><td>${estadoBadge(p.estado)}</td><td>${proxBadge(p)}</td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-sm btn-secondary" onclick="nuevaAnamnesisParaPaciente('${p.id}')">📋</button><button class="btn btn-sm btn-secondary" onclick="abrirICParaPaciente('${p.id}')">💬 IC</button><button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪</button><button class="btn btn-sm btn-secondary" onclick="verHistorialPorId('${p.id}')">📂</button><button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️</button><button class="btn btn-sm btn-danger" onclick="eliminarPaciente('${p.id}')">✕</button></div></td></tr>`).join('');
@@ -2878,8 +2884,12 @@ window.guardarICFirebase=async()=>{
       const vIA=elIA?(elIA.textContent||'').trim():'';
       const iaGenerada=vIA&&!vIA.startsWith('Genera')&&!vIA.startsWith('⏳')&&!vIA.startsWith('❌')&&vIA.length>50;
       if(iaGenerada){
-        // La nota de seguimiento es un párrafo único — va en nota y obj
+        // La nota de seguimiento va en resp (y obj como fallback para notas viejas)
+        resp=vIA;
         obj=vIA;
+        // Incluir impresión diagnóstica si fue generada
+        const segImpresion=(document.getElementById('seg-impresion-hidden')?.value||'').trim();
+        if(segImpresion) resp=vIA+'\n\nIMPRESIÓN DIAGNÓSTICA:\n'+segImpresion;
         // También capturar datos del formulario para los demás campos
         const cb2=id=>document.getElementById(id)?.checked||false;
         const val2=id=>(document.getElementById(id)?.value||'').trim();
@@ -3187,13 +3197,13 @@ window.dashNavDia=(delta)=>{
   window._dashDiaOffset=(window._dashDiaOffset||0)+delta;
   window._dashMode='dia';
   _updateNavUI();
-  renderDashboard();
+  (window.renderDashboard&&window.renderDashboard)();
 };
 window.dashNavHoy=()=>{
   window._dashDiaOffset=0;
   window._dashMode='dia';
   _updateNavUI();
-  renderDashboard();
+  (window.renderDashboard&&window.renderDashboard)();
 };
 const _updateNavUI=()=>{
   const offset=window._dashDiaOffset||0;
@@ -3239,7 +3249,7 @@ window.setDashMode=(modo)=>{
   window._dashMode=modo;
   if(modo==='dia')window._dashDiaOffset=0;
   _updateNavUI();
-  renderDashboard();
+  (window.renderDashboard&&window.renderDashboard)();
 };
 window.toggleDashView=(soloHoy)=>setDashMode(soloHoy?'dia':'todos');
 
@@ -4367,16 +4377,18 @@ window.goTo = function(page){
     var sb = document.getElementById('sidebar');
     if(sb) sb.classList.remove('open');
   }
-  // Render page content
-  if(page==='pacientes') renderPacientes && renderPacientes();
-  if(page==='consulta-externa') renderConsultaExterna && renderConsultaExterna();
-  if(page==='dashboard') renderDashboard && renderDashboard();
-  if(page==='interconsultas') renderIC && renderIC();
-  if(page==='historial-ic') renderIC && renderIC();
-  if(page==='historial') renderHistorial && renderHistorial();
-  if(page==='historial-pac'){ hpacRenderLista && hpacRenderLista(); }
-  if(page==='psicoeducacion') setTimeout(function(){ renderPsicoCards && renderPsicoCards('all'); }, 50);
-  if(page==='tests') document.getElementById('topbar-title').textContent='Tests Clínicos';
+  // Render page content — setTimeout ensures ES6 module is loaded
+  var fn={
+    'pacientes': function(){if(window.renderPacientes)window.renderPacientes();else setTimeout(function(){window.renderPacientes&&window.renderPacientes();},300);},
+    'consulta-externa': function(){if(window.renderConsultaExterna)window.renderConsultaExterna();else setTimeout(function(){window.renderConsultaExterna&&window.renderConsultaExterna();},300);},
+    'dashboard': function(){if(window.renderDashboard)window.renderDashboard();else setTimeout(function(){window.renderDashboard&&window.renderDashboard();},300);},
+    'interconsultas': function(){if(window.renderIC)window.renderIC();else setTimeout(function(){window.renderIC&&window.renderIC();},300);},
+    'historial-ic': function(){if(window.renderIC)window.renderIC();else setTimeout(function(){window.renderIC&&window.renderIC();},300);},
+    'historial': function(){if(window.renderHistorial)window.renderHistorial();else setTimeout(function(){window.renderHistorial&&window.renderHistorial();},300);},
+    'historial-pac': function(){setTimeout(function(){window.hpacRenderLista&&window.hpacRenderLista();},100);},
+    'psicoeducacion': function(){setTimeout(function(){window.renderPsicoCards&&window.renderPsicoCards('all');},100);}
+  };
+  if(fn[page]) fn[page]();
 };
 
 
@@ -4727,7 +4739,7 @@ window.buscarPacientesLocal=(q)=>{
   window._searchQ=q.trim();
   const topbar=document.getElementById('global-search');
   if(topbar)topbar.value=q;
-  renderPacientes();
+  window.renderPacientes && window.renderPacientes();
 };
 window.formatDate=(d)=>{if(!d)return'';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;};
 
@@ -4885,6 +4897,13 @@ window.cargarNotasRapidas = async function(pacId){
       </div>`;
     }).join('');
   }catch(e){ cont.innerHTML='<p style="font-size:0.72rem;color:var(--text3)">—</p>'; }
+};
+
+window.setSegRiesgo=function(el,nivel){
+  el.closest('.sev-row').querySelectorAll('.sev-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  var h=document.getElementById('seg-riesgo');
+  if(h)h.value=nivel;
 };
 
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
@@ -5084,7 +5103,7 @@ window.hpacGenerarNotaIA=async(docId, ni)=>{
       const dataSeg='Estado emocional: '+(fd.sub?.emoc||e.nota?.slice(0,200)||'—')+'. Afecto: '+(fd.obj?.afecto||'—')+'. Riesgo: '+(fd.riesgo||e.riesgo||'—')+'. Intervención: '+(fd.trat?.interv||'—')+'. Plan: '+(fd.trat?.plan||'—')+'.';
       obj=await llamar(base+'\n\nNota de seguimiento psicológico hospitalario. '+dataSeg);
       sub=''; res=''; tra='';
-      await window._updateDoc(window._doc(window.db,col,docId),{obj,nota:obj,needsAI:false,_aiFormSnap:null});
+      await window._updateDoc(window._doc(window.db,col,docId),{resp:obj,nota:obj,needsAI:false,_aiFormSnap:null});
     } else {
       // IC Nueva / Anamnesis: 4 campos paralelos
       const dSub='Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos: '+(fd.sub?.pens||'—')+'. Cita: '+(fd.sub?.cita||'—')+'. Antecedentes: '+(e.nota?.slice(0,150)||'—')+'.';
@@ -5999,6 +6018,7 @@ IMPRESIÓN CLÍNICA:
 - Tipo de respuesta emocional: ${tipoResp.length?tipoResp.join(', '):'No especificada'}
 - Impresión diagnóstica: ${impresion.length?impresion.join(', '):'No especificada'}
 - Red de apoyo: ${red.length?red.join(', '):'No evaluada'}
+${(function(){var h=document.getElementById('seg-impresion-hidden');var v=h?h.value.trim():'';return v?'\nIMPRESIÓN DIAGNÓSTICA IA (CIE-11 / DSM-5):\n'+v:'';})()} 
 
 INTERVENCIÓN Y PLAN:
 - Intervención realizada: ${intervencion.length?intervencion.join(', '):'No especificada'}
