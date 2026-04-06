@@ -1595,6 +1595,7 @@ input.toggle-cb{display:none}
         <div class="test-section-label">Evaluación Forense Clínica</div>
         <div class="tests-grid">
           <div class="test-card" onclick="showTest('svacbca')"><div class="tc-icon">⚖️</div><h4>SVA/CBCA</h4><p>Análisis de credibilidad del testimonio. Violencia, abuso y trauma en contexto hospitalario.</p><div class="tc-meta"><span class="tc-tag">⏱ 15–20 min</span><span class="tc-tag">19 criterios</span><span class="tc-tag">Nota IA</span></div></div>
+          <div class="test-card" onclick="showTest('sims')"><div class="tc-icon">🎭</div><h4>SIMS</h4><p>Detección de simulación de síntomas psicológicos y neurológicos. Puntuación de corte validada.</p><div class="tc-meta"><span class="tc-tag">⏱ 10–15 min</span><span class="tc-tag">75 ítems</span><span class="tc-tag">V/F</span></div></div>
         </div>
         <div style="background:var(--warning-light);border:1px solid #f0d080;border-radius:var(--radius);padding:14px 18px;margin-top:20px;font-size:0.8rem;color:#5a4000;line-height:1.6">
           💡 <strong>Adaptaciones para población vulnerable colombiana</strong> — Todos los tests usan lenguaje sencillo y cercano. Active el modo lectura asistida para texto grande. Los puntos de corte del MMSE y MoCA se ajustan automáticamente según la escolaridad.
@@ -1602,6 +1603,28 @@ input.toggle-cb{display:none}
       </div>
 
 
+
+      <!-- SIMS -->
+      <div id="test-sims" class="test-screen">
+        <div class="test-header">
+          <div class="tc-icon" style="font-size:2rem">🎭</div>
+          <div><h2>SIMS — Structured Inventory of Malingered Symptomatology</h2><p>Detección de simulación de síntomas · 75 ítems V/F · Smith & Burger (1997)</p></div>
+          <button class="btn btn-secondary" onclick="showTest('home')">← Volver</button>
+        </div>
+        <div class="clinician-note">📌 <strong>Nota clínica:</strong> El SIMS detecta presentación no creíble de síntomas psicológicos y neurológicos. <strong>Punto de corte ≥ 16</strong> sugiere simulación (sensibilidad 75%, especificidad 90%). No es diagnóstico definitivo — es indicador de necesidad de evaluación más profunda. Administrar como autoinforme o lectura asistida.</div>
+
+        <div style="background:var(--accent-light);border:1px solid var(--accent2);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:0.8rem;color:var(--text2)">
+          <strong>Instrucciones para el paciente:</strong> "A continuación hay una serie de afirmaciones. Responda <strong>VERDADERO</strong> si la afirmación describe algo que le ocurre o ha ocurrido, o <strong>FALSO</strong> si no le describe. No hay respuestas correctas o incorrectas. Sea tan honesto como pueda."
+        </div>
+
+        <div id="sims-form" style="margin-bottom:20px"></div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+          <button class="btn btn-primary" onclick="calcularSIMS()">📊 Calcular resultado</button>
+          <button class="btn btn-secondary" onclick="resetSIMS()">↺ Reiniciar</button>
+        </div>
+        <div id="sims-resultado" style="display:none"></div>
+      </div>
       <!-- SVA/CBCA -->
       <div id="test-svacbca" class="test-screen">
         <div class="test-header">
@@ -4913,6 +4936,220 @@ window.setPRisk=function(nivel,el){
   if(h)h.value=nivel;
 };
 
+
+// ── SIMS — Structured Inventory of Malingered Symptomatology ─────────
+var SIMS_ITEMS = [
+  // Subscala AM — Amnesia (ítems 1-15) — clave: T=simula
+  {n:1,  sub:'AM', txt:'A veces olvido el nombre de personas que conozco bien desde hace años.', clave:'F'},
+  {n:2,  sub:'AM', txt:'A veces no puedo recordar qué hice el día anterior.', clave:'F'},
+  {n:3,  sub:'AM', txt:'En ocasiones olvido dónde puse objetos cotidianos como llaves o billetera.', clave:'F'},
+  {n:4,  sub:'AM', txt:'Hay períodos de horas o días enteros que no puedo recordar en absoluto.', clave:'T'},
+  {n:5,  sub:'AM', txt:'Olvido cosas tan pronto como me las dicen.', clave:'T'},
+  {n:6,  sub:'AM', txt:'No puedo recordar mi propio nombre cuando alguien me lo pregunta.', clave:'T'},
+  {n:7,  sub:'AM', txt:'Olvido cómo se hacen cosas simples que he hecho miles de veces, como amarrar los zapatos.', clave:'T'},
+  {n:8,  sub:'AM', txt:'Tengo lagunas de memoria para eventos recientes importantes de mi vida.', clave:'T'},
+  {n:9,  sub:'AM', txt:'Olvido inmediatamente lo que acabo de leer, aunque lo lea varias veces.', clave:'T'},
+  {n:10, sub:'AM', txt:'A veces olvido cómo se llaman objetos de uso diario.', clave:'T'},
+  {n:11, sub:'AM', txt:'No puedo recordar lo que desayuné esta mañana.', clave:'T'},
+  {n:12, sub:'AM', txt:'Hay palabras simples que de repente no puedo recordar cómo se dicen.', clave:'T'},
+  {n:13, sub:'AM', txt:'A veces olvido completamente conversaciones que tuve hace solo unas horas.', clave:'T'},
+  {n:14, sub:'AM', txt:'Olvido fechas importantes como mi cumpleaños o el de mis hijos.', clave:'T'},
+  {n:15, sub:'AM', txt:'Tengo dificultad para recordar dónde vivo o mi número de teléfono.', clave:'T'},
+
+  // Subscala LI — Baja inteligencia (ítems 16-30)
+  {n:16, sub:'LI', txt:'No entiendo instrucciones aunque me las expliquen varias veces.', clave:'T'},
+  {n:17, sub:'LI', txt:'Tengo dificultades para hacer cálculos simples como sumar o restar.', clave:'T'},
+  {n:18, sub:'LI', txt:'No puedo leer un texto sencillo aunque lo intente.', clave:'T'},
+  {n:19, sub:'LI', txt:'Me cuesta mucho entender lo que me dicen aunque hablen despacio.', clave:'T'},
+  {n:20, sub:'LI', txt:'No puedo seguir una conversación normal.', clave:'T'},
+  {n:21, sub:'LI', txt:'Me resulta imposible recordar más de una instrucción a la vez.', clave:'T'},
+  {n:22, sub:'LI', txt:'Tengo problemas para entender preguntas simples.', clave:'T'},
+  {n:23, sub:'LI', txt:'No puedo distinguir la mano derecha de la izquierda.', clave:'T'},
+  {n:24, sub:'LI', txt:'Me resulta difícil contar hacia atrás desde 10.', clave:'T'},
+  {n:25, sub:'LI', txt:'No puedo recordar las letras del abecedario en orden.', clave:'T'},
+  {n:26, sub:'LI', txt:'No sé qué día de la semana es hoy.', clave:'T'},
+  {n:27, sub:'LI', txt:'Tengo dificultad para escribir mi propio nombre.', clave:'T'},
+  {n:28, sub:'LI', txt:'No entiendo lo que leo aunque sean palabras sencillas.', clave:'T'},
+  {n:29, sub:'LI', txt:'Me cuesta seguir instrucciones de una sola acción.', clave:'T'},
+  {n:30, sub:'LI', txt:'No puedo decir cuánto es 2 más 2.', clave:'T'},
+
+  // Subscala NI — Deterioro neurológico (ítems 31-45)
+  {n:31, sub:'NI', txt:'A veces siento que una parte de mi cuerpo no me pertenece.', clave:'T'},
+  {n:32, sub:'NI', txt:'Tengo episodios de pérdida de visión total en ambos ojos simultáneamente.', clave:'T'},
+  {n:33, sub:'NI', txt:'A veces pierdo completamente la sensación en todo mi cuerpo.', clave:'T'},
+  {n:34, sub:'NI', txt:'Tengo convulsiones que sólo ocurren cuando hay alguien presente.', clave:'T'},
+  {n:35, sub:'NI', txt:'A veces no puedo mover ninguna parte de mi cuerpo por completo.', clave:'T'},
+  {n:36, sub:'NI', txt:'Tengo dolores de cabeza tan severos que no puedo hacer absolutamente nada.', clave:'T'},
+  {n:37, sub:'NI', txt:'A veces pierdo el habla completamente por varias horas.', clave:'T'},
+  {n:38, sub:'NI', txt:'Siento que mi cuerpo flota o que estoy fuera de él con frecuencia.', clave:'T'},
+  {n:39, sub:'NI', txt:'A veces pierdo el equilibrio tan repentinamente que caigo sin poder hacer nada.', clave:'T'},
+  {n:40, sub:'NI', txt:'Tengo episodios donde no puedo controlar los movimientos de mis extremidades.', clave:'T'},
+  {n:41, sub:'NI', txt:'A veces no puedo sentir nada en mis manos o pies durante días enteros.', clave:'T'},
+  {n:42, sub:'NI', txt:'Tengo dificultad para tragar incluso agua.', clave:'T'},
+  {n:43, sub:'NI', txt:'A veces escucho un zumbido tan fuerte que no puedo oír nada más.', clave:'T'},
+  {n:44, sub:'NI', txt:'Tengo episodios donde pierdo completamente el control de mis esfínteres.', clave:'T'},
+  {n:45, sub:'NI', txt:'A veces no puedo reconocer objetos familiares aunque los vea claramente.', clave:'T'},
+
+  // Subscala AF — Trastornos afectivos (ítems 46-60)
+  {n:46, sub:'AF', txt:'Me siento triste o deprimido casi todos los días.', clave:'F'},
+  {n:47, sub:'AF', txt:'Hay días en que no tengo energía para hacer nada.', clave:'F'},
+  {n:48, sub:'AF', txt:'A veces me preocupo demasiado por cosas que probablemente no van a pasar.', clave:'F'},
+  {n:49, sub:'AF', txt:'Mi estado de ánimo cambia de forma extrema sin razón aparente varias veces al día.', clave:'T'},
+  {n:50, sub:'AF', txt:'Me siento completamente sin emociones — no puedo sentir nada, ni alegría ni tristeza.', clave:'T'},
+  {n:51, sub:'AF', txt:'Lloro todo el tiempo, incluso cuando no hay ninguna razón para hacerlo.', clave:'T'},
+  {n:52, sub:'AF', txt:'Tengo una tristeza tan profunda que físicamente me duele el pecho constantemente.', clave:'T'},
+  {n:53, sub:'AF', txt:'Me siento eufórico y deprimido en el mismo momento.', clave:'T'},
+  {n:54, sub:'AF', txt:'No soy capaz de sentir nada de lo que antes me daba placer — absolutamente nada.', clave:'T'},
+  {n:55, sub:'AF', txt:'Mi ansiedad es tan extrema que no puedo estar quieto ni un segundo.', clave:'T'},
+  {n:56, sub:'AF', txt:'Siento que voy a morir de angustia en cualquier momento.', clave:'T'},
+  {n:57, sub:'AF', txt:'Tengo ataques de pánico que duran horas enteras sin parar.', clave:'T'},
+  {n:58, sub:'AF', txt:'Me siento tan deprimido que no puedo ni moverme ni hablar por días completos.', clave:'T'},
+  {n:59, sub:'AF', txt:'Mi miedo es tan intenso que no puedo respirar durante horas.', clave:'T'},
+  {n:60, sub:'AF', txt:'Tengo pensamientos de muerte todo el tiempo, sin ningún control sobre ellos.', clave:'T'},
+
+  // Subscala P — Psicosis (ítems 61-75)
+  {n:61, sub:'P',  txt:'A veces escucho voces que me hablan directamente.', clave:'F'},
+  {n:62, sub:'P',  txt:'A veces siento que las personas de televisión me envían mensajes personales.', clave:'T'},
+  {n:63, sub:'P',  txt:'Escucho voces que tienen conversaciones largas entre ellas dentro de mi cabeza constantemente.', clave:'T'},
+  {n:64, sub:'P',  txt:'Creo que ciertas personas pueden leer o controlar mis pensamientos.', clave:'T'},
+  {n:65, sub:'P',  txt:'Veo cosas que los demás no pueden ver, como figuras o sombras extrañas.', clave:'T'},
+  {n:66, sub:'P',  txt:'Creo que soy una figura histórica importante o que tengo poderes especiales.', clave:'T'},
+  {n:67, sub:'P',  txt:'A veces siento que mis pensamientos son transmitidos en voz alta a los demás.', clave:'T'},
+  {n:68, sub:'P',  txt:'Creo que hay una conspiración organizada específicamente en mi contra.', clave:'T'},
+  {n:69, sub:'P',  txt:'A veces siento que me han implantado algo en el cuerpo para controlarme.', clave:'T'},
+  {n:70, sub:'P',  txt:'Escucho mi propio nombre gritado constantemente aunque no haya nadie.', clave:'T'},
+  {n:71, sub:'P',  txt:'Veo imágenes aterradoras que nadie más puede ver, todo el tiempo.', clave:'T'},
+  {n:72, sub:'P',  txt:'Creo que tengo la capacidad de predecir el futuro con exactitud.', clave:'T'},
+  {n:73, sub:'P',  txt:'Siento que hay fuerzas sobrenaturales que actúan sobre mi cuerpo.', clave:'T'},
+  {n:74, sub:'P',  txt:'Mis pensamientos son tan acelerados que no puedo dormir nunca.', clave:'T'},
+  {n:75, sub:'P',  txt:'Creo que soy la única persona en el mundo que puede salvar a la humanidad.', clave:'T'}
+];
+
+var SIMS_SUBESCALAS = {
+  AM: {nombre:'Amnesia', corte:3},
+  LI: {nombre:'Baja Inteligencia / Deterioro Cognitivo', corte:3},
+  NI: {nombre:'Deterioro Neurológico', corte:3},
+  AF: {nombre:'Trastornos Afectivos', corte:4},
+  P:  {nombre:'Psicosis', corte:3}
+};
+
+window.renderSIMS = function(){
+  var container = document.getElementById('sims-form');
+  if(!container) return;
+  var html = '';
+  var subs = ['AM','LI','NI','AF','P'];
+  var subNames = {AM:'Amnesia',LI:'Deterioro Cognitivo / Baja Inteligencia',NI:'Deterioro Neurológico',AF:'Trastornos Afectivos',P:'Psicosis'};
+  subs.forEach(function(sub){
+    html += '<div style="margin-bottom:20px">';
+    html += '<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent2);padding:6px 0;border-bottom:2px solid var(--accent2);margin-bottom:10px">'+subNames[sub]+'</div>';
+    SIMS_ITEMS.filter(function(it){return it.sub===sub;}).forEach(function(it){
+      html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--surface2)">';
+      html += '<span style="font-size:0.72rem;color:var(--text3);min-width:22px;padding-top:2px">'+it.n+'.</span>';
+      html += '<span style="flex:1;font-size:0.82rem;line-height:1.5;color:var(--text)">'+it.txt+'</span>';
+      html += '<div style="display:flex;gap:6px;flex-shrink:0">';
+      html += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.78rem;font-weight:600;color:var(--success)">';
+      html += '<input type="radio" name="sims_'+it.n+'" value="V" style="accent-color:var(--success)"> V</label>';
+      html += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.78rem;font-weight:600;color:var(--danger)">';
+      html += '<input type="radio" name="sims_'+it.n+'" value="F" style="accent-color:var(--danger)"> F</label>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  });
+  container.innerHTML = html;
+};
+
+window.calcularSIMS = function(){
+  var total = 0;
+  var subScores = {AM:0, LI:0, NI:0, AF:0, P:0};
+  var noRespondidos = [];
+
+  SIMS_ITEMS.forEach(function(it){
+    var sel = document.querySelector('input[name="sims_'+it.n+'"]:checked');
+    if(!sel){ noRespondidos.push(it.n); return; }
+    var resp = sel.value; // 'V' o 'F'
+    // Puntúa 1 si la respuesta coincide con la clave de simulación
+    if(resp === it.clave){
+      total++;
+      subScores[it.sub]++;
+    }
+  });
+
+  if(noRespondidos.length > 5){
+    toast('⚠️ Faltan '+noRespondidos.length+' ítems por responder (máx 5 sin respuesta)');
+    return;
+  }
+
+  // Interpretación
+  var nivel, color, interpretacion;
+  if(total >= 16){
+    nivel = 'POSITIVO — Posible simulación';
+    color = '#c0392b';
+    interpretacion = 'Puntuación por encima del punto de corte clínico (≥16). Los resultados sugieren una presentación no creíble de síntomas. Se recomienda evaluación adicional con instrumentos complementarios, entrevista estructurada de validez de síntomas y revisión de historial clínico.';
+  } else if(total >= 10){
+    nivel = 'LÍMITE — Requiere seguimiento';
+    color = '#d97706';
+    interpretacion = 'Puntuación en rango límite. No alcanza el criterio de simulación pero justifica cautela clínica. Considerar re-evaluación, inconsistencias entre síntomas reportados y conducta observada.';
+  } else {
+    nivel = 'NEGATIVO — Sin indicadores de simulación';
+    color = '#16a34a';
+    interpretacion = 'Puntuación dentro del rango normativo. No se identifican indicadores significativos de presentación simulada de síntomas.';
+  }
+
+  // Subescalas con puntaje elevado
+  var subsElevadas = [];
+  Object.keys(subScores).forEach(function(sub){
+    if(subScores[sub] >= SIMS_SUBESCALAS[sub].corte){
+      subsElevadas.push(SIMS_SUBESCALAS[sub].nombre+' ('+subScores[sub]+'/15)');
+    }
+  });
+
+  var out = document.getElementById('sims-resultado');
+  if(!out) return;
+  out.style.display = '';
+  out.innerHTML =
+    '<div style="background:var(--surface2);border:2px solid '+color+';border-radius:12px;padding:18px 20px">' +
+    '<div style="font-size:1.1rem;font-weight:700;color:'+color+';margin-bottom:4px">'+nivel+'</div>' +
+    '<div style="font-size:2rem;font-weight:700;color:'+color+';margin:8px 0">Puntuación total: '+total+' / 75</div>' +
+    '<div style="font-size:0.72rem;color:var(--text3);margin-bottom:12px">Punto de corte: ≥ 16 sugiere simulación</div>' +
+    '<div style="font-size:0.82rem;color:var(--text);line-height:1.6;margin-bottom:14px">'+interpretacion+'</div>' +
+
+    '<div style="font-size:0.78rem;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em">Puntuación por subescala</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:14px">' +
+    Object.keys(subScores).map(function(sub){
+      var sc = subScores[sub];
+      var corte = SIMS_SUBESCALAS[sub].corte;
+      var elev = sc >= corte;
+      return '<div style="background:'+(elev?'#fee2e2':'var(--surface)')+';border:1px solid '+(elev?'#f87171':'var(--border)')+';border-radius:8px;padding:8px 10px">' +
+        '<div style="font-size:0.68rem;font-weight:700;color:'+(elev?'#c0392b':'var(--text3)')+';text-transform:uppercase">'+SIMS_SUBESCALAS[sub].nombre+'</div>' +
+        '<div style="font-size:1.2rem;font-weight:700;color:'+(elev?'#c0392b':'var(--text)')+'">'+sc+' <span style="font-size:0.72rem;font-weight:400">/ 15</span></div>' +
+        '<div style="font-size:0.68rem;color:var(--text3)">Corte: ≥'+corte+(elev?' ⚠️':' ✓')+'</div>' +
+        '</div>';
+    }).join('') + '</div>' +
+
+    (subsElevadas.length ?
+      '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;font-size:0.78rem;color:#7f1d1d;margin-bottom:12px">'+
+      '<strong>Subescalas elevadas:</strong> '+subsElevadas.join(' · ')+'</div>' : '') +
+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    '<button class="btn btn-primary btn-sm" onclick="guardarSIMS('+total+','+JSON.stringify(subScores).replace(/"/g,"'")+',\''+nivel+'\')">💾 Guardar resultado</button>' +
+    '</div></div>';
+
+  out.scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+window.guardarSIMS = function(total, subScores, nivel){
+  var pacNombre = document.getElementById('test-pac-nombre')?.value || '';
+  var resumen = nivel+' | Total: '+total+'/75 | AM:'+subScores.AM+' LI:'+subScores.LI+' NI:'+subScores.NI+' AF:'+subScores.AF+' P:'+subScores.P;
+  guardarResultadoTest('SIMS', total, total>=16?'positivo':total>=10?'limite':'negativo', pacNombre, resumen);
+  toast('✅ Resultado SIMS guardado');
+};
+
+window.resetSIMS = function(){
+  document.querySelectorAll('#sims-form input[type="radio"]').forEach(function(r){r.checked=false;});
+  var out = document.getElementById('sims-resultado');
+  if(out) out.style.display = 'none';
+};
+
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
 // ── HISTORIAL IC POR PACIENTE ──
@@ -6183,7 +6420,9 @@ window.showTest=(id)=>{
   const el=document.getElementById(id==='home'?'tests-home':`test-${id}`);
   if(el)el.classList.add('active');
   if(id!=='home'){
-    if(id==='pcl5'){renderPCL5Questions();}else{renderTestQuestions(id);}
+    if(id==='pcl5'){renderPCL5Questions();}
+    else if(id==='sims'){renderSIMS();}
+    else{renderTestQuestions(id);}
     const res=document.getElementById(`${id}-result`);
     if(res)res.style.display='none';
   }
