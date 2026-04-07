@@ -1856,6 +1856,33 @@ input.toggle-cb{display:none}
   </div>
 </div>
 
+<!-- MODAL PERSONALIZAR CARTILLA -->
+<div class="modal-overlay" id="modal-personalizar-cartilla">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3>✨ Personalizar cartilla para paciente</h3>
+      <button class="modal-close" onclick="closeModal('modal-personalizar-cartilla')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px">
+      <div class="form-group" style="margin-bottom:12px">
+        <label style="font-size:0.8rem;font-weight:600;color:var(--text2)">Paciente</label>
+        <select id="pcar-pac-sel" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;margin-top:4px">
+          <option value="">— Seleccionar paciente —</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label style="font-size:0.8rem;font-weight:600;color:var(--text2)">Ajustes adicionales <span style="font-weight:400;color:var(--text3)">(opcional)</span></label>
+        <textarea id="pcar-contexto-extra" rows="3" placeholder="Ej: No tiene familia, vive sola. Es analfabeta. Práctica religiosa activa. Muy ansiosa con términos médicos…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;resize:vertical;margin-top:4px"></textarea>
+      </div>
+      <div id="pcar-status" style="display:none;font-size:0.78rem;color:var(--text3);font-style:italic;margin-bottom:8px">⏳ Generando cartilla personalizada…</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-personalizar-cartilla')">Cancelar</button>
+      <button class="btn btn-primary" style="background:#7c3aed" onclick="generarCartillaPersonalizada()">✨ Generar y abrir PDF</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PACIENTE -->
 <div class="modal-overlay" id="modal-paciente">
   <div class="modal">
@@ -3971,7 +3998,10 @@ window.renderPsicoCards = function(filtro){
           <span style="background:${g.color}22;color:${g.color};font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:20px">${prioLabels[g.prio]}</span>
           <svg class="psico-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="transition:transform 0.2s;color:var(--text3)"><path d="M19 9l-7 7-7-7"/></svg>
         </div>
-        <button onclick="event.stopPropagation();generarPDFPsico('${g.id}')" style="background:var(--accent2);color:#fff;border:none;border-radius:7px;padding:5px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0" title="Generar documento para el paciente">📄 PDF</button>
+        <div style="display:flex;gap:5px;flex-shrink:0" onclick="event.stopPropagation()">
+          <button onclick="generarPDFPsico('${g.id}')" style="background:var(--accent2);color:#fff;border:none;border-radius:7px;padding:5px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;white-space:nowrap" title="Generar cartilla estándar">📄 PDF</button>
+          <button onclick="abrirPersonalizarCartilla('${g.id}')" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:5px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;white-space:nowrap" title="Adaptar al paciente con IA">✨ Personalizar</button>
+        </div>
       </div>
       <div class="psico-body" style="display:none;padding:0 16px 14px">
         <div style="font-size:0.78rem;color:var(--text2);background:var(--surface2);border-radius:7px;padding:8px 12px;margin-bottom:10px;line-height:1.5">
@@ -5044,6 +5074,149 @@ window.cargarPendientesPaciente = async function(pacId){
   }catch(e){
     lista.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">—</p>';
   }
+};
+
+
+// ── CARTILLA PERSONALIZADA CON IA ────────────────────────────────────
+var _pcarGuiaId = null;
+
+window.abrirPersonalizarCartilla = function(guiaId){
+  _pcarGuiaId = guiaId;
+  const guia = psicoGuias.find(g=>g.id===guiaId);
+  if(!guia || !guia.cartilla) return toast('⚠️ Esta guía no tiene cartilla');
+  // Populate patient selector
+  const sel = document.getElementById('pcar-pac-sel');
+  if(sel){
+    sel.innerHTML = '<option value="">— Seleccionar paciente —</option>' +
+      (window.pacientes||[]).map(p=>`<option value="${p.id}">${p.nombre}${p.hab?' · Hab. '+p.hab:''}</option>`).join('');
+  }
+  document.getElementById('pcar-contexto-extra').value = '';
+  document.getElementById('pcar-status').style.display = 'none';
+  openModal('modal-personalizar-cartilla');
+};
+
+window.generarCartillaPersonalizada = async function(){
+  const apiKey = (typeof getGeminiKey==='function'?getGeminiKey():null)||localStorage.getItem('gemini_api_key')||'';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+
+  const guia = psicoGuias.find(g=>g.id===_pcarGuiaId);
+  if(!guia) return toast('⚠️ Guía no encontrada');
+
+  const pacId = document.getElementById('pcar-pac-sel').value;
+  const extra = (document.getElementById('pcar-contexto-extra').value||'').trim();
+
+  // Gather patient context
+  const p = pacId ? (window.pacientes||[]).find(x=>x.id===pacId) : null;
+  const ctx = [];
+  if(p){
+    if(p.edad) ctx.push('Edad: '+p.edad+' años');
+    if(p.sexo) ctx.push('Sexo: '+p.sexo);
+    if(p.motivo) ctx.push('Diagnóstico médico: '+p.motivo.slice(0,150));
+    if(p.dxpsi) ctx.push('Impresión psicológica: '+p.dxpsi);
+    if(p.riesgo) ctx.push('Riesgo suicida: '+p.riesgo);
+    if(p.notas) ctx.push('Notas: '+p.notas.slice(0,150));
+  }
+  if(extra) ctx.push('Indicaciones adicionales: '+extra);
+
+  const c = guia.cartilla;
+  const cartillaOriginal = [
+    c.quePasa ? 'QUÉ ESTÁ PASANDO:\n'+c.quePasa : '',
+    c.queEs ? 'LO QUE PUEDES ESTAR SINTIENDO:\n'+c.queEs : '',
+    c.sintomas ? 'SÍNTOMAS:\n'+c.sintomas : '',
+    c.conexion ? 'CONEXIÓN / REFLEXIÓN:\n'+c.conexion : '',
+    c.hoy ? 'QUÉ PUEDES HACER HOY:\n'+c.hoy : '',
+    c.pensamientos ? 'PENSAMIENTOS FRECUENTES:\n'+(c.pensamientos||[]).join(' | ') : '',
+  ].filter(Boolean).join('\n\n');
+
+  const prompt = 'Eres una psicóloga clínica hospitalaria en Colombia. '
+    + 'Tienes una cartilla psicoeducativa para entregar al paciente y debes adaptarla a su contexto específico.\n\n'
+    + 'CONTEXTO DEL PACIENTE:\n'+(ctx.length?ctx.join('\n'):'No especificado')
+    + '\n\nCARTILLA ORIGINAL:\n'+cartillaOriginal
+    + '\n\nINSTRUCCIONES DE ADAPTACIÓN:\n'
+    + '1. Elimina o reformula cualquier sección que no aplique al contexto del paciente (ej: si no tiene familia, elimina referencias a familia; si es mayor, elimina referencias a trabajo).\n'
+    + '2. Mantén el mismo tono cálido, cercano y colombiano.\n'
+    + '3. Adapta los ejemplos y pensamientos frecuentes al contexto real.\n'
+    + '4. NO inventes información clínica — solo adapta el texto existente.\n'
+    + '5. Mantén la misma estructura de secciones, pero puedes omitir secciones enteras si no aplican.\n'
+    + '6. Usa lenguaje simple, sin términos médicos complejos.\n'
+    + '7. Responde SOLO con el texto adaptado de la cartilla, listo para entregar, sin explicaciones ni comentarios.\n'
+    + '8. Formato: usa los mismos títulos de sección en mayúscula, y listas con • para los puntos.';
+
+  const statusEl = document.getElementById('pcar-status');
+  if(statusEl) statusEl.style.display = '';
+  document.querySelector('#modal-personalizar-cartilla .btn-primary').disabled = true;
+
+  try{
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.3, maxOutputTokens:3000}})
+    });
+    const d = await r.json();
+    if(!r.ok||d.error) throw new Error(d.error?.message||'Error API');
+    const texto = (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    if(!texto) throw new Error('Respuesta vacía');
+
+    closeModal('modal-personalizar-cartilla');
+    // Open as print window using same style as generarPDFPsico
+    _imprimirCartillaAdaptada(guia, texto, p);
+
+  }catch(e){
+    if(statusEl) statusEl.textContent = '❌ Error: '+e.message;
+    toast('❌ '+e.message);
+  } finally {
+    document.querySelector('#modal-personalizar-cartilla .btn-primary').disabled = false;
+  }
+};
+
+window._imprimirCartillaAdaptada = function(guia, textoAdaptado, paciente){
+  const color = guia.color || '#1a56a0';
+  const fecha = new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
+  const nombre = paciente ? paciente.nombre : '';
+
+  // Parse the adapted text into sections
+  const nl2p = txt => txt.split('\n\n').map(p=>{
+    if(p.includes('\n•')||p.startsWith('•')){
+      const items=p.split('\n').filter(Boolean);
+      const titulo=items[0].startsWith('•')?'':'<p style="margin:0 0 6px;font-weight:600">'+items[0]+'</p>';
+      const lista=items.filter(i=>i.startsWith('•')).map(i=>'<li>'+i.slice(1).trim()+'</li>').join('');
+      return titulo+'<ul style="padding-left:18px;margin:0">'+lista+'</ul>';
+    }
+    return '<p style="margin:0 0 8px">'+p.replace(/\n/g,'<br>')+'</p>';
+  }).join('');
+
+  const docHTML = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<title>${guia.titulo} — Adaptada</title>
+<style>
+  body{font-family:'Georgia',serif;max-width:680px;margin:0 auto;padding:32px 24px;color:#1a1a1a;font-size:12pt;line-height:1.7}
+  h1{font-size:20pt;color:${color};margin:0 0 4px}
+  .sub{font-size:10pt;color:#666;margin-bottom:24px}
+  .badge{display:inline-block;background:${color}22;color:${color};border-radius:20px;padding:2px 12px;font-size:9pt;font-weight:700;margin-bottom:20px}
+  .section{margin-bottom:22px;padding:14px 16px;background:#fafafa;border-left:4px solid ${color};border-radius:4px}
+  .section-title{font-size:10pt;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${color};margin-bottom:10px}
+  ul{margin:0;padding-left:20px}li{margin-bottom:4px}
+  .footer{margin-top:32px;border-top:1px solid #ddd;padding-top:14px;font-size:9pt;color:#888;text-align:center}
+  .ia-badge{background:#f3e8ff;color:#7c3aed;border-radius:12px;padding:2px 10px;font-size:8.5pt;font-weight:700;margin-left:8px}
+  @media print{body{padding:16px}button{display:none}}
+</style></head><body>
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+  <div>
+    <h1>${guia.icono} ${guia.titulo}</h1>
+    <div class="sub">${nombre?'Para: <strong>'+nombre+'</strong> · ':''} ${fecha}</div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:9pt;color:#999">ESE Hospital La María</div>
+    <div style="font-size:9pt;color:#999">Psicología Hospitalaria</div>
+    <span class="ia-badge">✨ Adaptada por IA</span>
+  </div>
+</div>
+<div class="section" style="white-space:pre-wrap;font-size:11.5pt;line-height:1.75">${nl2p(textoAdaptado)}</div>
+<div class="footer">Este documento fue generado y personalizado por el equipo de Psicología · ESE Hospital La María · Medellín</div>
+<div style="text-align:center;margin-top:16px"><button onclick="window.print()" style="background:${color};color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:11pt;cursor:pointer;font-weight:600">🖨️ Imprimir</button></div>
+</body></html>`;
+
+  const w = window.open('','_blank','width=750,height=900');
+  if(w){ w.document.write(docHTML); w.document.close(); }
+  else toast('⚠️ Activa ventanas emergentes para imprimir');
 };
 
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
