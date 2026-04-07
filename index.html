@@ -4556,23 +4556,48 @@ window.guardarNotaRapida = async function(pacId){
   }catch(e){ toast('❌ '+e.message); }
 };
 
-window.cargarNotasRapidas = function(pacId){
+window.cargarNotasRapidas = async function(pacId){
   if(!pacId) return;
   const cont = document.getElementById('ps-notas-historial');
   if(!cont) return;
-  // Lee del array local de interconsultas (ya cargado por onSnapshot)
-  const notas = (window.interconsultas||[])
+
+  // Fuente 1: interconsultas en memoria (notas nuevas)
+  const deIC = (window.interconsultas||[])
     .filter(e=>e.pacienteId===pacId && e.modo==='Nota rápida')
+    .map(e=>({texto: e.sub||e.nota||'', fecha: e.fecha||''}));
+
+  // Fuente 2: colección notas_rapidas en Firebase (notas antiguas)
+  let deFirebase = [];
+  try{
+    const snap = await window._getDocs(
+      window._query(
+        window._collection(window.db,'notas_rapidas'),
+        window._where('pacienteId','==',pacId),
+        window._orderBy('creado','desc'),
+        window._limit(20)
+      )
+    );
+    deFirebase = snap.docs.map(d=>({
+      texto: d.data().texto||'',
+      fecha: d.data().fecha||''
+    }));
+  }catch(e){ /* notas_rapidas puede no existir */ }
+
+  // Combinar, deduplicar por texto+fecha, ordenar
+  const todas = [...deIC, ...deFirebase]
+    .filter((n,i,arr)=> n.texto &&
+      arr.findIndex(x=>x.texto===n.texto && x.fecha===n.fecha)===i)
     .sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''))
-    .slice(0,10);
-  if(!notas.length){
+    .slice(0,15);
+
+  if(!todas.length){
     cont.innerHTML='<p style="font-size:0.72rem;color:var(--text3);font-style:italic">Sin notas rápidas aún.</p>';
     return;
   }
-  cont.innerHTML = notas.map(n=>`
+  cont.innerHTML = todas.map(n=>`
     <div style="border-top:1px solid var(--border);padding:6px 0;font-size:0.75rem">
       <span style="color:var(--text3);font-size:0.68rem">${n.fecha||''}</span>
-      <div style="color:var(--text);margin-top:2px;line-height:1.5">${n.sub||n.nota||''}</div>
+      <div style="color:var(--text);margin-top:2px;line-height:1.5">${n.texto}</div>
     </div>`).join('');
 };
 
