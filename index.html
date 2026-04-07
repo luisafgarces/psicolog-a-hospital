@@ -2188,7 +2188,7 @@ window.renderPacientes=(lista)=>{
   let html=q?`<tr><td colspan="8" style="background:#1a3a2a;font-size:0.75rem;color:#34D399;padding:7px 14px;">🔍 Mostrando ${filtered.length} resultado${filtered.length>1?'s':''} para "<strong>${q}</strong>" — <a href="#" onclick="window._searchQ='';document.getElementById('global-search').value='';(window.renderPacientes&&window.renderPacientes)();return false;" style="color:#34D399">Limpiar</a></td></tr>`:'';
   pisoOrder.forEach(piso=>{
     if(!q)html+=`<tr><td colspan="8" style="background:var(--surface2);font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;padding:7px 14px;">🏢 ${piso}</td></tr>`;
-    html+=grouped[piso].map(p=>`<tr><td><strong>${p.nombre}</strong><div class="td-sub">${p.hab?'Hab. '+p.hab:''} ${p.fecha?'· '+formatDate(p.fecha):''}</div></td><td>${p.cedula}</td><td>${p.edad?p.edad+' a.':''} ${p.sexo?p.sexo.charAt(0):''}</td><td>${p.motivo?p.motivo.slice(0,40)+(p.motivo.length>40?'…':''):'—'}</td><td>${riskBadge(p.riesgo)}</td><td>${estadoBadge(p.estado)}</td><td>${proxBadge(p)}</td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-sm btn-secondary" onclick="nuevaAnamnesisParaPaciente('${p.id}')">📋</button><button class="btn btn-sm btn-secondary" onclick="abrirICParaPaciente('${p.id}')">💬 IC</button><button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪</button><button class="btn btn-sm btn-secondary" onclick="verHistorialPorId('${p.id}')">📂</button><button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️</button><button class="btn btn-sm btn-danger" onclick="eliminarPaciente('${p.id}')">✕</button></div></td></tr>`).join('');
+    html+=grouped[piso].map(p=>`<tr><td><strong>${p.nombre}</strong><div class="td-sub">${p.hab?'Hab. '+p.hab:''} ${p.fecha?'· '+formatDate(p.fecha):''}</div></td><td>${p.cedula}</td><td>${p.edad?p.edad+' a.':''} ${p.sexo?p.sexo.charAt(0):''}</td><td>${p.motivo?p.motivo.slice(0,40)+(p.motivo.length>40?'…':''):'—'}</td><td>${riskBadge(p.riesgo)}</td><td>${estadoBadge(p.estado)}</td><td>${proxBadge(p)}</td><td><button class="btn btn-sm btn-secondary" onclick="abrirPacSheet('${p.id}')">👤 Ver Paciente</button></td></tr>`).join('');
   });
   tbody.innerHTML=html;
 };
@@ -2371,42 +2371,6 @@ window.selectICPaciente=(id)=>{
   }
 };
 
-window.abrirICParaPaciente=(id)=>{
-  goTo('interconsultas');
-  setTimeout(()=>{
-    const sel=document.getElementById('ic-paciente-sel');
-    if(sel){sel.value=id;selectICPaciente(id);}
-  },200);
-};
-
-window.nuevaAnamnesisParaPaciente=(id)=>{
-  goTo('anamnesis');
-  setTimeout(()=>{
-    const p=pacientes.find(x=>x.id===id);
-    if(!p)return;
-    const el=id=>document.getElementById(id);
-    if(el('an-nombre'))el('an-nombre').value=p.nombre||'';
-    if(el('an-cedula'))el('an-cedula').value=p.cedula||'';
-    if(el('an-edad'))el('an-edad').value=p.edad||'';
-    if(el('an-hab'))el('an-hab').value=p.hab||'';
-    if(el('an-paciente-sel'))el('an-paciente-sel').value=id;
-  },200);
-};
-
-window.irTestsPaciente=(id)=>{
-  goTo('tests');
-  window._testPacienteId=id;
-  setTimeout(()=>{
-    const p=pacientes.find(x=>x.id===id);
-    if(!p)return;
-    const nom=document.getElementById('test-pac-nombre');
-    const sel=document.getElementById('test-pac-sel');
-    if(nom)nom.value=p.nombre||'';
-    if(sel)sel.value=id;
-    window._testPacienteId=id;
-  },200);
-};
-
 window.openModal=(id)=>{
   const m=document.getElementById(id);
   if(!m)return;
@@ -2515,8 +2479,8 @@ window.renderIC=()=>{
     const estado=ic.estado||'pendiente';
     const estadoBadgeIC=e=>e==='subida'?'<span class="badge badge-blue">📋 Subida</span>':e==='respondida'?'<span class="badge badge-green">✅ Respondida</span>':'<span class="badge badge-yellow">⏳ Pendiente</span>';
     const accionBtn=estado==='pendiente'?`<button class="btn btn-sm btn-secondary" onclick="responderIC('${ic.id}')">✅ Respondida</button>`:estado==='respondida'?`<button class="btn btn-sm btn-primary" onclick="subirIC('${ic.id}')">📋 Subir al sistema</button>`:`<span style="font-size:0.72rem;color:var(--text3)">✓ En el sistema</span>`;
-    const histBtn=ic.pacienteId?`<button class="btn btn-sm btn-secondary" onclick="verHistorialPorId('${ic.pacienteId}')" title="Ver historial del paciente">📂</button>`:'';
-    return`<div class="ic-card"><div class="ic-icon ${prioridad==='urgente'?'urgent':estado==='pendiente'?'pending':'done'}">${prioridad==='urgente'?'🚨':estado==='subida'?'📋':estado==='respondida'?'✅':'📤'}</div><div class="ic-body"><h4 style="cursor:${ic.pacienteId?'pointer':'default'}" onclick="${ic.pacienteId?`verHistorialPorId('${ic.pacienteId}')`:''}">${titulo}</h4><p>${desc}</p><div class="ic-meta"><span class="badge ${prioridad==='urgente'?'badge-red':prioridad==='electiva'?'badge-blue':'badge-gray'}">${prioridad}</span>${estadoBadgeIC(estado)}<span class="text-sm">${ic.fecha?ic.fecha:''}</span></div></div><div class="ic-actions">${accionBtn}${histBtn}<button class="btn btn-sm btn-danger" onclick="eliminarIC('${ic.id}')">✕</button></div></div>`;
+    const histBtn=ic.pacienteId?`<button class="btn btn-sm btn-secondary" onclick="abrirPacSheet('${ic.pacienteId}')" title="Ver historial del paciente">📂</button>`:'';
+    return`<div class="ic-card"><div class="ic-icon ${prioridad==='urgente'?'urgent':estado==='pendiente'?'pending':'done'}">${prioridad==='urgente'?'🚨':estado==='subida'?'📋':estado==='respondida'?'✅':'📤'}</div><div class="ic-body"><h4 style="cursor:${ic.pacienteId?'pointer':'default'}" onclick="${ic.pacienteId?`abrirPacSheet('${ic.pacienteId}')`:''}">${titulo}</h4><p>${desc}</p><div class="ic-meta"><span class="badge ${prioridad==='urgente'?'badge-red':prioridad==='electiva'?'badge-blue':'badge-gray'}">${prioridad}</span>${estadoBadgeIC(estado)}<span class="text-sm">${ic.fecha?ic.fecha:''}</span></div></div><div class="ic-actions">${accionBtn}${histBtn}<button class="btn btn-sm btn-danger" onclick="eliminarIC('${ic.id}')">✕</button></div></div>`;
   }).join('');
 };
 
@@ -2998,11 +2962,9 @@ window.renderDashboard=()=>{
           <div class="rc-badges">${riskBadge(p.riesgo)} ${estadoBadge(p.estado)}</div>
           ${esPorFecha?`<div class="rc-proxima">🏢 ${getPiso(p)}</div>`:p.proxSesion?`<div class="rc-proxima">📅 Próx. sesión: ${formatDate(p.proxSesion)}</div>`:''}
           <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap" onclick="event.stopPropagation()">
-            <button class="btn btn-sm btn-secondary" onclick="abrirICParaPaciente('${p.id}')">💬 IC</button>
-            <button class="btn btn-sm btn-secondary" onclick="nuevaAnamnesisParaPaciente('${p.id}')">📋 Anamnesis</button>
-            <button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪 Test</button>
+            <button class="btn btn-sm btn-secondary" onclick="abrirPacSheet('${p.id}')">👤 Ver Paciente</button>
             <button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️ Editar</button>
-            <button class="btn btn-sm btn-secondary" onclick="verHistorialPorId('${p.id}')">📂 Historial IC</button>
+            <button class="btn btn-sm btn-secondary" onclick="hpacAbrirPaciente('${p.id}')">📂 Historial</button>
           </div>
         </div>`).join('');
       const headerLabel=esPorFecha?labelFecha(grupo):`🏢 ${grupo}`;
@@ -3090,8 +3052,7 @@ window.renderConsultaExterna=(q)=>{
       <td>${rBadge(p.riesgo)}</td>
       <td>${p.proxSesion?`<div>${citaBadge}</div><div style="font-size:0.78rem;color:var(--text2)">${formatDate(p.proxSesion)}</div>`:'<span style="color:var(--text3)">—</span>'}</td>
       <td><div style="display:flex;gap:5px;flex-wrap:wrap">
-        <button class="btn btn-sm btn-secondary" onclick="nuevaAnamnesisParaPaciente('${p.id}')">📋 Anamnesis</button>
-        <button class="btn btn-sm btn-secondary" onclick="irTestsPaciente('${p.id}')">🧪 Tests</button>
+        <button class="btn btn-sm btn-secondary" onclick="abrirPacSheet('${p.id}')">👤 Ver Paciente</button>
         <button class="btn btn-sm btn-secondary" onclick="goTo('historial-pac');setTimeout(()=>hpacAbrirPaciente('${p.id}'),200)">📂 Historial</button>
         <button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️ Editar</button>
       </div></td>
@@ -4435,8 +4396,7 @@ window.globalSearch=(q)=>{
             <div style="font-size:0.72rem;color:var(--text3)">${p.cedula?'CC: '+p.cedula+' · ':''}${p.hab?'Hab. '+p.hab:''}</div>
           </div>
           <div style="display:flex;gap:5px;flex-shrink:0">
-            <button class="btn btn-sm btn-secondary" style="padding:3px 8px;font-size:0.72rem" onclick="closeSrDrop();document.getElementById('global-search').value='';verHistorialPorId('${p.id}')">📂</button>
-            <button class="btn btn-sm btn-secondary" style="padding:3px 8px;font-size:0.72rem" onclick="closeSrDrop();document.getElementById('global-search').value='';abrirICParaPaciente('${p.id}')">💬</button>
+            <button class="btn btn-sm btn-secondary" style="padding:3px 8px;font-size:0.72rem" onclick="closeSrDrop();document.getElementById('global-search').value='';abrirPacSheet('${p.id}')">👤</button>
           </div>
         </div>`).join('')+
         `<div style="padding:9px 14px;font-size:0.73rem;color:var(--text3);text-align:center;cursor:pointer;background:var(--surface2)" onclick="closeSrDrop();goTo('pacientes')">Ver todos los pacientes →</div>`;
@@ -5419,7 +5379,6 @@ window.hpacCopiar=(ni)=>{
 };
 
 // ── HISTORIAL IC en dashboard/pacientes ──────────────────────
-window.verHistorialPorId=(pacId)=>verHistorialIC(pacId,'');
 
 // ── PATIENT INFO SHEET ──────────────────────────────────────
 window.abrirPacSheet=async(id)=>{
@@ -5463,12 +5422,12 @@ window.abrirPacSheet=async(id)=>{
   document.getElementById('ps-grid').innerHTML=grid.map(ri).join('');
   window._psPacId=id;
   document.getElementById('ps-actions').innerHTML=`
-    <button class="btn btn-primary btn-sm" onclick="abrirICParaPaciente('${id}');closePacSheet()">💬 IC</button>
-    <button class="btn btn-secondary btn-sm" onclick="nuevaAnamnesisParaPaciente('${id}');closePacSheet()">📋 Anamnesis</button>
-    <button class="btn btn-secondary btn-sm" onclick="irTestsPaciente('${id}');closePacSheet()">🧪 Test</button>
+    <button class="btn btn-primary btn-sm" onclick="goTo('interconsultas');closePacSheet()">💬 IC</button>
+    <button class="btn btn-secondary btn-sm" onclick="goTo('anamnesis');closePacSheet()">📋 Anamnesis</button>
+    <button class="btn btn-secondary btn-sm" onclick="goTo('tests');closePacSheet()">🧪 Test</button>
     <button class="btn btn-secondary btn-sm" onclick="generarPlanTratamiento('${id}')">🧠 Plan</button>
     <button class="btn btn-secondary btn-sm" onclick="editarPaciente('${id}');closePacSheet()">✏️ Editar</button>
-    <button class="btn btn-secondary btn-sm" onclick="verHistorialPorId('${id}');closePacSheet()">📂 Historial</button>
+    <button class="btn btn-secondary btn-sm" onclick="hpacAbrirPaciente('${id}');closePacSheet()">📂 Historial</button>
   `;
   // Cargar plan existente si hay
   cargarPlanTratamiento(id);
