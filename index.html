@@ -1856,6 +1856,27 @@ input.toggle-cb{display:none}
   </div>
 </div>
 
+<!-- MODAL PDF PACIENTE -->
+<div class="modal-overlay" id="modal-pdf-paciente">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h3>📄 Generar cartilla PDF</h3>
+      <button class="modal-close" onclick="closeModal('modal-pdf-paciente')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px">
+      <div class="form-group">
+        <label style="font-size:0.82rem;font-weight:600;color:var(--text2)">Paciente</label>
+        <select id="pdf-pac-sel" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;margin-top:4px"></select>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:4px">Solo se muestran pacientes activos. Deja en blanco para cartilla genérica.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-pdf-paciente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="generarPDFConPaciente()">📄 Generar PDF</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PERSONALIZAR CARTILLA -->
 <div class="modal-overlay" id="modal-personalizar-cartilla">
   <div class="modal" style="max-width:480px">
@@ -4081,8 +4102,23 @@ window.generarPDFPsico = function(guiaId){
   if(!guia) return toast('⚠️ Guía no encontrada');
   if(!guia.cartilla) return toast('⚠️ Esta guía no tiene cartilla para paciente aún');
 
+  // Si viene del modal (override ya seteado), usar ese nombre
+  // Si no, abrir modal para seleccionar paciente
+  if(window._pdfNombreOverride !== undefined){
+    var nombre = window._pdfNombreOverride;
+    window._pdfNombreOverride = undefined;
+  } else {
+    const pacs = (window.pacientes||[]).filter(p=>p.estado!=='alta'&&p.estado!=='fallecido');
+    const sel = document.getElementById('pdf-pac-sel');
+    if(sel){
+      sel.innerHTML = '<option value="">— Sin nombre / Genérica —</option>'
+        + pacs.map(p=>'<option value="'+p.id+'">'+p.nombre+(p.hab?' · Hab. '+p.hab:'')+'</option>').join('');
+    }
+    window._pdfGuiaId = guiaId;
+    openModal('modal-pdf-paciente');
+    return;
+  }
   const c = guia.cartilla;
-  const nombre = prompt('Nombre del paciente (dejar en blanco si no aplica):') || '';
   const fecha = new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
   const color = guia.color || '#1a56a0';
 
@@ -5129,18 +5165,21 @@ window.generarCartillaPersonalizada = async function(){
   ].filter(Boolean).join('\n\n');
 
   const prompt = 'Eres una psicóloga clínica hospitalaria en Colombia. '
-    + 'Tienes una cartilla psicoeducativa para entregar al paciente y debes adaptarla a su contexto específico.\n\n'
-    + 'CONTEXTO DEL PACIENTE:\n'+(ctx.length?ctx.join('\n'):'No especificado')
-    + '\n\nCARTILLA ORIGINAL:\n'+cartillaOriginal
-    + '\n\nINSTRUCCIONES DE ADAPTACIÓN:\n'
-    + '1. Elimina o reformula cualquier sección que no aplique al contexto del paciente (ej: si no tiene familia, elimina referencias a familia; si es mayor, elimina referencias a trabajo).\n'
-    + '2. Mantén el mismo tono cálido, cercano y colombiano.\n'
-    + '3. Adapta los ejemplos y pensamientos frecuentes al contexto real.\n'
-    + '4. NO inventes información clínica — solo adapta el texto existente.\n'
-    + '5. Mantén la misma estructura de secciones, pero puedes omitir secciones enteras si no aplican.\n'
-    + '6. Usa lenguaje simple, sin términos médicos complejos.\n'
-    + '7. Responde SOLO con el texto adaptado de la cartilla, listo para entregar, sin explicaciones ni comentarios.\n'
-    + '8. Formato: usa los mismos títulos de sección en mayúscula, y listas con • para los puntos.';
+    + 'Devuelve ÚNICAMENTE un objeto JSON válido con estas claves exactas: quePasa, queEs, sintomas, conexion, hoy, pensamientos (array de strings), para_familia. '
+    + 'ADAPTA cada sección al contexto del paciente — NO elimines secciones, solo ajusta el contenido. '
+    + 'Si el paciente no tiene familia, adapta "para_familia" hacia cuidadores o equipo de salud.\\n\\n'
+    + 'CONTEXTO DEL PACIENTE:\\n'+(ctx.length?ctx.join('\\n'):'No especificado')+'\\n\\n'
+    + 'CONTENIDO ORIGINAL DE LA CARTILLA (adapta cada campo):\\n'
+    + JSON.stringify({
+        quePasa: c.quePasa,
+        queEs: c.queEs,
+        sintomas: c.sintomas,
+        conexion: c.conexion,
+        hoy: c.hoy,
+        pensamientos: c.pensamientos||[],
+        para_familia: 'Para familiares y cuidadores: escuche sin minimizar. Pregunte cómo puede ayudar. Cuídese también usted.'
+      })
+    + '\\n\\nRespuesta: solo el JSON, sin markdown ni explicaciones.';
 
   const statusEl = document.getElementById('pcar-status');
   if(statusEl) statusEl.style.display = '';
@@ -5149,16 +5188,20 @@ window.generarCartillaPersonalizada = async function(){
   try{
     const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.3, maxOutputTokens:3000}})
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.3, maxOutputTokens:4000}})
     });
     const d = await r.json();
     if(!r.ok||d.error) throw new Error(d.error?.message||'Error API');
-    const texto = (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    let texto = (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
     if(!texto) throw new Error('Respuesta vacía');
+    // Strip markdown fences if present
+    texto = texto.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    let adaptado;
+    try{ adaptado = JSON.parse(texto); }
+    catch(e){ throw new Error('Error al parsear respuesta de IA: '+e.message); }
 
     closeModal('modal-personalizar-cartilla');
-    // Open as print window using same style as generarPDFPsico
-    _imprimirCartillaAdaptada(guia, texto, p);
+    _imprimirCartillaAdaptada(guia, adaptado, p);
 
   }catch(e){
     if(statusEl) statusEl.textContent = '❌ Error: '+e.message;
@@ -5168,57 +5211,140 @@ window.generarCartillaPersonalizada = async function(){
   }
 };
 
-window._imprimirCartillaAdaptada = function(guia, textoAdaptado, paciente){
+window._imprimirCartillaAdaptada = function(guia, a, paciente){
+  // a = {quePasa, queEs, sintomas, conexion, hoy, pensamientos, para_familia}
   const color = guia.color || '#1a56a0';
   const fecha = new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
   const nombre = paciente ? paciente.nombre : '';
 
-  // Parse the adapted text into sections
-  const nl2p = txt => txt.split('\n\n').map(p=>{
-    if(p.includes('\n•')||p.startsWith('•')){
-      const items=p.split('\n').filter(Boolean);
-      const titulo=items[0].startsWith('•')?'':'<p style="margin:0 0 6px;font-weight:600">'+items[0]+'</p>';
-      const lista=items.filter(i=>i.startsWith('•')).map(i=>'<li>'+i.slice(1).trim()+'</li>').join('');
-      return titulo+'<ul style="padding-left:18px;margin:0">'+lista+'</ul>';
-    }
-    return '<p style="margin:0 0 8px">'+p.replace(/\n/g,'<br>')+'</p>';
-  }).join('');
+  const nl2p = txt => {
+    if(!txt) return '';
+    return txt.split('\n\n').map(p=>{
+      if(p.includes('\n\u2022')||p.startsWith('\u2022')){
+        const items=p.split('\n').filter(Boolean);
+        const titulo=items[0].startsWith('\u2022')?'':'<p style="margin:0 0 6px;font-weight:600">'+items[0]+'</p>';
+        const lista=items.filter(i=>i.startsWith('\u2022')).map(i=>'<li>'+i.slice(1).trim()+'</li>').join('');
+        return titulo+'<ul style="padding-left:18px;margin:0">'+lista+'</ul>';
+      }
+      if(p.includes('\n-')||p.startsWith('-')){
+        const items=p.split('\n').filter(Boolean);
+        const lista=items.filter(i=>i.startsWith('-')).map(i=>'<li>'+i.slice(1).trim()+'</li>').join('');
+        return '<ul style="padding-left:18px;margin:0">'+lista+'</ul>';
+      }
+      return '<p style="margin:0 0 8px">'+p.replace(/\n/g,'<br>')+'</p>';
+    }).join('');
+  };
 
-  const docHTML = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
-<title>${guia.titulo} — Adaptada</title>
+  const pensamientosHTML = (a.pensamientos||[]).map(p=>
+    '<div style="background:#fef9ec;border:1.5px solid #f0d060;border-radius:7px;padding:8px 12px;font-size:11.5pt;color:#7b4f00;font-style:italic;text-align:center">'+p+'</div>'
+  ).join('');
+
+  const docHTML = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cartilla — ${guia.titulo}</title>
 <style>
-  body{font-family:'Georgia',serif;max-width:680px;margin:0 auto;padding:32px 24px;color:#1a1a1a;font-size:12pt;line-height:1.7}
-  h1{font-size:20pt;color:${color};margin:0 0 4px}
-  .sub{font-size:10pt;color:#666;margin-bottom:24px}
-  .badge{display:inline-block;background:${color}22;color:${color};border-radius:20px;padding:2px 12px;font-size:9pt;font-weight:700;margin-bottom:20px}
-  .section{margin-bottom:22px;padding:14px 16px;background:#fafafa;border-left:4px solid ${color};border-radius:4px}
-  .section-title{font-size:10pt;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${color};margin-bottom:10px}
-  ul{margin:0;padding-left:20px}li{margin-bottom:4px}
-  .footer{margin-top:32px;border-top:1px solid #ddd;padding-top:14px;font-size:9pt;color:#888;text-align:center}
-  .ia-badge{background:#f3e8ff;color:#7c3aed;border-radius:12px;padding:2px 10px;font-size:8.5pt;font-weight:700;margin-left:8px}
-  @media print{body{padding:16px}button{display:none}}
-</style></head><body>
-<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
-  <div>
-    <h1>${guia.icono} ${guia.titulo}</h1>
-    <div class="sub">${nombre?'Para: <strong>'+nombre+'</strong> · ':''} ${fecha}</div>
-  </div>
-  <div style="text-align:right">
-    <div style="font-size:9pt;color:#999">ESE Hospital La María</div>
-    <div style="font-size:9pt;color:#999">Psicología Hospitalaria</div>
-    <span class="ia-badge">✨ Adaptada por IA</span>
+  @page{size:letter;margin:14mm 15mm 14mm 15mm}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;font-size:12.5pt;color:#1a1714;background:#fff;line-height:1.6}
+  h2{font-size:13pt;font-weight:800;color:${color};margin:0 0 8px}
+  p{margin:0 0 8px}
+  ul{margin:0 0 8px;padding-left:20px}
+  li{margin-bottom:4px}
+  .bloque{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #e5e7eb}
+  .bloque:last-of-type{border-bottom:none}
+  .caja{border-radius:9px;padding:13px 16px;margin-bottom:14px;page-break-inside:avoid}
+  .check{width:18px;height:18px;border:2.5px solid ${color};border-radius:4px;flex-shrink:0;margin-top:3px;display:inline-block}
+  .fila-check{display:flex;gap:10px;margin-bottom:9px;align-items:flex-start;font-size:12pt}
+  @media print{.barra{display:none};body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="barra" style="background:#1a1714;color:#fff;padding:9px 16px;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-family:sans-serif">
+  <span>📄 ${guia.titulo} <span style="background:#7c3aed;color:#fff;border-radius:10px;padding:1px 8px;font-size:10px;margin-left:8px">✨ Adaptada por IA</span></span>
+  <div style="display:flex;gap:8px">
+    <button onclick="window.print()" style="background:#2563a8;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;cursor:pointer;font-weight:600">🖨️ Imprimir / Guardar PDF</button>
+    <button onclick="window.close()" style="background:#555;color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;cursor:pointer">✕</button>
   </div>
 </div>
-<div class="section" style="white-space:pre-wrap;font-size:11.5pt;line-height:1.75">${nl2p(textoAdaptado)}</div>
-<div class="footer">Este documento fue generado y personalizado por el equipo de Psicología · ESE Hospital La María · Medellín</div>
-<div style="text-align:center;margin-top:16px"><button onclick="window.print()" style="background:${color};color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:11pt;cursor:pointer;font-weight:600">🖨️ Imprimir</button></div>
+<div style="border-bottom:5px solid ${color};padding-bottom:12px;margin-bottom:16px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div style="font-size:9pt;color:#666;line-height:1.5">
+      <strong style="font-size:10pt;color:#1a1714;display:block">ESE Hospital La María</strong>
+      Medellín, Antioquia · Servicio de Psicología Hospitalaria<br>${fecha}
+    </div>
+    <span style="background:${color};color:#fff;font-size:8pt;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.05em;text-transform:uppercase">Cartilla Psicoeducativa · Adaptada</span>
+  </div>
+  <div style="margin-top:10px">
+    <div style="font-size:2.6rem;line-height:1">${guia.icono}</div>
+    <div style="font-size:18pt;font-weight:900;color:${color};line-height:1.2;margin-top:6px">${guia.titulo}</div>
+    <div style="font-size:10.5pt;color:#666;margin-top:3px;font-style:italic">Una guía para entender lo que vives y cuidar también tu mente</div>
+  </div>
+  <div style="margin-top:10px;background:${color}11;border-left:5px solid ${color};padding:9px 14px;border-radius:0 8px 8px 0;font-size:11.5pt;color:#333;line-height:1.6">
+    Esta cartilla ha sido preparada con cariño para ti.${nombre?' Es para <strong>'+nombre+'</strong>.':''} Es normal sentir miedo, tristeza o agotamiento. Aquí encontrarás información clara y herramientas para cuidar tu mente mientras cuidas tu cuerpo.
+  </div>
+</div>
+<div class="bloque"><h2>¿Qué está pasando?</h2>${nl2p(a.quePasa)}</div>
+<div class="bloque"><h2>${guia.icono} Lo que debes saber</h2>${nl2p(a.queEs)}</div>
+<div class="bloque"><h2>💙 Lo que puedes sentir</h2>${nl2p(a.sintomas)}</div>
+<div class="bloque"><h2>🔗 Cómo todo se conecta</h2>${nl2p(a.conexion)}</div>
+<div class="bloque"><h2>🌿 Lo que puedes hacer hoy</h2>${nl2p(a.hoy)}</div>
+${pensamientosHTML.length ? '<div class="bloque"><h2 style="margin-bottom:10px">💭 Pensamientos que pueden aparecer</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'+pensamientosHTML+'</div><p style="font-size:12pt">Reconocer estos pensamientos es el primer paso. <strong>No eres tus pensamientos.</strong> Puedes aprender a relacionarte con ellos de otra manera.</p></div>' : ''}
+<div class="bloque">
+  <h2 style="margin-bottom:12px">🛠️ Estrategias que pueden ayudarte</h2>
+  <div style="display:flex;gap:10px;margin-bottom:10px"><div style="font-size:1.5rem;width:32px;flex-shrink:0;text-align:center">🫁</div><div><div style="font-weight:700;color:${color};margin-bottom:3px">Respiración tranquilizante</div><div style="font-size:12pt">Inhala por la nariz contando hasta 4 → Aguanta 2 segundos → Exhala por la boca contando hasta 6. Repite 5 veces. Úsala antes, durante o después de cualquier momento difícil.</div></div></div>
+  <div style="display:flex;gap:10px;margin-bottom:10px"><div style="font-size:1.5rem;width:32px;flex-shrink:0;text-align:center">🧠</div><div><div style="font-weight:700;color:${color};margin-bottom:3px">Cuestiona el pensamiento</div><div style="font-size:12pt">Cuando tengas un pensamiento que te angustie, pregúntate: ¿Esto que pienso es completamente cierto? ¿Qué le diría a un amigo que pensara esto?</div></div></div>
+  <div style="display:flex;gap:10px"><div style="font-size:1.5rem;width:32px;flex-shrink:0;text-align:center">💬</div><div><div style="font-weight:700;color:${color};margin-bottom:3px">Frases de apoyo</div><div style="font-size:12pt">"Puedo hacer esto. Lo he hecho antes." &nbsp;·&nbsp; "Esto es difícil, pero no es para siempre." &nbsp;·&nbsp; "Pedir ayuda es una señal de fortaleza."</div></div></div>
+</div>
+<div class="caja" style="background:${color}09;border:2px solid ${color}">
+  <h2 style="margin-bottom:10px">✅ Mis compromisos para hoy</h2>
+  <div class="fila-check"><span class="check"></span><span>Voy a poner en práctica al menos una de las recomendaciones de esta cartilla hoy.</span></div>
+  <div class="fila-check"><span class="check"></span><span>Si me siento muy mal emocionalmente, voy a decírselo a la enfermera o al médico.</span></div>
+  <div class="fila-check"><span class="check"></span><span>Voy a guardar esta cartilla y releerla cuando lo necesite.</span></div>
+  <div style="display:flex;gap:40px;margin-top:12px;font-size:10.5pt;flex-wrap:wrap">
+    <span>Fecha: ______________________</span>
+    <span>Firma: ______________________</span>
+  </div>
+</div>
+<div class="caja" style="background:#fef2f2;border:1.5px solid #fca5a5;margin-top:0">
+  <div style="font-size:12pt;font-weight:700;color:#dc2626;margin-bottom:8px">🚨 Cuándo buscar ayuda de inmediato</div>
+  <div style="font-size:12pt;margin-bottom:5px">⚠️ Si tienes pensamientos de hacerte daño o de no querer seguir viviendo</div>
+  <div style="font-size:12pt;margin-bottom:5px">⚠️ Si sientes que no puedes manejar solo lo que estás viviendo</div>
+  <div style="font-size:12pt;margin-bottom:5px">⚠️ Si hay un cambio brusco en tu estado de ánimo o comportamiento</div>
+  <div style="font-size:12pt;color:#1e4d8c">✅ Usa el botón de llamada o pídele al equipo que avise a Psicología</div>
+</div>
+<div class="caja" style="background:${color};color:#fff;margin-top:0">
+  <div style="font-size:12pt;font-weight:800;margin-bottom:8px">Un mensaje para ti</div>
+  <div style="font-size:12pt;line-height:1.7;opacity:.95">Lo que estás viviendo es real, es difícil y merece ser reconocido. No tienes que estar "fuerte" todo el tiempo ni fingir que todo está bien. Muchas personas han pasado por este camino y han encontrado formas de adaptarse y seguir adelante. <strong>Pedir ayuda es un acto de valentía.</strong></div>
+</div>
+<div class="caja" style="background:#f8f9fa;border:1.5px solid #d1d5db;margin-top:0">
+  <div style="font-size:12pt;font-weight:700;color:#374151;margin-bottom:8px">💛 Para familiares y cuidadores</div>
+  <div style="font-size:11.5pt">${nl2p(a.para_familia)}</div>
+</div>
+<div style="margin-top:14px;padding-top:10px;border-top:1.5px solid #e5e7eb;display:flex;justify-content:space-between;align-items:flex-end;font-size:8.5pt;color:#888">
+  <div>Elaborado por el Servicio de Psicología Clínica · ESE Hospital La María · Medellín, Antioquia<br>
+  <span style="color:#bbb">Este material es de apoyo educativo y no reemplaza la consulta con su equipo de salud.</span></div>
+  <div style="text-align:right">✨ Cartilla adaptada por IA al contexto del paciente</div>
+</div>
 </body></html>`;
 
-  const w = window.open('','_blank','width=750,height=900');
+  const w = window.open('','_blank','width=800,height=950');
   if(w){ w.document.write(docHTML); w.document.close(); }
   else toast('⚠️ Activa ventanas emergentes para imprimir');
 };
 
+
+// ── PDF CON PACIENTE SELECCIONADO ────────────────────────────────────
+window.generarPDFConPaciente = function(){
+  const guiaId = window._pdfGuiaId;
+  closeModal('modal-pdf-paciente');
+  const pacId = document.getElementById('pdf-pac-sel')?.value||'';
+  const pac = pacId ? (window.pacientes||[]).find(p=>p.id===pacId) : null;
+  window._pdfNombreOverride = pac ? pac.nombre : '';
+  // Re-run generarPDFPsico — it will pick up _pdfNombreOverride
+  if(guiaId) generarPDFPsico(guiaId);
+};
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
 // ── HISTORIAL IC POR PACIENTE ──
