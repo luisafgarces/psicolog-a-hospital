@@ -5067,15 +5067,26 @@ window.hpacFiltrar=(q)=>{
 };
 
 window.hpacAbrirPaciente=(pacId)=>{
+  console.log('hpacAbrirPaciente llamado con id:', pacId);
+  if(!pacId){toast('⚠️ ID de paciente no disponible');return;}
   _hpacPacId=pacId;window._hpacPacId=pacId;
   window._hPacId=pacId;
-  const p=(window.pacientes||[]).find(x=>x.id===pacId)||{};
-  window._hPacNombre=p.nombre||'';
-  document.getElementById('hpac-pac-nombre').textContent=p.nombre||'Paciente';
-  document.getElementById('hpac-pac-info').textContent=(p.cedula?'CC: '+p.cedula+' · ':'')+((p.tipo==='consulta-externa'?'🚶 Consulta externa · ':'')+(p.hab?'Hab. '+p.hab+' · ':'')+((p.motivo||'').slice(0,70)));
-  document.getElementById('hpac-lista-view').style.display='none';
-  document.getElementById('hpac-notas-view').style.display='block';
-  hpacRenderNotas();
+  // Navegar primero
+  goTo('historial-pac');
+  // Esperar a que la página sea visible antes de manipular sus elementos
+  setTimeout(()=>{
+    const p=(window.pacientes||[]).find(x=>x.id===pacId)||{};
+    window._hPacNombre=p.nombre||'';
+    const nomEl=document.getElementById('hpac-pac-nombre');
+    const infoEl=document.getElementById('hpac-pac-info');
+    if(nomEl)nomEl.textContent=p.nombre||'Paciente';
+    if(infoEl)infoEl.textContent=(p.cedula?'CC: '+p.cedula+' · ':'')+((p.tipo==='consulta-externa'?'🚶 Consulta externa · ':'')+(p.hab?'Hab. '+p.hab+' · ':'')+((p.motivo||'').slice(0,70)));
+    const lv=document.getElementById('hpac-lista-view');
+    const nv=document.getElementById('hpac-notas-view');
+    if(lv)lv.style.display='none';
+    if(nv)nv.style.display='block';
+    if(typeof hpacRenderNotas==='function')hpacRenderNotas();
+  },150);
 };
 
 window.hpacVolverLista=()=>{
@@ -5431,7 +5442,7 @@ window.abrirPacSheet=async(id)=>{
     <button class="btn btn-secondary btn-sm" onclick="goTo('tests');closePacSheet()">🧪 Test</button>
     <button class="btn btn-secondary btn-sm" onclick="generarPlanTratamiento('${id}')">🧠 Plan</button>
     <button class="btn btn-secondary btn-sm" onclick="editarPaciente('${id}');closePacSheet()">✏️ Editar</button>
-    <button class="btn btn-primary btn-sm" style="background:#2563a8;width:100%;margin-top:8px" onclick="hpacAbrirPaciente('${id}');closePacSheet()">📂 Ver historial completo</button>
+    <button class="btn btn-primary btn-sm" style="background:#2563a8;width:100%;margin-top:8px" onclick="closePacSheet();hpacAbrirPaciente('${id}')">📂 Ver historial completo</button>
   `;
   // Cargar plan existente si hay
   cargarPlanTratamiento(id);
