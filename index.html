@@ -3998,6 +3998,27 @@ const psicoGuias = [
      pensamientos: ['"¿Cuándo voy a salir de aquí?"', '"Ya no aguanto más este cuarto"', '"Mi familia está cansada de visitarme"', '"¿Y si ya no soy el mismo cuando salga?"'],
    }},
 
+  {id:'miembro-fantasma', prio:'p1', tags:['p1','dolor','neurologia','cirugia','amputacion'], servicio:'Cirugía / Traumatología / Neurología',
+   titulo:'Síndrome del Miembro Fantasma',
+   icono:'🦿', color:'#b45309',
+   objetivo:'Psicoeducación sobre el dolor y las sensaciones del miembro fantasma, normalización de la experiencia, manejo del impacto emocional de la amputación y estrategias de afrontamiento.',
+   contenido:[
+     {t:'¿Qué es el miembro fantasma?', c:'Sensación de que el miembro amputado sigue presente — con dolor, calor, picazón o movimiento. No es alucinación ni "cosa mental". Es una respuesta neurológica real: el cerebro conserva el mapa del miembro y sigue enviando y recibiendo señales.'},
+     {t:'Por qué ocurre', c:'El sistema nervioso central tarda en reorganizarse tras la amputación. Las neuronas que antes procesaban señales del miembro continúan activas. El cerebro interpreta esa actividad como sensaciones del miembro perdido. Es más frecuente en amputaciones traumáticas o en personas con dolor crónico previo.'},
+     {t:'Impacto emocional — lo que no se nombra', c:'Más allá del dolor físico: duelo por el cuerpo, pérdida de identidad y rol, miedo a la dependencia, vergüenza social, rabia, culpa (especialmente en amputaciones por enfermedad prevenible). Explorar sin asumir — cada persona elabora la pérdida a su ritmo.'},
+     {t:'Evaluación psicológica clave', c:'Distinguir entre dolor fantasma (doloroso), sensación fantasma (sin dolor) y telescopía (percepción de que el miembro se acorta). Evaluar: impacto funcional del dolor, comorbilidad depresiva, ansiedad, riesgo suicida, ajuste a la prótesis si aplica, red de apoyo.'},
+     {t:'Intervención — educación como analgesia', c:'Explicar el mecanismo neurológico reduce el miedo y la catastrofización. El paciente que entiende que el dolor es real pero no señal de daño puede abordarlo diferente. Trabajar la distinción entre "mi cuerpo sigue en peligro" vs "mi cerebro está reorganizándose".'},
+     {t:'Terapia de espejo y técnicas complementarias', c:'La terapia de espejo (técnica de retroalimentación visual) tiene evidencia en reducción de dolor fantasma. Relajación progresiva, imaginería guiada y mindfulness del cuerpo también son útiles. Coordinar con fisioterapia y medicina del dolor.'},
+   ],
+   cartilla:{
+     quePasa: 'Lo que sientes es real\n\nSi después de la amputación sientes dolor, calor, picazón o movimiento en la parte del cuerpo que ya no está, no significa que estés "volviendo loco" ni que sea algo imaginario.\n\nEso se llama síndrome del miembro fantasma. Le ocurre a la mayoría de las personas que pasan por una amputación. Es una respuesta real del sistema nervioso — no es psicológico en el sentido de "inventado".',
+     queEs: 'Por qué pasa esto\n\nEl cerebro tiene un "mapa" de todo el cuerpo. Cuando se pierde un miembro, ese mapa no desaparece de inmediato. Las neuronas que antes procesaban las señales de esa parte siguen activas y el cerebro las interpreta como si el miembro todavía estuviera ahí.\n\nEs como cuando un teléfono sigue recibiendo llamadas para alguien que ya se fue. La línea existe — solo que ya no tiene destino.',
+     sintomas: 'Lo que puedes estar sintiendo:\n• Dolor en la parte del cuerpo que ya no está (ardor, calambre, presión)\n• Sensación de calor, frío o picazón\n• Sensación de que el miembro se mueve aunque ya no esté\n• Sensación de que el miembro se va "acortando" con el tiempo\n• Tristeza profunda por la pérdida de esa parte de tu cuerpo\n• Rabia, vergüenza o sensación de que ya no eres el mismo\n• Miedo a lo que viene — la prótesis, el trabajo, la familia, la vida',
+     conexion: 'Lo que sientes en el cuerpo y lo que sientes en el alma van juntos\n\nLa amputación no es solo una pérdida física. Es también una pérdida de la imagen que tenías de ti mismo, de cómo te movías por el mundo, de lo que podías hacer.\n\nEse duelo es real y merece tiempo. No hay que "superarlo rápido" ni fingir que todo está bien.\n\nAl mismo tiempo, hay personas que han pasado por esto y han encontrado formas de vivir bien — no igual que antes, pero bien.',
+     hoy: 'Lo que puedes hacer hoy:\n• Si tienes dolor intenso, cuéntaselo al equipo médico — hay tratamientos específicos para el dolor fantasma.\n• Prueba la respiración lenta cuando el dolor aparezca: inhala 4 segundos, exhala 6 segundos.\n• Si hay un espejo disponible, pregúntale al equipo sobre la terapia de espejo — puede ayudar.\n• Habla de lo que sientes — con el equipo de psicología, con alguien de confianza.\n• No compares tu proceso con el de nadie más. Tu ritmo es válido.',
+     pensamientos: ['"¿Cómo voy a vivir así?"', '"Nadie me va a entender"', '"Esto no tiene solución"', '"¿Por qué me pasó a mí?"'],
+   }},
+
 ];
 window.renderPsicoCards = function(filtro){
   const cont = document.getElementById('psico-cards');
@@ -4242,14 +4263,20 @@ ${pensamientosHTML.length ? `<div class="bloque">
   <div style="font-size:12pt;line-height:1.7;opacity:.95">Lo que estás viviendo es real, es difícil y merece ser reconocido. No tienes que estar "fuerte" todo el tiempo ni fingir que todo está bien. Muchas personas han pasado por este camino y han encontrado formas de adaptarse y seguir conectadas con lo que aman. <strong>Pedir ayuda es un acto de valentía.</strong></div>
 </div>
 
-<!-- familia -->
-<div class="caja" style="background:#f8f9fa;border:1.5px solid #d1d5db;margin-top:0">
-  <div style="font-size:12pt;font-weight:700;color:#374151;margin-bottom:8px">💛 Para familiares y cuidadores</div>
-  <div style="font-size:11.5pt;margin-bottom:5px">✔ Escuche sin minimizar — evite frases como "tú puedes" o "no es para tanto". Simplemente acompañe.</div>
-  <div style="font-size:11.5pt;margin-bottom:5px">✔ Pregunte cómo puede ayudar en lugar de asumir lo que necesita.</div>
-  <div style="font-size:11.5pt;margin-bottom:5px">✔ Cuídese también usted — cuidar a alguien con una enfermedad genera agotamiento emocional.</div>
-  <div style="font-size:11.5pt">✔ Si nota cambios importantes en el estado de ánimo, comuníquelo al equipo de salud.</div>
-</div>
+${(()=>{
+  // Mostrar sección de familia solo si el paciente tiene red de apoyo familiar
+  // o si no hay info específica del paciente (cartilla genérica)
+  const pacObj = (window.pacientes||[]).find(p=>p.nombre===nombre);
+  const sinFamilia = pacObj && pacObj.notas && /sin familia|no tiene familia|vive solo|sin red/i.test(pacObj.notas);
+  if(sinFamilia) return '';
+  return '<div class="caja" style="background:#f8f9fa;border:1.5px solid #d1d5db;margin-top:0">'
+    + '<div style="font-size:12pt;font-weight:700;color:#374151;margin-bottom:8px">💛 Para familiares y cuidadores</div>'
+    + '<div style="font-size:11.5pt;margin-bottom:5px">✔ Escuche sin minimizar — evite frases como &quot;tú puedes&quot; o &quot;no es para tanto&quot;. Simplemente acompañe.</div>'
+    + '<div style="font-size:11.5pt;margin-bottom:5px">✔ Pregunte cómo puede ayudar en lugar de asumir lo que necesita.</div>'
+    + '<div style="font-size:11.5pt;margin-bottom:5px">✔ Cuídese también usted — cuidar a alguien con una enfermedad genera agotamiento emocional.</div>'
+    + '<div style="font-size:11.5pt">✔ Si nota cambios importantes en el estado de ánimo, comuníquelo al equipo de salud.</div>'
+    + '</div>';
+})()}
 
 <!-- footer -->
 <div style="margin-top:14px;padding-top:10px;border-top:1.5px solid #e5e7eb;display:flex;justify-content:space-between;align-items:flex-end;font-size:8.5pt;color:#888">
@@ -4659,7 +4686,7 @@ window.guardarNotaRapida = async function(pacId){
   const fecha = new Date().toISOString().split('T')[0];
   try{
     // Guardar como entrada en interconsultas con modo "Nota rápida"
-    await addDoc(collection(db,'interconsultas'),{
+    await window._addDoc(window._collection(window.db,'interconsultas'),{
       pacienteId: pacId,
       pacienteNombre: p.nombre||'',
       pacienteCedula: p.cedula||'',
@@ -4672,12 +4699,15 @@ window.guardarNotaRapida = async function(pacId){
       resp: '',
       trat: '',
       nota: txt,
-      creado: serverTimestamp()
+      creado: window._serverTimestamp()
     });
     document.getElementById('ps-nota-rapida').value = '';
-    toast('✅ Nota guardada en historial');
+    // Mostrar inmediatamente en cache local antes de que onSnapshot actualice
+    if(!window.interconsultas) window.interconsultas = [];
+    window.interconsultas.unshift({pacienteId:pacId, pacienteNombre:p.nombre||'', modo:'Nota rápida', sub:txt, nota:txt, fecha:fecha});
+    toast('✅ Nota guardada');
     cargarNotasRapidas(pacId);
-  }catch(e){ toast('❌ '+e.message); }
+  }catch(e){ toast('❌ Error al guardar: '+e.message); console.error('guardarNotaRapida error:',e); }
 };
 
 window.cargarNotasRapidas = async function(pacId){
@@ -5318,10 +5348,18 @@ ${pensamientosHTML.length ? '<div class="bloque"><h2 style="margin-bottom:10px">
   <div style="font-size:12pt;font-weight:800;margin-bottom:8px">Un mensaje para ti</div>
   <div style="font-size:12pt;line-height:1.7;opacity:.95">Lo que estás viviendo es real, es difícil y merece ser reconocido. No tienes que estar "fuerte" todo el tiempo ni fingir que todo está bien. Muchas personas han pasado por este camino y han encontrado formas de adaptarse y seguir adelante. <strong>Pedir ayuda es un acto de valentía.</strong></div>
 </div>
-<div class="caja" style="background:#f8f9fa;border:1.5px solid #d1d5db;margin-top:0">
-  <div style="font-size:12pt;font-weight:700;color:#374151;margin-bottom:8px">💛 Para familiares y cuidadores</div>
-  <div style="font-size:11.5pt">${nl2p(a.para_familia)}</div>
-</div>
+${(()=>{
+  const txt = a.para_familia||'';
+  // Si la IA omitió el campo o lo dejó vacío, no mostrar
+  if(!txt || txt.trim().length < 10) return '';
+  // Detectar si la IA adaptó el título para que no sea "familia"
+  const esFamilia = !/cuidador|equipo|enfermería|personal/i.test(txt) || /famili/i.test(txt);
+  const titulo = esFamilia ? '💛 Para familiares y cuidadores' : '💛 Para el equipo y cuidadores';
+  return '<div class="caja" style="background:#f8f9fa;border:1.5px solid #d1d5db;margin-top:0">'
+    + '<div style="font-size:12pt;font-weight:700;color:#374151;margin-bottom:8px">'+titulo+'</div>'
+    + '<div style="font-size:11.5pt">'+nl2p(txt)+'</div>'
+    + '</div>';
+})()}
 <div style="margin-top:14px;padding-top:10px;border-top:1.5px solid #e5e7eb;display:flex;justify-content:space-between;align-items:flex-end;font-size:8.5pt;color:#888">
   <div>Elaborado por el Servicio de Psicología Clínica · ESE Hospital La María · Medellín, Antioquia<br>
   <span style="color:#bbb">Este material es de apoyo educativo y no reemplaza la consulta con su equipo de salud.</span></div>
