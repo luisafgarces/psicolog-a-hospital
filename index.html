@@ -1835,6 +1835,22 @@ input.toggle-cb{display:none}
         <textarea id="ps-nota-rapida" rows="3" placeholder="Información adicional post-sesión, eventos relevantes, comunicaciones del equipo…" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.8rem;resize:vertical;background:var(--surface)"></textarea>
         <div id="ps-notas-historial" style="margin-top:8px;max-height:140px;overflow-y:auto"></div>
       </div>
+
+      <!-- PENDIENTES -->
+      <div style="margin-top:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:0.72rem;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:0.06em">📋 Pendientes</span>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-sm" style="font-size:0.68rem;padding:2px 8px;background:#fef3c7;border:1px solid #fde68a;color:#92400e" onclick="togglePendientesCompletados(window._psPacId)">Ver completados</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <input type="text" id="ps-pendiente-input" placeholder="Nuevo pendiente… ej: Llamar a familiar, Solicitar psiquiatría" style="flex:1;padding:6px 10px;border:1px solid #fde68a;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.8rem;background:#fff;outline:none" onkeydown="if(event.key==='Enter')agregarPendiente(window._psPacId)">
+          <button class="btn btn-sm btn-primary" style="font-size:0.72rem;padding:4px 10px;background:#d97706;border:none;flex-shrink:0" onclick="agregarPendiente(window._psPacId)">+ Agregar</button>
+        </div>
+        <div id="ps-pendientes-lista" style="max-height:180px;overflow-y:auto"></div>
+        <div id="ps-pendientes-completados" style="display:none;margin-top:10px;border-top:1px dashed #fde68a;padding-top:10px"></div>
+      </div>
     </div>
     <div class="pac-sheet-actions" id="ps-actions"></div>
   </div>
@@ -4835,6 +4851,115 @@ window.saveCurrentTest = function(score, level){
   guardarResultadoTest(_currentTest || 'test', score, level, pacNombre, _lastTestInterpretation||level);
 };
 
+
+// ── PENDIENTES DE PACIENTE ────────────────────────────────────────────
+window.agregarPendiente = async function(pacId){
+  if(!pacId) return toast('⚠️ No hay paciente seleccionado');
+  const inp = document.getElementById('ps-pendiente-input');
+  const txt = (inp?.value||'').trim();
+  if(!txt) return toast('⚠️ Escribe el pendiente primero');
+  const p = (window.pacientes||[]).find(x=>x.id===pacId)||{};
+  try{
+    await window._addDoc(window._collection(window.db,'pendientes'),{
+      pacienteId: pacId,
+      pacienteNombre: p.nombre||'',
+      texto: txt,
+      completado: false,
+      fecha: new Date().toISOString().split('T')[0],
+      creado: window._serverTimestamp()
+    });
+    if(inp) inp.value = '';
+    toast('✅ Pendiente agregado');
+    cargarPendientes(pacId);
+  }catch(e){ toast('❌ '+e.message); }
+};
+
+window.togglePendiente = async function(docId, completado, pacId){
+  try{
+    await window._updateDoc(window._doc(window.db,'pendientes',docId),{
+      completado: !completado,
+      fechaCompletado: !completado ? new Date().toISOString().split('T')[0] : null
+    });
+    cargarPendientes(pacId||window._psPacId);
+  }catch(e){ toast('❌ '+e.message); }
+};
+
+window.eliminarPendiente = async function(docId, pacId){
+  if(!confirm('¿Eliminar este pendiente?')) return;
+  try{
+    // Mark as deleted via update (deleteDoc not exposed globally)
+    await window._updateDoc(window._doc(window.db,'pendientes',docId),{completado:true,fechaCompletado:'eliminado'});
+    cargarPendientes(pacId||window._psPacId);
+  }catch(e){ toast('❌ '+e.message); }
+};
+
+window._mostrarCompletados = false;
+window.togglePendientesCompletados = function(pacId){
+  window._mostrarCompletados = !window._mostrarCompletados;
+  const btn = document.querySelector('[onclick*="togglePendientesCompletados"]');
+  if(btn) btn.textContent = window._mostrarCompletados ? 'Ocultar completados' : 'Ver completados';
+  const div = document.getElementById('ps-pendientes-completados');
+  if(div) div.style.display = window._mostrarCompletados ? '' : 'none';
+  if(window._mostrarCompletados) cargarPendientes(pacId||window._psPacId);
+};
+
+window.cargarPendientes = async function(pacId){
+  if(!pacId) return;
+  const lista = document.getElementById('ps-pendientes-lista');
+  const completadosDiv = document.getElementById('ps-pendientes-completados');
+  if(!lista) return;
+
+  try{
+    const snap = await window._getDocs(
+      window._query(
+        window._collection(window.db,'pendientes'),
+        window._where('pacienteId','==',pacId),
+        window._orderBy('creado','desc')
+      )
+    );
+
+    const todos = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const activos = todos.filter(p=>!p.completado);
+    const completados = todos.filter(p=>p.completado);
+
+    // Render activos
+    if(!activos.length){
+      lista.innerHTML = '<p style="font-size:0.72rem;color:#92400e;font-style:italic;opacity:0.7">Sin pendientes activos.</p>';
+    } else {
+      lista.innerHTML = activos.map(p=>`
+        <div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #fde68a">
+          <input type="checkbox" style="margin-top:3px;accent-color:#d97706;flex-shrink:0;width:15px;height:15px;cursor:pointer"
+            onchange="togglePendiente('${p.id}',false,'${pacId}')">
+          <div style="flex:1;font-size:0.8rem;color:#451a03;line-height:1.4">${p.texto}</div>
+          <span style="font-size:0.65rem;color:#92400e;flex-shrink:0">${p.fecha||''}</span>
+        </div>`).join('');
+    }
+
+    // Render completados (solo si visibles)
+    if(window._mostrarCompletados && completadosDiv){
+      if(!completados.length){
+        completadosDiv.innerHTML = '<p style="font-size:0.72rem;color:var(--text3);font-style:italic">Sin completados aún.</p>';
+      } else {
+        completadosDiv.innerHTML = '<div style="font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">✅ Completados</div>' +
+          completados.map(p=>`
+            <div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;opacity:0.6">
+              <input type="checkbox" checked style="margin-top:3px;accent-color:#16a34a;flex-shrink:0;width:15px;height:15px;cursor:pointer"
+                onchange="togglePendiente('${p.id}',true,'${pacId}')">
+              <div style="flex:1;font-size:0.78rem;color:var(--text2);text-decoration:line-through;line-height:1.4">${p.texto}</div>
+              <span style="font-size:0.65rem;color:var(--text3);flex-shrink:0">${p.fechaCompletado||p.fecha||''}</span>
+            </div>`).join('');
+      }
+    }
+
+    // Badge en dashboard: guardar conteo de activos
+    window._pendientesPaciente = window._pendientesPaciente || {};
+    window._pendientesPaciente[pacId] = activos.length;
+
+  }catch(e){
+    lista.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">—</p>';
+  }
+};
+
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
 // ── HISTORIAL IC POR PACIENTE ──
@@ -5472,6 +5597,8 @@ window.abrirPacSheet=async(id)=>{
   // Cargar plan existente si hay
   cargarPlanTratamiento(id);
   cargarNotasRapidas(id);
+  cargarPendientes(id);
+  window._mostrarCompletados=false;
   document.getElementById('pac-sheet-overlay').classList.add('open');
   document.body.style.overflow='hidden';
 };
