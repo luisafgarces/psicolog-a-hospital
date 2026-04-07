@@ -4896,33 +4896,72 @@ window.saveCurrentTest = function(score, level){
 
 // ── PENDIENTES DE PACIENTE ────────────────────────────────────────────
 window.agregarPendientePaciente = async function(pacId){
-  if(!pacId) return toast('⚠️ No hay paciente seleccionado');
+  if(!pacId){ toast('⚠️ No hay paciente seleccionado'); return; }
   const inp = document.getElementById('ps-pendiente-input');
   const txt = (inp?.value||'').trim();
-  if(!txt) return toast('⚠️ Escribe el pendiente primero');
+  if(!txt){ toast('⚠️ Escribe el pendiente primero'); return; }
   const p = (window.pacientes||[]).find(x=>x.id===pacId)||{};
+  const fecha = new Date().toISOString().split('T')[0];
+  // Show immediately in local cache before Firebase
+  if(!window._pendientesCache) window._pendientesCache = {};
+  if(!window._pendientesCache[pacId]) window._pendientesCache[pacId] = [];
+  const tempId = 'temp_'+Date.now();
+  window._pendientesCache[pacId].unshift({id:tempId, texto:txt, completado:false, fecha:fecha});
+  if(inp) inp.value = '';
+  window.renderPendientesDesdeCache(pacId);
   try{
-    await window._addDoc(window._collection(window.db,'pendientes'),{
+    const ref = await window._addDoc(window._collection(window.db,'pendientes'),{
       pacienteId: pacId,
       pacienteNombre: p.nombre||'',
       texto: txt,
       completado: false,
-      fecha: new Date().toISOString().split('T')[0],
+      fecha: fecha,
       creado: window._serverTimestamp()
     });
-    if(inp) inp.value = '';
-    toast('✅ Pendiente agregado');
-    cargarPendientesPaciente(pacId);
-  }catch(e){ toast('❌ '+e.message); }
+    // Replace temp with real id
+    const item = window._pendientesCache[pacId].find(x=>x.id===tempId);
+    if(item) item.id = ref.id;
+    toast('✅ Pendiente guardado');
+  }catch(e){
+    // Remove temp on failure
+    window._pendientesCache[pacId] = window._pendientesCache[pacId].filter(x=>x.id!==tempId);
+    window.renderPendientesDesdeCache(pacId);
+    toast('❌ '+e.message);
+  }
 };
 
-window.togglePendientePaciente = async function(docId, completado, pacId){
+window.renderPendientesDesdeCache = function(pacId){
+  const lista = document.getElementById('ps-pendientes-lista');
+  if(!lista) return;
+  const todos = (window._pendientesCache&&window._pendientesCache[pacId])||[];
+  const activos = todos.filter(p=>!p.completado);
+  if(!activos.length){
+    lista.innerHTML = '<p style="font-size:0.72rem;color:#92400e;font-style:italic;opacity:0.7">Sin pendientes activos.</p>';
+  } else {
+    lista.innerHTML = activos.map(p=>`
+      <div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #fde68a">
+        <input type="checkbox" style="margin-top:3px;accent-color:#d97706;flex-shrink:0;width:15px;height:15px;cursor:pointer"
+          onchange="togglePendientePaciente('${p.id}','${pacId}',this.checked)">
+        <div style="flex:1;font-size:0.8rem;color:#451a03;line-height:1.4">${p.texto}</div>
+        <span style="font-size:0.65rem;color:#92400e;flex-shrink:0">${p.fecha||''}</span>
+      </div>`).join('');
+  }
+};
+
+window.togglePendientePaciente = async function(docId, pacId, checked){
+  // Update cache immediately
+  const pid = pacId||window._psPacId;
+  if(window._pendientesCache&&window._pendientesCache[pid]){
+    const item = window._pendientesCache[pid].find(x=>x.id===docId);
+    if(item){ item.completado=checked; item.fechaCompletado=checked?new Date().toISOString().split('T')[0]:null; }
+  }
+  window.renderPendientesDesdeCache(pid);
   try{
     await window._updateDoc(window._doc(window.db,'pendientes',docId),{
-      completado: !completado,
-      fechaCompletado: !completado ? new Date().toISOString().split('T')[0] : null
+      completado: checked,
+      fechaCompletado: checked ? new Date().toISOString().split('T')[0] : null
     });
-    cargarPendientesPaciente(pacId||window._psPacId);
+    cargarPendientesPaciente(pid);
   }catch(e){ toast('❌ '+e.message); }
 };
 
@@ -4952,15 +4991,20 @@ window.cargarPendientesPaciente = async function(pacId){
   if(!lista) return;
 
   try{
+    // No orderBy to avoid Firestore index requirement — sort in memory
     const snap = await window._getDocs(
       window._query(
         window._collection(window.db,'pendientes'),
-        window._where('pacienteId','==',pacId),
-        window._orderBy('creado','desc')
+        window._where('pacienteId','==',pacId)
       )
     );
+    const todos = snap.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
 
-    const todos = snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Update local cache
+    if(!window._pendientesCache) window._pendientesCache = {};
+    window._pendientesCache[pacId] = todos;
+
     const activos = todos.filter(p=>!p.completado);
     const completados = todos.filter(p=>p.completado);
 
@@ -4971,7 +5015,7 @@ window.cargarPendientesPaciente = async function(pacId){
       lista.innerHTML = activos.map(p=>`
         <div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #fde68a">
           <input type="checkbox" style="margin-top:3px;accent-color:#d97706;flex-shrink:0;width:15px;height:15px;cursor:pointer"
-            onchange="togglePendientePaciente('${p.id}',false,'${pacId}')">
+            onchange="togglePendientePaciente('${p.id}','${pacId}',this.checked)">
           <div style="flex:1;font-size:0.8rem;color:#451a03;line-height:1.4">${p.texto}</div>
           <span style="font-size:0.65rem;color:#92400e;flex-shrink:0">${p.fecha||''}</span>
         </div>`).join('');
