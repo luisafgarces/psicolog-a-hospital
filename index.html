@@ -2089,7 +2089,6 @@ onSnapshot(query(collection(db,'anamnesis'),orderBy('creado','desc')),snap=>{
 onSnapshot(query(collection(db,'test_resultados'),orderBy('creado','desc')),snap=>{
   testHistory=snap.docs.map(d=>({id:d.id,...d.data()}));window.testHistory=testHistory;
   updateStats();
-  if(document.getElementById('page-historial').classList.contains('active'))(window.renderHistorial&&window.renderHistorial)();
   if(document.getElementById('page-dashboard').classList.contains('active'))(window.renderDashboard&&window.renderDashboard)();
   if(document.getElementById('page-historial-pac').classList.contains('active')){(window.hpacRenderLista&&window.hpacRenderLista)();if(window._hpacPacId)hpacRenderNotas();}
 });
@@ -2242,7 +2241,6 @@ window.limpiarCapacidad=()=>{
   ['cap-nombre','cap-edad','cap-hab','cap-dx','cap-decision','cap-solicitante','cap-c1-obs','cap-c2-obs','cap-c3-obs','cap-c4-obs','cap-factores-obs','cap-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['cap-c1','cap-c2','cap-c3','cap-c4','cap-conclusion'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.querySelectorAll('#cap-factores input, #cap-recom input').forEach(cb=>cb.checked=false);
-  document.querySelectorAll('#page-capacidad .risk-btn').forEach(b=>{b.style.background='';b.style.borderColor='';b.style.fontWeight='';});
   const sel=document.getElementById('cap-pac-sel');if(sel)sel.value='';
   document.getElementById('cap-nota-output').textContent='Completa los campos y presiona "Generar nota"…';
   window._capPacienteId=null;
@@ -2901,26 +2899,6 @@ const _fmtDia=(offset)=>{
   const d=new Date();d.setDate(d.getDate()+offset);
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 };
-const _labelDia=(offset)=>{
-  if(offset===0)return'Hoy';
-  if(offset===-1)return'Ayer';
-  if(offset===1)return'Mañana';
-  if(offset===-2)return'Anteayer';
-  const d=new Date();d.setDate(d.getDate()+offset);
-  const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  return dias[d.getDay()]+' '+d.getDate()+' '+meses[d.getMonth()];
-};
-const _fechaLarga=(offset)=>{
-  const d=new Date();d.setDate(d.getDate()+offset);
-  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  return dias[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()]+' de '+d.getFullYear();
-};
-
-window.dashNavDia=()=>{};  // removed — no longer needed
-window.dashNavHoy=()=>{ window._dashMode='dia'; (window.renderDashboard&&window.renderDashboard)(); };
-const _updateNavUI=()=>{};  // removed — handled by renderDashboard
 
 window.setDashMode=(modo)=>{
   window._dashMode=modo;
@@ -2948,15 +2926,6 @@ window.renderDashboard=()=>{
   const hoy=fmt(hoyD);
   const mananaDate=new Date(hoyD);mananaDate.setDate(hoyD.getDate()+1);
   const manana=fmt(mananaDate);
-  // semana actual
-  const diaSemana=hoyD.getDay()===0?7:hoyD.getDay();
-  const lunesD=new Date(hoyD);lunesD.setDate(hoyD.getDate()-(diaSemana-1));
-  const domD=new Date(lunesD);domD.setDate(lunesD.getDate()+6);
-  const semanaIni=fmt(lunesD),semanaFin=fmt(domD);
-  // mes actual
-  const mesIni=`${hoyD.getFullYear()}-${String(hoyD.getMonth()+1).padStart(2,'0')}-01`;
-  const lastDay=new Date(hoyD.getFullYear(),hoyD.getMonth()+1,0);
-  const mesFin=fmt(lastDay);
   const modo=window._dashMode||'dia';
   // Update button styles
   const btnHoy=document.getElementById('btn-hoy-dash');
@@ -4050,8 +4019,7 @@ window.goTo = function(page){
     'consulta-externa': function(){if(window.renderConsultaExterna)window.renderConsultaExterna();else setTimeout(function(){window.renderConsultaExterna&&window.renderConsultaExterna();},300);},
     'dashboard': function(){if(window.renderDashboard)window.renderDashboard();else setTimeout(function(){window.renderDashboard&&window.renderDashboard();},300);},
     'interconsultas': function(){if(window.renderIC)window.renderIC();else setTimeout(function(){window.renderIC&&window.renderIC();},300);},
-    'historial-ic': function(){if(window.renderIC)window.renderIC();else setTimeout(function(){window.renderIC&&window.renderIC();},300);},
-    'historial-pac': function(){setTimeout(function(){window.hpacRenderLista&&window.hpacRenderLista();},100);},
+'historial-pac': function(){setTimeout(function(){window.hpacRenderLista&&window.hpacRenderLista();},100);},
     'psicoeducacion': function(){setTimeout(function(){window.renderPsicoCards&&window.renderPsicoCards('all');},100);}
   };
   if(fn[page]) fn[page]();
@@ -4289,6 +4257,81 @@ window.generarOrientacionIC = async function(){
     toast('❌ Error Gemini: '+e.message);
   }
 }
+
+
+// ── GENERAR NOTA ANAMNESIS CON GEMINI ───────────────────────────────
+window.generarNota = async function(){
+  const apiKey = (typeof getGeminiKey==='function' ? getGeminiKey() : null)
+    || localStorage.getItem('gemini_api_key') || '';
+  if(!apiKey) return toast('⚠️ Configura tu API Key de Gemini primero');
+
+  const v   = id => document.getElementById(id)?.value || '';
+  const rc  = id => getRadio ? getRadio(id)||'—' : '—';
+  const chk = id => window.getChecked ? (window.getChecked(id)||'—') : '—';
+  const out = document.getElementById('nota-output');
+
+  if(out){ out.textContent='⏳ Generando nota con Gemini…'; }
+
+  const datos = [
+    'Paciente: '+v('an-edad')+'a, '+v('an-ecivil')+', '+v('an-ocupacion'),
+    'Motivo de consulta: '+(v('an-motivo')||'no registrado'),
+    'Historia: inicio '+rc('an-inicio')+', evolución '+v('an-evolucion')+', intensidad '+v('an-intens')+'/10',
+    'Síntomas: '+chk('an-sint'),
+    'Desencadenantes: '+chk('an-desenc'),
+    'Impacto: '+chk('an-impacto'),
+    v('an-descripcion') ? 'Descripción: '+v('an-descripcion') : '',
+    'Antecedentes psiq: tto psicológico '+rc('an-tpsi')+', tto psiquiátrico '+rc('an-tpsiq'),
+    'Dx previos: '+chk('an-dx-previos'),
+    'IS previos: '+rc('an-is-prev')+', intentos: '+rc('an-is'),
+    v('an-meds') ? 'Medicación actual: '+v('an-meds') : '',
+    'Red de apoyo: '+rc('an-red'),
+    'Violencia (tamizaje): '+chk('an-violencia'),
+    'Examen mental — Orientación: '+chk('an-orient')+', Afecto: '+chk('an-afecto')+', Pensamiento: '+rc('an-pcurso')+', Insight: '+chk('an-insight'),
+    'Riesgo suicida: '+rc('an-ideacion')+' — Clasificación: '+(v('an-riesgo')||'no clasificado'),
+    'Impresión diagnóstica: '+chk('an-dx')+(v('an-cie') ? ' ('+v('an-cie')+')' : ''),
+    'Plan: '+chk('an-enfoque')+', Remisiones: '+chk('an-remisiones'),
+  ].filter(Boolean).join('\n');
+
+  // Tests del paciente
+  const pacId = document.getElementById('anamnesis-paciente-sel')?.value || null;
+  const pacNombre = v('an-nombre');
+  const testsResumen = getTestsResumenPaciente(pacId, pacNombre);
+
+  // Capacidad decisional
+  const capTexto = getCapInlineTexto('an');
+  const capInstruccion = capTexto && capTexto.trim()
+    ? '\n\nIMPORTANTE: La sección VALORACIÓN DE CAPACIDAD DECISIONAL debe ir al FINAL de la nota, después del PLAN.'
+    + '\n\nINSTRUCCIÓN ADICIONAL: Al final de la nota, después de todas las secciones, agrega una sección llamada "VALORACIÓN DE CAPACIDAD DECISIONAL" y dentro de ella copia EXACTAMENTE este texto, sin modificarlo, sin parafrasearlo, sin resumirlo:\n' + capTexto
+    : '';
+
+  const impresionIA = (document.getElementById('an-impresion-hidden')?.value || '').trim();
+
+  const prompt = 'Eres un psicólogo clínico hospitalario experto con enfoque cognitivo-conductual. '
+    + 'Redacta una NOTA DE ANAMNESIS PSICOLÓGICA HOSPITALARIA completa en texto corrido, sin listas ni viñetas. '
+    + 'No uses el nombre del paciente. Lenguaje técnico-clínico preciso. '
+    + 'La nota debe tener estas secciones en orden: ANÁLISIS SUBJETIVO, ANÁLISIS OBJETIVO, IMPRESIÓN CLÍNICA, PLAN. '
+    + 'Termina con punto final.\n\n'
+    + 'DATOS DEL FORMULARIO:\n' + datos
+    + (testsResumen ? '\n\n' + testsResumen : '')
+    + (impresionIA ? '\n\nIMPRESIÓN DIAGNÓSTICA IA (CIE-11):\n' + impresionIA : '')
+    + capInstruccion;
+
+  try{
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.35, maxOutputTokens:4000}})
+    });
+    const d = await r.json();
+    if(!r.ok||d.error) throw new Error(d.error?.message||'Error API');
+    const texto = (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    if(!texto) throw new Error('Respuesta vacía de Gemini');
+    if(out) out.textContent = texto;
+    toast('✅ Nota generada');
+  }catch(e){
+    if(out) out.textContent = '❌ Error: '+e.message;
+    toast('❌ '+e.message);
+  }
+};
 
 window.generarNota_local=()=>{
   const v=id=>document.getElementById(id)?.value||'';
@@ -5636,6 +5679,10 @@ async function generarNotaIcConGemini(apiKey){
   var dResp=`Tipo respuesta emocional: ${chips('Tipo de respuesta emocional')||'esperable'}. Impresión clínica: ${chips('Impresión clínica')||'respuesta adaptativa'}. Esquema cognitivo: ${chips('Esquema cognitivo predominante')||'no identificado'}.`;
 
   var dTrat=`Intervención: ${chips('Intervención realizada hoy')||'valoración clínica'}. Plan: ${chips('Plan')||'seguimiento'}. Frecuencia: ${chips('Frecuencia de seguimiento')||'según evolución'}. Recomendaciones comunicación: ${chips('Comunicación con el paciente')||'no especificadas'}. Recomendaciones entorno: ${chips('Entorno y condiciones hospitalarias')||'no especificadas'}. Alertas: ${chips('Alertas para reportar a psicología')||'ninguna'}. Notas: ${tratNotas||'ninguna'}.`;
+  // Instrucción para incluir capacidad decisional literal al final de TRATAMIENTO
+  const _capIcInstruccion = _capTextoIC && _capTextoIC.trim()
+    ? '\n\nINSTRUCCIÓN FINAL OBLIGATORIA: Después del párrafo de tratamiento, agrega una sección llamada "VALORACIÓN DE CAPACIDAD DECISIONAL" y copia EXACTAMENTE este texto sin modificarlo:\n' + _capTextoIC
+    : '';
 
   // Mostrar carga
   ['ic-out-sub','ic-out-obj','ic-out-resp','ic-out-trat'].forEach(function(id){
@@ -5697,7 +5744,7 @@ async function generarNotaIcConGemini(apiKey){
     '"Se realizó escucha activa, validación emocional y exploración de factores protectores. Se da alta de psicología. '+
     'Se recomienda al equipo monitorizar el estado anímico y alertar a psicología ante cambios conductuales o expresiones de desesperanza."'+
     '\n\nEscribe el TRATAMIENTO: intervención realizada hoy y plan. NO repitas la impresión diagnóstica ni datos clínicos previos. '+
-    'Solo lo que se hizo y lo que sigue. Datos:\n'+dTrat;
+    'Solo lo que se hizo y lo que sigue. Datos:\n'+dTrat+_capIcInstruccion;
 
   try{
     var [sub,obj,res,tra]=await Promise.all([
@@ -5950,7 +5997,13 @@ ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
     'No se identifican distorsiones cognitivas predominantes ni ideación suicida activa. Riesgo suicida: BAJO. '+
     'Se realizó intervención de contención emocional y psicoeducación sobre el proceso de hospitalización. '+
     'Continúa en seguimiento activo por psicología; se recomienda al equipo alertar ante cambios conductuales o expresiones de desesperanza."'+
-    '\n\nAHORA escribe la nota de seguimiento con ese estilo, usando solo estos datos reales — no inventes ni generalices:\n\n'+datos;
+    '\n\nAHORA escribe la nota de seguimiento con ese estilo, usando solo estos datos reales — no inventes ni generalices:\n\n'+datos
+    + (function(){
+        var _capSeg=(typeof getCapInlineTexto==='function')?getCapInlineTexto('ic'):'';
+        return (_capSeg&&_capSeg.trim())
+          ?'\n\nINSTRUCCIÓN FINAL OBLIGATORIA: Al final de la nota, agrega una sección llamada "VALORACIÓN DE CAPACIDAD DECISIONAL" y copia EXACTAMENTE este texto sin modificarlo:\n'+_capSeg
+          :'';
+      })();
 
   console.log('[SEG] datos enviados a Gemini:', datos.slice(0,600));
   // Mostrar carga
