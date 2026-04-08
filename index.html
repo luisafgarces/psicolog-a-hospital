@@ -2275,9 +2275,15 @@ const app = initializeApp({
   appId:"1:641640192728:web:14a1d4074e2a6fa6e3d5ad"
 });
 // Activar persistencia offline multi-tab (iPhone + PC comparten cola via Firebase)
-const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
-});
+let db;
+try {
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
+  });
+} catch(e) {
+  console.warn('[Firebase] persistentLocalCache no disponible, usando memoria:', e.message);
+  db = getFirestore(app);
+}
 window.db=db;
 window._updateDoc=updateDoc;
 window._doc=doc;
@@ -2883,7 +2889,7 @@ window.guardarICFirebase=async()=>{
       // Generar nota con Gemini si hay API key, y esperar el resultado antes de guardar
       const apiKey=getGeminiKey();
       if(apiKey){
-        try{await generarSegConGemini(apiKey);}catch(e){}
+        try{await generarSegConGemini(apiKey);}catch(e){console.warn('[SAVE] generarSegConGemini error:',e);}
       }
       const elSeg=document.getElementById('ic-out-seg-texto');
       const vSeg=(elSeg?.textContent||'').trim();
@@ -7665,13 +7671,8 @@ ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
   if(wrap){wrap.style.display='';wrap.scrollIntoView({behavior:'smooth',block:'start'});}
 
   try{
-    var resp=await window.geminiCall(apiKey, prompt, 4000);
-    var data=await resp.json();
-    console.log('[SEG] Gemini full response:', JSON.stringify(data).slice(0,800));
-    if(!resp.ok||data.error)throw new Error(data.error?.message||'Error de API');
-    var candidate=data.candidates?.[0];
-    console.log('[SEG] finishReason:', candidate?.finishReason, '| texto length:', candidate?.content?.parts?.[0]?.text?.length);
-    var texto=(candidate?.content?.parts?.[0]?.text||'').trim();
+    var texto=await window.geminiCall(apiKey, prompt, 4000);
+    console.log('[SEG] Gemini respuesta length:', texto?.length);
     if(!texto)throw new Error('Respuesta vacía de Gemini');
     setIcOut('ic-out-seg-texto',texto);
   }catch(e){
