@@ -2887,7 +2887,7 @@ window.guardarICFirebase=async()=>{
     }
     else if(window.icCurrentMode==='seg'){
       // Generar nota con Gemini si hay API key, y esperar el resultado antes de guardar
-      const apiKey=getGeminiKey();
+      const apiKey=(typeof window.getGeminiKey==='function'?window.getGeminiKey():'')||localStorage.getItem('gemini_api_key')||'';
       if(apiKey){
         try{await generarSegConGemini(apiKey);}catch(e){console.warn('[SAVE] generarSegConGemini error:',e);}
       }
@@ -3110,6 +3110,7 @@ window.guardarICFirebase=async()=>{
     }catch(e){console.warn('Backup localStorage error:',e);}
   }
   try{
+    if(!db)throw new Error('Base de datos no inicializada — recarga la página');
     await addDoc(collection(db,'interconsultas'),{
       pacienteId:pacObj?.id||pacId||null,
       pacienteNombre:nombre,
@@ -7199,7 +7200,7 @@ function icList(arr){
   return arr.slice(0,-1).join(', ')+' y '+arr[arr.length-1];
 }
 
-function getGeminiKey(){
+window.getGeminiKey = function getGeminiKey(){
   // Lee API key de Anthropic (o Gemini como fallback)
   var ids=['gemini-api-key','an-gemini-key'];
   var fromDom='';
