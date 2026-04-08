@@ -2856,7 +2856,7 @@ window.guardarICFirebase=async()=>{
   // Capturar nota generada si existe
   let notaTexto='';
   try{
-    if(icCurrentMode==='nueva'){
+    if(window.icCurrentMode==='nueva'){
       // Leer SOLO lo que está visible en pantalla (generado por Gemini)
       // NUNCA llamar generarNotaIcNueva() aquí — sobreescribe la nota IA
       const PLACEHOLDER=['Genera la nota','⏳','❌','N/A'];
@@ -2879,7 +2879,7 @@ window.guardarICFirebase=async()=>{
       // Si no hay NADA de IA, guardar mensaje indicativo en vez de nota genérica
       if(!notaTexto) notaTexto='[Nota no generada — completar con IA antes de guardar]';
     }
-    else if(icCurrentMode==='seg'){
+    else if(window.icCurrentMode==='seg'){
       // Generar nota con Gemini si hay API key, y esperar el resultado antes de guardar
       const apiKey=getGeminiKey();
       if(apiKey){
@@ -2907,7 +2907,7 @@ window.guardarICFirebase=async()=>{
         notaTexto=partes.join(' | ')||'Seguimiento psicológico realizado. Ver formulario para detalles.';
       }
     }
-    else if(icCurrentMode==='esp'){
+    else if(window.icCurrentMode==='esp'){
       generarNotaIcEsp();
       const el=document.getElementById('ic-esp-text');
       notaTexto=(el?.textContent||'').trim();
@@ -2916,10 +2916,10 @@ window.guardarICFirebase=async()=>{
   setSyncStatus('syncing');
   let sub='',obj='',resp='',trat='';
   try{
-    if(icCurrentMode==='nueva'){
+    if(window.icCurrentMode==='nueva'){
       const gs=t=>{const el=document.getElementById(t);if(!el)return'';const v=el.textContent||'';return v.startsWith('Genera')?'':v;};
       sub=gs('ic-out-sub');obj=gs('ic-out-obj');resp=gs('ic-out-resp');trat=gs('ic-out-trat');
-    } else if(icCurrentMode==='seg'){
+    } else if(window.icCurrentMode==='seg'){
       // Primero intentar usar la nota generada por IA
       const elIA=document.getElementById('ic-out-seg-texto');
       const vIA=elIA?(elIA.textContent||'').trim():'';
@@ -3047,14 +3047,14 @@ window.guardarICFirebase=async()=>{
         if(proxCita)partesTrat.push('Próxima cita: '+proxCita);
         trat=partesTrat.join('\n');
       }
-    } else if(icCurrentMode==='esp'){
+    } else if(window.icCurrentMode==='esp'){
       // solo en nota para evitar duplicado al renderizar
     }
   }catch(ex){console.error('Error capturando datos de seguimiento:',ex);}
   // Capturar SIEMPRE todos los campos del formulario — independiente de si hay nota IA o no
-  const sinNotaIA=!sub&&!obj&&!resp&&!trat&&icCurrentMode==='nueva';
+  const sinNotaIA=!sub&&!obj&&!resp&&!trat&&window.icCurrentMode==='nueva';
   const needsAI=sinNotaIA;
-  const formulario=icCurrentMode==='nueva'?{
+  const formulario=window.icCurrentMode==='nueva'?{
     edad:icv('ic-edad'),sexo:icv('ic-sexo'),dx:dx,hab:hab,riesgo:riesgo,
     sub:{
       emoc:icChipsBySubLabel('Estado emocional referido').join(', '),
@@ -3093,7 +3093,7 @@ window.guardarICFirebase=async()=>{
   if(sinNotaIA&&_aiFormSnap){
     try{
       const bkKey='ic_backup_'+Date.now();
-      const bkData={key:bkKey,nombre,fecha,dx,riesgo,modo:icCurrentMode==='nueva'?'IC Nueva':'Seguimiento',_aiFormSnap,guardado:new Date().toISOString()};
+      const bkData={key:bkKey,nombre,fecha,dx,riesgo,modo:window.icCurrentMode==='nueva'?'IC Nueva':'Seguimiento',_aiFormSnap,guardado:new Date().toISOString()};
       localStorage.setItem(bkKey,JSON.stringify(bkData));
       // Guardar lista de backups
       const bkList=JSON.parse(localStorage.getItem('ic_backups')||'[]');
@@ -3109,7 +3109,7 @@ window.guardarICFirebase=async()=>{
       pacienteNombre:nombre,
       pacienteCedula:pacObj?.cedula||'',
       hab,edad,dx,riesgo,
-      modo:icCurrentMode==='nueva'?'IC Nueva':icCurrentMode==='seg'?'Seguimiento':icCurrentMode==='fam'?'Intervención Familiar':'Nota especial',
+      modo:window.icCurrentMode==='nueva'?'IC Nueva':window.icCurrentMode==='seg'?'Seguimiento':window.icCurrentMode==='fam'?'Intervención Familiar':'Nota especial',
       fecha,nota:notaTexto,sub,obj,resp,trat,
       estado:'respondida',
       needsAI:needsAI||false,
@@ -3128,7 +3128,7 @@ window.guardarICFirebase=async()=>{
       try{const bkList=JSON.parse(localStorage.getItem('ic_backups')||'[]');if(bkList.length){const last=bkList[bkList.length-1];localStorage.removeItem(last);localStorage.setItem('ic_backups',JSON.stringify(bkList.slice(0,-1)));}}catch(e){}
       setTimeout(()=>limpiarFormIC(false),300);
     }
-  }catch(e){setSyncStatus('offline');let _em=e.message||'Error';if(_em.includes('permission-denied')||_em.includes('Missing or insufficient permissions'))_em='Sin permisos en Firestore — revisa Database → Rules en tu consola Firebase';else if(_em.includes('unavailable')||_em.includes('network'))_em='Sin conexión a Firebase';else if(_em.includes('not-found'))_em='Proyecto Firebase no encontrado';toast('❌ '+_em);console.error('[Firebase IC]',e);}
+  }catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
 };
 
 window.guardarAnamnesis=async()=>{
@@ -6404,7 +6404,6 @@ window.geminiCall = async function(apiKey, prompt, maxTokens){
       const d = await r.json();
       if(!r.ok || d.error){
         const msg = d.error?.message||'Error API';
-        // Si el modelo no está disponible o hay sobrecarga, intentar el siguiente
         if(msg.toLowerCase().includes('demand') || msg.toLowerCase().includes('overload')
            || msg.toLowerCase().includes('no longer available') || msg.toLowerCase().includes('deprecated')
            || r.status===503 || r.status===429 || r.status===404){
@@ -7089,11 +7088,16 @@ window.closePacSheet=(e)=>{
 };
 
 // ── IC ENRIQUECIDA ────────────────────────────────────────────
-let icCurrentMode='nueva';
-let icCurrentEsp=null;
+// BUGFIX: usar window.icCurrentMode para que sea visible desde <script type="module">
+// Un módulo ES6 tiene scope aislado y no puede leer let/var de scripts normales.
+window.icCurrentMode='nueva';
+var icCurrentMode=window.icCurrentMode; // alias local para compatibilidad
+window.icCurrentEsp=null;
+var icCurrentEsp=null;
 
 window.setICMode=function(m){
   icCurrentMode=m;
+  window.icCurrentMode=m; // mantener window sincronizado
   ['nueva','seg','esp','fam'].forEach(function(x){
     var el=document.getElementById('ic-btn-'+x);
     if(el)el.classList.toggle('active',x===m);
