@@ -3136,6 +3136,35 @@ window.guardarAnamnesis=async()=>{
   const nota=notaValida?notaIA:notaLocal;
   setSyncStatus('syncing');
   try{
+    const anForm={
+      nombre:document.getElementById('an-nombre')?.value||'',
+      cedula:document.getElementById('an-cedula')?.value||'',
+      edad:document.getElementById('an-edad')?.value||'',
+      ecivil:document.getElementById('an-ecivil')?.value||'',
+      ocupacion:document.getElementById('an-ocupacion')?.value||'',
+      motivo:document.getElementById('an-motivo')?.value||'',
+      evolucion:document.getElementById('an-evolucion')?.value||'',
+      intens:document.getElementById('an-intens')?.value||'',
+      descripcion:document.getElementById('an-descripcion')?.value||'',
+      desenc:window.getChecked?.('an-desenc')||'',
+      sint:window.getChecked?.('an-sint')||'',
+      impacto:window.getChecked?.('an-impacto')||'',
+      riesgo:document.getElementById('an-riesgo')?.value||'',
+      riesgoNotas:document.getElementById('an-riesgo-notas')?.value||'',
+      ideacion:window.getRadio?.('an-ideacion')||'',
+      meds:document.getElementById('an-meds')?.value||'',
+      enf:document.getElementById('an-enf')?.value||'',
+      dx:window.getChecked?.('an-dx')||'',
+      cie:document.getElementById('an-cie')?.value||'',
+      dxObs:document.getElementById('an-dx-obs')?.value||'',
+      orient:window.getChecked?.('an-orient')||'',
+      afecto:window.getChecked?.('an-afecto')||'',
+      pcurso:window.getRadio?.('an-pcurso')||'',
+      insight:window.getChecked?.('an-insight')||'',
+      enfoque:window.getChecked?.('an-enfoque')||'',
+      remisiones:window.getChecked?.('an-remisiones')||'',
+      proxcita:document.getElementById('an-proxcita')?.value||''
+    };
     await addDoc(collection(db,'anamnesis'),{
       pacienteId:document.getElementById('anamnesis-paciente-sel').value||null,
       pacienteNombre:nombre,
@@ -3145,6 +3174,7 @@ window.guardarAnamnesis=async()=>{
       dx:window.getChecked('an-dx'),
       nota,
       modo:'Anamnesis',
+      formulario:anForm,
       ...(getCapInlineData('an')||{}),
       creado:serverTimestamp()
     });
@@ -6163,6 +6193,203 @@ window.calcDiasModal = function(){
   else label.textContent = 'Lleva ' + d + ' días hospitalizado';
 };
 
+
+// ── DESCARGAR FORMULARIO DILIGENCIADO ────────────────────────────────
+window.descargarFormIC = function(docId){
+  const all = [...(window.interconsultas||[]), ...(window.anamnesisList||[])];
+  const e = all.find(x=>x.id===docId);
+  if(!e) return toast('⚠️ No se encontró la nota');
+
+  const fd = e._aiFormSnap || e.formulario || {};
+  const fecha = e.fecha || '—';
+  const modo = e.modo || 'IC';
+  const nombre = e.pacienteNombre || '—';
+  const hab = e.hab || '—';
+  const dx = e.dx || (fd.dx) || '—';
+  const riesgo = e.riesgo || (fd.riesgo) || '—';
+
+  const row = (l,v) => (v&&String(v).trim()&&v!=='—')
+    ? '<tr><td style="font-weight:600;color:#374151;padding:5px 10px;border:1px solid #e5e7eb;white-space:nowrap;background:#f9fafb;font-size:10.5pt;width:35%">'+l+'</td>'
+      +'<td style="padding:5px 10px;border:1px solid #e5e7eb;font-size:10.5pt;line-height:1.5">'+String(v)+'</td></tr>'
+    : '';
+
+  const sec = (titulo, filas) => filas.trim()
+    ? '<tr><td colspan="2" style="background:#1e3a5f;color:#fff;font-weight:700;padding:7px 10px;font-size:9.5pt;letter-spacing:0.05em;text-transform:uppercase">'+titulo+'</td></tr>'+filas
+    : '';
+
+  let filas = '';
+
+  // ── DATOS COMUNES ──
+  filas += sec('Datos del paciente',
+    row('Paciente', nombre) +
+    row('Habitación', hab) +
+    row('Fecha', fecha) +
+    row('Modo', modo) +
+    row('Diagnóstico médico', dx) +
+    row('Riesgo suicida', riesgo)
+  );
+
+  // ── IC NUEVA ──
+  if(modo==='IC Nueva'){
+    const sub = fd.sub||{};
+    const obj = fd.obj||{};
+    const resp = fd.resp||{};
+    const trat = fd.trat||{};
+
+    filas += sec('Motivo de interconsulta',
+      row('Pedido del médico', e.motivoMedico||fd.motivoMedico) +
+      row('Urgencia', fd.urgencia) +
+      row('Pregunta específica', fd.preguntaIC)
+    );
+    filas += sec('Contexto médico',
+      row('Tipo hospitalización', fd.tipoHosp) +
+      row('Evento crítico', fd.eventoCritico) +
+      row('Días internado', fd.diasInternacion) +
+      row('Inicio/evolución', fd.inicioEvolucion)
+    );
+    filas += sec('Análisis subjetivo',
+      row('Estado emocional', sub.emoc) +
+      row('Preocupaciones', sub.preoc) +
+      row('Pensamientos automáticos', sub.pens) +
+      row('Intensidad malestar', sub.intensidad) +
+      row('Cita textual', sub.cita) +
+      row('Conductas de evitación', sub.evitacion) +
+      row('Activación conductual', sub.activacion) +
+      row('Adherencia', sub.adherencia)
+    );
+    filas += sec('Examen mental',
+      row('Orientación', obj.orient) +
+      row('Conciencia', obj.conc) +
+      row('Conducta', obj.conducta) +
+      row('Afecto', obj.afecto) +
+      row('Pensamiento', obj.pens) +
+      row('Insight', obj.insight) +
+      row('Regulación emocional', obj.regulacion) +
+      row('Ideación suicida', obj.ideacion) +
+      row('Factores protectores', obj.protectores) +
+      row('Análisis clínico', obj.notasRiesgo||obj.analisisCC)
+    );
+    filas += sec('Impresión diagnóstica',
+      row('Tipo de respuesta', resp.tipoResp) +
+      row('Impresión clínica', resp.impresion) +
+      row('Diagnóstico (IA)', resp.impresionIA||resp.sintomasDx)
+    );
+    filas += sec('Intervención y plan',
+      row('Intervención realizada', trat.interv) +
+      row('Respuesta al médico', trat.respMedico) +
+      row('Plan', trat.plan) +
+      row('Seguimiento', trat.freq||trat.seguimiento) +
+      row('Notas', trat.notas)
+    );
+  }
+
+  // ── SEGUIMIENTO ──
+  else if(modo==='Seguimiento'){
+    filas += sec('Estado emocional referido',
+      row('Estado emocional', fd.sub?.emoc||fd.estadoEmoc) +
+      row('Preocupaciones', fd.sub?.preoc||fd.preocupaciones) +
+      row('Pensamientos automáticos', fd.sub?.pens||fd.pensamientoAut) +
+      row('Cita textual', fd.sub?.cita||fd.citaTextual) +
+      row('Intensidad', fd.sub?.intensidad||fd.intensidad)
+    );
+    filas += sec('Examen mental',
+      row('Orientación', fd.obj?.orient||fd.orientacion) +
+      row('Afecto', fd.obj?.afecto||fd.afecto) +
+      row('Pensamiento', fd.obj?.pens||fd.pensamiento) +
+      row('Insight', fd.obj?.insight) +
+      row('Regulación emocional', fd.obj?.regulacion||fd.regulacion) +
+      row('Ideación suicida', fd.obj?.ideacion) +
+      row('Factores protectores', fd.obj?.protectores)
+    );
+    filas += sec('Respuesta / Plan',
+      row('Impresión clínica', fd.resp?.impresion||fd.impresion) +
+      row('Intervención', fd.trat?.interv||fd.intervencion) +
+      row('Plan', fd.trat?.plan||fd.plan) +
+      row('Seguimiento', fd.trat?.freq||fd.frecuencia) +
+      row('Riesgo suicida', fd.riesgo||riesgo)
+    );
+  }
+
+  // ── ANAMNESIS ──
+  else if(modo==='Anamnesis'){
+    filas += sec('Datos de identificación',
+      row('Nombre', fd.nombre||nombre) +
+      row('Cédula', fd.cedula||e.pacienteCedula) +
+      row('Edad', fd.edad) +
+      row('Estado civil', fd.ecivil) +
+      row('Ocupación', fd.ocupacion)
+    );
+    filas += sec('Motivo de consulta',
+      row('Motivo', fd.motivo)
+    );
+    filas += sec('Historia del problema actual',
+      row('Evolución', fd.evolucion) +
+      row('Intensidad', fd.intens) +
+      row('Desencadenantes', fd.desenc) +
+      row('Síntomas', fd.sint) +
+      row('Impacto funcional', fd.impacto) +
+      row('Descripción', fd.descripcion)
+    );
+    filas += sec('Examen mental',
+      row('Orientación', fd.orient) +
+      row('Afecto', fd.afecto) +
+      row('Curso del pensamiento', fd.pcurso) +
+      row('Insight', fd.insight)
+    );
+    filas += sec('Riesgo suicida',
+      row('Ideación', fd.ideacion) +
+      row('Clasificación', fd.riesgo||riesgo) +
+      row('Notas de riesgo', fd.riesgoNotas)
+    );
+    filas += sec('Impresión diagnóstica',
+      row('Diagnóstico', fd.dx||dx) +
+      row('Código CIE', fd.cie) +
+      row('Observaciones', fd.dxObs)
+    );
+    filas += sec('Plan terapéutico',
+      row('Enfoque', fd.enfoque) +
+      row('Remisiones', fd.remisiones) +
+      row('Próxima cita', fd.proxcita)
+    );
+    if(fd.meds) filas += sec('Medicación', row('Medicación actual', fd.meds));
+  }
+
+  // ── NOTA GENERADA ──
+  const notaTexto = (e.sub&&e.obj)
+    ? ['ANÁLISIS SUBJETIVO\n'+e.sub, 'ANÁLISIS OBJETIVO\n'+e.obj,
+       e.resp&&'RESPUESTA\n'+e.resp, e.trat&&'TRATAMIENTO\n'+e.trat]
+        .filter(Boolean).join('\n\n')
+    : (e.nota||'');
+
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<title>${modo} — ${nombre} — ${fecha}</title>
+<style>
+  @page{size:letter;margin:15mm}
+  body{font-family:'Segoe UI',Arial,sans-serif;font-size:11pt;color:#111;margin:0;padding:0}
+  table{width:100%;border-collapse:collapse;margin-bottom:16px}
+  h1{font-size:15pt;color:#1e3a5f;margin:0 0 4px}
+  .sub{font-size:9pt;color:#666;margin-bottom:16px}
+  .nota{background:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;padding:12px;font-size:10.5pt;white-space:pre-wrap;line-height:1.6;margin-bottom:16px}
+  .nota-title{font-size:9pt;font-weight:700;text-transform:uppercase;color:#475569;margin-bottom:6px}
+  .footer{margin-top:20px;border-top:1px solid #e5e7eb;padding-top:8px;font-size:8pt;color:#9ca3af;text-align:center}
+  @media print{.barra{display:none}}
+</style></head><body>
+<div class="barra" style="background:#1e3a5f;color:#fff;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:16px">
+  <span>📋 ${modo} — ${nombre}</span>
+  <button onclick="window.print()" style="background:#2563a8;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px">🖨️ Imprimir / Guardar PDF</button>
+</div>
+<h1>Formulario de ${modo}</h1>
+<div class="sub">ESE Hospital La María · Psicología Hospitalaria · ${fecha}</div>
+<table>${filas}</table>
+${notaTexto?'<div class="nota-title">📄 Nota clínica generada</div><div class="nota">'+notaTexto+'</div>':''}
+<div class="footer">ESE Hospital La María · Medellín · Documento generado por PsicoHosp</div>
+</body></html>`;
+
+  const w = window.open('','_blank','width=820,height=1000,scrollbars=yes');
+  if(w){ w.document.write(html); w.document.close(); }
+  else toast('⚠️ Activa ventanas emergentes para imprimir');
+};
+
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
 // ── HISTORIAL IC POR PACIENTE ──
@@ -6252,6 +6479,8 @@ function mhicRender(){
     const esModoConIA2=(e.modo==='IC Nueva'||e.modo==='Seguimiento'||e.modo==='Anamnesis');
     const regenBtn=esModoConIA2?'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem;opacity:0.85" onclick="hpacGenerarNotaIA(\'' + e.id + '\','+ni+')" title="Regenerar con IA">✨ IA</button>':'';
     const editarBtn='<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="mhicEditar('+ni+')">Editar</button>';
+    const hasForm=!!(e._aiFormSnap||e.formulario||e.nota||e.sub);
+    const formBtn=hasForm?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="descargarFormIC(\'' + e.id + '\')" title="Descargar formulario diligenciado">📥 Formulario</button>':'';
     const subInfo=(e.hab||e.dx)?'<div style="font-size:0.72rem;color:var(--text3);margin-top:2px">'+(e.hab?'Hab. '+e.hab+' - ':'')+( e.dx||'')+'</div>':'';
     let camposHtml='<div style="font-size:0.78rem;color:var(--text3);font-style:italic;margin-top:8px">Sin texto guardado</div>';
     const cv=[];
@@ -6275,7 +6504,7 @@ function mhicRender(){
     partes.push('<div style="background:var(--surface2);border:1px solid var(--border);border-left:4px solid '+col+';border-radius:10px;padding:14px 16px;margin-bottom:12px">'
       +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">'
       +'<div><div style="font-weight:700;font-size:0.88rem">'+(e.modo||'Nota')+' - '+'<span style="color:'+col+'">'+(e.fecha||'Sin fecha')+'</span></div>'+subInfo+'</div>'
-      +'<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">'+rBadgeHtml+respondidaBtn+regenBtn+editarBtn+'</div>'
+      +'<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">'+rBadgeHtml+respondidaBtn+regenBtn+formBtn+editarBtn+'</div>'
       +'</div>'+camposHtml+'</div>');
   }
   body.innerHTML=partes.join('');
