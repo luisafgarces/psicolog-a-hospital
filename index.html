@@ -2221,9 +2221,9 @@ input.toggle-cb{display:none}
       <div class="form-group full"><label>Tratamiento médico actual</label><textarea id="p-trat-medico" rows="2" placeholder="Ej: Quimioterapia ciclo 3, Morfina 10mg c/8h, O2 suplementario…"></textarea></div>
       <div class="form-group full"><label>Prioridad de la interconsulta</label>
         <div id="p-prioridad-btns" style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
-          <button type="button" class="risk-btn" data-val="REGULAR" style="color:var(--text2);border-color:#6b7280" onclick="window.setPPrioridad('REGULAR',this)">🟢 REGULAR</button>
-          <button type="button" class="risk-btn" data-val="PRIORITARIA" style="color:#d97706;border-color:#d97706" onclick="window.setPPrioridad('PRIORITARIA',this)">🟡 PRIORITARIA</button>
-          <button type="button" class="risk-btn" data-val="URGENTE" style="color:#dc2626;border-color:#dc2626" onclick="window.setPPrioridad('URGENTE',this)">🔴 URGENTE</button>
+          <button type="button" class="risk-btn" data-val="REGULAR" style="color:var(--text2);border-color:#6b7280">🟢 REGULAR</button>
+          <button type="button" class="risk-btn" data-val="PRIORITARIA" style="color:#d97706;border-color:#d97706">🟡 PRIORITARIA</button>
+          <button type="button" class="risk-btn" data-val="URGENTE" style="color:#dc2626;border-color:#dc2626">🔴 URGENTE</button>
         </div>
         <input type="hidden" id="p-prioridad" value="">
       </div>
@@ -2436,39 +2436,37 @@ onSnapshot(query(collection(db,'capacidad_decisional'),orderBy('creado','desc'))
 });
 
 window.guardarPaciente=async()=>{
-  const nombre=document.getElementById('p-nombre').value.trim(),cedula=document.getElementById('p-cedula').value.trim();
+  const gv=id=>(document.getElementById(id)||{}).value||'';
+  const nombre=gv('p-nombre').trim(), cedula=gv('p-cedula').trim();
   if(!nombre||!cedula)return toast('⚠️ Nombre y cédula son obligatorios');
-  // Verificar duplicado
   const dup=pacientes.find(p=>p.cedula===cedula);
   if(dup){
-    if(!confirm(`⚠️ PACIENTE YA REGISTRADO\n\nYa existe un paciente con la cédula ${cedula}:\n"${dup.nombre}"\n\n¿Deseas editarlo en vez de crear uno nuevo?`))return;
-    // Abrir edición del existente
+    if(!confirm('⚠️ Ya existe un paciente con esa cédula: "'+dup.nombre+'". ¿Deseas editarlo?'))return;
     editarPaciente(dup.id);return;
   }
   const dupNombre=pacientes.find(p=>p.nombre.toLowerCase()===nombre.toLowerCase());
   if(dupNombre){
-    if(!confirm(`⚠️ NOMBRE SIMILAR\n\nYa existe un paciente con nombre "${dupNombre.nombre}" (CC: ${dupNombre.cedula}).\n\n¿Confirmas que es un paciente diferente y deseas continuar?`))return;
+    if(!confirm('⚠️ Nombre similar: "'+dupNombre.nombre+'" (CC: '+dupNombre.cedula+'). ¿Es un paciente diferente?'))return;
   }
   setSyncStatus('syncing');
   try{
     await addDoc(collection(db,'pacientes'),{
-      nombre,cedula,
-      edad:document.getElementById('p-edad').value,
-      sexo:document.getElementById('p-sexo').value,
-      fecha:document.getElementById('p-fecha').value,
-      hab:document.getElementById('p-hab').value,
-      motivo:document.getElementById('p-motivo').value,
-      tipo:document.getElementById('p-tipo').value||'hospitalizado',
-      estado:document.getElementById('p-estado').value||'seguimiento',
-      proxSesion:document.getElementById('p-proxsesion').value,
-      notas:document.getElementById('p-notas').value,
-      tratMedico:document.getElementById('p-trat-medico').value,
-      fechaIC:document.getElementById('p-fecha-ic').value,
-      prioridad:document.getElementById('p-prioridad').value,
+      nombre, cedula,
+      edad:gv('p-edad'), sexo:gv('p-sexo'),
+      fecha:gv('p-fecha'), hab:gv('p-hab'),
+      motivo:gv('p-motivo'),
+      tipo:gv('p-tipo')||'hospitalizado',
+      estado:gv('p-estado')||'seguimiento',
+      proxSesion:gv('p-proxsesion'),
+      notas:gv('p-notas'),
+      tratMedico:gv('p-trat-medico'),
+      fechaIC:gv('p-fecha-ic'),
+      prioridad:gv('p-prioridad'),
       creado:serverTimestamp()
     });
-    closeModal('modal-paciente');toast('✅ Paciente registrado');
-    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad'].forEach(id=>document.getElementById(id).value='');
+    closeModal('modal-paciente');
+    toast('✅ Paciente registrado');
+    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.querySelectorAll('#p-prioridad-btns .risk-btn').forEach(b=>b.classList.remove('sel'));
   }
   catch(e){setSyncStatus('offline');toast('❌ Error: '+e.message);}
@@ -8243,6 +8241,18 @@ window.calcPCL5=()=>{
 
 // ── INIT ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
+  // Wire prioridad buttons via event delegation (avoids inline onclick issues)
+  const prioWrap = document.getElementById('p-prioridad-btns');
+  if(prioWrap){
+    prioWrap.addEventListener('click', function(e){
+      const btn = e.target.closest('.risk-btn[data-val]');
+      if(!btn) return;
+      prioWrap.querySelectorAll('.risk-btn').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+      const h = document.getElementById('p-prioridad');
+      if(h) h.value = btn.dataset.val;
+    });
+  }
   // Tests now render on demand when selected — no pre-render needed
   renderPCL5Questions && null; // no-op, handled by showTest
   try{document.getElementById('an-fecha').value=new Date().toISOString().split('T')[0];}catch(e){}
