@@ -6793,6 +6793,7 @@ window.abrirPacSheet=async(id)=>{
     <button class="btn btn-secondary btn-sm" onclick="goTo('tests');closePacSheet()">🧪 Test</button>
     <button class="btn btn-secondary btn-sm" onclick="generarPlanTratamiento('${id}')">🧠 Plan</button>
     <button class="btn btn-secondary btn-sm" onclick="editarPaciente('${id}');closePacSheet()">✏️ Editar</button>
+    <button class="btn btn-secondary btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="closePacSheet();eliminarPaciente('${id}')">🗑️ Eliminar</button>
     <button class="btn btn-primary btn-sm" style="background:#2563a8;width:100%;margin-top:8px" onclick="closePacSheet();hpacAbrirPaciente('${id}')">📂 Ver historial completo</button>
   `;
   // Cargar plan existente si hay
