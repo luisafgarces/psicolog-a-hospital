@@ -2443,6 +2443,9 @@ onSnapshot(query(collection(db,'interconsultas'),orderBy('creado','desc')),snap=
   updateBadges();updateStats();
   if(document.getElementById('page-interconsultas').classList.contains('active'))(window.renderIC&&window.renderIC)();
   if(document.getElementById('page-dashboard').classList.contains('active'))(window.renderDashboard&&window.renderDashboard)();
+  // Refrescar historial de paciente si está abierto (página o modal)
+  if(document.getElementById('page-historial-pac').classList.contains('active')){(window.hpacRenderLista&&window.hpacRenderLista)();if(window._hpacPacId&&typeof hpacRenderNotas==='function')hpacRenderNotas();}
+  if(document.getElementById('modal-historial-ic').style.display==='flex'&&typeof mhicRender==='function')mhicRender();
 });
 onSnapshot(query(collection(db,'anamnesis'),orderBy('creado','desc')),snap=>{
   anamnesisList=snap.docs.map(d=>({id:d.id,...d.data()}));window.anamnesisList=anamnesisList;
@@ -2454,6 +2457,9 @@ onSnapshot(query(collection(db,'anamnesis'),orderBy('creado','desc')),snap=>{
     const hs=document.getElementById('seg-historial-pac-sel');
     if(hs&&hs.value&&typeof anamHistorialRender==='function')anamHistorialRender(hs.value);
   }
+  // Refrescar historial de paciente si está abierto (página o modal)
+  if(document.getElementById('page-historial-pac').classList.contains('active')){(window.hpacRenderLista&&window.hpacRenderLista)();if(window._hpacPacId&&typeof hpacRenderNotas==='function')hpacRenderNotas();}
+  if(document.getElementById('modal-historial-ic').style.display==='flex'&&typeof mhicRender==='function')mhicRender();
 });
 onSnapshot(query(collection(db,'test_resultados'),orderBy('creado','desc')),snap=>{
   testHistory=snap.docs.map(d=>({id:d.id,...d.data()}));window.testHistory=testHistory;
@@ -2899,8 +2905,26 @@ window.guardarICFirebase=async()=>{
         aiResp&&'RESPUESTA\n'+aiResp,
         aiTrat&&'TRATAMIENTO\n'+aiTrat
       ].filter(Boolean).join('\n\n');
-      // Si no hay NADA de IA, guardar mensaje indicativo en vez de nota genérica
-      if(!notaTexto) notaTexto='[Nota no generada — completar con IA antes de guardar]';
+      // Si no hay nota IA, construir nota desde el formulario directamente
+      if(!notaTexto){
+        const icC2=lbl=>icChipsBySubLabel(lbl);
+        const icv2=id=>{const el=document.getElementById(id);return el?(el.value||'').trim():'';};
+        const p2=[];
+        const emoc2=icC2('Estado emocional referido');if(emoc2.length)p2.push('Estado emocional: '+emoc2.join(', '));
+        const preoc2=icC2('Principales preocupaciones');if(preoc2.length)p2.push('Preocupaciones: '+preoc2.join(', '));
+        const pens2=icC2('Pensamientos automáticos');if(pens2.length)p2.push('Pensamientos automáticos: '+pens2.join(', '));
+        const dist2=icC2('Distorsiones cognitivas');if(dist2.length)p2.push('Distorsiones cognitivas: '+dist2.join(', '));
+        const cita2=icv2('ic-sub-cita');if(cita2)p2.push('Cita textual: "'+cita2+'"');
+        const orient2=icC2('Orientación');if(orient2.length)p2.push('Orientación: '+orient2.join(', '));
+        const afecto2=icC2('Afecto');if(afecto2.length)p2.push('Afecto: '+afecto2.join(', '));
+        const ideac2=icC2('Ideación actual');if(ideac2.length)p2.push('Ideación suicida: '+ideac2.join(', '));
+        const niv2=icv2('ic-riesgo-nivel');if(niv2&&niv2!=='No clasificado')p2.push('Nivel de riesgo: '+niv2);
+        const notas2=icv2('ic-riesgo-notas');if(notas2)p2.push('Notas de riesgo: '+notas2);
+        const interv2=icC2('Intervención realizada hoy');if(interv2.length)p2.push('Intervención: '+interv2.join(', '));
+        const plan2=icC2('Plan');if(plan2.length)p2.push('Plan: '+plan2.join(', '));
+        const freq2=icC2('Frecuencia de seguimiento');if(freq2.length)p2.push('Frecuencia de seguimiento: '+freq2.join(', '));
+        notaTexto=p2.join(' | ')||'IC Nueva — formulario diligenciado. Ver campos del formulario para detalles.';
+      }
     }
     else if(window.icCurrentMode==='seg'){
       // Generar nota con Gemini si hay API key, y esperar el resultado antes de guardar
@@ -3135,6 +3159,7 @@ window.guardarICFirebase=async()=>{
       hab,edad,dx,riesgo,
       modo:window.icCurrentMode==='nueva'?'IC Nueva':window.icCurrentMode==='seg'?'Seguimiento':window.icCurrentMode==='fam'?'Intervención Familiar':'Nota especial',
       fecha,nota:notaTexto,sub,obj,resp,trat,
+      fechaGuardado:new Date().toISOString().split('T')[0],
       estado:'respondida',
       needsAI:needsAI||false,
       ...(_aiFormSnap?{_aiFormSnap}:{}),
@@ -3151,6 +3176,12 @@ window.guardarICFirebase=async()=>{
       // Limpiar backups de localStorage ya sincronizados
       try{const bkList=JSON.parse(localStorage.getItem('ic_backups')||'[]');if(bkList.length){const last=bkList[bkList.length-1];localStorage.removeItem(last);localStorage.setItem('ic_backups',JSON.stringify(bkList.slice(0,-1)));}}catch(e){}
       setTimeout(()=>limpiarFormIC(false),300);
+      // Refrescar historial del paciente si está abierto
+      setTimeout(()=>{
+        if(window._hPacId&&typeof _hpacPacId!=='undefined'&&!_hpacPacId){_hpacPacId=window._hPacId;window._hpacPacId=window._hPacId;}
+        if(typeof hpacRenderNotas==='function')hpacRenderNotas();
+        if(typeof mhicRender==='function')mhicRender();
+      },600);
     }
   }catch(e){console.error('[FIREBASE SAVE ERROR]',e);setSyncStatus('offline');toast('❌ '+e.message);}
 };
@@ -3207,6 +3238,7 @@ window.guardarAnamnesis=async()=>{
       nota,
       modo:'Anamnesis',
       formulario:anForm,
+      fechaGuardado:new Date().toISOString().split('T')[0],
       ...(getCapInlineData('an')||{}),
       creado:serverTimestamp()
     });
@@ -3509,7 +3541,7 @@ window.mneGuardar=async()=>{
   setSyncStatus('syncing');
   try{
     if(window._mneId){
-      await updateDoc(doc(db,window._mneCol,window._mneId),{fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,editado:serverTimestamp()});
+      await updateDoc(doc(db,window._mneCol,window._mneId),{fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,fechaEditado:new Date().toISOString().split('T')[0],editado:serverTimestamp()});
       toast('✅ Nota actualizada');
     } else {
       const pac=pacientes.find(p=>p.id===window._hPacId);
@@ -3520,6 +3552,7 @@ window.mneGuardar=async()=>{
         hab:pac?.hab||'',
         dx:pac?.motivo||'',
         fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,
+        fechaGuardado:new Date().toISOString().split('T')[0],
         creado:serverTimestamp()
       });
       toast('✅ Nota guardada');
@@ -3527,7 +3560,12 @@ window.mneGuardar=async()=>{
     setSyncStatus('online');
     window.mneCerrar();
     const cb=window._mneOnSave;window._mneOnSave=null;
-    if(cb)cb();else setTimeout(()=>{if(typeof hpacRenderNotas==='function')hpacRenderNotas();if(typeof mhicRender==='function')mhicRender();},500);
+    if(cb)cb();else setTimeout(()=>{
+      // Sync _hpacPacId so hpacRenderNotas can find the patient
+      if(window._hPacId&&typeof _hpacPacId!=='undefined'&&!_hpacPacId){_hpacPacId=window._hPacId;window._hpacPacId=window._hPacId;}
+      if(typeof hpacRenderNotas==='function')hpacRenderNotas();
+      if(typeof mhicRender==='function')mhicRender();
+    },500);
   }catch(ex){setSyncStatus('offline');toast('❌ '+ex.message);}
 };
 
@@ -6542,14 +6580,17 @@ function mhicRender(){
     const subInfo=(e.hab||e.dx)?'<div style="font-size:0.72rem;color:var(--text3);margin-top:2px">'+(e.hab?'Hab. '+e.hab+' - ':'')+( e.dx||'')+'</div>':'';
     let camposHtml='<div style="font-size:0.78rem;color:var(--text3);font-style:italic;margin-top:8px">Sin texto guardado</div>';
     const cv=[];
-    const _noNA=v=>v&&v.trim()&&!v.startsWith('N/A')&&!v.startsWith('Genera')&&!v.startsWith('⏳');
+    const _noNA=v=>v&&v.trim()&&!v.startsWith('N/A')&&!v.startsWith('Genera')&&!v.startsWith('⏳')&&!v.startsWith('[Nota no generada');
     if(_noNA(e.sub))cv.push({l:'Subjetivo',v:e.sub});
     if(_noNA(e.obj))cv.push({l:'Objetivo',v:e.obj});
     if(_noNA(e.resp))cv.push({l:'Respuesta',v:e.resp});
     if(_noNA(e.trat))cv.push({l:'Tratamiento',v:e.trat});
-    // Solo mostrar nota si NO hay campos individuales (evita duplicado 'Notas adicionales')
-    if(_noNA(e.nota)&&!cv.length)cv.push({l:'Nota clínica',v:e.nota});
-    if(!cv.length){const any=e.nota||e.trat||e.obj||e.sub||e.resp||'';if(any)cv.push({l:'Nota clínica',v:any});}
+    // Mostrar nota si tiene contenido real — si no hay campos SOAP, es el contenido principal
+    if(_noNA(e.nota)){
+      if(!cv.length)cv.push({l:'Nota clínica',v:e.nota});
+      else if(e.nota.length>80&&!e.sub&&!e.obj&&!e.resp&&!e.trat)cv.push({l:'Nota clínica',v:e.nota});
+    }
+    if(!cv.length){const any=e.nota||e.trat||e.obj||e.sub||e.resp||'';if(any&&!any.startsWith('[Nota no generada'))cv.push({l:'Nota clínica',v:any});}
     if(cv.length){
       let cHtml='';
       for(let j=0;j<cv.length;j++){
@@ -6561,7 +6602,7 @@ function mhicRender(){
     }
     partes.push('<div style="background:var(--surface2);border:1px solid var(--border);border-left:4px solid '+col+';border-radius:10px;padding:14px 16px;margin-bottom:12px">'
       +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">'
-      +'<div><div style="font-weight:700;font-size:0.88rem">'+(e.modo||'Nota')+' - '+'<span style="color:'+col+'">'+(e.fecha||'Sin fecha')+'</span></div>'+subInfo+'</div>'
+      +'<div><div style="font-weight:700;font-size:0.88rem">'+(e.modo||'Nota')+' - '+'<span style="color:'+col+'">'+(e.fecha||'Sin fecha')+'</span>'+(e.fechaGuardado?'<span style="font-size:0.68rem;color:var(--text3);margin-left:6px">· guardado '+e.fechaGuardado+'</span>':'')+(e.fechaEditado?'<span style="font-size:0.68rem;color:var(--warning);margin-left:6px">· editado '+e.fechaEditado+'</span>':'')+'</div>'+subInfo+'</div>'
       +'<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">'+rBadgeHtml+respondidaBtn+regenBtn+formBtn+editarBtn+'</div>'
       +'</div>'+camposHtml+'</div>');
   }
@@ -6812,26 +6853,32 @@ window.hpacRenderNotas=()=>{
         }
       } else {
         // IC Nueva, Nota especial, Anamnesis y cualquier otro modo:
-        // mostrar todos los campos con contenido real
+        // Mostrar campos SOAP con contenido real
         if(!hasNAVal(e.sub))cv.push({label:'Análisis Subjetivo',text:e.sub});
         if(!hasNAVal(e.obj))cv.push({label:'Análisis Objetivo',text:e.obj});
         if(!hasNAVal(e.resp))cv.push({label:'Respuesta / Impresión clínica',text:e.resp});
-        // Mostrar valoración de capacidad si se incluyó
         if(e.capConclusion)cv.push({label:'⚖️ Capacidad Decisional',text:(e.capDecision?'Decisión: '+e.capDecision+'\n':'')+'CONCLUSIÓN: '+e.capConclusion+(e.capObs?'\nObservaciones: '+e.capObs:'')});
         if(!hasNAVal(e.trat))cv.push({label:'Tratamiento / Plan',text:e.trat});
-        // nota: mostrar siempre si tiene contenido (puede ser la nota completa o complementaria)
-        if(!hasNAVal(e.nota)&&!cv.length)cv.push({label:'Nota clínica',text:e.nota});
-        // Si absolutamente nada se encontró, intentar cualquier campo
+        // Mostrar nota completa si existe y no es placeholder ni duplicado de campos ya mostrados
+        var notaPlaceholder=(e.nota||'').startsWith('[Nota no generada');
+        if(!hasNAVal(e.nota)&&!notaPlaceholder){
+          // Si no hay campos SOAP, la nota es el contenido principal
+          if(!cv.length)cv.push({label:'Nota clínica',text:e.nota});
+          // Si hay campos SOAP pero la nota tiene info distinta y relevante, mostrarla también
+          else if(e.nota.length>80&&!e.sub&&!e.obj&&!e.resp&&!e.trat)cv.push({label:'Nota clínica',text:e.nota});
+        }
+        // Último recurso: cualquier campo con contenido
         if(!cv.length){
           var any=e.nota||e.trat||e.obj||e.sub||e.resp||'';
-          if(any)cv.push({label:'Nota clínica',text:any});
+          if(any&&!any.startsWith('[Nota no generada'))cv.push({label:'Nota clínica',text:any});
         }
       }
       var camposHtml='';
       var esModoConIA=(modo==='IC Nueva'||modo==='Seguimiento'||modo==='Anamnesis');
-      // Es pendiente si: no hay campos, o la nota es el placeholder, o tiene _aiFormSnap sin haber sido procesado
+      // Es pendiente IA solo si: no hay ningún campo con contenido Y no hay nota útil
       var notaEsPlaceholder=(e.nota||'').startsWith('[Nota no generada');
-      var esPendienteIA=esModoConIA&&(!cv.length||notaEsPlaceholder);
+      var tieneContenidoReal=cv.length>0||(e.nota&&!notaEsPlaceholder&&(e.nota||'').length>10);
+      var esPendienteIA=esModoConIA&&!tieneContenidoReal&&e._aiFormSnap;
       if(cv.length){
         for(var j=0;j<cv.length;j++){
           camposHtml+='<div class="hpac-campo">'
@@ -6917,6 +6964,8 @@ window.hpacRenderNotas=()=>{
         +'<span style="font-weight:700;font-size:0.88rem;color:'+col+'">'+modo+'</span>'
         +(esPendienteIA?'<span style="font-size:0.68rem;font-weight:700;background:#fef3c7;color:#92400e;padding:1px 7px;border-radius:20px;margin-left:6px">⏳ Sin nota</span>':'')
         +'<span style="font-size:0.82rem;color:var(--text2);margin-left:8px">'+(e.fecha||'Sin fecha')+'</span>'
+        +(e.fechaGuardado?'<span style="font-size:0.7rem;color:var(--text3);margin-left:6px" title="Fecha en que se guardó">· guardado '+e.fechaGuardado+'</span>':'')
+        +(e.fechaEditado?'<span style="font-size:0.7rem;color:var(--warning);margin-left:6px" title="Fecha de última edición">· editado '+e.fechaEditado+'</span>':'')
         +'</div>'
         +'<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">'
         +rBadgeHtml+respondidaBtn+genBtn
