@@ -2208,8 +2208,14 @@ input.toggle-cb{display:none}
       <div class="form-group"><label>Cédula *</label><input type="text" id="p-cedula"></div>
       <div class="form-group"><label>Edad</label><input type="number" id="p-edad" min="0" max="120"></div>
       <div class="form-group"><label>Sexo</label><select id="p-sexo"><option value="">Seleccionar...</option><option>Femenino</option><option>Masculino</option><option>No binario</option></select></div>
-      <div class="form-group"><label>Fecha de ingreso hospitalario</label><input type="date" id="p-fecha"></div>
-      <div class="form-group"><label>Fecha de solicitud de IC</label><input type="date" id="p-fecha-ic"></div>
+      <div class="form-group"><label>Fecha de ingreso hospitalario</label><input type="date" id="p-fecha" oninput="calcDiasModal()"></div>
+      <div class="form-group"><label>Fecha de solicitud de IC a psicología</label><input type="date" id="p-fecha-ic" oninput="calcDiasModal()"></div>
+      <div class="form-group full" id="p-dias-wrap" style="display:none">
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:8px 14px;font-size:0.85rem;color:#166534;display:flex;align-items:center;gap:10px">
+          <span style="font-size:1.1rem">🗓️</span>
+          <span id="p-dias-label" style="font-weight:600"></span>
+        </div>
+      </div>
       <div class="form-group" id="p-hab-group"><label>Habitación / Servicio</label><input type="text" id="p-hab" placeholder="Ej: 304B, URG-12, UCI-3, AZU-5"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px"><button type="button" onclick="document.getElementById('p-hab').value='AZU-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔵 Bloque Azul</button><button type="button" onclick="document.getElementById('p-hab').value='URG-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🟡 Urgencias</button><button type="button" onclick="document.getElementById('p-hab').value='UCI-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔴 UCI</button></div></div>
       <div class="form-group full"><label id="p-motivo-label">Diagnóstico médico / Motivo de interconsulta</label><textarea id="p-motivo" rows="2" placeholder="Ej: Ca. de mama, impacto emocional dx reciente"></textarea></div>
       <div class="form-group full"><label>Tratamiento médico actual</label><textarea id="p-trat-medico" rows="2" placeholder="Ej: Quimioterapia ciclo 3, Morfina 10mg c/8h, O2 suplementario…"></textarea></div>
@@ -6123,6 +6129,20 @@ window.cieKeyNav = function(e){
 
   items.forEach((d,i)=>d.style.background=i===_cieIdx?'var(--surface2)':'');
   if(items[_cieIdx]) items[_cieIdx].scrollIntoView({block:'nearest'});
+};
+
+
+window.calcDiasModal = function(){
+  const ingreso = document.getElementById('p-fecha')?.value;
+  const wrap = document.getElementById('p-dias-wrap');
+  const label = document.getElementById('p-dias-label');
+  if(!ingreso || !wrap || !label){ if(wrap) wrap.style.display='none'; return; }
+  const d = calcularDiasInternacion(ingreso);
+  if(d === null){ wrap.style.display='none'; return; }
+  wrap.style.display = '';
+  if(d === 0) label.textContent = 'Ingresó hoy';
+  else if(d === 1) label.textContent = 'Lleva 1 día hospitalizado';
+  else label.textContent = 'Lleva ' + d + ' días hospitalizado';
 };
 
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
