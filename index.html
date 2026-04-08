@@ -2728,12 +2728,13 @@ window.openModal=(id)=>{
   m.classList.add('open');
   // Reset patient modal fields if opening patient modal
   if(id==='modal-paciente'){
-    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-dxpsi','p-riesgo-obs','p-notas','p-proxsesion'].forEach(fid=>{
+    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad'].forEach(fid=>{
       const el=document.getElementById(fid);if(el)el.value='';
     });
-    document.getElementById('p-riesgo').value='';
+    const riesgo=document.getElementById('p-riesgo');if(riesgo)riesgo.value='';
     document.getElementById('p-sexo').value='';
     document.getElementById('p-fecha').value=new Date().toISOString().split('T')[0];
+    const diasWrap=document.getElementById('p-dias-wrap');if(diasWrap)diasWrap.style.display='none';
     document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>b.classList.remove('sel'));
     const btn=document.querySelector('#modal-paciente .btn-primary');
     if(btn){btn.textContent='Registrar';btn.onclick=guardarPaciente;}
