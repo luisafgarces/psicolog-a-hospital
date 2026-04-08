@@ -2669,7 +2669,7 @@ window.guardarCapacidadFirebase=async()=>{
   try{
     await addDoc(collection(db,'capacidad_decisional'),{
       pacienteId:window._capPacienteId||null,
-      pacienteNombre:nombre,
+      pacienteNombre:pacObj?.nombre||nombre,
       fecha:v('cap-fecha'),
       hab:v('cap-hab'),
       dx:v('cap-dx'),
@@ -2868,7 +2868,14 @@ window.guardarICFirebase=async()=>{
   // Buscar paciente vinculado por nombre o selector
   const selPac=document.getElementById('ic-paciente-sel');
   const pacId=selPac?.value||null;
-  const pacObj=pacId?pacientes.find(p=>p.id===pacId):pacientes.find(p=>p.nombre===nombre)||null;
+  // Buscar paciente: primero por ID del selector, luego por nombre exacto, luego por nombre case-insensitive
+  const pacObj=pacId
+    ? pacientes.find(p=>p.id===pacId)
+    : pacientes.find(p=>p.nombre===nombre)
+      || pacientes.find(p=>(p.nombre||'').toLowerCase().trim()===(nombre||'').toLowerCase().trim())
+      || null;
+  // Si encontramos el paciente pero el selector estaba vacío, usar su ID
+  const pacIdFinal=pacId||pacObj?.id||null;
   // Capturar nota generada si existe
   let notaTexto='';
   try{
@@ -3122,7 +3129,7 @@ window.guardarICFirebase=async()=>{
   try{
     if(!db)throw new Error('Base de datos no inicializada — recarga la página');
     await addDoc(collection(db,'interconsultas'),{
-      pacienteId:pacObj?.id||pacId||null,
+      pacienteId:pacIdFinal||null,
       pacienteNombre:nombre,
       pacienteCedula:pacObj?.cedula||'',
       hab,edad,dx,riesgo,
