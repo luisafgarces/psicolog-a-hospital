@@ -628,14 +628,10 @@ input.toggle-cb{display:none}
               </div>
               <div class="ic-g2">
                 <div class="ic-field">
-                  <div class="ic-sublabel">Tratamiento médico actual <span style="font-weight:400;color:var(--text3);font-size:0.65rem">(editar en ficha del paciente)</span></div>
-                  <div id="ic-trat-medico-display" style="font-size:0.8rem;color:var(--text2);background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;min-height:38px;line-height:1.5;font-style:italic;opacity:0.8">— se carga del paciente —</div>
-                  <input type="hidden" id="ic-trat-medico" value="">
-                </div>
-                <div class="ic-field">
                   <div class="ic-sublabel">Días de internación</div>
                   <div id="ic-dias-display" style="font-size:0.85rem;color:var(--text2);background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;min-height:34px">— se calcula del ingreso —</div>
                   <input type="hidden" id="ic-dias-internacion" value="">
+                  <input type="hidden" id="ic-trat-medico" value="">
                 </div>
               </div>
             </div>
@@ -2212,7 +2208,8 @@ input.toggle-cb{display:none}
       <div class="form-group"><label>Cédula *</label><input type="text" id="p-cedula"></div>
       <div class="form-group"><label>Edad</label><input type="number" id="p-edad" min="0" max="120"></div>
       <div class="form-group"><label>Sexo</label><select id="p-sexo"><option value="">Seleccionar...</option><option>Femenino</option><option>Masculino</option><option>No binario</option></select></div>
-      <div class="form-group"><label>Fecha de ingreso</label><input type="date" id="p-fecha"></div>
+      <div class="form-group"><label>Fecha de ingreso hospitalario</label><input type="date" id="p-fecha"></div>
+      <div class="form-group"><label>Fecha de solicitud de IC</label><input type="date" id="p-fecha-ic"></div>
       <div class="form-group" id="p-hab-group"><label>Habitación / Servicio</label><input type="text" id="p-hab" placeholder="Ej: 304B, URG-12, UCI-3, AZU-5"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px"><button type="button" onclick="document.getElementById('p-hab').value='AZU-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔵 Bloque Azul</button><button type="button" onclick="document.getElementById('p-hab').value='URG-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🟡 Urgencias</button><button type="button" onclick="document.getElementById('p-hab').value='UCI-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔴 UCI</button></div></div>
       <div class="form-group full"><label id="p-motivo-label">Diagnóstico médico / Motivo de interconsulta</label><textarea id="p-motivo" rows="2" placeholder="Ej: Ca. de mama, impacto emocional dx reciente"></textarea></div>
       <div class="form-group full"><label>Tratamiento médico actual</label><textarea id="p-trat-medico" rows="2" placeholder="Ej: Quimioterapia ciclo 3, Morfina 10mg c/8h, O2 suplementario…"></textarea></div>
@@ -2237,22 +2234,7 @@ input.toggle-cb{display:none}
   </div>
 </div>
 
-<!-- MODAL IC -->
-<div class="modal-overlay" id="modal-ic">
-  <div class="modal">
-    <div class="modal-header"><h3>Nueva Interconsulta</h3><button class="modal-close" onclick="closeModal('modal-ic')"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button></div>
-    <div class="modal-body"><div class="form-grid">
-      <div class="form-group full"><label>Paciente *</label><select id="ic-paciente"><option value="">— Seleccionar —</option></select></div>
-      <div class="form-group"><label>Especialidad *</label><select id="ic-especialidad"><option value="">Seleccionar...</option><option>Psiquiatría</option><option>Neurología</option><option>Medicina interna</option><option>Trabajo social</option><option>Nutrición</option><option>Fisioterapia</option><option>Otra</option></select></div>
-      <div class="form-group"><label>Prioridad</label><select id="ic-prioridad"><option value="normal">Normal</option><option value="urgente">Urgente</option><option value="electiva">Electiva</option></select></div>
-      <div class="form-group full"><label>Motivo *</label><textarea id="ic-motivo" rows="3"></textarea></div>
-      <div class="form-group full"><label>Información clínica relevante</label><textarea id="ic-info" rows="2"></textarea></div>
-      <div class="form-group"><label>Fecha</label><input type="date" id="ic-fecha"></div>
-      <div class="form-group"><label>Médico solicitante</label><input type="text" id="ic-medico"></div>
-    </div></div>
-    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modal-ic')">Cancelar</button><button class="btn btn-primary" onclick="guardarIC()">Enviar</button></div>
-  </div>
-</div>
+
 
 <div id="toast"></div>
 
@@ -2481,10 +2463,11 @@ window.guardarPaciente=async()=>{
       proxSesion:document.getElementById('p-proxsesion').value,
       notas:document.getElementById('p-notas').value,
       tratMedico:document.getElementById('p-trat-medico').value,
+      fechaIC:document.getElementById('p-fecha-ic').value,
       creado:serverTimestamp()
     });
     closeModal('modal-paciente');toast('✅ Paciente registrado');
-    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-dxpsi','p-riesgo-obs','p-notas','p-proxsesion','p-trat-medico'].forEach(id=>document.getElementById(id).value='');
+    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-dxpsi','p-riesgo-obs','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('p-riesgo').value='';
     document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>b.classList.remove('sel'));
   }
@@ -2709,7 +2692,6 @@ window.selectICPaciente=(id)=>{
   if(edad&&(p.edad||p.sexo))edad.value=(p.edad?p.edad+' años':'')+(p.sexo?' '+p.sexo.charAt(0):'');
   if(dx&&p.motivo){dx.value=p.motivo;const disp=document.getElementById('ic-pdx-display');if(disp){disp.textContent=p.motivo;disp.style.opacity='1';disp.style.fontStyle='normal';}}
   const tratEl=document.getElementById('ic-trat-medico');if(tratEl&&p.tratMedico)tratEl.value=p.tratMedico;
-  const tratDisp=document.getElementById('ic-trat-medico-display');if(tratDisp){tratDisp.textContent=p.tratMedico||'— sin tratamiento registrado —';tratDisp.style.opacity=p.tratMedico?'1':'0.5';tratDisp.style.fontStyle=p.tratMedico?'normal':'italic';}
   const diasVal=calcularDiasInternacion(p.fecha);
   const diasEl=document.getElementById('ic-dias-internacion');if(diasEl)diasEl.value=diasVal!==null?diasVal:'';
   const diasDisp=document.getElementById('ic-dias-display');
@@ -2753,7 +2735,7 @@ window.openModal=(id)=>{
     setPTipo('hospitalizado');
     document.getElementById('p-estado').value='seguimiento';
   }
-  if(id==='modal-ic') populateICPacientes && populateICPacientes();
+
 };
 window.closeModal=(id)=>{const m=document.getElementById(id);if(m)m.classList.remove('open');};
 
@@ -2778,6 +2760,7 @@ window.editarPaciente=(id)=>{
   setPTipo(p.tipo||'hospitalizado');
   document.getElementById('p-notas').value=p.notas||'';
   document.getElementById('p-trat-medico').value=p.tratMedico||'';
+  document.getElementById('p-fecha-ic').value=p.fechaIC||'';
   document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>{b.classList.toggle('sel',b.textContent.trim()===p.riesgo);});
   // Change button to update
   const btn=document.querySelector('#modal-paciente .btn-primary');
@@ -2802,7 +2785,8 @@ window.actualizarPaciente=async(id)=>{
       estado:document.getElementById('p-estado').value,
       proxSesion:document.getElementById('p-proxsesion').value,
       notas:document.getElementById('p-notas').value,
-      tratMedico:document.getElementById('p-trat-medico').value
+      tratMedico:document.getElementById('p-trat-medico').value,
+      fechaIC:document.getElementById('p-fecha-ic').value
     });
     closeModal('modal-paciente');toast('✅ Paciente actualizado');
     const btn=document.querySelector('#modal-paciente .btn-primary');
@@ -2810,27 +2794,7 @@ window.actualizarPaciente=async(id)=>{
   }catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
 };
 
-window.guardarIC=async()=>{
-  const pacId=document.getElementById('ic-paciente')?.value;
-  const esp=document.getElementById('ic-especialidad')?.value||'';
-  const motivo=document.getElementById('ic-motivo')?.value?.trim()||'';
-  if(!pacId||!motivo)return toast('⚠️ Paciente y motivo son obligatorios');
-  const pac=pacientes.find(p=>p.id===pacId);setSyncStatus('syncing');
-  try{
-    await addDoc(collection(db,'interconsultas'),{
-      pacienteId:pacId,pacienteNombre:pac?pac.nombre:'?',pacienteCedula:pac?pac.cedula:'',
-      hab:pac?pac.hab||'':'',
-      especialidad:esp,
-      prioridad:document.getElementById('ic-prioridad')?.value||'normal',
-      motivo,
-      info:document.getElementById('ic-info')?.value||'',
-      fecha:document.getElementById('ic-fecha')?.value||'',
-      medico:document.getElementById('ic-medico')?.value||'',
-      estado:'pendiente',creado:serverTimestamp()
-    });
-    closeModal('modal-ic');toast('✅ Interconsulta enviada');
-  }catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
-};
+
 
 window.renderIC=()=>{
   const cont=document.getElementById('lista-ic');
@@ -6774,7 +6738,14 @@ window.abrirPacSheet=async(id)=>{
   const grid=[
     {l:'Habitación',v:p.hab||(p.tipo==='consulta-externa'?'Consulta Externa':'—')},
     {l:'Fecha ingreso',v:p.fecha?formatDate(p.fecha):'—'},
-    (()=>{const d=calcularDiasInternacion(p.fecha);return d!==null?{l:'Días internado',v:d===0?'Ingresó hoy':d===1?'1 día':d+' días',color:d>14?'var(--warning)':d>7?'var(--text)':'var(--text)'}:null;})(),
+    p.fechaIC?{l:'Fecha solicitud IC',v:formatDate(p.fechaIC)}:null,
+    (()=>{
+      const d=calcularDiasInternacion(p.fecha);
+      if(d===null) return null;
+      const label=d===0?'Ingresó hoy':d===1?'1 día hospitalizado':d+' días hospitalizado';
+      const color=d>21?'var(--danger)':d>14?'var(--warning)':'var(--text)';
+      return {l:'Tiempo hospitalizado',v:label,color};
+    })(),
     {l:'Edad',v:p.edad?p.edad+' años':'—'},
     {l:'Sexo',v:p.sexo||'—'},
     {l:'Riesgo suicida',v:p.riesgo||'Sin clasificar',color:riskColor[p.riesgo]||'var(--text2)'},
