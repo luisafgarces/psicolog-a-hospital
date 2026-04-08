@@ -2221,9 +2221,9 @@ input.toggle-cb{display:none}
       <div class="form-group full"><label>Tratamiento médico actual</label><textarea id="p-trat-medico" rows="2" placeholder="Ej: Quimioterapia ciclo 3, Morfina 10mg c/8h, O2 suplementario…"></textarea></div>
       <div class="form-group full"><label>Prioridad de la interconsulta</label>
         <div id="p-prioridad-btns" style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
-          <button type="button" class="risk-btn" data-val="REGULAR" style="color:var(--text2);border-color:#6b7280" onclick="setPPrioridad('REGULAR',this)">🟢 REGULAR</button>
-          <button type="button" class="risk-btn" data-val="PRIORITARIA" style="color:#d97706;border-color:#d97706" onclick="setPPrioridad('PRIORITARIA',this)">🟡 PRIORITARIA</button>
-          <button type="button" class="risk-btn" data-val="URGENTE" style="color:#dc2626;border-color:#dc2626" onclick="setPPrioridad('URGENTE',this)">🔴 URGENTE</button>
+          <button type="button" class="risk-btn" data-val="REGULAR" style="color:var(--text2);border-color:#6b7280" onclick="window.setPPrioridad('REGULAR',this)">🟢 REGULAR</button>
+          <button type="button" class="risk-btn" data-val="PRIORITARIA" style="color:#d97706;border-color:#d97706" onclick="window.setPPrioridad('PRIORITARIA',this)">🟡 PRIORITARIA</button>
+          <button type="button" class="risk-btn" data-val="URGENTE" style="color:#dc2626;border-color:#dc2626" onclick="window.setPPrioridad('URGENTE',this)">🔴 URGENTE</button>
         </div>
         <input type="hidden" id="p-prioridad" value="">
       </div>
@@ -2746,24 +2746,22 @@ window.editarPaciente=(id)=>{
   // Abrir modal primero (openModal limpia los campos), luego rellenar
   openModal('modal-paciente');
   // Pre-fill modal with patient data
-  document.getElementById('p-nombre').value=p.nombre||'';
-  document.getElementById('p-cedula').value=p.cedula||'';
-  document.getElementById('p-edad').value=p.edad||'';
-  document.getElementById('p-sexo').value=p.sexo||'';
-  document.getElementById('p-fecha').value=p.fecha||'';
-  document.getElementById('p-hab').value=p.hab||'';
-  document.getElementById('p-motivo').value=p.motivo||'';
-  document.getElementById('p-riesgo').value=p.riesgo||'';
-  document.getElementById('p-riesgo-obs').value=p.riesgoObs||'';
-  document.getElementById('p-estado').value=p.estado||'seguimiento';
-  document.getElementById('p-proxsesion').value=p.proxSesion||'';
+  const _sv=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||'';};
+  _sv('p-nombre',p.nombre);
+  _sv('p-cedula',p.cedula);
+  _sv('p-edad',p.edad);
+  _sv('p-sexo',p.sexo);
+  _sv('p-fecha',p.fecha);
+  _sv('p-hab',p.hab);
+  _sv('p-motivo',p.motivo);
+  _sv('p-estado',p.estado||'seguimiento');
+  _sv('p-proxsesion',p.proxSesion);
+  _sv('p-notas',p.notas);
+  _sv('p-trat-medico',p.tratMedico);
+  _sv('p-fecha-ic',p.fechaIC);
+  _sv('p-prioridad',p.prioridad);
   setPTipo(p.tipo||'hospitalizado');
-  document.getElementById('p-notas').value=p.notas||'';
-  document.getElementById('p-trat-medico').value=p.tratMedico||'';
-  document.getElementById('p-fecha-ic').value=p.fechaIC||'';
-  document.getElementById('p-prioridad').value=p.prioridad||'';
   document.querySelectorAll('#p-prioridad-btns .risk-btn').forEach(b=>b.classList.toggle('sel',b.dataset.val===(p.prioridad||'')));
-  document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>{b.classList.toggle('sel',b.textContent.trim()===p.riesgo);});
   // Change button to update
   const btn=document.querySelector('#modal-paciente .btn-primary');
   btn.textContent='Actualizar';btn.onclick=()=>actualizarPaciente(id);
@@ -5038,7 +5036,8 @@ window.setPPrioridad=function(nivel,el){
   if(h) h.value=nivel;
 };
 window.setPRisk=function(nivel,el){
-  document.querySelectorAll('#modal-paciente .risk-btn').forEach(function(b){b.classList.remove('sel');});
+  if(!el)return;
+  el.closest('.risk-selector')?.querySelectorAll('.risk-btn').forEach(function(b){b.classList.remove('sel');});
   el.classList.add('sel');
   var h=document.getElementById('p-riesgo');
   if(h)h.value=nivel;
