@@ -7136,9 +7136,9 @@ window.abrirPacSheet=async(id)=>{
   document.getElementById('ps-grid').innerHTML=grid.map(ri).join('');
   window._psPacId=id;
   document.getElementById('ps-actions').innerHTML=`
-    <button class="btn btn-primary btn-sm" onclick="goTo('interconsultas');closePacSheet()">💬 IC</button>
-    <button class="btn btn-secondary btn-sm" onclick="goTo('anamnesis');closePacSheet()">📋 Anamnesis</button>
-    <button class="btn btn-secondary btn-sm" onclick="goTo('tests');closePacSheet()">🧪 Test</button>
+    <button class="btn btn-primary btn-sm" onclick="closePacSheet();goTo('interconsultas');setTimeout(()=>{const sel=document.getElementById('ic-paciente-sel');if(sel){sel.value='${id}';selectICPaciente('${id}');}},250)">💬 IC</button>
+    <button class="btn btn-secondary btn-sm" onclick="closePacSheet();goTo('anamnesis');setTimeout(()=>{const sel=document.getElementById('anamnesis-paciente-sel');if(sel){sel.value='${id}';if(typeof selectAnamPaciente==='function')selectAnamPaciente('${id}');}},250)">📋 Anamnesis</button>
+    <button class="btn btn-secondary btn-sm" onclick="closePacSheet();goTo('tests');setTimeout(()=>{const sel=document.getElementById('test-pac-sel');if(sel){sel.value='${id}';if(typeof selectTestPaciente==='function')selectTestPaciente('${id}');}},250)">🧪 Test</button>
     <button class="btn btn-secondary btn-sm" onclick="generarPlanTratamiento('${id}')">🧠 Plan</button>
     <button class="btn btn-secondary btn-sm" onclick="editarPaciente('${id}');closePacSheet()">✏️ Editar</button>
     <button class="btn btn-secondary btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="closePacSheet();eliminarPaciente('${id}')">🗑️ Eliminar</button>
