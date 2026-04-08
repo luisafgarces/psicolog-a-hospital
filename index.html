@@ -3128,7 +3128,7 @@ window.guardarICFirebase=async()=>{
       try{const bkList=JSON.parse(localStorage.getItem('ic_backups')||'[]');if(bkList.length){const last=bkList[bkList.length-1];localStorage.removeItem(last);localStorage.setItem('ic_backups',JSON.stringify(bkList.slice(0,-1)));}}catch(e){}
       setTimeout(()=>limpiarFormIC(false),300);
     }
-  }catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
+  }catch(e){setSyncStatus('offline');let _em=e.message||'Error';if(_em.includes('permission-denied')||_em.includes('Missing or insufficient permissions'))_em='Sin permisos en Firestore — revisa Database → Rules en tu consola Firebase';else if(_em.includes('unavailable')||_em.includes('network'))_em='Sin conexión a Firebase';else if(_em.includes('not-found'))_em='Proyecto Firebase no encontrado';toast('❌ '+_em);console.error('[Firebase IC]',e);}
 };
 
 window.guardarAnamnesis=async()=>{
@@ -6388,10 +6388,10 @@ ${notaTexto?'<div class="nota-title">📄 Nota clínica generada</div><div class
 
 
 // ── GEMINI CALLER CON FALLBACK ───────────────────────────────────────
-// Intenta gemini-2.5-flash primero; si hay alta demanda, cae a gemini-2.0-flash
+// Intenta gemini-2.5-flash primero; si hay alta demanda, cae a gemini-2.0-flash-lite
 window.geminiCall = async function(apiKey, prompt, maxTokens){
   maxTokens = maxTokens || 4000;
-  const models = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+  const models = ['gemini-2.5-flash', 'gemini-2.0-flash-lite'];
   let lastErr = null;
   for(const model of models){
     try{
@@ -6404,8 +6404,10 @@ window.geminiCall = async function(apiKey, prompt, maxTokens){
       const d = await r.json();
       if(!r.ok || d.error){
         const msg = d.error?.message||'Error API';
-        // If overloaded, try next model
-        if(msg.toLowerCase().includes('demand') || msg.toLowerCase().includes('overload') || r.status===503 || r.status===429){
+        // Si el modelo no está disponible o hay sobrecarga, intentar el siguiente
+        if(msg.toLowerCase().includes('demand') || msg.toLowerCase().includes('overload')
+           || msg.toLowerCase().includes('no longer available') || msg.toLowerCase().includes('deprecated')
+           || r.status===503 || r.status===429 || r.status===404){
           lastErr = new Error(msg);
           continue;
         }
@@ -6413,7 +6415,8 @@ window.geminiCall = async function(apiKey, prompt, maxTokens){
       }
       return (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
     }catch(e){
-      if(e.message?.toLowerCase().includes('demand') || e.message?.toLowerCase().includes('overload')){
+      if(e.message?.toLowerCase().includes('demand') || e.message?.toLowerCase().includes('overload')
+         || e.message?.toLowerCase().includes('no longer available') || e.message?.toLowerCase().includes('deprecated')){
         lastErr = e; continue;
       }
       throw e;
