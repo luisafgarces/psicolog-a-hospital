@@ -1174,7 +1174,7 @@ input.toggle-cb{display:none}
         </div>
         <!-- GEMINI API KEY -->
         <div style="margin-top:16px;background:#f0fdf4;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="font-size:0.78rem;font-weight:700;color:#1e4d8c;white-space:nowrap">🤖 IA Clínica — Anthropic Claude</span>
+          <span style="font-size:0.78rem;font-weight:700;color:#1e4d8c;white-space:nowrap">🤖 IA Clínica — Google Gemini</span>
           <input type="password" id="gemini-api-key" placeholder="Pega tu API Key de Google Gemini…" style="flex:1;min-width:200px;padding:7px 11px;border:1px solid #bfdbfe;border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('gemini_api_key',this.value);document.getElementById('gemini-key-status').textContent='✅ API key guardada';">
           <span id="gemini-key-status" style="font-size:0.72rem;color:#1e4d8c;white-space:nowrap">Guardada en este dispositivo</span>
         </div>
@@ -1779,7 +1779,7 @@ input.toggle-cb{display:none}
           <div class="anamnesis-section-body open">
             <div id="nota-output" class="nota-output">Completa los campos y presiona "Generar nota clínica"…</div>
             <div style="margin:10px 0;background:#f0fdf4;border:1px solid #bfdbfe;border-radius:8px;padding:9px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <span style="font-size:0.75rem;font-weight:700;color:#1e4d8c;white-space:nowrap">🤖 IA Clínica — Anthropic Claude</span>
+              <span style="font-size:0.75rem;font-weight:700;color:#1e4d8c;white-space:nowrap">🤖 IA Clínica — Google Gemini</span>
               <input type="password" id="an-gemini-key" placeholder="API Key de Google Gemini…" style="flex:1;min-width:160px;padding:5px 9px;border:1px solid #bfdbfe;border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('gemini_api_key',this.value);document.getElementById('an-key-status').textContent='✅ Guardada';">
               <span id="an-key-status" style="font-size:0.7rem;color:#1e4d8c;white-space:nowrap">Guardada en este dispositivo</span>
             </div>
@@ -2334,9 +2334,7 @@ async function sincronizarPendientes(){
             // Llamar directamente al endpoint con los datos guardados
             const ctx=`Paciente: ${data._formData.edad||''}${data._formData.sexo?' | '+data._formData.sexo:''}. Dx: ${data._formData.dx||'—'}. Riesgo: ${data._formData.riesgo||'—'}.`;
             const llamar=async(prompt)=>{
-              const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
-              const d=await r.json();
-              return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+              return await window.geminiCall(apiKey, prompt, 4000);
             };
             const base='Psicólogo clínico hospitalario (TCC). Un párrafo completo, texto corrido, sin listas. No uses el nombre del paciente. Contexto: '+ctx;
             const fd=data._formData;
@@ -2388,9 +2386,7 @@ async function generarNotasPendientesIA(){
         const ctx='Paciente: '+(fd.edad||'')+(fd.sexo?' | '+fd.sexo:'')+'. Dx: '+(fd.dx||'—')+'. Riesgo: '+(fd.riesgo||'—')+'.';
         const base='Psicólogo clínico hospitalario (TCC). Un párrafo completo, texto corrido, sin listas. No uses el nombre del paciente. Contexto: '+ctx;
         const llamar=async(prompt)=>{
-          const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
-          const d=await r.json();
-          return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+          return await window.geminiCall(apiKey, prompt, 4000);
         };
         const [sub,obj,res,tra]=await Promise.all([
           llamar(base+'\n\nAnálisis Subjetivo de interconsulta hospitalaria. Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos automáticos: '+(fd.sub?.pens||'—')+'. Cita textual: '+(fd.sub?.cita||'—')+'.'  ),
@@ -2835,6 +2831,18 @@ window.subirIC=async(id)=>{try{await updateDoc(doc(db,'interconsultas',id),{esta
 window.eliminarIC=async(id)=>{if(!confirm('¿Eliminar?'))return;try{await deleteDoc(doc(db,'interconsultas',id));toast('🗑️ Eliminada');}catch(e){toast('❌ '+e.message);}};
 
 window.guardarICFirebase=async()=>{
+  // Local helpers — guardarICFirebase is in ES6 module scope where outer icv/icChipsBySubLabel are not available
+  const icv=id=>{const el=document.getElementById(id);return el?(el.value||'').trim():'';};
+  const icChipsBySubLabel=lbl=>{
+    const chips=[];
+    document.querySelectorAll('.ic-sublabel').forEach(sl=>{
+      if((sl.textContent||'').trim()===lbl){
+        const parent=sl.closest('.ic-field')||sl.parentElement;
+        if(parent) parent.querySelectorAll('.ic-chip.on,.ic-chip.on-r,.ic-chip.on-a,.ic-chip.on-g').forEach(c=>chips.push((c.textContent||'').trim()));
+      }
+    });
+    return chips;
+  };
   const nombre=document.getElementById('ic-pnombre').value.trim()||'Sin nombre';
   const hab=document.getElementById('ic-hab').value.trim()||'—';
   const dx=document.getElementById('ic-pdx').value.trim()||'—';
@@ -3605,10 +3613,7 @@ AHORA genera el plan para este paciente con ese mismo nivel de especificidad cl�
 ${ctx}`;
 
   try{
-    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
-    const d=await r.json();
-    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
-    const plan=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    const plan = await window.geminiCall(apiKey, prompt, 4000);
     if(!plan)throw new Error('Respuesta vacía');
 
     // Guardar en Firebase como campo del paciente
@@ -3860,10 +3865,7 @@ ${relato?'- Resumen del relato: '+relato:''}
 Genera la nota clínica ahora:`;
 
   try{
-    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
-    const d=await r.json();
-    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
-    const nota=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    const nota = await window.geminiCall(apiKey, prompt, 4000);
     if(notaDiv){notaDiv.textContent=nota;}
     // Guardar nota junto con resultado
     const pacNombreReal=document.getElementById('test-pac-nombre')?.value||'';
@@ -3952,10 +3954,7 @@ window.generarNotaDesdeBackup=async function(key){
     const ctx='Dx: '+(fd.dx||bk.dx||'—')+'. Riesgo: '+(bk.riesgo||'—')+'.';
     const base='Eres psicólogo clínico hospitalario (TCC). UN SOLO PÁRRAFO, texto corrido, sin listas, no uses el nombre del paciente. '+ctx;
     const llamar=async(p)=>{
-      const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:p}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
-      const d=await r.json();
-      if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
-      return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+      return await window.geminiCall(apiKey, p, 4000);
     };
 
     const dSub='Estado emocional: '+(fd.sub?.emoc||'—')+'. Preocupaciones: '+(fd.sub?.preoc||'—')+'. Pensamientos: '+(fd.sub?.pens||'—')+'. Cita: '+(fd.sub?.cita||'—')+'.';
@@ -4671,10 +4670,7 @@ window.generarOrientacionIC = async function(){
     + 'IMPORTANTE: Completa TODAS las secciones sin truncar. Sé concreta y directa. Contexto: hospital tercer nivel, tiempo limitado por visita.';
 
   try{
-    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:3000}})});
-    const data=await r.json();
-    if(!r.ok||data.error)throw new Error(data.error?.message||'Error de API');
-    const texto=(data.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    const texto = await window.geminiCall(apiKey, prompt, 3000);
     if(!texto)throw new Error('Respuesta vacía de Gemini');
     if(outEl)outEl.textContent=texto;
   }catch(e){
@@ -6390,6 +6386,42 @@ ${notaTexto?'<div class="nota-title">📄 Nota clínica generada</div><div class
   else toast('⚠️ Activa ventanas emergentes para imprimir');
 };
 
+
+// ── GEMINI CALLER CON FALLBACK ───────────────────────────────────────
+// Intenta gemini-2.5-flash primero; si hay alta demanda, cae a gemini-2.0-flash
+window.geminiCall = async function(apiKey, prompt, maxTokens){
+  maxTokens = maxTokens || 4000;
+  const models = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+  let lastErr = null;
+  for(const model of models){
+    try{
+      const r = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+apiKey,
+        {method:'POST', headers:{'Content-Type':'application/json'},
+         body:JSON.stringify({contents:[{parts:[{text:prompt}]}],
+           generationConfig:{temperature:0.35, maxOutputTokens:maxTokens}})}
+      );
+      const d = await r.json();
+      if(!r.ok || d.error){
+        const msg = d.error?.message||'Error API';
+        // If overloaded, try next model
+        if(msg.toLowerCase().includes('demand') || msg.toLowerCase().includes('overload') || r.status===503 || r.status===429){
+          lastErr = new Error(msg);
+          continue;
+        }
+        throw new Error(msg);
+      }
+      return (d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    }catch(e){
+      if(e.message?.toLowerCase().includes('demand') || e.message?.toLowerCase().includes('overload')){
+        lastErr = e; continue;
+      }
+      throw e;
+    }
+  }
+  throw lastErr || new Error('Gemini no disponible');
+};
+
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
 // ── HISTORIAL IC POR PACIENTE ──
@@ -6572,7 +6604,7 @@ window.hpacGenerarNotaIA=async(docId, ni)=>{
   const llamar=async(prompt)=>{
     let r;
     try{
-      r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
+      r=await window.geminiCall(apiKey, prompt, 4000);
     }catch(fetchErr){
       throw new Error('Error de red al contactar Gemini: '+fetchErr.message+'. Verifica que tienes conexión a internet.');
     }
@@ -7309,10 +7341,7 @@ async function generarNotaIcConGemini(apiKey){
 
   // Helper para llamar Gemini con tokens configurables
   async function llamarGemini(prompt, tokens){
-    var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
-    var d=await r.json();
-    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
-    return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    return await window.geminiCall(apiKey, prompt, 4000);
   }
 
   // Instrucción base compartida — los datos demográficos van UNA SOLA VEZ en ctx
@@ -7628,7 +7657,7 @@ ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
   if(wrap){wrap.style.display='';wrap.scrollIntoView({behavior:'smooth',block:'start'});}
 
   try{
-    var resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})});
+    var resp=await window.geminiCall(apiKey, prompt, 4000);
     var data=await resp.json();
     console.log('[SEG] Gemini full response:', JSON.stringify(data).slice(0,800));
     if(!resp.ok||data.error)throw new Error(data.error?.message||'Error de API');
