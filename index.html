@@ -8242,17 +8242,16 @@ window.calcPCL5=()=>{
 // ── INIT ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
   // Wire prioridad buttons via event delegation (avoids inline onclick issues)
-  const prioWrap = document.getElementById('p-prioridad-btns');
-  if(prioWrap){
-    prioWrap.addEventListener('click', function(e){
-      const btn = e.target.closest('.risk-btn[data-val]');
-      if(!btn) return;
-      prioWrap.querySelectorAll('.risk-btn').forEach(b=>b.classList.remove('sel'));
-      btn.classList.add('sel');
-      const h = document.getElementById('p-prioridad');
-      if(h) h.value = btn.dataset.val;
-    });
-  }
+  // Use document-level delegation for prioridad — works even when modal is hidden at attach time
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('#p-prioridad-btns button[data-val]');
+    if(!btn) return;
+    const wrap = document.getElementById('p-prioridad-btns');
+    if(wrap) wrap.querySelectorAll('button').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');
+    const h = document.getElementById('p-prioridad');
+    if(h) h.value = btn.dataset.val;
+  });
   // Tests now render on demand when selected — no pre-render needed
   renderPCL5Questions && null; // no-op, handled by showTest
   try{document.getElementById('an-fecha').value=new Date().toISOString().split('T')[0];}catch(e){}
