@@ -39,9 +39,19 @@ function installPWA() {
 // Prioridad IC — defined early so available when HTML buttons are clicked
 function selPrioridad(val) {
   var wrap = document.getElementById('p-prioridad-btns');
-  if(wrap) wrap.querySelectorAll('button').forEach(function(b){ b.classList.remove('sel'); });
+  if(wrap) wrap.querySelectorAll('button').forEach(function(b){
+    b.classList.remove('sel');
+    b.style.background = '';
+    b.style.boxShadow = '';
+    b.style.fontWeight = '600';
+  });
   var btns = document.querySelectorAll('#p-prioridad-btns button[data-val="'+val+'"]');
-  btns.forEach(function(b){ b.classList.add('sel'); });
+  btns.forEach(function(b){
+    b.classList.add('sel');
+    b.style.background = val==='URGENTE'?'#fef2f2':val==='PRIORITARIA'?'#fffbeb':'#f0fdf4';
+    b.style.boxShadow = '0 0 0 2px '+(val==='URGENTE'?'#dc2626':val==='PRIORITARIA'?'#d97706':'#16a34a');
+    b.style.fontWeight = '800';
+  });
   var h = document.getElementById('p-prioridad');
   if(h) h.value = val;
 }
@@ -182,6 +192,7 @@ tbody td{padding:12px 14px;font-size:0.85rem}
 .risk-btn.low{color:var(--success)}.risk-btn.low.sel{background:var(--success-light);border-color:var(--success)}
 .risk-btn.med{color:var(--warning)}.risk-btn.med.sel{background:var(--warning-light);border-color:var(--warning)}
 .risk-btn.high{color:var(--danger)}.risk-btn.high.sel{background:var(--danger-light);border-color:var(--danger)}
+.risk-btn.sel{background:var(--surface2);border-color:var(--accent2)!important;box-shadow:0 0 0 2px var(--accent2)44}
 .timer-bar{display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap}
 .timer-step{flex:1;min-width:110px;padding:7px 10px;border-radius:8px;border:1px solid var(--border);font-size:0.72rem;color:var(--text2);background:var(--surface)}
 .timer-step .ts-time{font-weight:600;color:var(--text);font-size:0.78rem}
