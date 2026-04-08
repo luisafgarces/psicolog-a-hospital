@@ -2219,17 +2219,14 @@ input.toggle-cb{display:none}
       <div class="form-group" id="p-hab-group"><label>Habitación / Servicio</label><input type="text" id="p-hab" placeholder="Ej: 304B, URG-12, UCI-3, AZU-5"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px"><button type="button" onclick="document.getElementById('p-hab').value='AZU-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔵 Bloque Azul</button><button type="button" onclick="document.getElementById('p-hab').value='URG-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🟡 Urgencias</button><button type="button" onclick="document.getElementById('p-hab').value='UCI-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔴 UCI</button></div></div>
       <div class="form-group full"><label id="p-motivo-label">Diagnóstico médico / Motivo de interconsulta</label><textarea id="p-motivo" rows="2" placeholder="Ej: Ca. de mama, impacto emocional dx reciente"></textarea></div>
       <div class="form-group full"><label>Tratamiento médico actual</label><textarea id="p-trat-medico" rows="2" placeholder="Ej: Quimioterapia ciclo 3, Morfina 10mg c/8h, O2 suplementario…"></textarea></div>
-      <div class="form-group full"><label>Impresión diagnóstica psicológica</label><textarea id="p-dxpsi" rows="2" placeholder="Ej: Trastorno adaptativo con sintomatología ansiosa"></textarea></div>
-      <div class="form-group full"><label>Riesgo suicida</label>
-        <div class="risk-selector" style="margin-top:4px">
-          <div class="risk-btn" style="color:var(--text2)" onclick="setPRisk('SIN RIESGO',this)">SIN RIESGO</div>
-          <div class="risk-btn low" onclick="setPRisk('BAJO',this)">BAJO</div>
-          <div class="risk-btn med" onclick="setPRisk('MEDIO',this)">MEDIO</div>
-          <div class="risk-btn high" onclick="setPRisk('ALTO',this)">ALTO</div>
+      <div class="form-group full"><label>Prioridad de la interconsulta</label>
+        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
+          <div class="risk-btn" style="color:var(--text2);border-color:#6b7280" onclick="setPPrioridad('REGULAR',this)">🟢 REGULAR</div>
+          <div class="risk-btn" style="color:#d97706;border-color:#d97706" onclick="setPPrioridad('PRIORITARIA',this)">🟡 PRIORITARIA</div>
+          <div class="risk-btn" style="color:#dc2626;border-color:#dc2626" onclick="setPPrioridad('URGENTE',this)">🔴 URGENTE</div>
         </div>
-        <input type="hidden" id="p-riesgo" value="">
+        <input type="hidden" id="p-prioridad" value="">
       </div>
-      <div class="form-group full"><label>Observaciones de riesgo</label><textarea id="p-riesgo-obs" rows="2" placeholder="Ideación, plan, factores protectores..."></textarea></div>
       <div class="form-group full"><label>Estado actual</label>
         <select id="p-estado"><option value="seguimiento">Seguimiento</option><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="consulta-externa">Consulta externa</option><option value="alta">Alta</option><option value="revaloracion">Revaluación</option><option value="alta-voluntaria">Alta voluntaria</option><option value="fallecido">Paciente fallecido</option></select>
       </div>
@@ -2470,10 +2467,12 @@ window.guardarPaciente=async()=>{
       notas:document.getElementById('p-notas').value,
       tratMedico:document.getElementById('p-trat-medico').value,
       fechaIC:document.getElementById('p-fecha-ic').value,
+      prioridad:document.getElementById('p-prioridad').value,
       creado:serverTimestamp()
     });
     closeModal('modal-paciente');toast('✅ Paciente registrado');
-    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-dxpsi','p-riesgo-obs','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic'].forEach(id=>document.getElementById(id).value='');
+    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#modal-paciente .risk-btn[onclick*="setPPrioridad"]').forEach(b=>b.classList.remove('sel'));
     document.getElementById('p-riesgo').value='';
     document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>b.classList.remove('sel'));
   }
@@ -2767,6 +2766,8 @@ window.editarPaciente=(id)=>{
   document.getElementById('p-notas').value=p.notas||'';
   document.getElementById('p-trat-medico').value=p.tratMedico||'';
   document.getElementById('p-fecha-ic').value=p.fechaIC||'';
+  document.getElementById('p-prioridad').value=p.prioridad||'';
+  document.querySelectorAll('#modal-paciente .risk-btn[onclick*="setPPrioridad"]').forEach(b=>b.classList.toggle('sel',b.textContent.trim().includes(p.prioridad||'')));
   document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>{b.classList.toggle('sel',b.textContent.trim()===p.riesgo);});
   // Change button to update
   const btn=document.querySelector('#modal-paciente .btn-primary');
@@ -2792,7 +2793,8 @@ window.actualizarPaciente=async(id)=>{
       proxSesion:document.getElementById('p-proxsesion').value,
       notas:document.getElementById('p-notas').value,
       tratMedico:document.getElementById('p-trat-medico').value,
-      fechaIC:document.getElementById('p-fecha-ic').value
+      fechaIC:document.getElementById('p-fecha-ic').value,
+      prioridad:document.getElementById('p-prioridad').value
     });
     closeModal('modal-paciente');toast('✅ Paciente actualizado');
     const btn=document.querySelector('#modal-paciente .btn-primary');
@@ -5036,6 +5038,11 @@ window.setSegRiesgo=function(el,nivel){
   if(h)h.value=nivel;
 };
 
+window.setPPrioridad=function(nivel,el){
+  document.querySelectorAll('#modal-paciente .risk-btn[onclick*="setPPrioridad"]').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('p-prioridad').value=nivel;
+};
 window.setPRisk=function(nivel,el){
   document.querySelectorAll('#modal-paciente .risk-btn').forEach(function(b){b.classList.remove('sel');});
   el.classList.add('sel');
@@ -6757,6 +6764,7 @@ window.abrirPacSheet=async(id)=>{
   const ri=item=>`<div class="pac-info-item${item.full?' pac-info-full':''}"><div class="pac-info-label">${item.l}</div><div class="pac-info-value" style="${item.color?'color:'+item.color:''}">${item.v||'—'}</div></div>`;
   const grid=[
     {l:'Habitación',v:p.hab||(p.tipo==='consulta-externa'?'Consulta Externa':'—')},
+    p.prioridad?{l:'Prioridad IC',v:p.prioridad==='URGENTE'?'🔴 URGENTE':p.prioridad==='PRIORITARIA'?'🟡 PRIORITARIA':'🟢 REGULAR',color:p.prioridad==='URGENTE'?'var(--danger)':p.prioridad==='PRIORITARIA'?'var(--warning)':'var(--success)'}:null,
     {l:'Fecha ingreso',v:p.fecha?formatDate(p.fecha):'—'},
     p.fechaIC?{l:'Fecha solicitud IC',v:formatDate(p.fechaIC)}:null,
     (()=>{
