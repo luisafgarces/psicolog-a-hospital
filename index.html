@@ -535,6 +535,7 @@ input.toggle-cb{display:none}
         <div class="ic-mode-bar">
           <button class="ic-mode-btn active" id="ic-btn-nueva" onclick="setICMode('nueva')">💬 IC Nueva</button>
           <button class="ic-mode-btn" id="ic-btn-seg" onclick="setICMode('seg')">📝 Seguimiento</button>
+          <button class="ic-mode-btn" id="ic-btn-fam" onclick="setICMode('fam')">👨‍👩‍👧 Intervención Familiar</button>
           <button class="ic-mode-btn" id="ic-btn-esp" onclick="setICMode('esp')">⚠️ Nota Especial</button>
         </div>
         <div class="ic-patient-bar">
@@ -543,6 +544,8 @@ input.toggle-cb{display:none}
           <div class="ic-pat-field"><label>Edad / Sexo</label><input type="text" id="ic-edad" placeholder="42 años, F"></div>
           <div class="ic-pat-field"><label>Diagnóstico médico / Motivo IC</label><input type="text" id="ic-pdx" placeholder="Ca. de mama, impacto emocional dx reciente" oninput="const w=document.getElementById('ic-orientacion-wrap');if(w&&this.value.length>5)w.style.display='';"></div>
           <div class="ic-pat-field"><label>Fecha</label><input type="date" id="ic-pfecha"></div>
+          <div class="ic-pat-field"><label>Médico solicitante</label><input type="text" id="ic-medico-sol" placeholder="Dr. García — Medicina Interna"></div>
+          <div class="ic-pat-field ic-only-nueva"><label>Urgencia</label><select id="ic-urgencia" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem"><option value="">— Seleccionar —</option><option value="Alta">🔴 Alta</option><option value="Media">🟡 Media</option><option value="Baja">🟢 Baja</option></select></div>
         </div>
         <!-- ORIENTACIÓN DE VALORACIÓN CON IA -->
         <div id="ic-orientacion-wrap" style="margin-bottom:10px;background:var(--surface);border:1.5px solid var(--accent2);border-radius:10px;">
@@ -560,256 +563,481 @@ input.toggle-cb{display:none}
         <div class="risk-alert-bar" id="ic-risk-alert">⚠️ RIESGO ALTO — Verificar protocolo de seguridad antes de cerrar la nota</div>
         <!-- MODO IC NUEVA + SEGUIMIENTO -->
         <div id="ic-mode-nueva">
+
+          <!-- S1: MOTIVO DE INTERCONSULTA -->
           <div class="ic-form-section ic-only-nueva">
-            <div class="ic-form-head slate"><span class="ft">🏥 Contexto médico</span></div>
+            <div class="ic-form-head red"><span class="ft">📋 Motivo de interconsulta</span><span class="ic-form-badge red">OBLIGATORIO</span></div>
             <div class="ic-form-body">
-              <div class="ic-g2">
-                <div class="ic-field"><div class="ic-sublabel">Tipo de hospitalización</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Aguda / reciente</span><span class="ic-chip" onclick="icTog(this)">Hospitalización prolongada</span><span class="ic-chip" onclick="icTog(this)">UCI / urgencias</span><span class="ic-chip" onclick="icTog(this)">Cirugía reciente</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Evento crítico reciente</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguno</span><span class="ic-chip" onclick="icTog(this)">Diagnóstico nuevo</span><span class="ic-chip" onclick="icTogR(this)">Malas noticias</span><span class="ic-chip" onclick="icTog(this)">Empeoramiento clínico</span><span class="ic-chip" onclick="icTogR(this)">Techo terapéutico</span><span class="ic-chip" onclick="icTog(this)">Procedimiento invasivo próximo</span></div></div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Pedido textual del médico derivante</div>
+                <textarea id="ic-motivo-medico" rows="2" placeholder="Transcribe exactamente lo que escribió el médico en la solicitud de IC…" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea>
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Urgencia</div>
+                <div class="ic-chips">
+                  <span class="ic-chip on-r" onclick="icTogSingle(this,'ic-urgencia-val')">🔴 Alta</span>
+                  <span class="ic-chip" onclick="icTogSingle(this,'ic-urgencia-val')">🟡 Media</span>
+                  <span class="ic-chip" onclick="icTogSingle(this,'ic-urgencia-val')">🟢 Baja</span>
+                </div>
+                <input type="hidden" id="ic-urgencia-val" value="Alta">
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Pregunta específica a responder</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTog(this)">Evaluar adherencia</span>
+                  <span class="ic-chip" onclick="icTog(this)">Ansiedad prequirúrgica</span>
+                  <span class="ic-chip" onclick="icTog(this)">Depresión en enfermedad crónica</span>
+                  <span class="ic-chip" onclick="icTog(this)">Duelo complicado</span>
+                  <span class="ic-chip" onclick="icTog(this)">Síntomas somáticos</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Riesgo suicida / autolesión</span>
+                  <span class="ic-chip" onclick="icTog(this)">Impacto diagnóstico nuevo</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Negativa activa al tratamiento</span>
+                  <span class="ic-chip" onclick="icTog(this)">Manejo conductual</span>
+                  <span class="ic-chip" onclick="icTog(this)">Otro</span>
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- S2: DATOS CLÍNICOS HOSPITALARIOS -->
           <div class="ic-form-section ic-only-nueva">
-            <div class="ic-form-head slate"><span class="ft">🗂️ Antecedentes de salud mental</span><span class="ic-form-badge">IC NUEVA</span></div>
+            <div class="ic-form-head slate"><span class="ft">🏥 Datos clínicos hospitalarios</span></div>
             <div class="ic-form-body">
               <div class="ic-g2">
-                <div class="ic-field"><div class="ic-sublabel">Tto. psicológico / psiquiátrico previo</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguno</span><span class="ic-chip" onclick="icTog(this)">Psicológico previo</span><span class="ic-chip" onclick="icTog(this)">Psiquiátrico previo</span><span class="ic-chip" onclick="icTog(this)">Ambos</span><span class="ic-chip" onclick="icTog(this)">Actualmente en tto.</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Hospitalizaciones psiquiátricas previas</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguna</span><span class="ic-chip" onclick="icTogA(this)">Sí — relevantes</span></div></div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Tipo de hospitalización</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Aguda / reciente</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hospitalización prolongada</span>
+                    <span class="ic-chip" onclick="icTog(this)">UCI / urgencias</span>
+                    <span class="ic-chip" onclick="icTog(this)">Cirugía reciente</span>
+                    <span class="ic-chip" onclick="icTog(this)">Cuidados paliativos</span>
+                  </div>
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Evento crítico reciente</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno</span>
+                    <span class="ic-chip" onclick="icTog(this)">Diagnóstico nuevo</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Malas noticias</span>
+                    <span class="ic-chip" onclick="icTog(this)">Empeoramiento clínico</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Techo terapéutico</span>
+                    <span class="ic-chip" onclick="icTog(this)">Procedimiento invasivo próximo</span>
+                  </div>
+                </div>
               </div>
-              <div class="ic-field"><div class="ic-sublabel">Diagnósticos psiquiátricos previos conocidos</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Sin antecedentes conocidos</span><span class="ic-chip" onclick="icTog(this)">Depresión mayor</span><span class="ic-chip" onclick="icTog(this)">TAG</span><span class="ic-chip" onclick="icTog(this)">Trastorno bipolar</span><span class="ic-chip" onclick="icTog(this)">TEPT</span><span class="ic-chip" onclick="icTog(this)">Pánico</span><span class="ic-chip" onclick="icTog(this)">TOC</span><span class="ic-chip" onclick="icTog(this)">Trastorno de personalidad</span><span class="ic-chip" onclick="icTogR(this)">Psicosis / esquizofrenia</span><span class="ic-chip" onclick="icTog(this)">TDAH</span><span class="ic-chip" onclick="icTog(this)">Otro</span></div></div>
               <div class="ic-g2">
-                <div class="ic-field"><div class="ic-sublabel">Intentos de suicidio previos</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguno</span><span class="ic-chip" onclick="icTogR(this)">Sí — relevantes</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Autolesiones previas</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguna</span><span class="ic-chip" onclick="icTogA(this)">Sí — sin intención suicida</span></div></div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Tratamiento médico actual</div>
+                  <textarea id="ic-trat-medico" rows="2" placeholder="Medicamentos y procedimientos en curso. Ej: Quimioterapia ciclo 3, Morfina 10mg c/8h…" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea>
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Días de internación</div>
+                  <input type="number" id="ic-dias-internacion" min="0" placeholder="Ej: 7" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.85rem">
+                </div>
               </div>
-              <div class="ic-field"><div class="ic-sublabel">Medicación psiquiátrica actual</div><textarea id="ic-meds-psiq" placeholder="Ej: Sertralina 50mg, Clonazepam 0.5mg. Dejar en blanco si ninguna." rows="1"></textarea></div>
             </div>
           </div>
+
+          <!-- S3: HISTORIA DEL PROBLEMA ACTUAL -->
           <div class="ic-form-section ic-only-nueva">
-            <div class="ic-form-head amber"><span class="ft">⚠️ Tamizaje de violencia</span><span class="ic-form-badge amber">IC NUEVA — SOLO DETECTAR</span></div>
+            <div class="ic-form-head slate"><span class="ft">📝 Historia del problema actual</span></div>
             <div class="ic-form-body">
-              <div class="ic-field"><div class="ic-sublabel">Tipo de violencia (marcar si aplica)</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Niega antecedentes de violencia</span><span class="ic-chip" onclick="icTogA(this)">Maltrato físico infantil</span><span class="ic-chip" onclick="icTogA(this)">Maltrato psicológico infantil</span><span class="ic-chip" onclick="icTogR(this)">Abuso sexual (infancia o adultez)</span><span class="ic-chip" onclick="icTogR(this)">Violencia de pareja — física</span><span class="ic-chip" onclick="icTogA(this)">Violencia de pareja — psicológica/económica</span><span class="ic-chip" onclick="icTogR(this)">Violencia de pareja — sexual</span><span class="ic-chip" onclick="icTogA(this)">Conflicto armado / desplazamiento</span><span class="ic-chip" onclick="icTog(this)">Testigo de violencia intrafamiliar</span><span class="ic-chip" onclick="icTog(this)">Acoso escolar / laboral</span></div></div>
-              <div class="ic-field"><div class="ic-sublabel">Situación actual de riesgo por violencia</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Sin riesgo actual identificado</span><span class="ic-chip" onclick="icTogA(this)">Situación activa — requiere orientación</span><span class="ic-chip" onclick="icTogR(this)">Riesgo inminente — remitir urgente a trabajo social</span></div></div>
-              <div style="font-size:0.72rem;color:var(--text3);margin-top:4px;padding:6px 8px;background:var(--warning-light);border-radius:6px;border-left:3px solid var(--warning)">⚠ Solo detectar, no elaborar. Si hay violencia activa, remitir a trabajo social y/o activar ruta de atención. No profundizar en narrativas en contexto hospitalario agudo.</div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Inicio y evolución en contexto hospitalario</div>
+                <textarea id="ic-inicio-evolucion" rows="3" placeholder="¿Cuándo comenzó el malestar emocional en relación con la internación? ¿Cómo ha evolucionado desde el ingreso? ¿Qué lo desencadenó o empeoró?" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea>
+              </div>
             </div>
           </div>
+
+          <!-- S4: EVALUACIÓN TCC — Pensamientos, Emociones, Conductas -->
           <div class="ic-form-section">
-            <div class="ic-form-head"><span class="ft">💬 Análisis subjetivo — Reporte del paciente</span><span class="ic-form-badge blue">SUBJETIVO</span></div>
+            <div class="ic-form-head red"><span class="ft">🎯 Evaluación TCC — Pensamientos · Emociones · Conductas</span><span class="ic-form-badge red">OBLIGATORIO</span></div>
             <div class="ic-form-body">
-              <div class="ic-field"><div class="ic-sublabel">Estado emocional referido</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ansioso/a</span><span class="ic-chip" onclick="icTog(this)">Triste</span><span class="ic-chip" onclick="icTogR(this)">Desesperanzado/a</span><span class="ic-chip" onclick="icTog(this)">Irritable</span><span class="ic-chip" onclick="icTog(this)">Asustado/a</span><span class="ic-chip" onclick="icTog(this)">Confundido/a</span><span class="ic-chip" onclick="icTogG(this)">Relativamente tranquilo/a</span><span class="ic-chip" onclick="icTog(this)">Abrumado/a</span><span class="ic-chip" onclick="icTog(this)">Ambivalente</span></div></div>
-              <div class="ic-g2">
-                <div class="ic-field"><div class="ic-sublabel">Principales preocupaciones</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Pronóstico incierto</span><span class="ic-chip" onclick="icTog(this)">Dolor / malestar físico</span><span class="ic-chip" onclick="icTog(this)">Familia / hijos</span><span class="ic-chip" onclick="icTog(this)">Rol de cuidador / proveedor familiar</span><span class="ic-chip" onclick="icTog(this)">Rol laboral / económico</span><span class="ic-chip" onclick="icTog(this)">Dependencia / autonomía</span><span class="ic-chip" onclick="icTog(this)">Miedo a morir</span><span class="ic-chip" onclick="icTog(this)">Proceso diagnóstico</span><span class="ic-chip" onclick="icTog(this)">Aislamiento</span><span class="ic-chip" onclick="icTogA(this)">Demoras del alta</span><span class="ic-chip" onclick="icTogA(this)">Demoras en procesos hospitalarios</span><span class="ic-chip" onclick="icTogA(this)">Inconformidad con la atención</span><span class="ic-chip" onclick="icTogA(this)">Demoras en procesos de la EPS</span><span class="ic-chip" onclick="icTogA(this)">Sensación de estancamiento</span><span class="ic-chip" onclick="icTog(this)">Ninguna</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Pensamientos automáticos (CC)</div><div class="ic-chips"><span class="ic-chip" onclick="icTogR(this)">No voy a mejorar</span><span class="ic-chip" onclick="icTogR(this)">Soy una carga</span><span class="ic-chip" onclick="icTogR(this)">No puedo con esto</span><span class="ic-chip" onclick="icTogR(this)">Lo peor está por venir</span><span class="ic-chip" onclick="icTogR(this)">Nunca volveré a ser el mismo/a</span><span class="ic-chip" onclick="icTogA(this)">Catastrofización</span><span class="ic-chip" onclick="icTogA(this)">Pensamiento todo-o-nada</span><span class="ic-chip" onclick="icTogA(this)">Minimización de recursos propios</span><span class="ic-chip" onclick="icTog(this)">Ninguno</span></div></div>
+              <div style="font-size:0.72rem;color:var(--text3);padding:5px 8px;background:#fef3f2;border-radius:6px;border-left:3px solid var(--danger);margin-bottom:8px">Modelo ABC: A = antecedente médico/hospitalario &nbsp;·&nbsp; B = creencias/pensamientos &nbsp;·&nbsp; C = consecuencias conductuales/emocionales</div>
+
+              <!-- B: Pensamientos automáticos -->
+              <div class="ic-field">
+                <div class="ic-sublabel">💭 Pensamientos automáticos sobre enfermedad/internación/procedimiento</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogR(this)">No voy a mejorar</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Soy una carga</span>
+                  <span class="ic-chip" onclick="icTogR(this)">No puedo con esto</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Lo peor está por venir</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Nunca volveré a ser el mismo/a</span>
+                  <span class="ic-chip" onclick="icTogR(this)">La cirugía va a salir mal</span>
+                  <span class="ic-chip" onclick="icTogR(this)">El medicamento me va a hacer daño</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Catastrofización</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Pensamiento todo-o-nada</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Minimización de recursos propios</span>
+                  <span class="ic-chip" onclick="icTog(this)">Ninguno identificado</span>
+                </div>
+                <textarea id="ic-tcc-pensamientos" rows="2" placeholder="¿Cuáles son los pensamientos recurrentes sobre su enfermedad, internación o procedimiento próximo? Cita textual si es posible…" style="margin-top:6px;width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea>
               </div>
-              <div class="ic-g2">
-                <div class="ic-field"><div class="ic-sublabel">Cita textual / narrativa relevante</div><textarea id="ic-sub-cita" placeholder="Ej: No sé cómo decirle a mis hijos..." rows="2"></textarea></div>
-                <div class="ic-field"><div class="ic-sublabel">Intensidad malestar (1–10) / Desde el ingreso</div><input type="text" id="ic-sub-intensidad" placeholder="Ej: 8/10 — Desde el ingreso describe..."></div>
+
+              <!-- C: Emociones -->
+              <div class="ic-field">
+                <div class="ic-sublabel">😟 Estado emocional referido</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTog(this)">Ansioso/a</span>
+                  <span class="ic-chip" onclick="icTog(this)">Triste</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Desesperanzado/a</span>
+                  <span class="ic-chip" onclick="icTog(this)">Irritable</span>
+                  <span class="ic-chip" onclick="icTog(this)">Asustado/a</span>
+                  <span class="ic-chip" onclick="icTog(this)">Confundido/a</span>
+                  <span class="ic-chip" onclick="icTog(this)">Abrumado/a</span>
+                  <span class="ic-chip" onclick="icTogG(this)">Relativamente tranquilo/a</span>
+                  <span class="ic-chip" onclick="icTog(this)">Ambivalente</span>
+                </div>
+                <div class="ic-g2" style="margin-top:6px">
+                  <div class="ic-field"><div class="ic-sublabel">Intensidad malestar (1–10)</div><input type="text" id="ic-sub-intensidad" placeholder="Ej: 8/10 — Desde el ingreso describe…"></div>
+                  <div class="ic-field"><div class="ic-sublabel">Cita textual</div><textarea id="ic-sub-cita" rows="2" placeholder="Ej: 'No sé cómo decirle a mis hijos…'"></textarea></div>
+                </div>
               </div>
-              <div class="ic-field"><div class="ic-sublabel">Funcionalidad física actual</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Deambula con autonomía</span><span class="ic-chip" onclick="icTogA(this)">Movilidad reducida</span><span class="ic-chip" onclick="icTogR(this)">En cama — dependencia total</span><span class="ic-chip" onclick="icTogA(this)">Dolor referido</span><span class="ic-chip" onclick="icTogA(this)">Fatiga marcada</span><span class="ic-chip" onclick="icTog(this)">Limitación sensorial</span><span class="ic-chip" onclick="icTog(this)">Dificultades del habla</span></div></div>
+
+              <!-- C: Conductas de evitación/seguridad -->
+              <div class="ic-field">
+                <div class="ic-sublabel">🚫 Conductas de evitación / seguridad</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTog(this)">No identificadas</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Evita chequeos médicos</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Evita o rechaza medicamentos</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Evita procedimientos</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Rituales para controlar ansiedad</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Búsqueda excesiva de reaseguramiento</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Evita hablar del diagnóstico</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Negativa activa al tratamiento</span>
+                </div>
+                <textarea id="ic-tcc-evitacion" rows="2" placeholder="¿Evita chequeos, medicamentos o procedimientos? ¿Usa rituales para controlar la ansiedad? ¿Cómo intenta reducir el miedo?" style="margin-top:6px;width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea>
+              </div>
+
+              <!-- C: Activación conductual -->
+              <div class="ic-field">
+                <div class="ic-sublabel">⚡ Activación conductual — nivel de actividad en hospital</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogG(this)">Actividad conservada</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Actividad reducida</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Inactividad casi total</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Higiene descuidada</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Aislamiento / no interactúa</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Movilidad reducida por miedo</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Negativa a rehabilitación</span>
+                </div>
+                <textarea id="ic-tcc-activacion" rows="2" placeholder="Nivel de actividad diaria en hospital: movilidad, higiene, interacción. ¿Hay barreras conductuales por síntomas?" style="margin-top:6px;width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea>
+              </div>
+
+              <!-- Adherencia -->
+              <div class="ic-field">
+                <div class="ic-sublabel">💊 Adherencia al tratamiento médico</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogG(this)">Buena adherencia</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Adherencia parcial</span>
+                  <span class="ic-chip" onclick="icTogR(this)">No adherencia activa</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Creencias negativas sobre medicamentos</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Barreras emocionales</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Barreras logísticas / económicas</span>
+                </div>
+                <textarea id="ic-tcc-adherencia" rows="2" placeholder="¿Por qué cree que le cuesta seguir el tratamiento? ¿Qué pensamientos surgen al tomar medicamentos? ¿Dificultades previas con tratamientos?" style="margin-top:6px;width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea>
+              </div>
             </div>
           </div>
+
+          <!-- S5: FACTORES DE RIESGO Y PROTECCIÓN -->
           <div class="ic-form-section">
-            <div class="ic-form-head amber"><span class="ft">🧩 Análisis objetivo — Examen mental</span><span class="ic-form-badge amber">OBJETIVO</span></div>
+            <div class="ic-form-head red"><span class="ft">🔴 Factores de riesgo y protección</span><span class="ic-form-badge red">SIEMPRE — NUNCA OMITIR</span></div>
+            <div class="ic-form-body">
+              <div class="ic-g2">
+                <div><div class="ic-sublabel">Ideación autolítica actual</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguna</span><span class="ic-chip" onclick="icTogRiesgo(this)">Pasiva — deseo de que termine</span><span class="ic-chip" onclick="icTogRiesgo(this)">Activa</span><span class="ic-chip" onclick="icTogRiesgo(this)">Con plan estructurado</span></div></div>
+                <div><div class="ic-sublabel">Intentos previos</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguno</span><span class="ic-chip" onclick="icTogR(this)">Sí — relevantes</span></div></div>
+              </div>
+              <div id="ic-plan-riesgo-wrap" style="display:none">
+                <div class="ic-field"><div class="ic-sublabel">⚠️ Describir: ideación, plan, medios disponibles</div><textarea id="ic-riesgo-notas" rows="2" placeholder="Deseo de morir vs. deseo de que termine el sufrimiento. Plan. Medios disponibles. Intención…"></textarea></div>
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Red de apoyo funcional</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogG(this)">Presente y activa</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Presente pero ambivalente</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Ausente</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Conflictos familiares activos</span>
+                </div>
+                <input type="text" id="ic-red-apoyo-detalle" placeholder="¿Quién está disponible ahora? ¿Calidad del apoyo? (opcional)" style="margin-top:6px;width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Factores protectores</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTog(this)">Motivación para recuperarse</span>
+                  <span class="ic-chip" onclick="icTog(this)">Hijos / familia</span>
+                  <span class="ic-chip" onclick="icTog(this)">Fe / espiritualidad</span>
+                  <span class="ic-chip" onclick="icTog(this)">Insight conservado</span>
+                  <span class="ic-chip" onclick="icTog(this)">Red de apoyo activa</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- S6: EXAMEN MENTAL (abreviado — contexto hospitalario agudo) -->
+          <div class="ic-form-section">
+            <div class="ic-form-head amber"><span class="ft">🧩 Examen mental</span><span class="ic-form-badge amber">OBJETIVO</span></div>
             <div class="ic-form-body">
               <div class="ic-g3">
                 <div><div class="ic-sublabel">Orientación</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Tiempo</span><span class="ic-chip" onclick="icTog(this)">Espacio</span><span class="ic-chip" onclick="icTog(this)">Persona</span><span class="ic-chip" onclick="icTogR(this)">Desorientado/a</span></div></div>
                 <div><div class="ic-sublabel">Conciencia / Colaboración</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Consciente</span><span class="ic-chip" onclick="icTog(this)">Colaborador/a</span><span class="ic-chip" onclick="icTog(this)">Poco colaborador/a</span><span class="ic-chip" onclick="icTogR(this)">Obnubilado/a</span></div></div>
                 <div><div class="ic-sublabel">Conducta</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Adecuada</span><span class="ic-chip" onclick="icTog(this)">Inhibida</span><span class="ic-chip" onclick="icTog(this)">Agitada</span><span class="ic-chip" onclick="icTog(this)">Lloroso/a</span><span class="ic-chip" onclick="icTog(this)">Retraído/a</span></div></div>
-                <div><div class="ic-sublabel">Afecto</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Eutímico</span><span class="ic-chip" onclick="icTog(this)">Depresivo</span><span class="ic-chip" onclick="icTog(this)">Ansioso</span><span class="ic-chip" onclick="icTog(this)">Lábil</span><span class="ic-chip" onclick="icTog(this)">Aplanado</span><span class="ic-chip" onclick="icTog(this)">Congruente</span></div></div>
-                <div><div class="ic-sublabel">Pensamiento</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Organizado</span><span class="ic-chip" onclick="icTog(this)">Lógico</span><span class="ic-chip" onclick="icTogR(this)">Ideas irracionales</span><span class="ic-chip" onclick="icTogR(this)">Bloqueo</span><span class="ic-chip" onclick="icTogR(this)">Bradipsiquia</span></div></div>
-                <div><div class="ic-sublabel">Lenguaje / Insight</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Coherente</span><span class="ic-chip" onclick="icTog(this)">Insight conservado</span><span class="ic-chip" onclick="icTog(this)">Insight parcial</span><span class="ic-chip" onclick="icTogR(this)">Sin insight</span></div></div>
+                <div><div class="ic-sublabel">Afecto</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Eutímico</span><span class="ic-chip" onclick="icTog(this)">Depresivo</span><span class="ic-chip" onclick="icTog(this)">Ansioso</span><span class="ic-chip" onclick="icTog(this)">Lábil</span><span class="ic-chip" onclick="icTog(this)">Aplanado</span></div></div>
+                <div><div class="ic-sublabel">Pensamiento</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Organizado</span><span class="ic-chip" onclick="icTogR(this)">Ideas irracionales</span><span class="ic-chip" onclick="icTogR(this)">Bloqueo</span><span class="ic-chip" onclick="icTogR(this)">Bradipsiquia</span></div></div>
+                <div><div class="ic-sublabel">Insight</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Conservado</span><span class="ic-chip" onclick="icTog(this)">Parcial</span><span class="ic-chip" onclick="icTogR(this)">Sin insight</span></div></div>
               </div>
-              <div class="ic-g2">
-                <div class="ic-field"><div class="ic-sublabel">Regulación emocional</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Tolera el malestar</span><span class="ic-chip" onclick="icTog(this)">Llanto contenido</span><span class="ic-chip" onclick="icTogR(this)">Llanto incontenible</span><span class="ic-chip" onclick="icTogR(this)">Ansiedad desbordada</span><span class="ic-chip" onclick="icTog(this)">Bloqueo emocional</span><span class="ic-chip" onclick="icTog(this)">Salir</span><span class="ic-chip" onclick="icTog(this)">Caminar</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Estrategias de afrontamiento</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Hablar / verbalizar</span><span class="ic-chip" onclick="icTog(this)">Espiritualidad / fe</span><span class="ic-chip" onclick="icTog(this)">Evitación</span><span class="ic-chip" onclick="icTog(this)">Control excesivo</span><span class="ic-chip" onclick="icTogR(this)">Afrontamiento desorganizado</span><span class="ic-chip" onclick="icTog(this)">Red de apoyo activa</span></div></div>
+              <div class="ic-g2" style="margin-top:8px">
+                <div class="ic-field"><div class="ic-sublabel">Regulación emocional</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Tolera el malestar</span><span class="ic-chip" onclick="icTogR(this)">Llanto incontenible</span><span class="ic-chip" onclick="icTogR(this)">Ansiedad desbordada</span><span class="ic-chip" onclick="icTog(this)">Bloqueo emocional</span></div></div>
+                <div class="ic-field"><div class="ic-sublabel">Comprensión del Dx</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Adecuada</span><span class="ic-chip" onclick="icTog(this)">Parcial</span><span class="ic-chip" onclick="icTogR(this)">Negación</span><span class="ic-chip" onclick="icTogA(this)">Expectativas irreales</span></div></div>
               </div>
-              <div class="ic-field"><div class="ic-sublabel">Comprensión del Dx / pronóstico</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Comprensión adecuada</span><span class="ic-chip" onclick="icTog(this)">Comprensión parcial</span><span class="ic-chip" onclick="icTogR(this)">Negación</span><span class="ic-chip" onclick="icTogA(this)">Expectativas irreales</span><span class="ic-chip" onclick="icTog(this)">Alta incertidumbre / miedo</span></div></div>
-              <div class="ic-g2">
-                <div class="ic-field"><div class="ic-sublabel">Nivel de conocimiento del diagnóstico</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Conoce Dx completo</span><span class="ic-chip" onclick="icTogA(this)">Información parcial</span><span class="ic-chip" onclick="icTogR(this)">Desconoce el Dx</span><span class="ic-chip" onclick="icTogA(this)">Información dada por familia, no por equipo</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Indicadores de duelo anticipatorio</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">No identificados</span><span class="ic-chip" onclick="icTogA(this)">Tristeza por pérdidas funcionales</span><span class="ic-chip" onclick="icTogA(this)">Preocupación por el legado / familia</span><span class="ic-chip" onclick="icTogR(this)">Despedida anticipada</span><span class="ic-chip" onclick="icTogA(this)">Cierre de asuntos pendientes</span><span class="ic-chip" onclick="icTog(this)">Ambivalencia vital</span></div></div>
-              </div>
+              <div class="ic-field" style="margin-top:4px"><div class="ic-sublabel">Análisis clínico libre</div><textarea id="ic-resp-analisis" rows="2" placeholder="Formulación clínica breve, hipótesis diagnóstica, observaciones relevantes…"></textarea></div>
             </div>
           </div>
-          <div class="ic-form-section ic-only-nueva">
-            <div class="ic-form-head slate"><span class="ft">🍽️ Hábitos — Alimentación, sueño y sustancias</span></div>
-            <div class="ic-form-body">
-              <div class="ic-g2">
-                <div class="ic-field"><div class="ic-sublabel">Alimentación</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Adecuada</span><span class="ic-chip" onclick="icTogA(this)">Reducida / poco apetito</span><span class="ic-chip" onclick="icTogR(this)">Muy escasa / ayuno</span><span class="ic-chip" onclick="icTogA(this)">Ingesta aumentada</span><span class="ic-chip" onclick="icTog(this)">Condicionada por dieta médica</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Sueño</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Conservado</span><span class="ic-chip" onclick="icTogA(this)">Insomnio de conciliación</span><span class="ic-chip" onclick="icTogA(this)">Insomnio de mantenimiento</span><span class="ic-chip" onclick="icTogR(this)">Insomnio severo</span><span class="ic-chip" onclick="icTog(this)">Hipersomnia</span><span class="ic-chip" onclick="icTog(this)">Alterado por hospitalización</span></div></div>
-              </div>
-              <div class="ic-field"><div class="ic-sublabel">Consumo de sustancias psicoactivas</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Niega consumo</span><span class="ic-chip" onclick="icTogA(this)">Consumo ocasional de alcohol</span><span class="ic-chip" onclick="icTogR(this)">Consumo problemático de alcohol</span><span class="ic-chip" onclick="icTogA(this)">Tabaco</span><span class="ic-chip" onclick="icTogR(this)">Marihuana</span><span class="ic-chip" onclick="icTogR(this)">Cocaína / bazuco</span><span class="ic-chip" onclick="icTogR(this)">Benzodiacepinas sin prescripción</span><span class="ic-chip" onclick="icTog(this)">Otro</span></div>
-              <textarea id="ic-sustancias-notas" placeholder="Detalles sobre consumo, frecuencia, impacto..." rows="2" style="margin-top:8px;width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea></div>
-            </div>
-          </div>
-          <div class="ic-form-section">
-            <div class="ic-form-head slate"><span class="ft">🧠 Distorsiones cognitivas</span></div>
-            <div class="ic-form-body">
-              <div class="ic-field"><div class="ic-chips"><span class="ic-chip" onclick="icTogR(this)" title="Ver en blanco o negro, sin matices" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Pensamiento todo o nada</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">Ver en blanco o negro, sin matices</span></span><span class="ic-chip" onclick="icTogR(this)" title=""Siempre me pasa lo mismo"" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Sobregeneralización</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">"Siempre me pasa lo mismo"</span></span><span class="ic-chip" onclick="icTogR(this)" title="Solo ve lo negativo, ignora lo positivo" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Filtro mental</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">Solo ve lo negativo, ignora lo positivo</span></span><span class="ic-chip" onclick="icTogR(this)" title=""Eso fue suerte, no cuenta"" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Descalificar lo positivo</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">"Eso fue suerte, no cuenta"</span></span><span class="ic-chip" onclick="icTogR(this)" title=""Sé que me juzgan / les caigo mal"" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Lectura de mente</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">"Sé que me juzgan / les caigo mal"</span></span><span class="ic-chip" onclick="icTogR(this)" title=""Sé que va a salir mal"" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Error del adivino</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">"Sé que va a salir mal"</span></span><span class="ic-chip" onclick="icTogR(this)" title="Exagera lo malo, minimiza lo bueno" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Catastrofismo / Minimización</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">Exagera lo malo, minimiza lo bueno</span></span><span class="ic-chip" onclick="icTogR(this)" title=""Me siento culpable, entonces lo soy"" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Razonamiento emocional</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">"Me siento culpable, entonces lo soy"</span></span><span class="ic-chip" onclick="icTogR(this)" title=""Debería poder con todo solo"" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Deberías (Imperativos)</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">"Debería poder con todo solo"</span></span><span class="ic-chip" onclick="icTogR(this)" title=""Soy un fracasado / perdedor"" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Etiquetado</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">"Soy un fracasado / perdedor"</span></span><span class="ic-chip" onclick="icTogR(this)" title=""Todo lo malo es mi culpa"" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Personalización</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">"Todo lo malo es mi culpa"</span></span><span class="ic-chip" onclick="icTogR(this)" title=""No es justo que me pase a mí"" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Falacia de justicia</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">"No es justo que me pase a mí"</span></span><span class="ic-chip" onclick="icTog(this)">Ninguna</span></div></div>
-            </div>
-          </div>
-          <div class="ic-form-section">
-            <div class="ic-form-head slate"><span class="ft">💭 Ideas irracionales</span></div>
-            <div class="ic-form-body">
-              <div class="ic-field"><div class="ic-chips"><span class="ic-chip" onclick="icTogR(this)" title="Necesita ser aprobado por todos" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Necesidad de aprobación</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">Necesita ser aprobado por todos</span></span><span class="ic-chip" onclick="icTogR(this)" title="Debe ser perfecto para tener valor" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Exigencia de competencia</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">Debe ser perfecto para tener valor</span></span><span class="ic-chip" onclick="icTogR(this)" title="Quien falla merece castigo" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Culpar y castigar</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">Quien falla merece castigo</span></span><span class="ic-chip" onclick="icTogR(this)" title="Todo lo malo es horrible e insoportable" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Catastrofismo</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">Todo lo malo es horrible e insoportable</span></span><span class="ic-chip" onclick="icTogR(this)" title="Mi infelicidad es culpa de otros" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Victimismo</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">Mi infelicidad es culpa de otros</span></span><span class="ic-chip" onclick="icTogR(this)" title="El mundo es peligroso, siempre alerta" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Preocupación por peligros</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">El mundo es peligroso, siempre alerta</span></span><span class="ic-chip" onclick="icTogR(this)" title="Es mejor evitar que enfrentar" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Evitación de problemas</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">Es mejor evitar que enfrentar</span></span><span class="ic-chip" onclick="icTogR(this)" title="Necesita de alguien más fuerte" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Dependencia</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">Necesita de alguien más fuerte</span></span><span class="ic-chip" onclick="icTogR(this)" title="El pasado determina mi presente" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Determinismo</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">El pasado determina mi presente</span></span><span class="ic-chip" onclick="icTogR(this)" title="Debe resolver los problemas de todos" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Preocupación por problemas ajenos</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">Debe resolver los problemas de todos</span></span><span class="ic-chip" onclick="icTogR(this)" title="Existe una solución perfecta para todo" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Perfeccionismo</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">Existe una solución perfecta para todo</span></span><span class="ic-chip" onclick="icTogR(this)" title="El sacrificio siempre tendrá recompensa" style="flex-direction:column;align-items:flex-start;gap:1px;padding:5px 8px;height:auto"><span style="font-weight:600;font-size:0.78rem;line-height:1.2">Falacia de la recompensa</span><span style="font-size:0.64rem;font-weight:400;opacity:0.72;line-height:1.3;white-space:normal;text-align:left">El sacrificio siempre tendrá recompensa</span></span><span class="ic-chip" onclick="icTog(this)">Ninguna</span></div></div>
-            </div>
-          </div>
-          <div class="ic-form-section">
-            <div class="ic-form-head red"><span class="ft">🔴 Riesgo suicida / autolesivo</span><span class="ic-form-badge red">SIEMPRE — NUNCA OMITIR</span></div>
-            <div class="ic-form-body">
-              <div class="ic-g2">
-                <div><div class="ic-sublabel">Ideación actual</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguna</span><span class="ic-chip" onclick="icTogA(this)">Pasiva — deseo de que termine</span><span class="ic-chip" onclick="icTogR(this)">Activa</span><span class="ic-chip" onclick="icTogR(this)">Con plan estructurado</span></div></div>
-                <div><div class="ic-sublabel">Clasificación de riesgo</div><div class="sev-row"><div class="sev-btn bajo" onclick="setICSev(this,'BAJO')">BAJO</div><div class="sev-btn medio" onclick="setICSev(this,'MEDIO')">MEDIO</div><div class="sev-btn alto" onclick="setICSev(this,'ALTO',true)">ALTO</div></div><input type="hidden" id="ic-riesgo-nivel" value=""></div>
-              </div>
-              <div class="ic-g2">
-                <div class="ic-field"><div class="ic-sublabel">Intentos previos</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguno</span><span class="ic-chip" onclick="icTogR(this)">Sí — relevantes</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Factores protectores</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Red de apoyo presente</span><span class="ic-chip" onclick="icTog(this)">Motivación para recuperarse</span><span class="ic-chip" onclick="icTog(this)">Hijos / familia</span><span class="ic-chip" onclick="icTog(this)">Fe / espiritualidad</span></div></div>
-              </div>
-              <div class="ic-field"><div class="ic-sublabel">Notas de riesgo</div><textarea id="ic-riesgo-notas" placeholder="Deseo de morir vs. deseo de que termine el sufrimiento..." rows="2"></textarea></div>
-            </div>
-          </div>
-          <div class="ic-form-section ic-only-nueva">
-            <div class="ic-form-head slate"><span class="ft">⚕️ Factores de interferencia con el manejo médico</span></div>
-            <div class="ic-form-body">
-              <div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Sin interferencia identificada</span><span class="ic-chip" onclick="icTogR(this)">Rechazo de procedimientos</span><span class="ic-chip" onclick="icTog(this)">Negación del Dx</span><span class="ic-chip" onclick="icTog(this)">Desmotivación para el tratamiento</span><span class="ic-chip" onclick="icTog(this)">Ansiedad anticipatoria a exámenes</span><span class="ic-chip" onclick="icTog(this)">Dependencia emocional del personal</span><span class="ic-chip" onclick="icTogA(this)">No adherencia a indicaciones</span></div>
-            </div>
-          </div>
+
+          <!-- S7: IMPRESIÓN DIAGNÓSTICA PRELIMINAR -->
           <div class="ic-form-section" id="ic-dx-section">
-            <div class="ic-form-head green"><span class="ft">🎯 Respuesta — Síntomas e Impresión Diagnóstica</span><span class="ic-form-badge green">RESPUESTA</span></div>
+            <div class="ic-form-head green"><span class="ft">🎯 Impresión diagnóstica preliminar</span><span class="ic-form-badge green">CIE-11 / DSM-5-TR</span></div>
             <div class="ic-form-body">
-              <div class="ic-g2" style="margin-bottom:8px">
-                <div class="ic-field"><div class="ic-sublabel">Tipo de respuesta</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Esperable / adaptativa</span><span class="ic-chip" onclick="icTogA(this)">Desproporcionada</span><span class="ic-chip" onclick="icTogR(this)">Patológica</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Red de apoyo</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Presente y activa</span><span class="ic-chip" onclick="icTogA(this)">Ambivalente</span><span class="ic-chip" onclick="icTogR(this)">Ausente</span><span class="ic-chip" onclick="icTog(this)">Conflictos familiares</span></div></div>
+              <div style="font-size:0.72rem;padding:6px 10px;background:#fef9ec;border:1px solid #f0d060;border-radius:7px;margin-bottom:8px;color:#7b4f00">
+                ⚠️ <strong>Impresión tentativa, no definitiva.</strong> Evitar sobrediagnóstico en contexto hospitalario agudo. Respuesta adaptativa ≠ trastorno.
               </div>
-
-              <div class="ic-field" id="ic-dx-chips">
-                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent2);margin-bottom:8px">🩺 Síntomas presentes — CIE-11 / DSM-5</div>
-
-                <div style="font-size:0.7rem;font-weight:600;color:#1d6fa4;margin:6px 0 4px">Afectivos — Depresión / Bipolar</div>
-                <div class="ic-chips">
-                  <span class="ic-chip" onclick="icTogR(this)">Ánimo deprimido persistente</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Anhedonia</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Fatiga / pérdida de energía</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Culpa excesiva / inutilidad</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Dificultad para concentrarse</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Pérdida de apetito / peso</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Insomnio</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Hipersomnia</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Agitación psicomotora</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Enlentecimiento psicomotor</span>
-                  <span class="ic-chip" onclick="icTog(this)">Labilidad emocional</span>
-                  <span class="ic-chip" onclick="icTog(this)">Disforia / irritabilidad</span>
-                  <span class="ic-chip" onclick="icTog(this)">Reactivo al contexto médico</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Ánimo elevado / eufórico</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Grandiosidad / autoestima inflada</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Disminución necesidad de sueño</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Logorrea / pensamiento acelerado</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Desinhibición / impulsividad</span>
-                </div>
-
-                <div style="font-size:0.7rem;font-weight:600;color:#1d6fa4;margin:8px 0 4px">Ansiosos — TAG / Pánico / TOC / Fobia</div>
-                <div class="ic-chips">
-                  <span class="ic-chip" onclick="icTogR(this)">Ansiedad / preocupación excesiva</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Ataques de pánico</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Evitación fóbica</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Tensión muscular</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Obsesiones (pensamientos intrusivos)</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Compulsiones (rituales)</span>
-                  <span class="ic-chip" onclick="icTog(this)">Ansiedad anticipatoria a procedimientos</span>
-                  <span class="ic-chip" onclick="icTog(this)">Hipervigilancia somática</span>
-                  <span class="ic-chip" onclick="icTog(this)">Miedo intenso a muerte / pronóstico</span>
-                </div>
-
-                <div style="font-size:0.7rem;font-weight:600;color:#1d6fa4;margin:8px 0 4px">Traumáticos — TEPT / Trastorno de ajuste</div>
-                <div class="ic-chips">
-                  <span class="ic-chip" onclick="icTogR(this)">Reexperimentación / flashbacks</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Pesadillas recurrentes</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Evitación de estímulos traumáticos</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Hiperactivación / sobresalto exagerado</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Disociación / despersonalización</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Entumecimiento emocional</span>
-                  <span class="ic-chip" onclick="icTog(this)">Respuesta desproporcionada a estresor</span>
-                </div>
-
-                <div style="font-size:0.7rem;font-weight:600;color:#1d6fa4;margin:8px 0 4px">Psicóticos</div>
-                <div class="ic-chips">
-                  <span class="ic-chip" onclick="icTogR(this)">Ideas delirantes</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Alucinaciones auditivas</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Alucinaciones visuales</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Pensamiento desorganizado</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Comportamiento desorganizado / catatónico</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Síntomas negativos (alogia, abulia, aplanamiento)</span>
-                  <span class="ic-chip" onclick="icTog(this)">Insight deteriorado</span>
-                  <span class="ic-chip" onclick="icTog(this)">Suspicacia / desconfianza marcada</span>
-                </div>
-
-                <div style="font-size:0.7rem;font-weight:600;color:#1d6fa4;margin:8px 0 4px">Cognitivos — Delirium / Demencia / TCE</div>
-                <div class="ic-chips">
-                  <span class="ic-chip" onclick="icTogR(this)">Alteración aguda de conciencia</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Desorientación (tiempo / espacio / persona)</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Fluctuación del estado mental</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Agitación nocturna</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Deterioro de memoria reciente</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Deterioro cognitivo progresivo</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Deterioro de funciones ejecutivas</span>
-                  <span class="ic-chip" onclick="icTog(this)">Labilidad post-TCE / desinhibición</span>
-                </div>
-
-                <div style="font-size:0.7rem;font-weight:600;color:#1d6fa4;margin:8px 0 4px">Personalidad / Somáticos / Sustancias</div>
-                <div class="ic-chips">
-                  <span class="ic-chip" onclick="icTogR(this)">Inestabilidad emocional intensa y reactiva</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Impulsividad dañina</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Relaciones inestables / idealización-devaluación</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Miedo intenso al abandono</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Síntomas somáticos desproporcionados</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Síntomas neurológicos sin causa orgánica</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Dolor crónico con componente emocional</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Consumo problemático activo</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Síndrome de abstinencia activo</span>
-                </div>
-
-                <div style="font-size:0.7rem;font-weight:600;color:#c0392b;margin:8px 0 4px">Suicidio / Autolesión</div>
-                <div class="ic-chips">
-                  <span class="ic-chip" onclick="icTogR(this)">Ideación suicida pasiva</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Ideación suicida activa sin plan</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Ideación suicida con plan</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Intento de suicidio reciente</span>
-                  <span class="ic-chip" onclick="icTogR(this)">Intentos previos relevantes</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Autolesiones sin intención suicida</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Desesperanza marcada</span>
-                  <span class="ic-chip" onclick="icTog(this)">Pensamientos recurrentes de muerte</span>
-                </div>
-              </div>
-
-              <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                <button onclick="generarImpresionDx()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.78rem;font-weight:700;cursor:pointer" id="ic-dx-btn">✨ Generar impresión diagnóstica</button>
-                <span style="font-size:0.7rem;color:var(--text3)">CIE-11 + diferenciales según síntomas seleccionados</span>
-              </div>
-              <div id="ic-dx-out" style="display:none;margin-top:8px;background:var(--accent-light);border:1.5px solid var(--accent2);border-radius:10px;padding:12px 14px;font-size:0.78rem;line-height:1.7;color:var(--text)"></div>
-
-              <div class="ic-field" style="margin-top:8px"><div class="ic-sublabel">Esquema cognitivo predominante</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Sin esquema disfuncional</span><span class="ic-chip" onclick="icTogR(this)">Vulnerabilidad / fragilidad</span><span class="ic-chip" onclick="icTogR(this)">Insuficiencia / incompetencia</span><span class="ic-chip" onclick="icTogR(this)">Abandono / desamparo</span><span class="ic-chip" onclick="icTogA(this)">Intolerancia a la incertidumbre</span><span class="ic-chip" onclick="icTogA(this)">Responsabilidad excesiva</span></div></div>
-              <div class="ic-field"><div class="ic-sublabel">Notas clínicas libres</div><textarea id="ic-resp-analisis" placeholder="Análisis CC, formulación, observaciones relevantes..." rows="2"></textarea></div>
-            </div>
-          </div>
-          <div class="ic-form-section">
-            <div class="ic-form-head slate"><span class="ft">🛠️ Tratamiento — Intervención y plan</span><span class="ic-form-badge">TRATAMIENTO</span></div>
-            <div class="ic-form-body">
-              <div class="ic-field"><div class="ic-sublabel">Intervención realizada hoy</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)" title="Acompañamiento sin juicio, reflejo empático del estado emocional y normalización de la respuesta afectiva ante la hospitalización.">Escucha activa y validación emocional</span><span class="ic-chip" onclick="icTog(this)" title="Intervención breve de estabilización ante crisis emocional aguda. Foco en regulación del sistema nervioso y reencuadre del momento presente.">Contención emocional</span><span class="ic-chip" onclick="icTog(this)" title="Explicación del impacto emocional esperable ante un diagnóstico nuevo o grave. Normaliza la ansiedad, tristeza o negación como respuestas adaptativas.">Psicoeducación sobre respuesta emocional al Dx</span><span class="ic-chip" onclick="icTog(this)" title="Información clara sobre procedimientos, tiempos y roles del equipo para reducir la ansiedad anticipatoria y la incertidumbre.">Psicoeducación sobre procesos hospitalarios</span><span class="ic-chip" onclick="icTog(this)" title="Identificación y cuestionamiento de pensamientos automáticos disfuncionales. En cama: "Si me intuban voy a morir" → explorar evidencia, ensayo cognitivo del procedimiento.">Reestructuración cognitiva</span><span class="ic-chip" onclick="icTog(this)" title="Estrategias para modular la intensidad emocional: respiración diafragmática, anclaje sensorial, tolerancia al malestar adaptada al contexto hospitalario.">Técnicas de regulación emocional</span><span class="ic-chip" onclick="icTog(this)" title="Estructuración del día en cama para romper la pasividad: horarios para comer, llamadas a familiares a hora fija, respiración cada 4 horas. Foco en pequeñas acciones con sentido.">Activación conductual</span><span class="ic-chip" onclick="icTog(this)" title="Respiración diafragmática, 4-7-8, o relajación muscular progresiva adaptada a movilidad reducida. Útil para dolor, ansiedad y procedimientos.">Técnicas de respiración / relajación</span><span class="ic-chip" onclick="icTog(this)" title="Identificación y activación de recursos relacionales del paciente. Coordinación con familia para visitas, videollamadas y apoyo emocional estructurado.">Reforzamiento de red de apoyo</span><span class="ic-chip" onclick="icTog(this)" title="Identificación de fortalezas, experiencias de afrontamiento previo, valores y motivaciones que sostienen al paciente durante la hospitalización.">Exploración de recursos y factores protectores</span><span class="ic-chip" onclick="icTog(this)" title="Psicoeducación a familiares sobre el estado emocional del paciente, cómo acompañar sin sobreproteger y señales de alerta para reportar.">Orientación familiar</span><span class="ic-chip" onclick="icTog(this)" title="Aplicación de C-SSRS, clasificación del riesgo y plan de seguridad inmediato coordinado con equipo tratante y psiquiatría si se requiere.">Evaluación y manejo de riesgo suicida</span><span class="ic-chip" onclick="icTog(this)" title="Acompañamiento ante pérdidas reales o anticipadas: funcionales, de rol, relacionales o vitales. Validación del proceso de duelo en contexto médico.">Intervención en duelo anticipatorio</span><span class="ic-chip" onclick="icTog(this)" title="Estrategias para mejorar el sueño en el ambiente hospitalario: control de estímulos, rutinas mínimas, manejo de ruido y luz, relajación breve.">Higiene del sueño adaptada a UCI</span><span class="ic-chip" onclick="icTog(this)" title="Trabajo cognitivo y emocional con la tolerancia a la incertidumbre. Foco en el momento presente y en lo que sí está bajo el control del paciente.">Manejo de incertidumbre diagnóstica</span><span class="ic-chip" onclick="icTog(this)" title="Para espera de procedimientos dolorosos: tarea cognitiva que consume atención (nombrar ciudades por letra, recordar canción) para reducir percepción del dolor durante curaciones.">Distracción cognitiva estructurada</span><span class="ic-chip" onclick="icTog(this)" title="Contrato simple de reforzadores adaptados a la cama: privacidad, control sobre luz/ventana, contacto familiar. "Si realizas los ejercicios, te ayudo con la videollamada."">Manejo de contingencias</span><span class="ic-chip" onclick="icTog(this)" title="Límites claros coordinados con enfermería para conductas de reaseguramiento. Ej: cambios de ropa de cama cada 4h, no a demanda. Combinado con técnicas de tolerancia al malestar.">Prevención de respuesta (TOC/Somatomorfo)</span><span class="ic-chip" onclick="icTog(this)" title="Para pacientes con delirio: anclajes concretos sin confrontar ideas delirantes. "Estamos en el hospital, es miércoles, estás seguro." Evitar discusión de contenido delirante.">Orientación a la realidad suave</span><span class="ic-chip" onclick="icTog(this)" title="Tono bajo, validación emocional, oferta de pequeño control ("¿prefieres que suba la persiana?"). Combinada con mindfulness breve: atención a sensaciones físicas presentes.">Desescalada verbal (agitación)</span><span class="ic-chip" onclick="icTog(this)" title="Imaginería guiada paso a paso del procedimiento médico temido: entrada a pabellón, sensaciones esperadas, uso de respiración. Reduce ansiedad anticipatoria y negativas.">Ensayo cognitivo de procedimiento</span><span class="ic-chip" onclick="icTog(this)" title="Explicar cómo el miedo genera tensión muscular que empeora el dolor, o cómo la hiperventilación empeora la disnea. A pie de cama, lenguaje sencillo, 5 minutos.">Psicoeducación circuito dolor-ansiedad</span></div></div>
               <div class="ic-g2">
-                <div class="ic-field"><div class="ic-sublabel">Plan</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Continúa seguimiento por psicología</span><span class="ic-chip" onclick="icTogR(this)">Remisión a psiquiatría</span><span class="ic-chip" onclick="icTog(this)">Orientación a trabajo social</span><span class="ic-chip" onclick="icTog(this)">Alta de psicología</span><span class="ic-chip" onclick="icTog(this)">Reinterconsulta si hay cambios</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Frecuencia de seguimiento</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Diario</span><span class="ic-chip" onclick="icTog(this)">Cada 2 días</span><span class="ic-chip" onclick="icTog(this)">Interdiario</span><span class="ic-chip" onclick="icTog(this)">Cada 8 días</span><span class="ic-chip" onclick="icTog(this)">Cada 15 días</span><span class="ic-chip" onclick="icTog(this)">Semanal</span><span class="ic-chip" onclick="icTog(this)">Según evolución</span></div></div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Tipo de respuesta emocional</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Esperable / adaptativa</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Desproporcionada</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Patológica — requiere intervención</span>
+                  </div>
+                </div>
+                <div class="ic-field" id="ic-dx-chips">
+                  <div class="ic-sublabel">Impresión diagnóstica (chips CIE-11)</div>
+                </div>
               </div>
-              <div class="ic-field"><div class="ic-sublabel">Notas / recomendaciones al equipo</div><textarea id="ic-trat-notas" placeholder="Indicaciones específicas para el equipo médico, enfermería o trabajo social..." rows="2"></textarea></div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Código CIE-11 / DSM-5-TR</div>
+                <input type="text" id="ic-cie" placeholder="Ej: 6B41 Trastorno adaptativo, F41.1 TAG…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.85rem">
+              </div>
+              <div class="ic-field"><div class="ic-sublabel">Observaciones diagnósticas</div><textarea id="ic-resp-obs" rows="2" placeholder="Factores que modulan la presentación clínica, diagnóstico diferencial breve…"></textarea></div>
+              <input type="hidden" id="ic-impresion-hidden-2" value="">
             </div>
           </div>
+
+          <!-- S8: RECOMENDACIONES -->
           <div class="ic-form-section">
-            <div class="ic-form-head" style="background:#e8f4fd;border-left:4px solid #1a56db"><span class="ft" style="color:#1a56db">📋 Recomendaciones al equipo tratante</span><span class="ic-form-badge" style="background:#dbeafe;color:#1a56db">EQUIPO</span></div>
+            <div class="ic-form-head green"><span class="ft">📤 Recomendaciones al médico derivante</span><span class="ic-form-badge red">OBLIGATORIO</span></div>
             <div class="ic-form-body">
-              <div class="ic-field"><div class="ic-sublabel">Comunicación con el paciente</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Informar con lenguaje claro y empático</span><span class="ic-chip" onclick="icTog(this)">Evitar información contradictoria entre servicios</span><span class="ic-chip" onclick="icTog(this)">Validar preguntas del paciente sobre pronóstico</span><span class="ic-chip" onclick="icTogA(this)">Diferir información pronóstica — en proceso de asimilación</span></div></div>
-              <div class="ic-field"><div class="ic-sublabel">Entorno y condiciones hospitalarias</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Facilitar presencia familiar dentro del protocolo</span><span class="ic-chip" onclick="icTog(this)">Favorecer condiciones de descanso nocturno</span><span class="ic-chip" onclick="icTog(this)">Minimizar estímulos estresantes evitables</span><span class="ic-chip" onclick="icTogA(this)">Limitar visitas si generan desestabilización</span></div></div>
-              <div class="ic-field"><div class="ic-sublabel">Alertas para reportar a psicología</div><div class="ic-chips"><span class="ic-chip" onclick="icTogR(this)">Cambio conductual súbito</span><span class="ic-chip" onclick="icTogR(this)">Rechazo activo al tratamiento</span><span class="ic-chip" onclick="icTogR(this)">Expresiones de desesperanza o ideación</span><span class="ic-chip" onclick="icTogA(this)">Aislamiento marcado</span><span class="ic-chip" onclick="icTogA(this)">Agitación o llanto persistente</span><span class="ic-chip" onclick="icTogA(this)">Conflicto familiar activo en visitas</span></div></div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Respuesta a la pregunta clínica planteada</div>
+                <textarea id="ic-resp-medico" rows="3" placeholder="Respuesta directa al médico sobre lo evaluado. Ej: 'Se identifica ansiedad anticipatoria severa ante cirugía, con catastrofización sobre el pronóstico. Se recomienda…'" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea>
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Intervención realizada / sugerida</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTog(this)">Contención emocional</span>
+                  <span class="ic-chip" onclick="icTog(this)">Psicoeducación</span>
+                  <span class="ic-chip" onclick="icTog(this)">Regulación emocional</span>
+                  <span class="ic-chip" onclick="icTog(this)">Activación conductual</span>
+                  <span class="ic-chip" onclick="icTog(this)">Reestructuración cognitiva</span>
+                  <span class="ic-chip" onclick="icTog(this)">Reforzamiento de red de apoyo</span>
+                  <span class="ic-chip" onclick="icTog(this)">Orientación familiar</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Remisión a psiquiatría</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Remisión a trabajo social</span>
+                  <span class="ic-chip" onclick="icTog(this)">Escucha activa</span>
+                </div>
+              </div>
+              <div class="ic-g2">
+                <div class="ic-field">
+                  <div class="ic-sublabel">Seguimiento</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogG(this)">Sí — programar seguimiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">No requiere</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alta de psicología</span>
+                  </div>
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Plazo de seguimiento</div>
+                  <input type="text" id="ic-seguimiento-plazo" placeholder="Ej: En 48h, Mañana, En 3 días">
+                </div>
+              </div>
+              <div class="ic-field"><div class="ic-sublabel">Notas adicionales al equipo</div><textarea id="ic-trat-notas" rows="2" placeholder="Alertas para el equipo, recomendaciones de comunicación con el paciente, condiciones del entorno…"></textarea></div>
             </div>
           </div>
+
         </div><!-- end ic-mode-nueva -->
         <!-- MODO ESPECIALES -->
+
+        <!-- MODO INTERVENCIÓN FAMILIAR -->
+        <div id="ic-mode-fam" style="display:none">
+
+          <div style="background:#fef9ec;border:1.5px solid #f0d060;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:0.78rem;color:#7b4f00;line-height:1.6">
+            👨‍👩‍👧 <strong>Intervención con familia / cuidadores</strong> — Se registra cuando no es posible intervenir directamente con el paciente. La familia es la unidad de atención en este encuentro.
+          </div>
+
+          <div class="ic-form-section">
+            <div class="ic-form-head slate"><span class="ft">📋 Contexto de la intervención</span></div>
+            <div class="ic-form-body">
+              <div class="ic-field">
+                <div class="ic-sublabel">Razón por la que no se interviene directamente con el paciente</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTog(this)">Paciente intubado / sedado</span>
+                  <span class="ic-chip" onclick="icTog(this)">Paciente con dolor severo</span>
+                  <span class="ic-chip" onclick="icTog(this)">Sin capacidad cognitiva para intervención</span>
+                  <span class="ic-chip" onclick="icTog(this)">Estado de conciencia alterado</span>
+                  <span class="ic-chip" onclick="icTog(this)">Paciente no disponible / fuga</span>
+                  <span class="ic-chip" onclick="icTog(this)">Paciente se niega a la atención</span>
+                  <span class="ic-chip" onclick="icTog(this)">Menor de edad — familia como interlocutor</span>
+                  <span class="ic-chip" onclick="icTog(this)">Solicitud directa del equipo médico</span>
+                </div>
+              </div>
+              <div class="ic-g2">
+                <div class="ic-field">
+                  <div class="ic-sublabel">Quién asistió a la intervención</div>
+                  <input type="text" id="fam-asistentes" placeholder="Ej: Esposa e hijo mayor, madre, cuidadora principal…">
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Vínculo con el paciente</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Cónyuge / pareja</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hijo/a</span>
+                    <span class="ic-chip" onclick="icTog(this)">Padre / madre</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hermano/a</span>
+                    <span class="ic-chip" onclick="icTog(this)">Cuidador/a primario/a</span>
+                    <span class="ic-chip" onclick="icTog(this)">Otro familiar</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ic-form-section">
+            <div class="ic-form-head amber"><span class="ft">😟 Estado emocional de la familia</span></div>
+            <div class="ic-form-body">
+              <div class="ic-field">
+                <div class="ic-sublabel">Estado emocional predominante observado</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTog(this)">Ansiedad marcada</span>
+                  <span class="ic-chip" onclick="icTog(this)">Tristeza / llanto</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Desesperanza</span>
+                  <span class="ic-chip" onclick="icTog(this)">Irritabilidad / rabia</span>
+                  <span class="ic-chip" onclick="icTog(this)">Confusión / desorientación</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Negación del pronóstico</span>
+                  <span class="ic-chip" onclick="icTog(this)">Culpa</span>
+                  <span class="ic-chip" onclick="icTogG(this)">Relativamente estables</span>
+                  <span class="ic-chip" onclick="icTog(this)">Agotamiento del cuidador</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Crisis emocional activa</span>
+                </div>
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Principales preocupaciones referidas por la familia</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTog(this)">Pronóstico del paciente</span>
+                  <span class="ic-chip" onclick="icTog(this)">Dolor / sufrimiento del paciente</span>
+                  <span class="ic-chip" onclick="icTog(this)">Decisiones médicas / consentimiento</span>
+                  <span class="ic-chip" onclick="icTog(this)">Cómo hablarle al paciente</span>
+                  <span class="ic-chip" onclick="icTog(this)">Cómo manejar sus propias emociones</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Conflicto entre familiares</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Agotamiento / límite del cuidado</span>
+                  <span class="ic-chip" onclick="icTog(this)">Aspectos logísticos / económicos</span>
+                  <span class="ic-chip" onclick="icTog(this)">Duelo anticipatorio</span>
+                </div>
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Cita textual / narrativa relevante de la familia</div>
+                <textarea id="fam-cita" rows="2" placeholder="Ej: 'No sabemos cómo decirle que el tratamiento no funcionó', 'Llevamos 3 semanas sin dormir bien'…" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="ic-form-section">
+            <div class="ic-form-head red"><span class="ft">⚠️ Dinámica familiar y factores de riesgo</span></div>
+            <div class="ic-form-body">
+              <div class="ic-g2">
+                <div class="ic-field">
+                  <div class="ic-sublabel">Dinámica familiar</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogG(this)">Cohesionada y funcional</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Conflictos entre familiares</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Un solo cuidador sobrecargado</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Dinámica disfuncional activa</span>
+                    <span class="ic-chip" onclick="icTog(this)">Familia ausente / red débil</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Dificultad para tomar decisiones conjuntas</span>
+                  </div>
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Comprensión del diagnóstico / pronóstico</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogG(this)">Comprensión adecuada</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Comprensión parcial</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Negación activa</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Expectativas irreales sobre pronóstico</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Información dada de forma fragmentada</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Riesgo de sobrecarga / claudicación del cuidador</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogG(this)">Sin indicadores de sobrecarga</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Indicadores leves de agotamiento</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Sobrecarga significativa</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Riesgo de claudicación</span>
+                </div>
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Riesgo autolítico en familiar / cuidador</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTog(this)">No explorado / no aplica</span>
+                  <span class="ic-chip" onclick="icTogG(this)">Niega ideación</span>
+                  <span class="ic-chip" onclick="icTogR(this)">Ideación presente — requiere evaluación</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ic-form-section">
+            <div class="ic-form-head green"><span class="ft">🛠️ Intervención realizada con la familia</span></div>
+            <div class="ic-form-body">
+              <div class="ic-field">
+                <div class="ic-sublabel">Tipo de intervención</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTog(this)">Escucha activa y validación emocional</span>
+                  <span class="ic-chip" onclick="icTog(this)">Contención emocional</span>
+                  <span class="ic-chip" onclick="icTog(this)">Psicoeducación sobre la enfermedad</span>
+                  <span class="ic-chip" onclick="icTog(this)">Psicoeducación sobre el duelo anticipatorio</span>
+                  <span class="ic-chip" onclick="icTog(this)">Orientación sobre cómo comunicarse con el paciente</span>
+                  <span class="ic-chip" onclick="icTog(this)">Orientación sobre autocuidado del cuidador</span>
+                  <span class="ic-chip" onclick="icTog(this)">Resolución de conflicto familiar</span>
+                  <span class="ic-chip" onclick="icTog(this)">Apoyo en toma de decisiones médicas</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Remisión a trabajo social</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Articulación con equipo médico</span>
+                </div>
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Notas de la intervención</div>
+                <textarea id="fam-notas-interv" rows="3" placeholder="Descripción de la intervención realizada, respuesta de la familia, temas trabajados, acuerdos…" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea>
+              </div>
+              <div class="ic-g2">
+                <div class="ic-field">
+                  <div class="ic-sublabel">Seguimiento</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogG(this)">Sí — con familia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sí — con paciente cuando sea posible</span>
+                    <span class="ic-chip" onclick="icTog(this)">No requiere seguimiento adicional</span>
+                  </div>
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Plazo</div>
+                  <input type="text" id="fam-seguimiento-plazo" placeholder="Ej: Mañana, En 48h, Según evolución">
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end ic-mode-fam -->
+
         <div id="ic-mode-esp" style="display:none">
           <div class="ic-form-section">
             <div class="ic-form-head slate"><span class="ft">📋 Notas especiales — Selecciona la situación</span></div>
@@ -832,7 +1060,7 @@ input.toggle-cb{display:none}
           </div>
         </div>
 
-        <div class="div style="margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden"" id="ic-cap-section">
+        <div style="margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden" id="ic-cap-section">
           <div class="anamnesis-section-header" onclick="toggleSection(this)" style="background:var(--surface2);border-top:2px solid #c0392b22">
             <span>⚖️</span><h4 style="color:#c0392b">Valoración de Capacidad Decisional <span style="font-size:0.72rem;font-weight:400;color:var(--text3)">(opcional)</span></h4>
             <svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
@@ -903,6 +1131,22 @@ input.toggle-cb{display:none}
               <textarea id="ic-cap-obs" rows="2" placeholder="Factores que afectaron la evaluación, recomendaciones al equipo…" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif"></textarea>
             </div>
           </div>
+        </div>
+        <!-- RECOMENDACIONES -->
+        <div class="ic-form-section ic-only-nueva">
+          <div class="ic-form-head green"><span class="ft">📤 Recomendaciones al médico derivante</span><span class="ic-form-badge red">OBLIGATORIO</span></div>
+          <div class="ic-form-body">
+            <div class="ic-field"><div class="ic-sublabel">Respuesta a la pregunta clínica planteada</div><textarea id="ic-resp-medico" placeholder="Respuesta directa al médico sobre lo evaluado. Ej: 'Se evalúa adherencia — se identifica creencia de que el medicamento causa daño renal. Se sugiere…'" rows="3" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea></div>
+            <div class="ic-field"><div class="ic-sublabel">Intervención inmediata realizada / sugerida</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Contención emocional</span><span class="ic-chip" onclick="icTog(this)">Psicoeducación</span><span class="ic-chip" onclick="icTog(this)">Regulación emocional</span><span class="ic-chip" onclick="icTog(this)">Activación conductual</span><span class="ic-chip" onclick="icTog(this)">Reestructuración cognitiva</span><span class="ic-chip" onclick="icTog(this)">Orientación familiar</span><span class="ic-chip" onclick="icTog(this)">Coordinación con equipo</span><span class="ic-chip" onclick="icTogA(this)">Remisión a psiquiatría</span><span class="ic-chip" onclick="icTogA(this)">Remisión a trabajo social</span></div></div>
+            <div class="ic-g2">
+              <div class="ic-field"><div class="ic-sublabel">Seguimiento psicológico</div><div class="ic-chips"><span class="ic-chip" onclick="icTogG(this)">Sí — programar seguimiento</span><span class="ic-chip" onclick="icTog(this)">No requiere seguimiento</span><span class="ic-chip" onclick="icTog(this)">Alta de psicología</span></div></div>
+              <div class="ic-field"><div class="ic-sublabel">Plazo de seguimiento</div><input type="text" id="ic-seguimiento-plazo" placeholder="Ej: En 48h, Mañana, En 3 días"></div>
+            </div>
+          </div>
+        </div>
+        <!-- ADVERTENCIA CLÍNICA -->
+        <div style="margin-top:8px;background:#fef9ec;border:1.5px solid #f0d060;border-radius:10px;padding:10px 14px;font-size:0.78rem;color:#7b4f00;line-height:1.6">
+          ⚠️ <strong>Nota clínica:</strong> La impresión diagnóstica es <strong>tentativa y no definitiva</strong>. Este instrumento apoya la evaluación en contexto hospitalario agudo. Evitar sobrediagnóstico. La nota generada debe ser revisada y firmada por el psicólogo tratante.
         </div>
         <!-- GEMINI API KEY -->
         <div style="margin-top:16px;background:#f0fdf4;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -1851,8 +2095,43 @@ input.toggle-cb{display:none}
         <div id="ps-pendientes-lista" style="max-height:180px;overflow-y:auto"></div>
         <div id="ps-pendientes-completados" style="display:none;margin-top:10px;border-top:1px dashed #fde68a;padding-top:10px"></div>
       </div>
+
+      <!-- SUPERVISIÓN DE CASOS -->
+      <div style="margin-top:12px;background:#f5f0ff;border:1px solid #c4b5fd;border-radius:10px;padding:12px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:0.72rem;font-weight:700;color:#5b21b6;text-transform:uppercase;letter-spacing:0.06em">🧠 Supervisión de casos</span>
+          <button class="btn btn-sm" style="font-size:0.68rem;padding:2px 10px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer" onclick="abrirNuevaSuperv(window._psPacId)">+ Nueva supervisión</button>
+        </div>
+        <div id="ps-superv-lista" style="max-height:300px;overflow-y:auto">
+          <p style="font-size:0.72rem;color:#8b5cf6;font-style:italic">Sin supervisiones registradas aún.</p>
+        </div>
+      </div>
     </div>
     <div class="pac-sheet-actions" id="ps-actions"></div>
+  </div>
+</div>
+
+<!-- MODAL NUEVA SUPERVISIÓN -->
+<div class="modal-overlay" id="modal-nueva-superv">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h3>🧠 Nueva supervisión de caso</h3>
+      <button class="modal-close" onclick="closeModal('modal-nueva-superv')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px">
+      <div class="form-group" style="margin-bottom:12px">
+        <label style="font-size:0.8rem;font-weight:600;color:var(--text2)">Fecha de referencia <span style="font-weight:400;color:var(--text3)">(post-sesión del…)</span></label>
+        <input type="date" id="superv-fecha" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;margin-top:4px">
+      </div>
+      <div class="form-group">
+        <label style="font-size:0.8rem;font-weight:600;color:var(--text2)">Pega aquí la respuesta de Claude</label>
+        <textarea id="superv-texto" rows="10" placeholder="Pega aquí el análisis de supervisión completo…&#10;&#10;La app extraerá automáticamente:&#10;• Impresión clínica&#10;• Acciones para próxima sesión&#10;• Pendientes por evaluar&#10;• Hipótesis&#10;• Limitaciones" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;resize:vertical;margin-top:4px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-nueva-superv')">Cancelar</button>
+      <button class="btn btn-primary" style="background:#7c3aed" onclick="guardarSuperv()">💾 Guardar supervisión</button>
+    </div>
   </div>
 </div>
 
@@ -2819,7 +3098,7 @@ window.guardarICFirebase=async()=>{
       pacienteNombre:nombre,
       pacienteCedula:pacObj?.cedula||'',
       hab,edad,dx,riesgo,
-      modo:icCurrentMode==='nueva'?'IC Nueva':icCurrentMode==='seg'?'Seguimiento':'Nota especial',
+      modo:icCurrentMode==='nueva'?'IC Nueva':icCurrentMode==='seg'?'Seguimiento':icCurrentMode==='fam'?'Intervención Familiar':'Nota especial',
       fecha,nota:notaTexto,sub,obj,resp,trat,
       estado:'respondida',
       needsAI:needsAI||false,
@@ -4100,9 +4379,11 @@ window.goTo = function(page){
   // Update nav-item active state
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
   // Close sidebar on mobile
-  if(window.innerWidth < 768){
+  if(window.innerWidth <= 1024){
     var sb = document.getElementById('sidebar');
+    var ov = document.getElementById('sidebar-overlay');
     if(sb) sb.classList.remove('open');
+    if(ov) ov.classList.remove('open');
   }
   // Render page content — setTimeout ensures ES6 module is loaded
   var fn={
@@ -5383,6 +5664,293 @@ window.generarPDFConPaciente = function(){
   // Re-run generarPDFPsico — it will pick up _pdfNombreOverride
   if(guiaId) generarPDFPsico(guiaId);
 };
+
+// ── SUPERVISIÓN DE CASOS ─────────────────────────────────────────────
+
+window.abrirNuevaSuperv = function(pacId){
+  if(!pacId) return toast('⚠️ No hay paciente seleccionado');
+  window._supervPacId = pacId;
+  document.getElementById('superv-fecha').value = new Date().toISOString().split('T')[0];
+  document.getElementById('superv-texto').value = '';
+  openModal('modal-nueva-superv');
+};
+
+// Parse the supervision text into structured sections
+function parsearSuperv(texto){
+  const out = {impresion:'', acciones:[], pendientes:[], hipotesis:[], limitacion:''};
+  if(!texto) return out;
+
+  const lines = texto.split('\n');
+  let current = null;
+
+  for(const raw of lines){
+    const l = raw.trim();
+    if(!l) continue;
+
+    // Detect section headers — flexible matching
+    if(/impresion|impression|impresión|valoracion|análisis clínico/i.test(l) && l.length < 80){
+      current = 'impresion'; continue;
+    }
+    if(/accion|acción|próxima sesión|plan.*sesión|sesión.*plan|para.*sesión|objectiv|objetivo/i.test(l) && l.length < 80){
+      current = 'acciones'; continue;
+    }
+    if(/pendiente|evaluar|explorar|verificar|por.*confirm/i.test(l) && l.length < 80){
+      current = 'pendientes'; continue;
+    }
+    if(/hipótesis|hipotesis|formulacion|formulación|hipóteses/i.test(l) && l.length < 80){
+      current = 'hipotesis'; continue;
+    }
+    if(/limitacion|limitación|limitante|restriccion|restricción/i.test(l) && l.length < 80){
+      current = 'limitacion'; continue;
+    }
+
+    // Accumulate content
+    const isItem = /^[-•*✓✗\d\.]\s/.test(l) || /^\[\s*[x ]?\s*\]/.test(l);
+    const clean = l.replace(/^[-•*✓✗\d\.]\s+/,'').replace(/^\[\s*[x ]?\s*\]\s*/,'').trim();
+    if(!clean) continue;
+
+    if(current === 'impresion'){
+      out.impresion += (out.impresion ? ' ' : '') + clean;
+    } else if(current === 'acciones' && (isItem || !out.acciones.length)){
+      out.acciones.push(clean);
+    } else if(current === 'pendientes' && (isItem || !out.pendientes.length)){
+      out.pendientes.push(clean);
+    } else if(current === 'hipotesis' && (isItem || !out.hipotesis.length)){
+      out.hipotesis.push(clean);
+    } else if(current === 'limitacion'){
+      out.limitacion += (out.limitacion ? ' ' : '') + clean;
+    } else if(current === 'acciones'){
+      // continuation line for acciones
+      if(out.acciones.length) out.acciones[out.acciones.length-1] += ' ' + clean;
+    } else if(!current && l.length > 20){
+      // Unclassified long line — put in impresion if empty
+      if(!out.impresion) out.impresion = clean;
+    }
+  }
+  return out;
+}
+
+window.guardarSuperv = async function(){
+  const pacId = window._supervPacId;
+  if(!pacId) return toast('⚠️ No hay paciente seleccionado');
+  const texto = (document.getElementById('superv-texto')?.value||'').trim();
+  if(!texto) return toast('⚠️ Pega el texto de supervisión primero');
+  const fecha = document.getElementById('superv-fecha')?.value || new Date().toISOString().split('T')[0];
+
+  const parsed = parsearSuperv(texto);
+  const p = (window.pacientes||[]).find(x=>x.id===pacId)||{};
+
+  // Count existing supervisions for numbering
+  const n = ((window._supervCache||{})[pacId]||[]).length + 1;
+
+  const data = {
+    pacienteId: pacId,
+    pacienteNombre: p.nombre||'',
+    numero: n,
+    fecha: fecha,
+    textoOriginal: texto,
+    impresion: parsed.impresion,
+    acciones: parsed.acciones.map(t=>({texto:t, hecho:false})),
+    pendientes: parsed.pendientes.map(t=>({texto:t, hecho:false})),
+    hipotesis: parsed.hipotesis.map(t=>({texto:t, hecho:false})),
+    limitacion: parsed.limitacion,
+    creado: window._serverTimestamp()
+  };
+
+  try{
+    await window._addDoc(window._collection(window.db,'supervisiones'), data);
+    toast('✅ Supervisión #'+n+' guardada');
+    closeModal('modal-nueva-superv');
+    cargarSuperv(pacId);
+  }catch(e){ toast('❌ '+e.message); }
+};
+
+window.cargarSuperv = async function(pacId){
+  if(!pacId) return;
+  const cont = document.getElementById('ps-superv-lista');
+  if(!cont) return;
+  try{
+    const snap = await window._getDocs(
+      window._query(
+        window._collection(window.db,'supervisiones'),
+        window._where('pacienteId','==',pacId)
+      )
+    );
+    const items = snap.docs.map(d=>({id:d.id,...d.data()}))
+      .filter(s=>!s.eliminado)
+      .sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+
+    // Update cache
+    if(!window._supervCache) window._supervCache = {};
+    window._supervCache[pacId] = items;
+
+    if(!items.length){
+      cont.innerHTML='<p style="font-size:0.72rem;color:#8b5cf6;font-style:italic">Sin supervisiones registradas aún.</p>';
+      return;
+    }
+    cont.innerHTML = items.map((s,i) => renderSupervCard(s, i+1)).join('');
+  }catch(e){
+    cont.innerHTML='<p style="font-size:0.72rem;color:var(--text3)">Error al cargar supervisiones.</p>';
+    console.error('cargarSuperv:', e);
+  }
+};
+
+function renderSupervCard(s, n){
+  const num = s.numero || n;
+  const fechaLabel = s.fecha ? new Date(s.fecha+'T12:00:00').toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+
+  const renderItems = (arr, tipo) => arr.length
+    ? arr.map((it, i) => `
+      <div style="display:flex;align-items:flex-start;gap:8px;padding:4px 0;border-bottom:1px solid #ede9fe">
+        <input type="checkbox" ${it.hecho?'checked':''} style="margin-top:3px;accent-color:#7c3aed;flex-shrink:0;width:14px;height:14px;cursor:pointer"
+          onchange="toggleSupervItem('${s.id}','${tipo}',${i},this.checked)">
+        <span style="font-size:0.78rem;color:${it.hecho?'#a78bfa':'#3b0764'};${it.hecho?'text-decoration:line-through;opacity:0.6':''}line-height:1.4">${it.texto}</span>
+      </div>`).join('')
+    : '';
+
+  const seccion = (emoji, titulo, arr, tipo) => arr.length ? `
+    <div style="margin-bottom:8px">
+      <div style="font-size:0.65rem;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px">${emoji} ${titulo}</div>
+      ${renderItems(arr, tipo)}
+    </div>` : '';
+
+  return `
+  <div style="background:#fff;border:1.5px solid #c4b5fd;border-radius:9px;padding:12px 14px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div>
+        <span style="font-size:0.78rem;font-weight:700;color:#5b21b6">🧠 Supervisión #${num}</span>
+        <span style="font-size:0.68rem;color:#8b5cf6;margin-left:8px">post-sesión ${fechaLabel}</span>
+      </div>
+      <button onclick="eliminarSuperv('${s.id}','${s.pacienteId}')" style="background:none;border:none;cursor:pointer;font-size:0.72rem;color:#a78bfa;padding:2px 6px">✕</button>
+    </div>
+    ${s.impresion ? `<div style="font-size:0.78rem;color:#3b0764;background:#f5f3ff;border-radius:7px;padding:8px 10px;margin-bottom:8px;line-height:1.5"><span style="font-weight:700;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:#7c3aed">📋 Impresión&nbsp;</span>${s.impresion}</div>` : ''}
+    ${seccion('🎯', 'Acciones próxima sesión', s.acciones||[], 'acciones')}
+    ${seccion('🔍', 'Pendientes por evaluar', s.pendientes||[], 'pendientes')}
+    ${seccion('💡', 'Hipótesis', s.hipotesis||[], 'hipotesis')}
+    ${s.limitacion ? `<div style="font-size:0.75rem;color:#92400e;background:#fef9ec;border-radius:6px;padding:6px 8px;margin-top:6px"><span style="font-weight:700">⚠️ Limitación: </span>${s.limitacion}</div>` : ''}
+  </div>`;
+}
+
+window.toggleSupervItem = async function(docId, tipo, idx, checked){
+  try{
+    // Optimistic UI — find the doc in cache and update
+    const pacId = window._psPacId;
+    const cache = (window._supervCache||{})[pacId]||[];
+    const entry = cache.find(s=>s.id===docId);
+    if(entry && entry[tipo] && entry[tipo][idx]){
+      entry[tipo][idx].hecho = checked;
+      document.getElementById('ps-superv-lista').innerHTML = cache.map((s,i)=>renderSupervCard(s,i+1)).join('');
+    }
+    // Persist to Firebase — need to update the array field
+    const snap = await window._getDocs(
+      window._query(window._collection(window.db,'supervisiones'), window._where('pacienteId','==',pacId))
+    );
+    const docSnap = snap.docs.find(d=>d.id===docId);
+    if(docSnap){
+      const data = docSnap.data();
+      data[tipo][idx].hecho = checked;
+      await window._updateDoc(window._doc(window.db,'supervisiones',docId), {[tipo]: data[tipo]});
+    }
+  }catch(e){ toast('❌ '+e.message); }
+};
+
+window.eliminarSuperv = async function(docId, pacId){
+  if(!confirm('¿Eliminar esta supervisión?')) return;
+  try{
+    await window._updateDoc(window._doc(window.db,'supervisiones',docId),{eliminado:true});
+    cargarSuperv(pacId||window._psPacId);
+    toast('🗑️ Supervisión eliminada');
+  }catch(e){ toast('❌ '+e.message); }
+};
+
+
+// ── FUNCIONES FALTANTES — ANAMNESIS ─────────────────────────────────
+
+// Limpiar formulario de anamnesis primera vez
+window.clearAnamnesis = function(){
+  // Limpiar inputs y selects del panel primera vez
+  document.querySelectorAll('#page-anamnesis input, #page-anamnesis textarea, #page-anamnesis select').forEach(el=>{
+    if(el.type==='checkbox'||el.type==='radio') el.checked=false;
+    else el.value='';
+  });
+  // Desmarcar chips
+  document.querySelectorAll('#page-anamnesis .ic-chip, #page-anamnesis .an-chip').forEach(c=>{
+    c.classList.remove('on','on-r','on-a','on-g');
+  });
+  // Limpiar output de nota
+  const out=document.getElementById('nota-output');
+  if(out) out.textContent='Completa los campos y presiona "Generar nota clínica"…';
+  // Setear fecha de hoy
+  const fecha=document.getElementById('an-fecha');
+  if(fecha) fecha.value=new Date().toISOString().split('T')[0];
+  toast('✅ Formulario limpiado');
+};
+
+// Cambiar tab en anamnesis (Primera vez / Nota de sesión / Historial)
+window.anamSwitchTab = function(tab){
+  const tabs = ['primera','sesion','historial'];
+  const accent = 'var(--accent)';
+  const normal = 'var(--text2)';
+  tabs.forEach(t=>{
+    const btn = document.getElementById('anam-tab-'+t);
+    const panel = document.getElementById('anam-panel-'+t);
+    const isActive = t===tab;
+    if(btn){
+      btn.style.color = isActive ? accent : normal;
+      btn.style.borderBottomColor = isActive ? accent : 'transparent';
+      btn.style.fontWeight = isActive ? '600' : '500';
+    }
+    if(panel) panel.style.display = isActive ? '' : 'none';
+  });
+  // Load historial if switching to it
+  if(tab==='historial'){
+    const histPanel=document.getElementById('anam-panel-historial');
+    if(histPanel && !histPanel.dataset.loaded){
+      histPanel.dataset.loaded='1';
+      if(typeof window.renderAnamHistorial==='function') window.renderAnamHistorial();
+      else if(typeof window.cargarHistorialAnamnesis==='function') window.cargarHistorialAnamnesis();
+    }
+  }
+  // Populate seg pac selector when switching to sesion
+  if(tab==='sesion'){
+    const sel=document.getElementById('seg-pac-sel');
+    if(sel && sel.options.length<=1){
+      sel.innerHTML='<option value="">— Seleccionar paciente —</option>'
+        +(window.pacientes||[]).map(p=>`<option value="${p.id}">${p.nombre}${p.hab?' · Hab. '+p.hab:''}</option>`).join('');
+    }
+  }
+};
+
+// Seleccionar paciente para nota de sesión
+window.anamSegSelectPac = function(pacId){
+  if(!pacId) return;
+  const p=(window.pacientes||[]).find(x=>x.id===pacId);
+  if(!p) return;
+  // Fill known fields
+  const fn=(id,v)=>{const el=document.getElementById(id);if(el&&v)el.value=v;};
+  fn('seg-fecha', new Date().toISOString().split('T')[0]);
+  window._segPacId = pacId;
+  window._segPacNombre = p.nombre;
+};
+
+// Limpiar formulario de nota de sesión
+window.anamSegLimpiar = function(){
+  document.querySelectorAll('#anam-panel-sesion input, #anam-panel-sesion textarea, #anam-panel-sesion select').forEach(el=>{
+    if(el.type==='checkbox'||el.type==='radio') el.checked=false;
+    else el.value='';
+  });
+  document.querySelectorAll('#anam-panel-sesion .ic-chip, #anam-panel-sesion .an-chip').forEach(c=>{
+    c.classList.remove('on','on-r','on-a','on-g');
+  });
+  toast('✅ Formulario de sesión limpiado');
+};
+
+// Guardar nota de sesión (wrapper que llama guardarAnamnesis)
+window.anamSegGuardar = function(){
+  if(typeof window.guardarAnamnesis==='function') window.guardarAnamnesis();
+  else toast('⚠️ Función de guardado no disponible');
+};
+
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
 // ── HISTORIAL IC POR PACIENTE ──
@@ -6021,6 +6589,7 @@ window.abrirPacSheet=async(id)=>{
   cargarPlanTratamiento(id);
   cargarNotasRapidas(id);
   cargarPendientesPaciente(id);
+  cargarSuperv(id);
   window._mostrarCompletados=false;
   document.getElementById('pac-sheet-overlay').classList.add('open');
   document.body.style.overflow='hidden';
@@ -6038,14 +6607,16 @@ let icCurrentEsp=null;
 
 window.setICMode=function(m){
   icCurrentMode=m;
-  ['nueva','seg','esp'].forEach(function(x){
+  ['nueva','seg','esp','fam'].forEach(function(x){
     var el=document.getElementById('ic-btn-'+x);
     if(el)el.classList.toggle('active',x===m);
   });
   var mnueva=document.getElementById('ic-mode-nueva');
   var mesp=document.getElementById('ic-mode-esp');
+  var mfam=document.getElementById('ic-mode-fam');
   if(mnueva)mnueva.style.display=(m==='nueva'||m==='seg')?'':'none';
   if(mesp)mesp.style.display=m==='esp'?'':'none';
+  if(mfam)mfam.style.display=m==='fam'?'':'none';
   document.querySelectorAll('.ic-only-nueva').forEach(function(el){el.style.display=m==='seg'?'none':'';});
   var f4=document.getElementById('ic-out-4campos');
   var seg=document.getElementById('ic-out-seg');
@@ -6056,6 +6627,25 @@ window.setICMode=function(m){
 window.toggleICView=function(){goTo('interconsultas');};
 
 window.icTog=function(el){el.classList.toggle('on');};
+// Single-select chip group — deselects siblings, sets hidden input
+window.icTogSingle=function(el,hiddenId){
+  const chips=el.parentElement.querySelectorAll('.ic-chip');
+  chips.forEach(c=>c.classList.remove('on','on-r','on-a','on-g'));
+  el.classList.add('on');
+  const h=document.getElementById(hiddenId);
+  if(h)h.value=el.textContent.replace(/[🔴🟡🟢]/g,'').trim();
+};
+// Auto-show riesgo notes when ideación activa selected
+window.icTogRiesgo=function(el){
+  icTogR(el);
+  const wrap=document.getElementById('ic-plan-riesgo-wrap');
+  if(!wrap)return;
+  const activa=document.querySelector('#ic-plan-riesgo-wrap')?.closest('.ic-form-body')?.querySelector('.ic-chip.on-r,.ic-chip.on-a');
+  // Show if any risky chip is on
+  const chips=document.querySelectorAll('[onclick*="icTogRiesgo"]');
+  const anyOn=[...chips].some(c=>c.classList.contains('on-r')||c.classList.contains('on-a'));
+  wrap.style.display=anyOn?'':'none';
+};
 window.icTogR=function(el){el.classList.toggle('on-r');};
 window.icTogG=function(el){el.classList.toggle('on-g');};
 window.icTogA=function(el){el.classList.toggle('on-a');};
@@ -6138,6 +6728,11 @@ window.generarNotaIC=function(){
   if(wrap)wrap.style.display='';
   if(icCurrentMode==='esp'){generarNotaIcEsp();return;}
   if(icCurrentMode==='seg'){generarNotaIcSeg();return;}
+  if(icCurrentMode==='fam'){
+    var apiKey=getGeminiKey();
+    if(!apiKey){toast('⚠️ Agrega tu API key de Gemini.');return;}
+    generarNotaFamiliarConGemini(apiKey);return;
+  }
   var apiKey=getGeminiKey();
   if(!apiKey){
     toast('⚠️ Agrega tu API key de Gemini para generar la nota con IA.');
@@ -6204,6 +6799,18 @@ async function generarNotaIcConGemini(apiKey){
   var tratNotas=icv('ic-trat-notas')||'';
   var sustNotas=icv('ic-sustancias-notas')||'';
   var riesgoNotas=icv('ic-riesgo-notas')||'';
+  var _motivoMedico=icv('ic-motivo-medico')||'';
+  var _tccPensamientos=icv('ic-tcc-pensamientos')||'';
+  var _tccEvitacion=icv('ic-tcc-evitacion')||'';
+  var _tccActivacion=icv('ic-tcc-activacion')||'';
+  var _tccAdherencia=icv('ic-tcc-adherencia')||'';
+  var _inicioEvolucion=icv('ic-inicio-evolucion')||'';
+  var _tratMedico=icv('ic-trat-medico')||'';
+  var _diasInternacion=icv('ic-dias-internacion')||'';
+  var _respMedico=icv('ic-resp-medico')||'';
+  var _respObs=icv('ic-resp-obs')||'';
+  var _redApoyoDetalle=icv('ic-red-apoyo-detalle')||'';
+  var _seguimientoPlazo=icv('ic-seguimiento-plazo')||'';
   function chips(label){return icChipsBySubLabel(label).join(', ');}
 
   // Contexto base del paciente
@@ -6214,20 +6821,24 @@ async function generarNotaIcConGemini(apiKey){
   const _icPacObj=_icPacId?(pacientes||[]).find(p=>p.id===_icPacId):null;
   const _icNombreExacto=_icPacObj?_icPacObj.nombre:_icPacNombre;
   var _testsResumen=getTestsResumenPaciente(_icPacId,_icNombreExacto);
-  var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}. Dx médico: ${dx}. Riesgo suicida: ${sev}.`;
+
+  var _urgencia=icv('ic-urgencia-val')||icv('ic-urgencia')||'';
+  var _medSol=icv('ic-medico-sol')||'';
+  var _preguntaIC=chips('Pregunta específica a responder')||'';
+  var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}. Dx médico: ${dx}. Días internado: ${_diasInternacion||'no registrado'}. Riesgo suicida: ${sev}.${_urgencia?' Urgencia IC: '+_urgencia+'.':''}${_medSol?' Médico solicitante: '+_medSol+'.':''}${_motivoMedico?' Pedido médico: '+_motivoMedico+'.':''}${_preguntaIC?' Pregunta IC: '+_preguntaIC+'.':''}${_tratMedico?' Tratamiento médico: '+_tratMedico+'.':''}${_inicioEvolucion?' Inicio/evolución: '+_inicioEvolucion+'.':''}`;
   if(_testsResumen)ctx+=`\n\n${_testsResumen}`;
   // Incluir valoración de capacidad si se llenó
   var _capTextoIC=getCapInlineTexto('ic');
   if(_capTextoIC)ctx+='\n\n'+_capTextoIC;
 
   // Datos por sección
-  var dSub=`Estado emocional: ${chips('Estado emocional referido')||'no especificado'}. Preocupaciones: ${chips('Principales preocupaciones')||'ninguna'}. Pensamientos automáticos: ${chips('Pensamientos automáticos')||'no identificados'}. Intensidad malestar: ${intensidad||'no cuantificada'}. Cita textual: ${cita||'ninguna'}. Antecedentes psiq: ${chips('Diagnósticos psiquiátricos previos')||'ninguno'}. Intentos suicidio: ${chips('Intentos de suicidio previos')||'ninguno'}. Violencia: ${chips('Tipo de violencia')||'niega'}.`;
+  var dSub=`Estado emocional: ${chips('Estado emocional referido')||'no especificado'}. Pensamientos automáticos: ${chips('Pensamientos automáticos sobre enfermedad/internación/procedimiento')||chips('Pensamientos automáticos (CC)')||'no identificados'}${_tccPensamientos?' — '+_tccPensamientos:''}. Conductas de evitación: ${chips('Conductas de evitación / seguridad')||'no exploradas'}${_tccEvitacion?' — '+_tccEvitacion:''}. Activación conductual: ${chips('Activación conductual — nivel de actividad en hospital')||chips('Activación conductual')||'no evaluada'}${_tccActivacion?' — '+_tccActivacion:''}. Adherencia: ${chips('Adherencia al tratamiento médico')||'no evaluada'}${_tccAdherencia?' — '+_tccAdherencia:''}. Intensidad malestar: ${intensidad||'no cuantificada'}. Cita textual: ${cita||'ninguna'}. Riesgo previo: ${chips('Intentos previos')||'ninguno'}. Red de apoyo: ${chips('Red de apoyo funcional')||'no explorada'}${_redApoyoDetalle?' — '+_redApoyoDetalle:''}.`;
 
-  var dObj=`Orientación: ${chips('Orientación')||'conservada'}. Conciencia: ${chips('Conciencia / Colaboración')||'consciente'}. Conducta: ${chips('Conducta')||'adecuada'}. Afecto: ${chips('Afecto')||'observable'}. Pensamiento: ${chips('Pensamiento')||'organizado'}. Insight: ${chips('Lenguaje / Insight')||'conservado'}. Regulación emocional: ${chips('Regulación emocional')||'no explorada'}. Afrontamiento: ${chips('Estrategias de afrontamiento')||'no exploradas'}. Distorsiones: ${chips('Distorsiones cognitivas')||'ninguna'}. Ideación suicida: ${chips('Ideación actual')||'niega'}. Factores protectores: ${chips('Factores protectores')||'no explorados'}. Análisis CC: ${analisisLibre||'no registrado'}. Red de apoyo: ${chips('Red de apoyo funcional')||'no explorada'}.`;
+  var dObj=`Orientación: ${chips('Orientación')||'conservada'}. Conciencia: ${chips('Conciencia / Colaboración')||'consciente'}. Conducta: ${chips('Conducta')||'adecuada'}. Afecto: ${chips('Afecto')||'observable'}. Pensamiento: ${chips('Pensamiento')||'organizado'}. Insight: ${chips('Insight')||chips('Lenguaje / Insight')||'conservado'}. Regulación emocional: ${chips('Regulación emocional')||'no explorada'}. Comprensión Dx: ${chips('Comprensión del Dx')||chips('Comprensión del Dx / pronóstico')||'no evaluada'}. Factores protectores: ${chips('Factores protectores')||'no explorados'}. Análisis CC: ${analisisLibre||_respObs||'no registrado'}.`;
 
-  var dResp=`Tipo respuesta emocional: ${chips('Tipo de respuesta emocional')||'esperable'}. Impresión clínica: ${chips('Impresión clínica')||'respuesta adaptativa'}. Esquema cognitivo: ${chips('Esquema cognitivo predominante')||'no identificado'}.`;
+  var dResp=`Tipo respuesta emocional: ${chips('Tipo de respuesta emocional')||'esperable'}. Impresión clínica: ${chips('Impresión clínica')||chips('Impresión diagnóstica (chips CIE-11)')||'respuesta adaptativa'}. Código CIE-11: ${icv('ic-cie')||'pendiente'}.${_respObs?' Observaciones: '+_respObs:''}.`;
 
-  var dTrat=`Intervención: ${chips('Intervención realizada hoy')||'valoración clínica'}. Plan: ${chips('Plan')||'seguimiento'}. Frecuencia: ${chips('Frecuencia de seguimiento')||'según evolución'}. Recomendaciones comunicación: ${chips('Comunicación con el paciente')||'no especificadas'}. Recomendaciones entorno: ${chips('Entorno y condiciones hospitalarias')||'no especificadas'}. Alertas: ${chips('Alertas para reportar a psicología')||'ninguna'}. Notas: ${tratNotas||'ninguna'}.`;
+  var dTrat=`Intervención: ${chips('Intervención realizada / sugerida')||chips('Intervención realizada hoy')||'valoración clínica'}. Respuesta al médico derivante: ${_respMedico||'ver análisis clínico'}. Seguimiento: ${chips('Seguimiento')||'según evolución'}${_seguimientoPlazo?' — plazo: '+_seguimientoPlazo:''}. Alertas al equipo: ${tratNotas||'ninguna'}.`;
   // Instrucción para incluir capacidad decisional literal al final de TRATAMIENTO
   const _capIcInstruccion = _capTextoIC && _capTextoIC.trim()
     ? '\n\nINSTRUCCIÓN FINAL OBLIGATORIA: Después del párrafo de tratamiento, agrega una sección llamada "VALORACIÓN DE CAPACIDAD DECISIONAL" y copia EXACTAMENTE este texto sin modificarlo:\n' + _capTextoIC
@@ -6579,6 +7190,95 @@ ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
     console.error('Gemini seg error:',e);
     var outEl=document.getElementById('ic-out-seg-texto');
     if(outEl){outEl.textContent='❌ Error al generar con Gemini: '+e.message+'. Verifica tu API key e intenta de nuevo.';outEl.classList.remove('ph');}
+    toast('❌ Error Gemini: '+e.message);
+  }
+}
+
+
+// ── NOTA FAMILIAR CON GEMINI ─────────────────────────────────────────
+async function generarNotaFamiliarConGemini(apiKey){
+  var icv=function(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';};
+  var chps=function(label){return icChipsBySubLabel(label).join(', ');};
+
+  var nombre=icv('ic-pnombre')||'el/la paciente';
+  var edad=icv('ic-edad')||'';
+  var dx=icv('ic-pdx')||'[diagnóstico médico]';
+  var fecha=icv('ic-pfecha')||new Date().toISOString().split('T')[0];
+  var asistentes=icv('fam-asistentes')||'familiar(es) presente(s)';
+  var cita=icv('fam-cita')||'';
+  var notasInterv=icv('fam-notas-interv')||'';
+  var plazo=icv('fam-seguimiento-plazo')||'';
+
+  var razon=chps('Razón por la que no se interviene directamente con el paciente')||'no especificada';
+  var vinculo=chps('Vínculo con el paciente')||'familiar';
+  var estadoFam=chps('Estado emocional predominante observado')||'no especificado';
+  var preocupaciones=chps('Principales preocupaciones referidas por la familia')||'no especificadas';
+  var dinamica=chps('Dinámica familiar')||'no explorada';
+  var comprension=chps('Comprensión del diagnóstico / pronóstico')||'no evaluada';
+  var sobrecarga=chps('Riesgo de sobrecarga / claudicación del cuidador')||'no evaluado';
+  var intervencion=chps('Tipo de intervención')||'valoración clínica';
+  var seguimiento=chps('Seguimiento')||'según evolución';
+
+  var datos=`
+TIPO DE NOTA: Intervención psicológica con familia / cuidadores (paciente no disponible para atención directa)
+
+DATOS DEL PACIENTE:
+- Nombre: ${nombre}${edad?' | '+edad:''}${dx?' | Dx: '+dx:''}${fecha?' | Fecha: '+fecha:''}
+
+CONTEXTO:
+- Razón de la intervención con familia: ${razon}
+- Asistentes: ${asistentes} (${vinculo})
+
+SUBJETIVO — Estado emocional de la familia:
+- Estado emocional observado: ${estadoFam}
+- Principales preocupaciones: ${preocupaciones}
+- Cita textual: ${cita||'No registrada'}
+
+OBJETIVO — Evaluación de la dinámica familiar:
+- Dinámica familiar: ${dinamica}
+- Comprensión del diagnóstico/pronóstico: ${comprension}
+- Riesgo de sobrecarga del cuidador: ${sobrecarga}
+
+INTERVENCIÓN REALIZADA:
+- Tipo: ${intervencion}
+- Notas: ${notasInterv||'No registradas'}
+
+PLAN:
+- Seguimiento: ${seguimiento}${plazo?' — Plazo: '+plazo:''}
+`.trim();
+
+  // Show loading
+  var outEl=document.getElementById('ic-out-seg-texto');
+  var seg=document.getElementById('ic-out-seg');
+  var f4=document.getElementById('ic-out-4campos');
+  var wrap=document.getElementById('ic-output-wrap');
+  if(seg)seg.style.display='';
+  if(f4)f4.style.display='none';
+  if(wrap){wrap.style.display='';wrap.scrollIntoView({behavior:'smooth',block:'start'});}
+  if(outEl){outEl.classList.remove('ph');outEl.textContent='⏳ Generando nota con IA clínica…';}
+
+  var prompt='Eres un psicólogo clínico hospitalario experto. '
+    +'Redacta una NOTA CLÍNICA en formato S-O-R-T (Análisis Subjetivo, Análisis Objetivo, Respuesta/Impresión Clínica, Tratamiento/Plan) '
+    +'en texto corrido, un párrafo por sección, sin listas ni viñetas. '
+    +'NO uses el nombre del paciente. Lenguaje técnico-clínico preciso y conciso. '
+    +'Esta es una intervención realizada CON LA FAMILIA O CUIDADORES — no con el paciente directamente. '
+    +'La nota debe reflejar eso claramente desde la primera línea. '
+    +'Termina indicando si hay seguimiento programado.\n\n'
+    +'DATOS:\n'+datos;
+
+  try{
+    var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+apiKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:4000}})
+    });
+    var d=await r.json();
+    if(!r.ok||d.error)throw new Error(d.error?.message||'Error API');
+    var texto=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+    if(!texto)throw new Error('Respuesta vacía de Gemini');
+    if(outEl){outEl.classList.remove('ph');outEl.textContent=texto;}
+    toast('✅ Nota generada');
+  }catch(e){
+    if(outEl){outEl.textContent='❌ Error: '+e.message;outEl.classList.remove('ph');}
     toast('❌ Error Gemini: '+e.message);
   }
 }
