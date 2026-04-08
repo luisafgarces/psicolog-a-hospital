@@ -791,6 +791,16 @@ input.toggle-cb{display:none}
                   <span class="ic-chip" onclick="icTog(this)">Red de apoyo activa</span>
                 </div>
               </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Clasificación del riesgo suicida</div>
+                <div class="sev-row" style="display:flex;gap:6px;margin-top:4px">
+                  <div class="sev-btn" onclick="setICSev(this,'SIN RIESGO',false)" style="color:var(--success)">SIN RIESGO</div>
+                  <div class="sev-btn bajo" onclick="setICSev(this,'BAJO',false)">BAJO</div>
+                  <div class="sev-btn medio" onclick="setICSev(this,'MEDIO',false)">MEDIO</div>
+                  <div class="sev-btn alto" onclick="setICSev(this,'ALTO',true)">ALTO</div>
+                </div>
+                <input type="hidden" id="ic-riesgo-nivel" value="">
+              </div>
             </div>
           </div>
 
@@ -2852,7 +2862,7 @@ window.guardarICFirebase=async()=>{
   const nombre=document.getElementById('ic-pnombre').value.trim()||'Sin nombre';
   const hab=document.getElementById('ic-hab').value.trim()||'—';
   const dx=document.getElementById('ic-pdx').value.trim()||'—';
-  const riesgo=document.getElementById('ic-riesgo-nivel').value||'No clasificado';
+  const riesgo=document.getElementById('ic-riesgo-nivel')?.value||'No clasificado';
   const edad=document.getElementById('ic-edad')?.value||'';
   const fecha=document.getElementById('ic-pfecha').value||new Date().toISOString().split('T')[0];
   // Buscar paciente vinculado por nombre o selector
@@ -3135,7 +3145,7 @@ window.guardarICFirebase=async()=>{
       try{const bkList=JSON.parse(localStorage.getItem('ic_backups')||'[]');if(bkList.length){const last=bkList[bkList.length-1];localStorage.removeItem(last);localStorage.setItem('ic_backups',JSON.stringify(bkList.slice(0,-1)));}}catch(e){}
       setTimeout(()=>limpiarFormIC(false),300);
     }
-  }catch(e){setSyncStatus('offline');toast('❌ '+e.message);}
+  }catch(e){console.error('[FIREBASE SAVE ERROR]',e);setSyncStatus('offline');toast('❌ '+e.message);}
 };
 
 window.guardarAnamnesis=async()=>{
@@ -7151,7 +7161,7 @@ window.icTogA=function(el){el.classList.toggle('on-a');};
 window.setICSev=function(el,nivel,isHigh){
   document.querySelectorAll('.sev-btn').forEach(function(s){s.classList.remove('on');});
   el.classList.add('on');
-  document.getElementById('ic-riesgo-nivel').value=nivel;
+  const _rn=document.getElementById('ic-riesgo-nivel');if(_rn)_rn.value=nivel;
   var alert=document.getElementById('ic-risk-alert');
   if(alert)alert.classList.toggle('show',!!isHigh);
 };
