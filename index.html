@@ -36,6 +36,15 @@ function installPWA() {
     deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
   }
 }
+// Prioridad IC — defined early so available when HTML buttons are clicked
+function selPrioridad(val) {
+  var wrap = document.getElementById('p-prioridad-btns');
+  if(wrap) wrap.querySelectorAll('button').forEach(function(b){ b.classList.remove('sel'); });
+  var btns = document.querySelectorAll('#p-prioridad-btns button[data-val="'+val+'"]');
+  btns.forEach(function(b){ b.classList.add('sel'); });
+  var h = document.getElementById('p-prioridad');
+  if(h) h.value = val;
+}
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -2221,9 +2230,9 @@ input.toggle-cb{display:none}
       <div class="form-group full"><label>Tratamiento médico actual</label><textarea id="p-trat-medico" rows="2" placeholder="Ej: Quimioterapia ciclo 3, Morfina 10mg c/8h, O2 suplementario…"></textarea></div>
       <div class="form-group full"><label>Prioridad de la interconsulta</label>
         <div id="p-prioridad-btns" style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
-          <button type="button" class="risk-btn" data-val="REGULAR" style="color:var(--text2);border-color:#6b7280">🟢 REGULAR</button>
-          <button type="button" class="risk-btn" data-val="PRIORITARIA" style="color:#d97706;border-color:#d97706">🟡 PRIORITARIA</button>
-          <button type="button" class="risk-btn" data-val="URGENTE" style="color:#dc2626;border-color:#dc2626">🔴 URGENTE</button>
+          <button type="button" class="risk-btn" data-val="REGULAR" style="color:var(--text2);border-color:#6b7280" onclick="selPrioridad('REGULAR')">🟢 REGULAR</button>
+          <button type="button" class="risk-btn" data-val="PRIORITARIA" style="color:#d97706;border-color:#d97706" onclick="selPrioridad('PRIORITARIA')">🟡 PRIORITARIA</button>
+          <button type="button" class="risk-btn" data-val="URGENTE" style="color:#dc2626;border-color:#dc2626" onclick="selPrioridad('URGENTE')">🔴 URGENTE</button>
         </div>
         <input type="hidden" id="p-prioridad" value="">
       </div>
@@ -8242,16 +8251,7 @@ window.calcPCL5=()=>{
 // ── INIT ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
   // Wire prioridad buttons via event delegation (avoids inline onclick issues)
-  // Use document-level delegation for prioridad — works even when modal is hidden at attach time
-  document.addEventListener('click', function(e){
-    const btn = e.target.closest('#p-prioridad-btns button[data-val]');
-    if(!btn) return;
-    const wrap = document.getElementById('p-prioridad-btns');
-    if(wrap) wrap.querySelectorAll('button').forEach(b=>b.classList.remove('sel'));
-    btn.classList.add('sel');
-    const h = document.getElementById('p-prioridad');
-    if(h) h.value = btn.dataset.val;
-  });
+
   // Tests now render on demand when selected — no pre-render needed
   renderPCL5Questions && null; // no-op, handled by showTest
   try{document.getElementById('an-fecha').value=new Date().toISOString().split('T')[0];}catch(e){}
