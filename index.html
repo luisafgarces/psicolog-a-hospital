@@ -542,10 +542,10 @@ input.toggle-cb{display:none}
           <div class="ic-pat-field"><label>Hab.</label><input type="text" id="ic-hab" placeholder="304B"></div>
           <div class="ic-pat-field"><label>Nombre del paciente</label><input type="text" id="ic-pnombre" placeholder="Nombre completo"></div>
           <div class="ic-pat-field"><label>Edad / Sexo</label><input type="text" id="ic-edad" placeholder="42 años, F"></div>
-          <div class="ic-pat-field"><label>Diagnóstico médico / Motivo IC</label><input type="text" id="ic-pdx" placeholder="Ca. de mama, impacto emocional dx reciente" oninput="const w=document.getElementById('ic-orientacion-wrap');if(w&&this.value.length>5)w.style.display='';"></div>
+          <div class="ic-pat-field" style="flex:2;min-width:160px"><label>Diagnóstico / Motivo IC</label><div id="ic-pdx-display" style="font-size:0.82rem;color:#e5e7eb;padding:2px 0;border-bottom:1px solid #3a3835;min-height:20px;font-style:italic;opacity:0.8">— se carga del paciente —</div><input type="hidden" id="ic-pdx" value=""></div>
           <div class="ic-pat-field"><label>Fecha</label><input type="date" id="ic-pfecha"></div>
           <div class="ic-pat-field"><label>Médico solicitante</label><input type="text" id="ic-medico-sol" placeholder="Dr. García — Medicina Interna"></div>
-          <div class="ic-pat-field ic-only-nueva"><label>Urgencia</label><select id="ic-urgencia" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem"><option value="">— Seleccionar —</option><option value="Alta">🔴 Alta</option><option value="Media">🟡 Media</option><option value="Baja">🟢 Baja</option></select></div>
+
         </div>
         <!-- ORIENTACIÓN DE VALORACIÓN CON IA -->
         <div id="ic-orientacion-wrap" style="margin-bottom:10px;background:var(--surface);border:1.5px solid var(--accent2);border-radius:10px;">
@@ -628,12 +628,14 @@ input.toggle-cb{display:none}
               </div>
               <div class="ic-g2">
                 <div class="ic-field">
-                  <div class="ic-sublabel">Tratamiento médico actual</div>
-                  <textarea id="ic-trat-medico" rows="2" placeholder="Medicamentos y procedimientos en curso. Ej: Quimioterapia ciclo 3, Morfina 10mg c/8h…" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea>
+                  <div class="ic-sublabel">Tratamiento médico actual <span style="font-weight:400;color:var(--text3);font-size:0.65rem">(editar en ficha del paciente)</span></div>
+                  <div id="ic-trat-medico-display" style="font-size:0.8rem;color:var(--text2);background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;min-height:38px;line-height:1.5;font-style:italic;opacity:0.8">— se carga del paciente —</div>
+                  <input type="hidden" id="ic-trat-medico" value="">
                 </div>
                 <div class="ic-field">
                   <div class="ic-sublabel">Días de internación</div>
-                  <input type="number" id="ic-dias-internacion" min="0" placeholder="Ej: 7" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.85rem">
+                  <div id="ic-dias-display" style="font-size:0.85rem;color:var(--text2);background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;min-height:34px">— se calcula del ingreso —</div>
+                  <input type="hidden" id="ic-dias-internacion" value="">
                 </div>
               </div>
             </div>
@@ -816,9 +818,15 @@ input.toggle-cb{display:none}
                   <div class="ic-sublabel">Impresión diagnóstica (chips CIE-11)</div>
                 </div>
               </div>
-              <div class="ic-field">
+              <div class="ic-field" style="position:relative">
                 <div class="ic-sublabel">Código CIE-11 / DSM-5-TR</div>
-                <input type="text" id="ic-cie" placeholder="Ej: 6B41 Trastorno adaptativo, F41.1 TAG…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.85rem">
+                <input type="text" id="ic-cie" placeholder="Escribe el trastorno o código… Ej: adaptativo, depres, ansiedad, 6B4…"
+                  style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.85rem"
+                  autocomplete="off"
+                  oninput="cieBuscar(this.value)"
+                  onkeydown="cieKeyNav(event)"
+                  onblur="setTimeout(()=>cieOcultarLista(),200)">
+                <div id="ic-cie-lista" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:400;background:var(--surface);border:1.5px solid var(--accent2);border-radius:0 0 8px 8px;max-height:220px;overflow-y:auto;box-shadow:0 6px 18px rgba(0,0,0,0.15)"></div>
               </div>
               <div class="ic-field"><div class="ic-sublabel">Observaciones diagnósticas</div><textarea id="ic-resp-obs" rows="2" placeholder="Factores que modulan la presentación clínica, diagnóstico diferencial breve…"></textarea></div>
               <input type="hidden" id="ic-impresion-hidden-2" value="">
@@ -2207,6 +2215,7 @@ input.toggle-cb{display:none}
       <div class="form-group"><label>Fecha de ingreso</label><input type="date" id="p-fecha"></div>
       <div class="form-group" id="p-hab-group"><label>Habitación / Servicio</label><input type="text" id="p-hab" placeholder="Ej: 304B, URG-12, UCI-3, AZU-5"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px"><button type="button" onclick="document.getElementById('p-hab').value='AZU-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔵 Bloque Azul</button><button type="button" onclick="document.getElementById('p-hab').value='URG-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🟡 Urgencias</button><button type="button" onclick="document.getElementById('p-hab').value='UCI-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔴 UCI</button></div></div>
       <div class="form-group full"><label id="p-motivo-label">Diagnóstico médico / Motivo de interconsulta</label><textarea id="p-motivo" rows="2" placeholder="Ej: Ca. de mama, impacto emocional dx reciente"></textarea></div>
+      <div class="form-group full"><label>Tratamiento médico actual</label><textarea id="p-trat-medico" rows="2" placeholder="Ej: Quimioterapia ciclo 3, Morfina 10mg c/8h, O2 suplementario…"></textarea></div>
       <div class="form-group full"><label>Impresión diagnóstica psicológica</label><textarea id="p-dxpsi" rows="2" placeholder="Ej: Trastorno adaptativo con sintomatología ansiosa"></textarea></div>
       <div class="form-group full"><label>Riesgo suicida</label>
         <div class="risk-selector" style="margin-top:4px">
@@ -2471,10 +2480,11 @@ window.guardarPaciente=async()=>{
       estado:document.getElementById('p-estado').value||'seguimiento',
       proxSesion:document.getElementById('p-proxsesion').value,
       notas:document.getElementById('p-notas').value,
+      tratMedico:document.getElementById('p-trat-medico').value,
       creado:serverTimestamp()
     });
     closeModal('modal-paciente');toast('✅ Paciente registrado');
-    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-dxpsi','p-riesgo-obs','p-notas','p-proxsesion'].forEach(id=>document.getElementById(id).value='');
+    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-dxpsi','p-riesgo-obs','p-notas','p-proxsesion','p-trat-medico'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('p-riesgo').value='';
     document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>b.classList.remove('sel'));
   }
@@ -2697,7 +2707,18 @@ window.selectICPaciente=(id)=>{
   if(hab&&p.hab)hab.value=p.hab;
   if(nombre)nombre.value=p.nombre;
   if(edad&&(p.edad||p.sexo))edad.value=(p.edad?p.edad+' años':'')+(p.sexo?' '+p.sexo.charAt(0):'');
-  if(dx&&p.motivo)dx.value=p.motivo;
+  if(dx&&p.motivo){dx.value=p.motivo;const disp=document.getElementById('ic-pdx-display');if(disp){disp.textContent=p.motivo;disp.style.opacity='1';disp.style.fontStyle='normal';}}
+  const tratEl=document.getElementById('ic-trat-medico');if(tratEl&&p.tratMedico)tratEl.value=p.tratMedico;
+  const tratDisp=document.getElementById('ic-trat-medico-display');if(tratDisp){tratDisp.textContent=p.tratMedico||'— sin tratamiento registrado —';tratDisp.style.opacity=p.tratMedico?'1':'0.5';tratDisp.style.fontStyle=p.tratMedico?'normal':'italic';}
+  const diasVal=calcularDiasInternacion(p.fecha);
+  const diasEl=document.getElementById('ic-dias-internacion');if(diasEl)diasEl.value=diasVal!==null?diasVal:'';
+  const diasDisp=document.getElementById('ic-dias-display');
+  if(diasDisp){
+    if(diasVal===null){diasDisp.textContent='— fecha de ingreso no registrada —';}
+    else if(diasVal===0){diasDisp.textContent='Ingresó hoy';diasDisp.style.color='var(--accent2)';}
+    else if(diasVal===1){diasDisp.textContent='1 día';diasDisp.style.color='var(--text2)';}
+    else{diasDisp.textContent=diasVal+' días';diasDisp.style.color=diasVal>14?'var(--warning)':'var(--text2)';}
+  }
   if(fecha)fecha.value=new Date().toISOString().split('T')[0];
   // Auto-set mode based on patient estado
   if(p.estado==='nueva-interconsulta-pendiente')setICMode('nueva');
@@ -2756,6 +2777,7 @@ window.editarPaciente=(id)=>{
   document.getElementById('p-proxsesion').value=p.proxSesion||'';
   setPTipo(p.tipo||'hospitalizado');
   document.getElementById('p-notas').value=p.notas||'';
+  document.getElementById('p-trat-medico').value=p.tratMedico||'';
   document.querySelectorAll('#modal-paciente .risk-btn').forEach(b=>{b.classList.toggle('sel',b.textContent.trim()===p.riesgo);});
   // Change button to update
   const btn=document.querySelector('#modal-paciente .btn-primary');
@@ -2779,7 +2801,8 @@ window.actualizarPaciente=async(id)=>{
       tipo:document.getElementById('p-tipo').value||'hospitalizado',
       estado:document.getElementById('p-estado').value,
       proxSesion:document.getElementById('p-proxsesion').value,
-      notas:document.getElementById('p-notas').value
+      notas:document.getElementById('p-notas').value,
+      tratMedico:document.getElementById('p-trat-medico').value
     });
     closeModal('modal-paciente');toast('✅ Paciente actualizado');
     const btn=document.querySelector('#modal-paciente .btn-primary');
@@ -5951,6 +5974,193 @@ window.anamSegGuardar = function(){
   else toast('⚠️ Función de guardado no disponible');
 };
 
+
+// ── CALCULAR DÍAS DE INTERNACIÓN ────────────────────────────────────
+function calcularDiasInternacion(fechaIngreso){
+  if(!fechaIngreso) return null;
+  const hoy = new Date();
+  hoy.setHours(0,0,0,0);
+  const ingreso = new Date(fechaIngreso + 'T00:00:00');
+  if(isNaN(ingreso.getTime())) return null;
+  const dias = Math.floor((hoy - ingreso) / (1000*60*60*24));
+  return dias >= 0 ? dias : null;
+}
+
+
+// ── AUTOCOMPLETE CIE-11 / DSM-5-TR ──────────────────────────────────
+const CIE11_DX = [
+  // Trastornos del estado de ánimo
+  {c:'6A70',n:'Trastorno depresivo de episodio único, leve'},
+  {c:'6A70.1',n:'Trastorno depresivo de episodio único, moderado sin síntomas psicóticos'},
+  {c:'6A70.2',n:'Trastorno depresivo de episodio único, grave sin síntomas psicóticos'},
+  {c:'6A70.3',n:'Trastorno depresivo de episodio único, grave con síntomas psicóticos'},
+  {c:'6A71',n:'Trastorno depresivo recurrente'},
+  {c:'6A72',n:'Distimia (trastorno depresivo persistente)'},
+  {c:'6A73',n:'Trastorno disfórico premenstrual'},
+  {c:'6A80',n:'Trastorno bipolar tipo I'},
+  {c:'6A81',n:'Trastorno bipolar tipo II'},
+  {c:'6A82',n:'Ciclotimia'},
+  // Trastornos de ansiedad
+  {c:'6B00',n:'Trastorno de ansiedad generalizada (TAG)'},
+  {c:'6B01',n:'Trastorno de pánico'},
+  {c:'6B02',n:'Agorafobia'},
+  {c:'6B03',n:'Fobia específica'},
+  {c:'6B04',n:'Trastorno de ansiedad social (fobia social)'},
+  {c:'6B05',n:'Trastorno de ansiedad por separación'},
+  {c:'6B06',n:'Mutismo selectivo'},
+  // Trastornos relacionados con el estrés
+  {c:'6B40',n:'Trastorno de estrés agudo'},
+  {c:'6B41',n:'Trastorno adaptativo'},
+  {c:'6B41.0',n:'Trastorno adaptativo con predominio de estado de ánimo depresivo'},
+  {c:'6B41.1',n:'Trastorno adaptativo con predominio de ansiedad'},
+  {c:'6B41.2',n:'Trastorno adaptativo mixto (ansiedad y estado de ánimo depresivo)'},
+  {c:'6B41.3',n:'Trastorno adaptativo con predominio de alteración de la conducta'},
+  {c:'6B42',n:'Trastorno de estrés postraumático (TEPT)'},
+  {c:'6B43',n:'Trastorno de estrés postraumático complejo'},
+  {c:'6B44',n:'Duelo prolongado'},
+  // Trastornos obsesivos-compulsivos
+  {c:'6B20',n:'Trastorno obsesivo-compulsivo (TOC)'},
+  {c:'6B21',n:'Trastorno dismórfico corporal'},
+  {c:'6B22',n:'Hipocondría (trastorno de ansiedad por enfermedad)'},
+  {c:'6B23',n:'Trastorno de acumulación'},
+  {c:'6B24',n:'Tricotilomanía'},
+  {c:'6B25',n:'Trastorno por excoriación'},
+  // Disociativo
+  {c:'6B60',n:'Trastorno de identidad disociativo'},
+  {c:'6B61',n:'Amnesia disociativa'},
+  {c:'6B63',n:'Despersonalización-desrealización'},
+  // Síntomas somáticos
+  {c:'6C20',n:'Trastorno de síntomas somáticos'},
+  {c:'6C21',n:'Trastorno de dolor crónico primario'},
+  {c:'6C22',n:'Trastorno de conversión (síntoma neurológico funcional)'},
+  {c:'6C23',n:'Trastorno facticio'},
+  // Alimentación
+  {c:'6B80',n:'Anorexia nerviosa'},
+  {c:'6B81',n:'Bulimia nerviosa'},
+  {c:'6B82',n:'Trastorno por atracón'},
+  {c:'6B84',n:'Pica'},
+  // Psicóticos
+  {c:'6A20',n:'Esquizofrenia'},
+  {c:'6A21',n:'Trastorno esquizoafectivo'},
+  {c:'6A22',n:'Trastorno esquizofreniforme'},
+  {c:'6A23',n:'Trastorno delirante'},
+  {c:'6A24',n:'Trastorno psicótico agudo y transitorio'},
+  {c:'6A25',n:'Trastorno psicótico inducido por sustancias'},
+  // Personalidad
+  {c:'6D10',n:'Trastorno de personalidad leve'},
+  {c:'6D11',n:'Trastorno de personalidad moderado'},
+  {c:'6D12',n:'Trastorno de personalidad grave'},
+  {c:'6D10.0',n:'Trastorno de personalidad con patrón anancástico (obsesivo-compulsivo)'},
+  {c:'6D10.1',n:'Trastorno de personalidad con patrón ansioso-evitativo'},
+  {c:'6D10.2',n:'Trastorno de personalidad con patrón dependiente'},
+  {c:'6D10.3',n:'Trastorno de personalidad con patrón histriónico'},
+  {c:'6D10.4',n:'Trastorno de personalidad con patrón impulsivo'},
+  {c:'6D10.5',n:'Trastorno de personalidad con patrón antisocial'},
+  {c:'6D10.6',n:'Trastorno de personalidad con patrón emocionalmente inestable (borderline)'},
+  {c:'6D10.7',n:'Trastorno de personalidad con patrón narcisista'},
+  {c:'6D10.8',n:'Trastorno de personalidad con patrón esquizoide'},
+  {c:'6D10.9',n:'Trastorno de personalidad con patrón paranoide'},
+  // Neurocognitivos
+  {c:'6D70',n:'Delirium'},
+  {c:'6D80',n:'Demencia debida a enfermedad de Alzheimer'},
+  {c:'6D81',n:'Demencia vascular'},
+  {c:'6D85',n:'Deterioro cognitivo leve'},
+  // Neurodesarrollo
+  {c:'6A00',n:'Trastorno del espectro autista (TEA)'},
+  {c:'6A05',n:'Trastorno por déficit de atención e hiperactividad (TDAH)'},
+  {c:'6A00.0',n:'TEA sin discapacidad intelectual ni funcional del lenguaje'},
+  // Sueño
+  {c:'7A00',n:'Insomnio crónico'},
+  {c:'7A01',n:'Insomnio a corto plazo'},
+  {c:'7A20',n:'Trastorno de hipersomnia'},
+  // Relacionados con sustancias
+  {c:'6C40',n:'Trastornos relacionados con el alcohol'},
+  {c:'6C43',n:'Trastornos relacionados con el cannabis'},
+  {c:'6C44',n:'Trastornos relacionados con los opioides'},
+  {c:'6C47',n:'Trastornos relacionados con la cocaína'},
+  // Factores psicosociales (Z-codes relevantes para hospital)
+  {c:'QE50',n:'Duelo no complicado'},
+  {c:'QE84',n:'Problemas relacionados con el apoyo social'},
+  {c:'QF27',n:'Problemas relacionados con condición médica'},
+  {c:'QF28',n:'Impacto psicológico de enfermedad crónica'},
+  {c:'QF80',n:'Reacción de adaptación a circunstancias difíciles'},
+  // Catatonía
+  {c:'6A40',n:'Catatonía asociada a otro trastorno mental'},
+  {c:'6A41',n:'Catatonía inducida por sustancias'},
+];
+
+var _cieIdx = -1; // keyboard nav index
+
+window.cieBuscar = function(q){
+  const lista = document.getElementById('ic-cie-lista');
+  if(!lista) return;
+  const txt = (q||'').trim().toLowerCase();
+  if(txt.length < 2){ lista.style.display='none'; _cieIdx=-1; return; }
+
+  const matches = CIE11_DX.filter(d =>
+    d.n.toLowerCase().includes(txt) ||
+    d.c.toLowerCase().startsWith(txt) ||
+    // tokenized search: each word must appear
+    txt.split(' ').every(w => d.n.toLowerCase().includes(w) || d.c.toLowerCase().includes(w))
+  ).slice(0, 12);
+
+  if(!matches.length){ lista.style.display='none'; return; }
+
+  lista.innerHTML = matches.map((d,i) => `
+    <div data-idx="${i}" data-code="${d.c}" data-name="${d.n}"
+      style="padding:8px 12px;cursor:pointer;font-size:0.82rem;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:8px"
+      onmousedown="cieSeleccionar('${d.c}','${d.n.replace(/'/g,'&#39;')}')"
+      onmouseover="cieHover(this)">
+      <span style="font-weight:700;color:var(--accent2);flex-shrink:0;font-size:0.75rem">${d.c}</span>
+      <span style="color:var(--text)">${d.n}</span>
+    </div>`).join('');
+  lista.style.display = '';
+  _cieIdx = -1;
+};
+
+window.cieSeleccionar = function(codigo, nombre){
+  const inp = document.getElementById('ic-cie');
+  if(inp) inp.value = codigo + ' — ' + nombre;
+  const lista = document.getElementById('ic-cie-lista');
+  if(lista) lista.style.display = 'none';
+  _cieIdx = -1;
+};
+
+window.cieOcultarLista = function(){
+  const lista = document.getElementById('ic-cie-lista');
+  if(lista) lista.style.display = 'none';
+};
+
+window.cieHover = function(el){
+  document.querySelectorAll('#ic-cie-lista > div').forEach(d=>d.style.background='');
+  el.style.background = 'var(--surface2)';
+};
+
+window.cieKeyNav = function(e){
+  const lista = document.getElementById('ic-cie-lista');
+  if(!lista || lista.style.display==='none') return;
+  const items = lista.querySelectorAll('div[data-idx]');
+  if(!items.length) return;
+
+  if(e.key==='ArrowDown'){
+    e.preventDefault();
+    _cieIdx = Math.min(_cieIdx+1, items.length-1);
+  } else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    _cieIdx = Math.max(_cieIdx-1, 0);
+  } else if(e.key==='Enter' && _cieIdx>=0){
+    e.preventDefault();
+    const sel = items[_cieIdx];
+    if(sel) cieSeleccionar(sel.dataset.code, sel.dataset.name);
+    return;
+  } else if(e.key==='Escape'){
+    cieOcultarLista(); return;
+  } else { return; }
+
+  items.forEach((d,i)=>d.style.background=i===_cieIdx?'var(--surface2)':'');
+  if(items[_cieIdx]) items[_cieIdx].scrollIntoView({block:'nearest'});
+};
+
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
 // ── HISTORIAL IC POR PACIENTE ──
@@ -6564,6 +6774,7 @@ window.abrirPacSheet=async(id)=>{
   const grid=[
     {l:'Habitación',v:p.hab||(p.tipo==='consulta-externa'?'Consulta Externa':'—')},
     {l:'Fecha ingreso',v:p.fecha?formatDate(p.fecha):'—'},
+    (()=>{const d=calcularDiasInternacion(p.fecha);return d!==null?{l:'Días internado',v:d===0?'Ingresó hoy':d===1?'1 día':d+' días',color:d>14?'var(--warning)':d>7?'var(--text)':'var(--text)'}:null;})(),
     {l:'Edad',v:p.edad?p.edad+' años':'—'},
     {l:'Sexo',v:p.sexo||'—'},
     {l:'Riesgo suicida',v:p.riesgo||'Sin clasificar',color:riskColor[p.riesgo]||'var(--text2)'},
