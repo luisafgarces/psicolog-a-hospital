@@ -2332,7 +2332,7 @@ window._query=query;
 window._where=where;
 window._orderBy=orderBy;
 window._limit=limit;
-window._fdb={collection,addDoc,deleteDoc,doc,updateDoc,serverTimestamp,query,orderBy};
+window._fdb={collection,addDoc,deleteDoc,doc,updateDoc,serverTimestamp,query,orderBy,getDocs,where,limit};
 let pacientes=[],interconsultas=[],anamnesisList=[],testHistory=[];
 window.pacientes=pacientes;window.interconsultas=interconsultas;window.anamnesisList=anamnesisList;window.testHistory=testHistory;
 
@@ -6460,6 +6460,36 @@ window.descargarFormIC = function(docId){
     if(fd.meds) filas += sec('Medicación', row('Medicación actual', fd.meds));
   }
 
+  // ── NOTA ESPECIAL ──
+  else if(modo==='Nota especial'){
+    filas += sec('Nota especial',
+      row('Tipo de situación', fd.espTipo||e.espTipo) +
+      row('Nota clínica', e.nota||e.sub||'')
+    );
+  }
+
+  // ── INTERVENCIÓN FAMILIAR ──
+  else if(modo==='Intervención Familiar'){
+    filas += sec('Intervención familiar',
+      row('Participantes', fd.famParticipantes||e.famParticipantes) +
+      row('Motivo', fd.famMotivo||e.famMotivo) +
+      row('Intervención realizada', fd.famInterv||e.famInterv) +
+      row('Seguimiento', fd.famSeguimiento||e.famSeguimiento)
+    );
+    filas += sec('Nota clínica',
+      row('Contenido', e.nota||e.sub||e.obj||'')
+    );
+  }
+
+  // ── FALLBACK: cualquier otro modo (mostrar nota directamente) ──
+  else {
+    if(e.sub) filas += sec('Análisis Subjetivo', row('Contenido', e.sub));
+    if(e.obj) filas += sec('Análisis Objetivo', row('Contenido', e.obj));
+    if(e.resp) filas += sec('Respuesta', row('Contenido', e.resp));
+    if(e.trat) filas += sec('Tratamiento', row('Contenido', e.trat));
+    if(e.nota && !e.sub && !e.obj) filas += sec('Nota clínica', row('Contenido', e.nota));
+  }
+
   // ── NOTA GENERADA ──
   const notaTexto = (e.sub&&e.obj)
     ? ['ANÁLISIS SUBJETIVO\n'+e.sub, 'ANÁLISIS OBJETIVO\n'+e.obj,
@@ -8662,14 +8692,18 @@ window.calcPCL5=()=>{
 
 
 // ══════════════════════════════════════════════════════════════
-// GUARDAR / CARGAR FORMULARIO LOCAL (localStorage)
+// BORRADORES — Firebase (primario) + localStorage (fallback offline)
 // ══════════════════════════════════════════════════════════════
+
+var _BKEY = 'psicohosp_saved_forms'; // clave localStorage fallback
+
+// ── Guardar borrador ─────────────────────────────────────────
 window.guardarFormularioLocal = function(tipo) {
   var data = { tipo: tipo, fecha: new Date().toISOString(), campos: {} };
-  // Guardar el modo IC activo para restaurarlo al cargar
   if (tipo === 'ic') data.icMode = window.icCurrentMode || 'nueva';
   var formId = tipo === 'ic' ? 'ic-form-view' : 'page-anamnesis';
   var formEl = document.getElementById(formId) || document.body;
+
   formEl.querySelectorAll('input:not([type=password]), select, textarea').forEach(function(el) {
     if (el.id) data.campos[el.id] = el.value;
   });
@@ -8681,86 +8715,167 @@ window.guardarFormularioLocal = function(tipo) {
     chipData.push({ text: el.textContent.trim(), cls: el.className });
   });
   data.chipsOn = chipData;
-  // Nombre del paciente — buscar en múltiples campos según el modo
-  var nombreEl = document.getElementById('ic-pnombre')
-    || document.getElementById('an-nombre')
-    || document.getElementById('ic-fam-nombre');
+
+  // Nombre del paciente
+  var nombreEl = document.getElementById('ic-pnombre') || document.getElementById('an-nombre');
   var nombre = (nombreEl && nombreEl.value.trim()) || '';
-  // Fallback: buscar en el selector de paciente
   if (!nombre) {
     var sel = document.getElementById('ic-paciente-sel') || document.getElementById('anamnesis-paciente-sel');
-    if (sel && sel.selectedIndex > 0) {
-      nombre = sel.options[sel.selectedIndex].text.split(' · ')[0].trim();
-    }
+    if (sel && sel.selectedIndex > 0) nombre = sel.options[sel.selectedIndex].text.split(' · ')[0].trim();
   }
   data.paciente = nombre || 'Sin nombre';
-  var modeLabel = {'nueva':'IC Nueva','seg':'Seguimiento','fam':'Intervención Familiar','esp':'Nota Especial'};
+  var modeLabel = {nueva:'IC Nueva', seg:'Seguimiento', fam:'Intervención Familiar', esp:'Nota Especial'};
   data.label = tipo === 'ic' ? (modeLabel[data.icMode] || 'IC') : 'Anamnesis';
-  var KEY = 'psicohosp_saved_forms';
+
+  // 1. Intentar guardar en Firebase
+  var db = window.db;
+  var fdb = window._fdb;
+  if (db && fdb) {
+    var docData = {
+      tipo: data.tipo,
+      icMode: data.icMode || null,
+      paciente: data.paciente,
+      label: data.label,
+      campos: data.campos,
+      chipsOn: data.chipsOn,
+      fecha: data.fecha,
+      creado: fdb.serverTimestamp()
+    };
+    fdb.addDoc(fdb.collection(db, 'borradores'), docData)
+      .then(function() {
+        toast('✅ Borrador guardado en la nube · ' + data.paciente);
+        // Refrescar lista si está abierta
+        var barId = tipo === 'ic' ? 'ic-saved-bar' : 'an-saved-bar';
+        var bar = document.getElementById(barId);
+        if (bar && bar.style.display !== 'none') mostrarFormulariosGuardados(tipo);
+      })
+      .catch(function(err) {
+        console.warn('Firebase borrador error:', err);
+        _guardarBorradorLocal(data);
+        toast('⚠️ Sin conexión — borrador guardado solo en este dispositivo');
+      });
+  } else {
+    // Fallback: solo localStorage
+    _guardarBorradorLocal(data);
+    toast('💾 Borrador guardado localmente · ' + data.paciente);
+  }
+};
+
+// Guardar en localStorage (fallback)
+function _guardarBorradorLocal(data) {
   var lista = [];
-  try { lista = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) {}
+  try { lista = JSON.parse(localStorage.getItem(_BKEY) || '[]'); } catch(e) {}
   var existIdx = lista.findIndex(function(f) {
-    return f.tipo === tipo && f.paciente === data.paciente
+    return f.tipo === data.tipo && f.paciente === data.paciente
       && f.icMode === data.icMode
       && (new Date() - new Date(f.fecha)) < 3600000;
   });
   if (existIdx >= 0) lista[existIdx] = data; else lista.unshift(data);
   if (lista.length > 20) lista = lista.slice(0, 20);
-  localStorage.setItem(KEY, JSON.stringify(lista));
-  toast('✅ Borrador guardado · ' + data.paciente + (data.label ? ' (' + data.label + ')' : ''));
-};
+  localStorage.setItem(_BKEY, JSON.stringify(lista));
+}
 
+// ── Mostrar lista de borradores ──────────────────────────────
 window.mostrarFormulariosGuardados = function(tipo) {
-  var KEY = 'psicohosp_saved_forms';
-  var lista = [];
-  try { lista = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) {}
-  lista = lista.filter(function(f) { return f.tipo === tipo; });
   var barId  = tipo === 'ic' ? 'ic-saved-bar'  : 'an-saved-bar';
   var listId = tipo === 'ic' ? 'ic-saved-list' : 'an-saved-list';
   var bar  = document.getElementById(barId);
   var list = document.getElementById(listId);
   if (!bar || !list) return;
-  if (!lista.length) { toast('ℹ️ No hay formularios guardados'); return; }
-  list.innerHTML = '';
-  lista.forEach(function(f, i) {
-    var d = new Date(f.fecha);
-    var modeTag = f.label ? ' · ' + f.label : '';
-    var label = (f.paciente || 'Sin nombre') + modeTag + ' — ' + d.toLocaleDateString('es-CO') + ' ' + d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-    var item = document.createElement('div');
-    item.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #e5c97a;border-radius:8px;padding:7px 12px;gap:8px;flex-wrap:wrap';
-    var lbl = document.createElement('span');
-    lbl.style.cssText = 'font-size:0.8rem;color:#78350f;flex:1';
-    lbl.textContent = label;
-    var btnCargar = document.createElement('button');
-    btnCargar.textContent = '📥 Cargar';
-    btnCargar.style.cssText = 'background:#d97706;color:#fff;border:none;border-radius:6px;padding:4px 11px;font-size:0.76rem;font-weight:700;cursor:pointer';
-    (function(idx) { btnCargar.onclick = function() { cargarFormularioGuardado(tipo, idx); }; })(i);
-    var btnDel = document.createElement('button');
-    btnDel.textContent = '🗑';
-    btnDel.style.cssText = 'background:#fdf0ee;color:#c0392b;border:1px solid #f0c0bb;border-radius:6px;padding:4px 9px;font-size:0.76rem;cursor:pointer';
-    (function(idx) { btnDel.onclick = function() { eliminarFormularioGuardado(tipo, idx); }; })(i);
-    item.appendChild(lbl);
-    item.appendChild(btnCargar);
-    item.appendChild(btnDel);
-    list.appendChild(item);
-  });
+
+  list.innerHTML = '<div style="font-size:0.78rem;color:#92400e;padding:6px 0">⏳ Cargando borradores…</div>';
   bar.style.display = 'block';
+
+  var db = window.db;
+  var fdb = window._fdb;
+
+  // Combinar Firebase + localStorage
+  Promise.resolve()
+    .then(function() {
+      if (!db || !fdb) return [];
+      return fdb.getDocs(
+        fdb.query(
+          fdb.collection(db, 'borradores'),
+          fdb.orderBy('creado', 'desc'),
+          fdb.limit(30)
+        )
+      ).then(function(snap) {
+        return snap.docs
+          .map(function(d) { return Object.assign({}, d.data(), { _fbId: d.id, _source: 'firebase' }); })
+          .filter(function(f) { return f.tipo === tipo; });
+      });
+    })
+    .catch(function() { return []; })
+    .then(function(fbItems) {
+      // Agregar items locales que no estén en Firebase
+      var localItems = [];
+      try { localItems = JSON.parse(localStorage.getItem(_BKEY) || '[]'); } catch(e) {}
+      localItems = localItems.filter(function(f) { return f.tipo === tipo; });
+      // Deduplicar: si hay en Firebase con mismo paciente+modo+fecha similar, no mostrar el local
+      var combined = fbItems.slice();
+      localItems.forEach(function(loc) {
+        var yaEsta = fbItems.some(function(fb) {
+          return fb.paciente === loc.paciente && fb.icMode === loc.icMode
+            && Math.abs(new Date(fb.fecha) - new Date(loc.fecha)) < 5000;
+        });
+        if (!yaEsta) combined.push(Object.assign({}, loc, { _source: 'local' }));
+      });
+
+      list.innerHTML = '';
+      if (!combined.length) {
+        list.innerHTML = '<div style="font-size:0.78rem;color:#92400e;font-style:italic">No hay borradores guardados.</div>';
+        return;
+      }
+
+      combined.forEach(function(f, i) {
+        var d = new Date(f.fecha);
+        var fechaStr = d.toLocaleDateString('es-CO') + ' ' + d.toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+        var sourceIcon = f._source === 'firebase' ? '☁️' : '📱';
+        var sourceTitle = f._source === 'firebase' ? 'Guardado en la nube (disponible en todos los dispositivos)' : 'Guardado solo en este dispositivo';
+        var modeTag = f.label ? ' · ' + f.label : '';
+        var label = sourceIcon + ' ' + (f.paciente || 'Sin nombre') + modeTag + ' — ' + fechaStr;
+
+        var item = document.createElement('div');
+        item.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #e5c97a;border-radius:8px;padding:7px 12px;gap:8px;flex-wrap:wrap';
+
+        var lbl = document.createElement('span');
+        lbl.style.cssText = 'font-size:0.8rem;color:#78350f;flex:1';
+        lbl.title = sourceTitle;
+        lbl.textContent = label;
+
+        var btnCargar = document.createElement('button');
+        btnCargar.textContent = '📥 Cargar';
+        btnCargar.style.cssText = 'background:#d97706;color:#fff;border:none;border-radius:6px;padding:4px 11px;font-size:0.76rem;font-weight:700;cursor:pointer';
+        (function(entry) { btnCargar.onclick = function() { _cargarEntrada(tipo, entry); }; })(f);
+
+        var btnPDF = document.createElement('button');
+        btnPDF.textContent = '🖨️ PDF';
+        btnPDF.title = 'Abrir para imprimir o guardar como PDF';
+        btnPDF.style.cssText = 'background:#1e3a5f;color:#fff;border:none;border-radius:6px;padding:4px 11px;font-size:0.76rem;font-weight:700;cursor:pointer';
+        (function(entry) { btnPDF.onclick = function() { imprimirBorradorLocal(entry); }; })(f);
+
+        var btnDel = document.createElement('button');
+        btnDel.textContent = '🗑';
+        btnDel.style.cssText = 'background:#fdf0ee;color:#c0392b;border:1px solid #f0c0bb;border-radius:6px;padding:4px 9px;font-size:0.76rem;cursor:pointer';
+        (function(entry, idx) {
+          btnDel.onclick = function() { _eliminarEntrada(tipo, entry, idx); };
+        })(f, i);
+
+        item.appendChild(lbl);
+        item.appendChild(btnCargar);
+        item.appendChild(btnPDF);
+        item.appendChild(btnDel);
+        list.appendChild(item);
+      });
+    });
 };
 
-window.cargarFormularioGuardado = function(tipo, idx) {
-  var KEY = 'psicohosp_saved_forms';
-  var lista = [];
-  try { lista = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) {}
-  var guardados = lista.filter(function(f) { return f.tipo === tipo; });
-  var data = guardados[idx];
-  if (!data) { toast('⚠️ No se encontró el formulario'); return; }
-
-  // Paso 1: si es IC, cambiar al modo correcto primero para que los campos sean visibles
+// ── Cargar borrador al formulario ────────────────────────────
+function _cargarEntrada(tipo, data) {
+  if (!data) { toast('⚠️ No se encontró el borrador'); return; }
   if (tipo === 'ic' && data.icMode && typeof window.setICMode === 'function') {
     window.setICMode(data.icMode);
   }
-
-  // Paso 2: pequeño delay para que el DOM actualice la visibilidad de secciones
   setTimeout(function() {
     var camposCargados = 0;
     Object.keys(data.campos || {}).forEach(function(id) {
@@ -8768,23 +8883,21 @@ window.cargarFormularioGuardado = function(tipo, idx) {
       var el = document.getElementById(id);
       if (el && (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA')) {
         el.value = data.campos[id];
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
+        el.dispatchEvent(new Event('input', {bubbles:true}));
+        el.dispatchEvent(new Event('change', {bubbles:true}));
         if (data.campos[id]) camposCargados++;
       }
     });
     Object.keys(data.campos || {}).forEach(function(key) {
       if (!key.startsWith('_ck_')) return;
-      var realKey = key.replace('_ck_', '');
-      var el = document.getElementById(realKey);
+      var el = document.getElementById(key.replace('_ck_', ''));
       if (el) el.checked = data.campos[key];
     });
     var chipsRestaurados = 0;
     if (data.chipsOn && data.chipsOn.length) {
-      var formId = tipo === 'ic' ? 'ic-form-view' : 'page-anamnesis';
-      var formEl = document.getElementById(formId) || document.body;
+      var formEl = document.getElementById(tipo === 'ic' ? 'ic-form-view' : 'page-anamnesis') || document.body;
       formEl.querySelectorAll('.ic-chip').forEach(function(chip) {
-        ['on', 'on-r', 'on-g', 'on-a'].forEach(function(cls) { chip.classList.remove(cls); });
+        ['on','on-r','on-g','on-a'].forEach(function(cls) { chip.classList.remove(cls); });
       });
       data.chipsOn.forEach(function(saved) {
         formEl.querySelectorAll('.ic-chip').forEach(function(chip) {
@@ -8799,32 +8912,47 @@ window.cargarFormularioGuardado = function(tipo, idx) {
         });
       });
     }
-    var resumen = camposCargados + ' campos';
-    if (chipsRestaurados) resumen += ', ' + chipsRestaurados + ' opciones';
-    toast('✅ Borrador cargado — ' + resumen + ' restaurados');
-    // Scroll al inicio del formulario
+    toast('✅ Borrador cargado — ' + camposCargados + ' campos, ' + chipsRestaurados + ' opciones');
     var formTop = document.getElementById(tipo === 'ic' ? 'ic-form-view' : 'page-anamnesis');
-    if (formTop) formTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (formTop) formTop.scrollIntoView({behavior:'smooth', block:'start'});
   }, 80);
 
   var barId = tipo === 'ic' ? 'ic-saved-bar' : 'an-saved-bar';
   var bar = document.getElementById(barId);
   if (bar) bar.style.display = 'none';
+}
+
+// Mantener compatibilidad con llamadas directas antiguas
+window.cargarFormularioGuardado = function(tipo, idx) {
+  mostrarFormulariosGuardados(tipo); // refrescar y cargar
 };
 
+// ── Eliminar borrador ────────────────────────────────────────
+function _eliminarEntrada(tipo, entry, idx) {
+  // Eliminar de Firebase si tiene ID
+  if (entry._fbId && window.db && window._fdb) {
+    window._fdb.deleteDoc(window._fdb.doc(window.db, 'borradores', entry._fbId))
+      .catch(function(e) { console.warn('Error eliminando borrador Firebase:', e); });
+  }
+  // Eliminar de localStorage si es local
+  if (entry._source === 'local') {
+    var lista = [];
+    try { lista = JSON.parse(localStorage.getItem(_BKEY) || '[]'); } catch(e) {}
+    lista = lista.filter(function(f) {
+      return !(f.tipo === entry.tipo && f.paciente === entry.paciente
+        && f.icMode === entry.icMode && f.fecha === entry.fecha);
+    });
+    localStorage.setItem(_BKEY, JSON.stringify(lista));
+  }
+  toast('🗑 Borrador eliminado');
+  mostrarFormulariosGuardados(tipo);
+}
+
+// Compatibilidad
 window.eliminarFormularioGuardado = function(tipo, idx) {
-  var KEY = 'psicohosp_saved_forms';
-  var lista = [];
-  try { lista = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) {}
-  var indexesOfType = [];
-  lista.forEach(function(f, i) { if (f.tipo === tipo) indexesOfType.push(i); });
-  var realIdx = indexesOfType[idx];
-  if (realIdx === undefined) return;
-  lista.splice(realIdx, 1);
-  localStorage.setItem(KEY, JSON.stringify(lista));
-  toast('🗑 Formulario eliminado');
   mostrarFormulariosGuardados(tipo);
 };
+
 
 window.mostrarHintGuardarIC = function() {
   var errDiv = document.getElementById('ic-ia-error-hint');
@@ -8864,6 +8992,222 @@ window.mostrarHintGuardarAN = function() {
   } else { errDiv.style.display = 'flex'; }
 };
 
+
+
+// ── IMPRIMIR BORRADOR LOCAL ──────────────────────────────────────────
+window.imprimirBorradorLocal = function(entry) {
+  if (!entry || !entry.campos) { toast('⚠️ Borrador vacío'); return; }
+
+  var campos = entry.campos;
+  var chipsOn = entry.chipsOn || [];
+  var paciente = entry.paciente || '—';
+  var fecha = entry.fecha ? new Date(entry.fecha).toLocaleString('es-CO', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+  var modo = entry.label || (entry.tipo === 'ic' ? 'Interconsulta' : 'Anamnesis');
+  var modeLabel = {'nueva':'IC Nueva','seg':'Seguimiento','fam':'Intervención Familiar','esp':'Nota Especial'};
+  if (entry.icMode) modo = modeLabel[entry.icMode] || modo;
+
+  // Helper: valor de campo por ID
+  var v = function(id) { return (campos[id] || '').trim(); };
+
+  // Helper: fila de tabla
+  var row = function(label, val) {
+    if (!val || !val.trim() || val === '—') return '';
+    return '<tr>'
+      + '<td style="font-weight:600;color:#374151;padding:6px 10px;border:1px solid #e5e7eb;background:#f9fafb;font-size:10pt;width:32%;vertical-align:top">' + label + '</td>'
+      + '<td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:10pt;line-height:1.6;vertical-align:top">' + val + '</td>'
+      + '</tr>';
+  };
+
+  // Helper: sección
+  var sec = function(titulo, filas) {
+    if (!filas.trim()) return '';
+    return '<tr><td colspan="2" style="background:#1e3a5f;color:#fff;font-weight:700;padding:7px 10px;font-size:9pt;letter-spacing:0.05em;text-transform:uppercase">' + titulo + '</td></tr>' + filas;
+  };
+
+  // Chips seleccionados agrupados como texto
+  var chipsTexto = chipsOn.map(function(c) { return c.text; }).join(' · ') || '—';
+
+  var filas = '';
+
+  // Datos básicos siempre
+  filas += sec('Datos del registro',
+    row('Paciente', paciente) +
+    row('Tipo de nota', modo) +
+    row('Fecha borrador', fecha) +
+    row('Habitación', v('ic-hab') || v('an-hab')) +
+    row('Diagnóstico / Motivo', v('ic-pdx') || v('an-motivo')) +
+    row('Riesgo suicida', v('ic-riesgo-nivel') || v('an-riesgo'))
+  );
+
+  // IC Nueva
+  if (entry.icMode === 'nueva' || entry.icMode === undefined && entry.tipo === 'ic') {
+    filas += sec('Datos del paciente',
+      row('Nombre', v('ic-pnombre')) +
+      row('Edad', v('ic-edad')) +
+      row('Sexo', v('ic-sexo')) +
+      row('Habitación', v('ic-hab')) +
+      row('Fecha IC', v('ic-pfecha')) +
+      row('Días internado', v('ic-dias-internacion')) +
+      row('Médico solicitante', v('ic-medico-sol')) +
+      row('Urgencia', v('ic-urgencia'))
+    );
+    filas += sec('Motivo de interconsulta',
+      row('Pedido del médico', v('ic-motivo-medico')) +
+      row('Diagnóstico médico', v('ic-pdx')) +
+      row('Tratamiento médico', v('ic-trat-medico')) +
+      row('Inicio / Evolución', v('ic-inicio-evolucion'))
+    );
+    filas += sec('Análisis subjetivo',
+      row('Estado emocional referido', chipsOn.filter(function(c){return c.text;}).slice(0,5).map(function(c){return c.text;}).join(', ') || '—') +
+      row('Cita textual', v('ic-sub-cita')) +
+      row('Intensidad del malestar', v('ic-sub-intensidad')) +
+      row('Notas sustancias', v('ic-sustancias-notas')) +
+      row('Pensamientos (TCC)', v('ic-tcc-pensamientos')) +
+      row('Evitación (TCC)', v('ic-tcc-evitacion')) +
+      row('Activación conductual', v('ic-tcc-activacion')) +
+      row('Adherencia', v('ic-tcc-adherencia')) +
+      row('Red de apoyo', v('ic-red-apoyo-detalle'))
+    );
+    filas += sec('Examen mental y análisis',
+      row('Análisis clínico libre', v('ic-resp-analisis')) +
+      row('Observaciones', v('ic-resp-obs')) +
+      row('Código CIE-11', v('ic-cie')) +
+      row('Notas de riesgo', v('ic-riesgo-notas'))
+    );
+    filas += sec('Intervención y plan',
+      row('Respuesta al médico', v('ic-resp-medico')) +
+      row('Plazo seguimiento', v('ic-seguimiento-plazo')) +
+      row('Notas de tratamiento', v('ic-trat-notas'))
+    );
+    if (chipsTexto !== '—') {
+      filas += sec('Opciones seleccionadas en el formulario',
+        row('Chips / Selecciones', chipsTexto)
+      );
+    }
+  }
+
+  // Seguimiento
+  else if (entry.icMode === 'seg') {
+    filas += sec('Datos del seguimiento',
+      row('Nombre', v('ic-pnombre')) +
+      row('Fecha', v('ic-pfecha')) +
+      row('Habitación', v('ic-hab')) +
+      row('Diagnóstico', v('ic-pdx')) +
+      row('Riesgo suicida', v('ic-riesgo-nivel'))
+    );
+    if (chipsTexto !== '—') {
+      filas += sec('Estado clínico observado',
+        row('Opciones seleccionadas', chipsTexto)
+      );
+    }
+    filas += sec('Notas de seguimiento',
+      row('Análisis clínico', v('ic-resp-analisis')) +
+      row('Respuesta al médico', v('ic-resp-medico')) +
+      row('Observaciones', v('ic-resp-obs')) +
+      row('Notas riesgo', v('ic-riesgo-notas')) +
+      row('Plazo seguimiento', v('ic-seguimiento-plazo')) +
+      row('Notas tratamiento', v('ic-trat-notas'))
+    );
+  }
+
+  // Intervención Familiar
+  else if (entry.icMode === 'fam') {
+    filas += sec('Datos de la intervención familiar',
+      row('Paciente', v('ic-pnombre') || paciente) +
+      row('Fecha', v('ic-pfecha')) +
+      row('Habitación', v('ic-hab')) +
+      row('Diagnóstico', v('ic-pdx'))
+    );
+    if (chipsTexto !== '—') {
+      filas += sec('Contenido de la intervención',
+        row('Opciones seleccionadas', chipsTexto)
+      );
+    }
+    filas += sec('Notas',
+      row('Notas de intervención', v('ic-trat-notas')) +
+      row('Plazo seguimiento', v('ic-seguimiento-plazo'))
+    );
+  }
+
+  // Nota Especial
+  else if (entry.icMode === 'esp') {
+    filas += sec('Nota especial',
+      row('Paciente', v('ic-pnombre') || paciente) +
+      row('Fecha', v('ic-pfecha')) +
+      row('Habitación', v('ic-hab')) +
+      row('Diagnóstico', v('ic-pdx'))
+    );
+    if (chipsTexto !== '—') {
+      filas += sec('Tipo de situación',
+        row('Seleccionado', chipsTexto)
+      );
+    }
+  }
+
+  // Anamnesis
+  else if (entry.tipo === 'an') {
+    filas += sec('Datos de identificación',
+      row('Nombre', v('an-nombre')) +
+      row('Cédula', v('an-cedula')) +
+      row('Edad', v('an-edad')) +
+      row('Estado civil', v('an-ecivil')) +
+      row('Ocupación', v('an-ocupacion')) +
+      row('Escolaridad', v('an-esc')) +
+      row('Remitido por', v('an-remitido'))
+    );
+    filas += sec('Motivo de consulta',
+      row('Motivo', v('an-motivo')) +
+      row('Fecha', v('an-fecha'))
+    );
+    filas += sec('Historia del problema',
+      row('Evolución', v('an-evolucion')) +
+      row('Intensidad', v('an-intens') ? v('an-intens') + '/10' : '') +
+      row('Descripción', v('an-descripcion')) +
+      row('Medicación actual', v('an-meds'))
+    );
+    filas += sec('Examen mental y riesgo',
+      row('Clasificación de riesgo', v('an-riesgo')) +
+      row('Notas de riesgo', v('an-riesgo-notas')) +
+      row('Código CIE', v('an-cie'))
+    );
+    filas += sec('Plan',
+      row('Próxima cita', v('an-proxcita'))
+    );
+    if (chipsTexto !== '—') {
+      filas += sec('Opciones seleccionadas',
+        row('Selecciones del formulario', chipsTexto)
+      );
+    }
+  }
+
+  var html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'
+    + '<title>Borrador · ' + modo + ' · ' + paciente + '</title>'
+    + '<style>'
+    + '@page{size:letter;margin:15mm}'
+    + '*{box-sizing:border-box}'
+    + 'body{font-family:"Segoe UI",Arial,sans-serif;font-size:11pt;color:#111;margin:0;padding:0}'
+    + 'table{width:100%;border-collapse:collapse;margin-bottom:16px}'
+    + 'h1{font-size:15pt;color:#1e3a5f;margin:0 0 4px}'
+    + '.sub{font-size:9pt;color:#666;margin-bottom:16px}'
+    + '.badge{display:inline-block;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:20px;padding:2px 10px;font-size:8.5pt;font-weight:700;margin-bottom:12px}'
+    + '.footer{margin-top:20px;border-top:1px solid #e5e7eb;padding-top:8px;font-size:8pt;color:#9ca3af;text-align:center}'
+    + '@media print{.barra{display:none}}'
+    + '</style></head><body>'
+    + '<div class="barra" style="background:#1e3a5f;color:#fff;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:16px">'
+    + '<span>📋 Borrador · ' + modo + ' · ' + paciente + '</span>'
+    + '<button onclick="window.print()" style="background:#2563a8;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px">🖨️ Imprimir / Guardar PDF</button>'
+    + '</div>'
+    + '<h1>' + modo + ' — ' + paciente + '</h1>'
+    + '<div class="sub">ESE Hospital La María · Psicología Hospitalaria · ' + fecha + '</div>'
+    + '<div class="badge">📋 BORRADOR LOCAL — No guardado en Firebase</div>'
+    + '<table>' + filas + '</table>'
+    + '<div class="footer">ESE Hospital La María · Medellín · Documento generado por PsicoHosp · Borrador local</div>'
+    + '</body></html>';
+
+  var w = window.open('', '_blank', 'width=820,height=1000,scrollbars=yes');
+  if (w) { w.document.write(html); w.document.close(); }
+  else toast('⚠️ Activa ventanas emergentes para imprimir');
+};
 
 // ── INIT ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
