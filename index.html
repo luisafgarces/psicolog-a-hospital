@@ -2981,6 +2981,28 @@ window.guardarICFirebase=async()=>{
         notaTexto=partes.join(' | ')||'Seguimiento psicológico realizado. Ver formulario para detalles.';
       }
     }
+    else if(window.icCurrentMode==='fam'){
+      // Leer nota familiar generada por IA (va en ic-out-seg-texto igual que seguimiento)
+      const elFam=document.getElementById('ic-out-seg-texto');
+      const vFam=(elFam?.textContent||'').trim();
+      if(vFam&&!vFam.startsWith('Genera')&&!vFam.startsWith('⏳')&&!vFam.startsWith('❌')&&vFam.length>30){
+        notaTexto=vFam;
+      }
+      // Si no hay nota IA, construir desde los chips del formulario familiar
+      if(!notaTexto){
+        const icC=lbl=>icChipsBySubLabel(lbl);
+        const partes=[];
+        const asist=icv('fam-asistentes');if(asist)partes.push('Asistentes: '+asist);
+        const vinculo=icC('Vínculo con el paciente');if(vinculo.length)partes.push('Vínculo: '+vinculo.join(', '));
+        const estadoFam=icC('Estado emocional predominante observado');if(estadoFam.length)partes.push('Estado emocional familiar: '+estadoFam.join(', '));
+        const preoc=icC('Principales preocupaciones referidas por la familia');if(preoc.length)partes.push('Preocupaciones: '+preoc.join(', '));
+        const interv=icC('Tipo de intervención');if(interv.length)partes.push('Intervención: '+interv.join(', '));
+        const seg=icC('Seguimiento');if(seg.length)partes.push('Seguimiento: '+seg.join(', '));
+        const notas=icv('fam-notas-interv');if(notas)partes.push('Notas: '+notas);
+        const plazo=icv('fam-seguimiento-plazo');if(plazo)partes.push('Plazo: '+plazo);
+        notaTexto=partes.join(' | ')||'Intervención familiar realizada. Ver formulario para detalles.';
+      }
+    }
     else if(window.icCurrentMode==='esp'){
       generarNotaIcEsp();
       const el=document.getElementById('ic-esp-text');
@@ -3120,6 +3142,45 @@ window.guardarICFirebase=async()=>{
         if(objLargo)partesTrat.push('Objetivo largo plazo: '+objLargo);
         if(proxCita)partesTrat.push('Próxima cita: '+proxCita);
         trat=partesTrat.join('\n');
+      }
+    } else if(window.icCurrentMode==='fam'){
+      // Para Intervención Familiar: capturar campos específicos del formulario familiar
+      const icC=lbl=>icChipsBySubLabel(lbl);
+      const asist=icv('fam-asistentes')||'';
+      const vinculo=icC('Vínculo con el paciente').join(', ');
+      const cita=icv('fam-cita')||'';
+      const estadoFam=icC('Estado emocional predominante observado').join(', ');
+      const preoc=icC('Principales preocupaciones referidas por la familia').join(', ');
+      const dinamica=icC('Dinámica familiar').join(', ');
+      const comprension=icC('Comprensión del diagnóstico / pronóstico').join(', ');
+      const sobrecarga=icC('Riesgo de sobrecarga / claudicación del cuidador').join(', ');
+      const tipoInterv=icC('Tipo de intervención').join(', ');
+      const notas=icv('fam-notas-interv')||'';
+      const segFam=icC('Seguimiento').join(', ');
+      const plazo=icv('fam-seguimiento-plazo')||'';
+      // Mapear a SOAP
+      const subPartes=[];
+      if(asist)subPartes.push('Asistentes: '+asist+(vinculo?' ('+vinculo+')':''));
+      if(estadoFam)subPartes.push('Estado emocional familiar: '+estadoFam);
+      if(preoc)subPartes.push('Preocupaciones referidas: '+preoc);
+      if(cita)subPartes.push('Cita textual: "'+cita+'"');
+      sub=subPartes.join(' | ')||'Intervención con familia/cuidadores.';
+      const objPartes=[];
+      if(dinamica)objPartes.push('Dinámica familiar: '+dinamica);
+      if(comprension)objPartes.push('Comprensión Dx/pronóstico: '+comprension);
+      if(sobrecarga)objPartes.push('Riesgo sobrecarga cuidador: '+sobrecarga);
+      obj=objPartes.join(' | ');
+      resp='Intervención psicológica con familia/cuidadores realizada.';
+      const tratPartes=[];
+      if(tipoInterv)tratPartes.push('Tipo de intervención: '+tipoInterv);
+      if(notas)tratPartes.push('Notas: '+notas);
+      if(segFam)tratPartes.push('Seguimiento: '+segFam+(plazo?' — Plazo: '+plazo:''));
+      trat=tratPartes.join(' | ');
+      // Si hubo nota IA, usarla en lugar del texto construido
+      const elFamIA=document.getElementById('ic-out-seg-texto');
+      const vFamIA=(elFamIA?.textContent||'').trim();
+      if(vFamIA&&!vFamIA.startsWith('Genera')&&!vFamIA.startsWith('⏳')&&!vFamIA.startsWith('❌')&&vFamIA.length>50){
+        resp=vFamIA; obj=vFamIA;
       }
     } else if(window.icCurrentMode==='esp'){
       // solo en nota para evitar duplicado al renderizar
