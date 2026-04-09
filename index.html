@@ -1190,19 +1190,21 @@ input.toggle-cb{display:none}
         </div>
         <!-- BOTONES -->
         <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center">
-          <button class="btn btn-secondary" onclick="guardarFormularioLocal('ic')" style="border:1.5px solid var(--accent);color:var(--accent);background:#f0f7ff" title="Guarda los datos del formulario en este dispositivo sin necesidad de IA">
-            💾 Guardar formulario
-          </button>
-          <button class="btn btn-secondary" onclick="mostrarFormulariosGuardados('ic')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Ver y cargar formularios guardados anteriormente">
-            📂 Ver guardados
+          <button class="btn btn-primary" onclick="guardarICFirebase()" title="Guarda el formulario en Firebase (historial del paciente)">
+            💾 Guardar nota
           </button>
           <button class="btn btn-primary" onclick="generarNotaIC()">✨ Generar nota con IA</button>
-          <button class="btn btn-secondary" onclick="guardarICFirebase()" style="margin-left:auto">☁️ Guardar en Firebase</button>
+          <button class="btn btn-secondary" onclick="guardarFormularioLocal('ic')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Guarda solo en este dispositivo como borrador de emergencia (no aparece en historial)">
+            📋 Borrador local
+          </button>
+          <button class="btn btn-secondary" onclick="mostrarFormulariosGuardados('ic')" style="color:#92400e" title="Ver borradores guardados localmente">
+            📂 Ver borradores
+          </button>
         </div>
         <!-- BARRA DE FORMULARIOS GUARDADOS IC -->
         <div id="ic-saved-bar" style="display:none;margin-top:10px;background:#fffbeb;border:1.5px solid #d97706;border-radius:10px;padding:10px 14px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <span style="font-size:0.78rem;font-weight:700;color:#92400e">📂 Formularios guardados localmente</span>
+            <span style="font-size:0.78rem;font-weight:700;color:#92400e">📋 Borradores locales (solo en este dispositivo — no aparecen en el historial)</span>
             <button onclick="document.getElementById('ic-saved-bar').style.display='none'" style="background:none;border:none;cursor:pointer;color:#92400e;font-size:1rem;padding:0 4px">✕</button>
           </div>
           <div id="ic-saved-list" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -1492,9 +1494,11 @@ input.toggle-cb{display:none}
                 <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="seg-modalidad" value="Online" id="seg-mod-online"> Online</label>
               </div>
             </div>
-            <div style="margin-left:auto;display:flex;gap:10px">
+            <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn btn-secondary" onclick="anamSegLimpiar()">🗑 Limpiar</button>
-              <button class="btn btn-primary" onclick="anamSegGuardar()">💾 Guardar nota de sesión</button>
+              <button class="btn btn-primary" onclick="anamSegGuardar()">💾 Guardar nota</button>
+              <button class="btn btn-secondary" onclick="guardarFormularioLocal('an')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Borrador de emergencia — no aparece en historial">📋 Borrador local</button>
+              <button class="btn btn-secondary" onclick="mostrarFormulariosGuardados('an')" style="color:#92400e" title="Ver borradores guardados">📂 Ver borradores</button>
             </div>
           </div>
         </div>
@@ -1808,15 +1812,15 @@ input.toggle-cb{display:none}
               <span id="an-key-status" style="font-size:0.7rem;color:#1e4d8c;white-space:nowrap">Guardada en este dispositivo</span>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-              <button type="button" class="btn btn-secondary" onclick="guardarFormularioLocal('an')" style="border:1.5px solid var(--accent);color:var(--accent);background:#f0f7ff">💾 Guardar formulario</button>
-              <button type="button" class="btn btn-secondary" onclick="mostrarFormulariosGuardados('an')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb">📂 Ver guardados</button>
+              <button type="button" class="btn btn-primary" onclick="guardarAnamnesis()" title="Guarda la anamnesis en Firebase (historial del paciente)">💾 Guardar nota</button>
               <button type="button" class="btn btn-primary" onclick="generarNota()">✨ Generar nota con IA</button>
               <button type="button" class="btn btn-secondary" onclick="copiarNota()">Copiar</button>
-              <button type="button" class="btn btn-primary" onclick="guardarAnamnesis()" style="margin-left:auto">☁️ Guardar en Firebase</button>
+              <button type="button" class="btn btn-secondary" onclick="guardarFormularioLocal('an')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Guarda solo en este dispositivo como borrador de emergencia (no aparece en historial)">📋 Borrador local</button>
+              <button type="button" class="btn btn-secondary" onclick="mostrarFormulariosGuardados('an')" style="color:#92400e">📂 Ver borradores</button>
             </div>
             <div id="an-saved-bar" style="display:none;margin-top:10px;background:#fffbeb;border:1.5px solid #d97706;border-radius:10px;padding:10px 14px">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                <span style="font-size:0.78rem;font-weight:700;color:#92400e">📂 Formularios guardados localmente</span>
+                <span style="font-size:0.78rem;font-weight:700;color:#92400e">📋 Borradores locales (solo en este dispositivo — no aparecen en el historial)</span>
                 <button onclick="document.getElementById('an-saved-bar').style.display='none'" style="background:none;border:none;cursor:pointer;color:#92400e;font-size:1rem;padding:0 4px">✕</button>
               </div>
               <div id="an-saved-list" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -4850,7 +4854,7 @@ function mostrarHintGuardarAN(){
     errDiv.id='an-ia-error-hint';
     errDiv.style.cssText='margin-top:10px;background:#fdf0ee;border:1.5px solid #c0392b;border-radius:10px;padding:10px 14px;font-size:0.82rem;color:#7b1a10;display:flex;align-items:center;gap:10px;flex-wrap:wrap';
     var msg=document.createElement('span');
-    msg.innerHTML='⚠️ <strong>La IA no está disponible.</strong> No pierdas tu trabajo — usa <strong>💾 Guardar formulario</strong> y genera la nota más tarde.';
+    msg.innerHTML='⚠️ <strong>La IA no está disponible.</strong> Puedes <strong>💾 Guardar nota</strong> en Firebase sin nota IA, o guardar un <strong>📋 Borrador local</strong> de emergencia para no perder lo diligenciado.';
     var btn=document.createElement('button');
     btn.textContent='💾 Guardar ahora';
     btn.style.cssText='background:#c0392b;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:0.78rem;font-weight:700;cursor:pointer;margin-left:4px;white-space:nowrap';
@@ -7539,7 +7543,7 @@ function mostrarHintGuardarIC(){
     errDiv.id='ic-ia-error-hint';
     errDiv.style.cssText='margin-top:10px;background:#fdf0ee;border:1.5px solid #c0392b;border-radius:10px;padding:10px 14px;font-size:0.82rem;color:#7b1a10;display:flex;align-items:center;gap:10px;flex-wrap:wrap';
     var msg=document.createElement('span');
-    msg.innerHTML='⚠️ <strong>La IA no está disponible.</strong> No pierdas tu trabajo — usa <strong>💾 Guardar formulario</strong> y genera la nota más tarde.';
+    msg.innerHTML='⚠️ <strong>La IA no está disponible.</strong> Puedes <strong>💾 Guardar nota</strong> en Firebase sin nota IA, o guardar un <strong>📋 Borrador local</strong> de emergencia para no perder lo diligenciado.';
     var btn=document.createElement('button');
     btn.textContent='💾 Guardar ahora';
     btn.style.cssText='background:#c0392b;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:0.78rem;font-weight:700;cursor:pointer;margin-left:4px;white-space:nowrap';
