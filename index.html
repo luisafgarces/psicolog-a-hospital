@@ -3556,19 +3556,31 @@ window.mneGuardar=async()=>{
   let sub,obj,resp,trat,nota;
   if(esSeg){
     const segTxt=v('mne-seg-texto');
+    // Para seguimiento: el texto va en obj Y en nota para garantizar visibilidad
     obj=segTxt||orig.obj||'';
-    sub=orig.sub||''; resp=orig.resp||''; trat=orig.trat||''; nota=orig.nota||'';
+    nota=segTxt||orig.nota||orig.obj||'';
+    sub=orig.sub||''; resp=orig.resp||''; trat=orig.trat||'';
   } else {
     sub=v('mne-sub')||orig.sub||'';
     obj=v('mne-obj')||orig.obj||'';
     resp=v('mne-resp')||orig.resp||'';
     trat=v('mne-trat')||orig.trat||'';
-    nota=orig.nota||'';
+    // nota es la concatenación de los 4 campos para búsqueda/copia
+    nota=([sub&&'ANÁLISIS SUBJETIVO\n'+sub,
+           obj&&'ANÁLISIS OBJETIVO\n'+obj,
+           resp&&'RESPUESTA\n'+resp,
+           trat&&'TRATAMIENTO\n'+trat]
+          .filter(Boolean).join('\n\n'))||orig.nota||'';
   }
   setSyncStatus('syncing');
   try{
     if(window._mneId){
+      // Actualizar Firebase
       await updateDoc(doc(db,window._mneCol,window._mneId),{fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,fechaEditado:new Date().toISOString().split('T')[0],editado:serverTimestamp()});
+      // Actualizar también el array en memoria inmediatamente (sin esperar onSnapshot)
+      const arr=window._mneCol==='anamnesis'?(window.anamnesisList||[]):(window.interconsultas||[]);
+      const idx=arr.findIndex(function(x){return x.id===window._mneId;});
+      if(idx>=0){arr[idx]=Object.assign({},arr[idx],{fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,fechaEditado:new Date().toISOString().split('T')[0]});}
       toast('✅ Nota actualizada');
     } else {
       const pac=pacientes.find(p=>p.id===window._hPacId);
@@ -3586,13 +3598,12 @@ window.mneGuardar=async()=>{
     }
     setSyncStatus('online');
     window.mneCerrar();
+    // Renderizar inmediatamente con los datos en memoria ya actualizados
+    if(window._hPacId&&typeof _hpacPacId!=='undefined'){_hpacPacId=window._hPacId;window._hpacPacId=window._hPacId;}
+    if(typeof hpacRenderNotas==='function')hpacRenderNotas();
+    if(typeof mhicRender==='function')mhicRender();
     const cb=window._mneOnSave;window._mneOnSave=null;
-    if(cb)cb();else setTimeout(()=>{
-      // Sync _hpacPacId so hpacRenderNotas can find the patient
-      if(window._hPacId&&typeof _hpacPacId!=='undefined'&&!_hpacPacId){_hpacPacId=window._hPacId;window._hpacPacId=window._hPacId;}
-      if(typeof hpacRenderNotas==='function')hpacRenderNotas();
-      if(typeof mhicRender==='function')mhicRender();
-    },500);
+    if(cb)cb();
   }catch(ex){setSyncStatus('offline');toast('❌ '+ex.message);}
 };
 
