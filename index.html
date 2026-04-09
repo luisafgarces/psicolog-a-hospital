@@ -8666,6 +8666,8 @@ window.calcPCL5=()=>{
 // ══════════════════════════════════════════════════════════════
 window.guardarFormularioLocal = function(tipo) {
   var data = { tipo: tipo, fecha: new Date().toISOString(), campos: {} };
+  // Guardar el modo IC activo para restaurarlo al cargar
+  if (tipo === 'ic') data.icMode = window.icCurrentMode || 'nueva';
   var formId = tipo === 'ic' ? 'ic-form-view' : 'page-anamnesis';
   var formEl = document.getElementById(formId) || document.body;
   formEl.querySelectorAll('input:not([type=password]), select, textarea').forEach(function(el) {
@@ -8679,18 +8681,33 @@ window.guardarFormularioLocal = function(tipo) {
     chipData.push({ text: el.textContent.trim(), cls: el.className });
   });
   data.chipsOn = chipData;
-  var nombreEl = document.getElementById('ic-pnombre') || document.getElementById('an-nombre');
-  data.paciente = nombreEl ? nombreEl.value : '—';
+  // Nombre del paciente — buscar en múltiples campos según el modo
+  var nombreEl = document.getElementById('ic-pnombre')
+    || document.getElementById('an-nombre')
+    || document.getElementById('ic-fam-nombre');
+  var nombre = (nombreEl && nombreEl.value.trim()) || '';
+  // Fallback: buscar en el selector de paciente
+  if (!nombre) {
+    var sel = document.getElementById('ic-paciente-sel') || document.getElementById('anamnesis-paciente-sel');
+    if (sel && sel.selectedIndex > 0) {
+      nombre = sel.options[sel.selectedIndex].text.split(' · ')[0].trim();
+    }
+  }
+  data.paciente = nombre || 'Sin nombre';
+  var modeLabel = {'nueva':'IC Nueva','seg':'Seguimiento','fam':'Intervención Familiar','esp':'Nota Especial'};
+  data.label = tipo === 'ic' ? (modeLabel[data.icMode] || 'IC') : 'Anamnesis';
   var KEY = 'psicohosp_saved_forms';
   var lista = [];
   try { lista = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) {}
   var existIdx = lista.findIndex(function(f) {
-    return f.tipo === tipo && f.paciente === data.paciente && (new Date() - new Date(f.fecha)) < 3600000;
+    return f.tipo === tipo && f.paciente === data.paciente
+      && f.icMode === data.icMode
+      && (new Date() - new Date(f.fecha)) < 3600000;
   });
   if (existIdx >= 0) lista[existIdx] = data; else lista.unshift(data);
   if (lista.length > 20) lista = lista.slice(0, 20);
   localStorage.setItem(KEY, JSON.stringify(lista));
-  toast('✅ Formulario guardado · ' + data.paciente);
+  toast('✅ Borrador guardado · ' + data.paciente + (data.label ? ' (' + data.label + ')' : ''));
 };
 
 window.mostrarFormulariosGuardados = function(tipo) {
@@ -8707,7 +8724,8 @@ window.mostrarFormulariosGuardados = function(tipo) {
   list.innerHTML = '';
   lista.forEach(function(f, i) {
     var d = new Date(f.fecha);
-    var label = (f.paciente || 'Sin nombre') + ' — ' + d.toLocaleDateString('es-CO') + ' ' + d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    var modeTag = f.label ? ' · ' + f.label : '';
+    var label = (f.paciente || 'Sin nombre') + modeTag + ' — ' + d.toLocaleDateString('es-CO') + ' ' + d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
     var item = document.createElement('div');
     item.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #e5c97a;border-radius:8px;padding:7px 12px;gap:8px;flex-wrap:wrap';
     var lbl = document.createElement('span');
@@ -8736,40 +8754,59 @@ window.cargarFormularioGuardado = function(tipo, idx) {
   var guardados = lista.filter(function(f) { return f.tipo === tipo; });
   var data = guardados[idx];
   if (!data) { toast('⚠️ No se encontró el formulario'); return; }
-  Object.keys(data.campos || {}).forEach(function(id) {
-    if (id.startsWith('_ck_')) return;
-    var el = document.getElementById(id);
-    if (el && (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA')) {
-      el.value = data.campos[id];
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-  });
-  Object.keys(data.campos || {}).forEach(function(key) {
-    if (!key.startsWith('_ck_')) return;
-    var realKey = key.replace('_ck_', '');
-    var el = document.getElementById(realKey);
-    if (el) el.checked = data.campos[key];
-  });
-  if (data.chipsOn && data.chipsOn.length) {
-    var formId = tipo === 'ic' ? 'ic-form-view' : 'page-anamnesis';
-    var formEl = document.getElementById(formId) || document.body;
-    formEl.querySelectorAll('.ic-chip').forEach(function(chip) {
-      ['on', 'on-r', 'on-g', 'on-a'].forEach(function(cls) { chip.classList.remove(cls); });
-    });
-    data.chipsOn.forEach(function(saved) {
-      formEl.querySelectorAll('.ic-chip').forEach(function(chip) {
-        if (chip.textContent.trim() === saved.text) {
-          var onCls = 'on';
-          if (saved.cls.indexOf('on-r') > -1) onCls = 'on-r';
-          else if (saved.cls.indexOf('on-g') > -1) onCls = 'on-g';
-          else if (saved.cls.indexOf('on-a') > -1) onCls = 'on-a';
-          chip.classList.add(onCls);
-        }
-      });
-    });
+
+  // Paso 1: si es IC, cambiar al modo correcto primero para que los campos sean visibles
+  if (tipo === 'ic' && data.icMode && typeof window.setICMode === 'function') {
+    window.setICMode(data.icMode);
   }
-  toast('✅ Formulario cargado: ' + data.paciente);
+
+  // Paso 2: pequeño delay para que el DOM actualice la visibilidad de secciones
+  setTimeout(function() {
+    var camposCargados = 0;
+    Object.keys(data.campos || {}).forEach(function(id) {
+      if (id.startsWith('_ck_')) return;
+      var el = document.getElementById(id);
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA')) {
+        el.value = data.campos[id];
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        if (data.campos[id]) camposCargados++;
+      }
+    });
+    Object.keys(data.campos || {}).forEach(function(key) {
+      if (!key.startsWith('_ck_')) return;
+      var realKey = key.replace('_ck_', '');
+      var el = document.getElementById(realKey);
+      if (el) el.checked = data.campos[key];
+    });
+    var chipsRestaurados = 0;
+    if (data.chipsOn && data.chipsOn.length) {
+      var formId = tipo === 'ic' ? 'ic-form-view' : 'page-anamnesis';
+      var formEl = document.getElementById(formId) || document.body;
+      formEl.querySelectorAll('.ic-chip').forEach(function(chip) {
+        ['on', 'on-r', 'on-g', 'on-a'].forEach(function(cls) { chip.classList.remove(cls); });
+      });
+      data.chipsOn.forEach(function(saved) {
+        formEl.querySelectorAll('.ic-chip').forEach(function(chip) {
+          if (chip.textContent.trim() === saved.text) {
+            var onCls = 'on';
+            if (saved.cls.indexOf('on-r') > -1) onCls = 'on-r';
+            else if (saved.cls.indexOf('on-g') > -1) onCls = 'on-g';
+            else if (saved.cls.indexOf('on-a') > -1) onCls = 'on-a';
+            chip.classList.add(onCls);
+            chipsRestaurados++;
+          }
+        });
+      });
+    }
+    var resumen = camposCargados + ' campos';
+    if (chipsRestaurados) resumen += ', ' + chipsRestaurados + ' opciones';
+    toast('✅ Borrador cargado — ' + resumen + ' restaurados');
+    // Scroll al inicio del formulario
+    var formTop = document.getElementById(tipo === 'ic' ? 'ic-form-view' : 'page-anamnesis');
+    if (formTop) formTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
+
   var barId = tipo === 'ic' ? 'ic-saved-bar' : 'an-saved-bar';
   var bar = document.getElementById(barId);
   if (bar) bar.style.display = 'none';
