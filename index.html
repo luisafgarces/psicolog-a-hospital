@@ -2158,32 +2158,60 @@ input.toggle-cb{display:none}
     <div class="pac-sheet-body">
       <div id="ps-sesiones-badge" class="pac-sesiones-badge" title="Ver historial completo del paciente">📅 0 sesiones registradas</div>
       <div class="pac-info-grid" id="ps-grid"></div>
-      <!-- Plan de tratamiento intrahospitalario -->
-      <div id="ps-plan-wrap" style="display:none;margin-top:12px;background:#f0fdf4;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px">
+      <!-- Plan farmacológico con historial -->
+      <div style="margin-top:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:0.72rem;font-weight:700;color:#c2410c;text-transform:uppercase;letter-spacing:0.06em">💊 Plan farmacológico</span>
+          <div style="display:flex;gap:5px;align-items:center">
+            <span id="ps-farm-fecha" style="font-size:0.65rem;color:#ea580c"></span>
+            <button id="ps-farm-edit-btn" class="btn btn-sm" style="font-size:0.68rem;padding:2px 8px;background:#ea580c;color:#fff;border:none;border-radius:5px" onclick="farmToggleEdit()">✏️ Editar</button>
+            <button id="ps-farm-save-btn" class="btn btn-sm" style="display:none;font-size:0.68rem;padding:2px 8px;background:#16a34a;color:#fff;border:none;border-radius:5px" onclick="guardarPlanFarmacologico(window._psPacId)">💾 Guardar</button>
+            <button id="ps-farm-cancel-btn" class="btn btn-sm btn-secondary" style="display:none;font-size:0.68rem;padding:2px 8px" onclick="farmCancelEdit()">Cancelar</button>
+          </div>
+        </div>
+        <!-- Vista lectura -->
+        <div id="ps-farm-view" style="font-size:0.82rem;color:#431407;line-height:1.7;white-space:pre-wrap;min-height:32px;padding:2px 0"></div>
+        <!-- Vista edición (oculta por defecto) -->
+        <textarea id="ps-farm-texto" rows="4" placeholder="Medicamentos, dosis, frecuencia…" style="display:none;width:100%;padding:8px 10px;border:1.5px solid #ea580c;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;resize:vertical;background:#fff;line-height:1.6;outline:none;color:var(--text)"></textarea>
+        <div style="display:flex;align-items:center;justify-content:flex-end;margin-top:6px">
+          <button onclick="toggleFarmHistorial(window._psPacId)" style="background:none;border:none;cursor:pointer;font-size:0.68rem;color:#c2410c;text-decoration:underline;padding:0">📜 Ver historial de cambios</button>
+        </div>
+        <div id="ps-farm-historial" style="display:none;margin-top:8px;border-top:1px solid #fed7aa;padding-top:8px;max-height:180px;overflow-y:auto"></div>
+      </div>
+
+      <!-- Plan de tratamiento intrahospitalario (IA) -->
+      <div id="ps-plan-wrap" style="margin-top:12px;background:#f0fdf4;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <span style="font-size:0.72rem;font-weight:700;color:#1e4d8c;text-transform:uppercase;letter-spacing:0.06em">🧠 Plan de tratamiento intrahospitalario</span>
           <div style="display:flex;gap:5px">
             <button class="btn btn-sm btn-secondary" style="font-size:0.68rem;padding:2px 8px" onclick="generarPlanTratamiento(window._psPacId)">↻ Regenerar</button>
-            <button class="btn btn-sm btn-secondary" style="font-size:0.68rem;padding:2px 8px" onclick="editarPlanTratamiento(window._psPacId)">✏️</button>
+            <button id="ps-plan-edit-btn" class="btn btn-sm btn-secondary" style="font-size:0.68rem;padding:2px 8px" onclick="planToggleEdit()">✏️ Editar</button>
+            <button id="ps-plan-save-btn" class="btn btn-sm" style="display:none;font-size:0.68rem;padding:2px 8px;background:#16a34a;color:#fff;border:none;border-radius:5px" onclick="planGuardarEdit()">💾 Guardar</button>
+            <button id="ps-plan-cancel-btn" class="btn btn-sm btn-secondary" style="display:none;font-size:0.68rem;padding:2px 8px" onclick="planCancelEdit()">Cancelar</button>
             <button class="btn btn-sm btn-secondary" style="font-size:0.68rem;padding:2px 8px" onclick="copiarPlanTratamiento()">Copiar</button>
           </div>
         </div>
         <div id="ps-plan-texto" style="font-size:0.78rem;color:#1e4d8c;line-height:1.6;white-space:pre-wrap"></div>
+        <textarea id="ps-plan-textarea-inline" rows="10" style="display:none;width:100%;padding:8px 10px;border:1.5px solid var(--accent2);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;resize:vertical;background:#fff;line-height:1.6;outline:none;color:var(--text);margin-top:4px"></textarea>
       </div>
 
       <!-- ANÁLISIS CLÍNICO DEL PROCESO -->
       <div style="margin-top:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <span style="font-size:0.72rem;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:0.06em">🧠 Análisis clínico del proceso</span>
-          <div style="display:flex;gap:5px">
-            <span id="ps-analisis-fecha" style="font-size:0.65rem;color:#0ea5e9;align-self:center"></span>
-            <button class="btn btn-sm" style="font-size:0.68rem;padding:2px 8px;background:#0ea5e9;color:#fff;border:none;border-radius:5px" onclick="guardarAnalisisClinico(window._psPacId)">💾 Guardar</button>
+          <div style="display:flex;gap:5px;align-items:center">
+            <span id="ps-analisis-fecha" style="font-size:0.65rem;color:#0ea5e9"></span>
+            <button id="ps-analisis-edit-btn" class="btn btn-sm" style="font-size:0.68rem;padding:2px 8px;background:#0ea5e9;color:#fff;border:none;border-radius:5px" onclick="analisisToggleEdit()">✏️ Editar</button>
+            <button id="ps-analisis-save-btn" class="btn btn-sm" style="display:none;font-size:0.68rem;padding:2px 8px;background:#16a34a;color:#fff;border:none;border-radius:5px" onclick="guardarAnalisisClinico(window._psPacId)">💾 Guardar</button>
+            <button id="ps-analisis-cancel-btn" class="btn btn-sm btn-secondary" style="display:none;font-size:0.68rem;padding:2px 8px" onclick="analisisCancelEdit()">Cancelar</button>
           </div>
         </div>
-        <textarea id="ps-analisis-texto" rows="5" placeholder="Formulación del caso, hipótesis de trabajo, evolución del proceso terapéutico, conexiones entre sesiones, reflexiones clínicas…" style="width:100%;padding:8px 10px;border:1px solid #bae6fd;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;resize:vertical;background:#fff;line-height:1.6;outline:none;color:var(--text)" onfocus="this.style.borderColor='#0ea5e9'" onblur="this.style.borderColor='#bae6fd'"></textarea>
+        <!-- Vista lectura -->
+        <div id="ps-analisis-view" style="font-size:0.82rem;color:#0c4a6e;line-height:1.7;white-space:pre-wrap;min-height:32px;padding:2px 0"></div>
+        <!-- Vista edición -->
+        <textarea id="ps-analisis-texto" rows="5" placeholder="Formulación del caso, hipótesis de trabajo, evolución del proceso terapéutico, conexiones entre sesiones, reflexiones clínicas…" style="display:none;width:100%;padding:8px 10px;border:1.5px solid #0ea5e9;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;resize:vertical;background:#fff;line-height:1.6;outline:none;color:var(--text)"></textarea>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
-          <span style="font-size:0.68rem;color:#0ea5e9;font-style:italic">Documento vivo — edita y amplía en cada sesión</span>
-          <button onclick="toggleAnalisisFechas(window._psPacId)" style="background:none;border:none;cursor:pointer;font-size:0.68rem;color:#0369a1;text-decoration:underline;padding:0">Ver historial de ediciones</button>
+          <button onclick="toggleAnalisisFechas(window._psPacId)" style="background:none;border:none;cursor:pointer;font-size:0.68rem;color:#0369a1;text-decoration:underline;padding:0">📜 Ver historial de ediciones</button>
         </div>
         <div id="ps-analisis-historial" style="display:none;margin-top:8px;border-top:1px solid #bae6fd;padding-top:8px;max-height:180px;overflow-y:auto"></div>
       </div>
@@ -3753,12 +3781,15 @@ window.cargarPlanTratamiento=function(pacId){
   if(plan&&wrap&&txt){
     wrap.style.display='';
     txt.textContent=plan;
+    txt.style.display='';
   } else if(wrap){
-    wrap.style.display='none';
+    wrap.style.display='';
+    if(txt) txt.textContent='Sin plan generado aún — usa ↻ Regenerar para crear uno con IA.';
   }
 };
 
 window.generarPlanTratamiento=async function(pacId){
+  window._planEditPacId=pacId; // Siempre sincronizar por si se edita después
   const apiKey=typeof getGeminiKey==='function'?getGeminiKey():'';
   if(!apiKey)return toast('⚠️ Configura tu API Key de Gemini primero');
   const pac=(window.pacientes||[]).find(p=>p.id===pacId);
@@ -3856,8 +3887,8 @@ window.editarPlanTratamiento=function(pacId){
 };
 
 window.guardarPlanEditado=async function(){
-  const pacId=window._planEditPacId;
-  if(!pacId)return;
+  const pacId=window._planEditPacId||window._psPacId;
+  if(!pacId){toast('⚠️ No hay paciente seleccionado');return;}
   const plan=document.getElementById('plan-trat-textarea')?.value||'';
   try{
     await updateDoc(doc(db,'pacientes',pacId),{planTratamiento:plan,planFecha:new Date().toISOString().split('T')[0]});
@@ -7342,6 +7373,7 @@ window.abrirPacSheet=async(id)=>{
     capText?{l:'Capacidad decisional',v:capText,color:capColorMap[capVal]}:null,
     {l:'Próxima sesión',v:p.proxSesion?formatDate(p.proxSesion):'No programada'},
     {l:'Dx médico / Motivo IC',v:p.motivo,full:true},
+    p.tratMedico?{l:'Tratamiento médico',v:p.tratMedico,full:true}:null,
     {l:'Impresión psicológica',v:p.dxpsi,full:true},
     {l:'Observaciones de riesgo',v:p.riesgoObs,full:true},
     {l:'Notas generales',v:p.notas,full:true},
@@ -7359,6 +7391,7 @@ window.abrirPacSheet=async(id)=>{
   `;
   // Cargar plan existente si hay
   cargarPlanTratamiento(id);
+  cargarPlanFarmacologico(id);
   cargarNotasRapidas(id);
   cargarPendientesPaciente(id);
   cargarSuperv(id);
@@ -8806,6 +8839,333 @@ window.calcPCL5=()=>{
   guardarResultadoTest('PCL-5',s,level,document.getElementById('test-pac-nombre').value,`Evento: ${document.getElementById('pcl5-evento')?.value||'—'} · ${extra}`);
 };
 
+
+
+// ══════════════════════════════════════════════════════════════
+// PLAN FARMACOLÓGICO — documento vivo con historial
+// ══════════════════════════════════════════════════════════════
+
+window.cargarPlanFarmacologico = async function(pacId) {
+  var txtEl   = document.getElementById('ps-farm-texto');
+  var fechaEl = document.getElementById('ps-farm-fecha');
+  if(!txtEl) return;
+  // Primero arrastrar el tratMedico del paciente si no hay plan farmacológico guardado
+  var pac = (window.pacientes||[]).find(p=>p.id===pacId);
+  if(!pac) return;
+  try {
+    var snap = await window._getDocs(
+      window._query(
+        window._collection(window.db, 'plan_farmacologico'),
+        window._where('pacienteId', '==', pacId)
+      )
+    );
+    if(!snap.empty) {
+      var d = snap.docs[0].data();
+      txtEl.value = d.texto || '';
+      var viewEl = document.getElementById('ps-farm-view');
+      if(viewEl) viewEl.textContent = d.texto || '';
+      if(fechaEl && d.ultimaEdicion)
+        fechaEl.textContent = 'Últ. cambio: ' + d.ultimaEdicion;
+      window._farmCache = window._farmCache || {};
+      window._farmCache[pacId] = { _fbId: snap.docs[0].id, historial: d.historial || [] };
+    } else {
+      var inicial = pac.tratMedico || '';
+      txtEl.value = inicial;
+      var viewEl = document.getElementById('ps-farm-view');
+      if(viewEl) viewEl.textContent = inicial;
+      if(fechaEl) fechaEl.textContent = inicial ? '(del perfil del paciente)' : '';
+      window._farmCache = window._farmCache || {};
+      window._farmCache[pacId] = { historial: [] };
+    }
+  } catch(e) {
+    var inicial = pac.tratMedico || '';
+    txtEl.value = inicial;
+    var viewEl = document.getElementById('ps-farm-view');
+    if(viewEl) viewEl.textContent = inicial;
+    window._farmCache = window._farmCache || {};
+    window._farmCache[pacId] = { historial: [] };
+    console.warn('cargarPlanFarmacologico:', e);
+  }
+};
+
+window.guardarPlanFarmacologico = async function(pacId) {
+  if(!pacId) return toast('⚠️ No hay paciente seleccionado');
+  var txtEl = document.getElementById('ps-farm-texto');
+  if(!txtEl) return;
+  var texto = txtEl.value.trim();
+  if(!texto) return toast('⚠️ Escribe el plan farmacológico antes de guardar');
+
+  var fechaHoy = new Date().toLocaleDateString('es-CO', {day:'2-digit', month:'short', year:'numeric'});
+  var horaHoy  = new Date().toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+  var timestamp = fechaHoy + ' ' + horaHoy;
+
+  var cache = (window._farmCache || {})[pacId] || {};
+  var historial = (cache.historial || []).slice();
+  historial.push({ fecha: timestamp, texto: texto });
+  if(historial.length > 50) historial = historial.slice(-50);
+
+  var docData = {
+    pacienteId: pacId,
+    texto: texto,
+    ultimaEdicion: timestamp,
+    historial: historial,
+    actualizado: window._serverTimestamp()
+  };
+
+  try {
+    if(cache._fbId) {
+      await window._updateDoc(window._doc(window.db, 'plan_farmacologico', cache._fbId), docData);
+    } else {
+      var ref = await window._addDoc(window._collection(window.db, 'plan_farmacologico'), docData);
+      if(!window._farmCache) window._farmCache = {};
+      window._farmCache[pacId] = { _fbId: ref.id, historial: historial };
+    }
+    if(!window._farmCache) window._farmCache = {};
+    window._farmCache[pacId] = Object.assign({}, cache, { historial: historial });
+    // También actualizar tratMedico del paciente para mantener sincronía
+    await window._updateDoc(window._doc(window.db, 'pacientes', pacId), { tratMedico: texto });
+    var fechaEl = document.getElementById('ps-farm-fecha');
+    if(fechaEl) fechaEl.textContent = 'Últ. cambio: ' + timestamp;
+    var viewEl = document.getElementById('ps-farm-view');
+    if(viewEl) viewEl.textContent = texto;
+    farmCancelEdit();
+    toast('✅ Plan farmacológico guardado');
+  } catch(e) {
+    toast('❌ ' + e.message);
+    console.error('guardarPlanFarmacologico:', e);
+  }
+};
+
+window.toggleFarmHistorial = function(pacId) {
+  var cont = document.getElementById('ps-farm-historial');
+  if(!cont) return;
+  if(cont.style.display !== 'none') { cont.style.display = 'none'; return; }
+
+  var cache = (window._farmCache || {})[pacId] || {};
+  var historial = (cache.historial || []).slice().reverse();
+
+  if(!historial.length) {
+    cont.innerHTML = '<p style="font-size:0.72rem;color:#ea580c;font-style:italic">Sin cambios registrados aún.</p>';
+  } else {
+    cont.innerHTML = historial.map(function(h, i) {
+      var isLast = i === 0;
+      return '<details style="margin-bottom:5px">'
+        + '<summary style="font-size:0.72rem;font-weight:600;color:#c2410c;cursor:pointer;padding:3px 0">'
+        + (isLast ? '🕐 ' : '📋 ') + h.fecha
+        + (isLast ? ' <span style="background:#ea580c;color:#fff;border-radius:10px;padding:1px 6px;font-size:0.62rem;margin-left:4px">actual</span>' : '')
+        + '</summary>'
+        + '<div style="margin-top:4px;padding:7px 10px;background:#fff;border:1px solid #fed7aa;border-radius:6px;font-size:0.78rem;color:var(--text);line-height:1.6;white-space:pre-wrap">'
+        + (h.texto || '—')
+        + '</div></details>';
+    }).join('');
+  }
+  cont.style.display = 'block';
+};
+
+
+// ── TOGGLE EDIT/VIEW para paneles de la ficha ───────────────
+
+// Plan farmacológico
+window.farmToggleEdit = function() {
+  var view = document.getElementById('ps-farm-view');
+  var ta   = document.getElementById('ps-farm-texto');
+  var btnE = document.getElementById('ps-farm-edit-btn');
+  var btnS = document.getElementById('ps-farm-save-btn');
+  var btnC = document.getElementById('ps-farm-cancel-btn');
+  if(!view||!ta) return;
+  ta.value = view.textContent;
+  view.style.display = 'none';
+  ta.style.display = '';
+  ta.focus();
+  btnE.style.display = 'none';
+  btnS.style.display = '';
+  btnC.style.display = '';
+};
+window.farmCancelEdit = function() {
+  var view = document.getElementById('ps-farm-view');
+  var ta   = document.getElementById('ps-farm-texto');
+  var btnE = document.getElementById('ps-farm-edit-btn');
+  var btnS = document.getElementById('ps-farm-save-btn');
+  var btnC = document.getElementById('ps-farm-cancel-btn');
+  if(!view||!ta) return;
+  view.style.display = '';
+  ta.style.display = 'none';
+  btnE.style.display = '';
+  btnS.style.display = 'none';
+  btnC.style.display = 'none';
+};
+
+// Plan de tratamiento IA
+window.planToggleEdit = function() {
+  var view = document.getElementById('ps-plan-texto');
+  var ta   = document.getElementById('ps-plan-textarea-inline');
+  var btnE = document.getElementById('ps-plan-edit-btn');
+  var btnS = document.getElementById('ps-plan-save-btn');
+  var btnC = document.getElementById('ps-plan-cancel-btn');
+  if(!view||!ta) return;
+  ta.value = view.textContent;
+  view.style.display = 'none';
+  ta.style.display = '';
+  ta.focus();
+  btnE.style.display = 'none';
+  btnS.style.display = '';
+  btnC.style.display = '';
+};
+window.planCancelEdit = function() {
+  var view = document.getElementById('ps-plan-texto');
+  var ta   = document.getElementById('ps-plan-textarea-inline');
+  var btnE = document.getElementById('ps-plan-edit-btn');
+  var btnS = document.getElementById('ps-plan-save-btn');
+  var btnC = document.getElementById('ps-plan-cancel-btn');
+  if(!view||!ta) return;
+  view.style.display = '';
+  ta.style.display = 'none';
+  btnE.style.display = '';
+  btnS.style.display = 'none';
+  btnC.style.display = 'none';
+};
+window.planGuardarEdit = async function() {
+  var ta = document.getElementById('ps-plan-textarea-inline');
+  var pacId = window._planEditPacId || window._psPacId;
+  if(!ta||!pacId) return;
+  var plan = ta.value.trim();
+  try {
+    await window._updateDoc(window._doc(window.db,'pacientes',pacId),{planTratamiento:plan,planFecha:new Date().toISOString().split('T')[0]});
+    var txt = document.getElementById('ps-plan-texto');
+    var wrap = document.getElementById('ps-plan-wrap');
+    if(txt) txt.textContent = plan;
+    if(wrap) wrap.style.display = plan ? '' : 'none';
+    var pac = (window.pacientes||[]).find(p=>p.id===pacId);
+    if(pac) pac.planTratamiento = plan;
+    planCancelEdit();
+    toast('✅ Plan guardado');
+  } catch(e) { toast('❌ '+e.message); }
+};
+
+// Análisis clínico
+window.analisisToggleEdit = function() {
+  var view = document.getElementById('ps-analisis-view');
+  var ta   = document.getElementById('ps-analisis-texto');
+  var btnE = document.getElementById('ps-analisis-edit-btn');
+  var btnS = document.getElementById('ps-analisis-save-btn');
+  var btnC = document.getElementById('ps-analisis-cancel-btn');
+  if(!view||!ta) return;
+  ta.value = view.textContent;
+  view.style.display = 'none';
+  ta.style.display = '';
+  ta.focus();
+  btnE.style.display = 'none';
+  btnS.style.display = '';
+  btnC.style.display = '';
+};
+window.analisisCancelEdit = function() {
+  var view = document.getElementById('ps-analisis-view');
+  var ta   = document.getElementById('ps-analisis-texto');
+  var btnE = document.getElementById('ps-analisis-edit-btn');
+  var btnS = document.getElementById('ps-analisis-save-btn');
+  var btnC = document.getElementById('ps-analisis-cancel-btn');
+  if(!view||!ta) return;
+  view.style.display = '';
+  ta.style.display = 'none';
+  btnE.style.display = '';
+  btnS.style.display = 'none';
+  btnC.style.display = 'none';
+};
+
+
+// ── ANÁLISIS CLÍNICO DEL PROCESO ────────────────────────────
+
+window.cargarAnalisisClinico = async function(pacId) {
+  var txtEl   = document.getElementById('ps-analisis-texto');
+  var viewEl  = document.getElementById('ps-analisis-view');
+  var fechaEl = document.getElementById('ps-analisis-fecha');
+  if(!txtEl) return;
+  txtEl.value = '';
+  if(viewEl) viewEl.textContent = '';
+  if(fechaEl) fechaEl.textContent = '';
+  if(!pacId) return;
+  try {
+    var snap = await window._getDocs(
+      window._query(
+        window._collection(window.db, 'analisis_clinico'),
+        window._where('pacienteId', '==', pacId)
+      )
+    );
+    if(!snap.empty) {
+      var d = snap.docs[0].data();
+      txtEl.value = d.texto || '';
+      if(viewEl) viewEl.textContent = d.texto || '';
+      if(fechaEl && d.ultimaEdicion)
+        fechaEl.textContent = 'Últ. edición: ' + d.ultimaEdicion;
+      window._analisisCache = window._analisisCache || {};
+      window._analisisCache[pacId] = { _fbId: snap.docs[0].id, historial: d.historial || [] };
+    } else {
+      window._analisisCache = window._analisisCache || {};
+      window._analisisCache[pacId] = { historial: [] };
+    }
+  } catch(e) { console.warn('cargarAnalisisClinico:', e); }
+};
+
+window.guardarAnalisisClinico = async function(pacId) {
+  if(!pacId) return toast('⚠️ No hay paciente seleccionado');
+  var txtEl = document.getElementById('ps-analisis-texto');
+  if(!txtEl) return;
+  var texto = txtEl.value.trim();
+  if(!texto) return toast('⚠️ Escribe algo antes de guardar');
+  var fechaHoy = new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});
+  var horaHoy  = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  var timestamp = fechaHoy + ' ' + horaHoy;
+  var cache = (window._analisisCache || {})[pacId] || {};
+  var historial = (cache.historial || []).slice();
+  historial.push({ fecha: timestamp, texto: texto });
+  if(historial.length > 50) historial = historial.slice(-50);
+  var docData = { pacienteId:pacId, texto:texto, ultimaEdicion:timestamp, historial:historial, actualizado:window._serverTimestamp() };
+  try {
+    if(cache._fbId) {
+      await window._updateDoc(window._doc(window.db,'analisis_clinico',cache._fbId), docData);
+    } else {
+      var ref = await window._addDoc(window._collection(window.db,'analisis_clinico'), docData);
+      if(!window._analisisCache) window._analisisCache = {};
+      window._analisisCache[pacId] = { _fbId: ref.id, historial: historial };
+    }
+    if(!window._analisisCache) window._analisisCache = {};
+    window._analisisCache[pacId] = Object.assign({}, cache, { historial: historial });
+    var fechaEl = document.getElementById('ps-analisis-fecha');
+    if(fechaEl) fechaEl.textContent = 'Últ. edición: ' + timestamp;
+    var viewEl = document.getElementById('ps-analisis-view');
+    if(viewEl) viewEl.textContent = texto;
+    analisisCancelEdit();
+    toast('✅ Análisis clínico guardado');
+  } catch(e) { toast('❌ '+e.message); console.error('guardarAnalisisClinico:',e); }
+};
+
+window.toggleAnalisisFechas = function(pacId) {
+  var cont = document.getElementById('ps-analisis-historial');
+  if(!cont) return;
+  if(cont.style.display !== 'none') { cont.style.display='none'; return; }
+  var cache = (window._analisisCache || {})[pacId] || {};
+  var historial = (cache.historial || []).slice().reverse();
+  if(!historial.length) {
+    cont.innerHTML = '<p style="font-size:0.72rem;color:#0ea5e9;font-style:italic">Sin ediciones previas.</p>';
+  } else {
+    cont.innerHTML = historial.map(function(h,i){
+      var isLast = i===0;
+      return '<details style="margin-bottom:5px"><summary style="font-size:0.72rem;font-weight:600;color:#0369a1;cursor:pointer;padding:3px 0">'
+        +(isLast?'🕐 ':'📄 ')+h.fecha
+        +(isLast?' <span style="background:#0ea5e9;color:#fff;border-radius:10px;padding:1px 6px;font-size:0.62rem;margin-left:4px">actual</span>':'')
+        +'</summary><div style="margin-top:4px;padding:7px 10px;background:#fff;border:1px solid #bae6fd;border-radius:6px;font-size:0.78rem;color:var(--text);line-height:1.6;white-space:pre-wrap">'
+        +(h.texto||'—')+'</div></details>';
+    }).join('');
+  }
+  cont.style.display='block';
+};
+
+window.getAnalisisParaIA = function() {
+  var viewEl = document.getElementById('ps-analisis-view');
+  var txt = viewEl ? viewEl.textContent.trim() : '';
+  if(!txt) { var ta = document.getElementById('ps-analisis-texto'); txt = ta ? ta.value.trim() : ''; }
+  return txt ? 'ANÁLISIS CLÍNICO DEL PROCESO (elaborado por la psicóloga):\n' + txt : '';
+};
 
 // ── INIT ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
