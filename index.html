@@ -2596,7 +2596,10 @@ window.guardarPaciente=async()=>{
 };
 
 window.renderPacientes=(lista)=>{
-  const data=lista!==undefined?lista:pacientes;
+  // Excluir alta voluntaria y fallecidos de la vista de pacientes activos
+  const ESTADOS_INACTIVOS = ['alta-voluntaria','fallecido'];
+  const raw_data=lista!==undefined?lista:pacientes;
+  const data=raw_data.filter(p=>!ESTADOS_INACTIVOS.includes(p.estado));
   const tbody=document.getElementById('tabla-pacientes');
   if(!tbody)return;
 
@@ -3490,7 +3493,7 @@ window.renderDashboard=()=>{
   const btnTodos=document.getElementById('btn-todos-dash');
   if(btnHoy){btnHoy.className=modo==='dia'?'btn btn-primary btn-sm':'btn btn-secondary btn-sm';}
   if(btnTodos){btnTodos.className=modo==='todos'?'btn btn-primary btn-sm':'btn btn-secondary btn-sm';}
-  let lista=pacientes.filter(p=>p.estado!=='alta');
+  let lista=pacientes.filter(p=>p.estado!=='alta'&&p.estado!=='alta-voluntaria'&&p.estado!=='fallecido');
   if(modo==='dia') lista=lista.filter(p=>p.proxSesion===hoy);
   // Apply piso filter
   const pisoFiltro=(document.getElementById('dash-filtro-piso')?.value||'').toLowerCase();
@@ -3571,9 +3574,9 @@ window.renderDashboard=()=>{
 
   // ── ALERTAS ──
   const alertas=[];
-  pacientes.filter(p=>p.riesgo==='ALTO'&&p.estado!=='alta').forEach(p=>alertas.push({tipo:'rojo',icon:'🔴',titulo:`Riesgo ALTO — ${p.nombre}`,desc:`Hab. ${p.hab||'—'} · ${p.motivo||'Sin diagnóstico'}`}));
+  pacientes.filter(p=>p.riesgo==='ALTO'&&p.estado!=='alta'&&p.estado!=='alta-voluntaria'&&p.estado!=='fallecido').forEach(p=>alertas.push({tipo:'rojo',icon:'🔴',titulo:`Riesgo ALTO — ${p.nombre}`,desc:`Hab. ${p.hab||'—'} · ${p.motivo||'Sin diagnóstico'}`}));
   pacientes.filter(p=>p.estado==='nueva-interconsulta-pendiente').forEach(p=>alertas.push({tipo:'amarillo',icon:'📋',titulo:`IC pendiente — ${p.nombre}`,desc:`Hab. ${p.hab||'—'}`}));
-  pacientes.filter(p=>p.riesgo==='MEDIO'&&p.estado!=='alta').forEach(p=>alertas.push({tipo:'amarillo',icon:'⚠️',titulo:`Riesgo MEDIO — ${p.nombre}`,desc:`Hab. ${p.hab||'—'}`}));
+  pacientes.filter(p=>p.riesgo==='MEDIO'&&p.estado!=='alta'&&p.estado!=='alta-voluntaria'&&p.estado!=='fallecido').forEach(p=>alertas.push({tipo:'amarillo',icon:'⚠️',titulo:`Riesgo MEDIO — ${p.nombre}`,desc:`Hab. ${p.hab||'—'}`}));
   if(alertaCont){
     alertaCont.innerHTML=alertas.length
       ?alertas.map(a=>`<div class="alerta-card alerta-${a.tipo}"><div class="al-icon">${a.icon}</div><div class="al-body"><h4>${a.titulo}</h4><p>${a.desc}</p></div></div>`).join('')
@@ -3594,7 +3597,7 @@ window.renderDashboard=()=>{
 };
 window.updateStats=()=>{
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('stat-pac',pacientes.filter(p=>p.estado!=='alta').length);
+  set('stat-pac',pacientes.filter(p=>p.estado!=='alta'&&p.estado!=='alta-voluntaria'&&p.estado!=='fallecido').length);
   const icPendIC=interconsultas.filter(x=>x.estado==='pendiente').length;const icPendPac=pacientes.filter(x=>x.estado==='nueva-interconsulta-pendiente').length;set('stat-ic',icPendIC+icPendPac);
   set('stat-riesgo',pacientes.filter(p=>p.riesgo==='ALTO').length);
   const hoy=new Date().toISOString().split('T')[0];
@@ -3626,12 +3629,12 @@ window.updateBadges=()=>{
   const bp=document.getElementById('badge-pac'),bi=document.getElementById('badge-ic'),bce=document.getElementById('badge-ce');
   if(bp)bp.textContent=pacientes.length;
   const biVal=interconsultas.filter(x=>x.estado==='pendiente').length+pacientes.filter(x=>x.estado==='nueva-interconsulta-pendiente').length;if(bi)bi.textContent=biVal;
-  if(bce)bce.textContent=pacientes.filter(p=>p.tipo==='consulta-externa'&&p.estado!=='alta').length;
+  if(bce)bce.textContent=pacientes.filter(p=>p.tipo==='consulta-externa'&&p.estado!=='alta'&&p.estado!=='alta-voluntaria'&&p.estado!=='fallecido').length;
 };
 window.renderConsultaExterna=(q)=>{
   const cont=document.getElementById('ce-lista');if(!cont)return;
   const q2=(typeof q==='string'?q:(document.getElementById('ce-search')?.value||'')).toLowerCase().trim();
-  let lista=(window.pacientes||[]).filter(p=>p.tipo==='consulta-externa'&&p.estado!=='alta');
+  let lista=(window.pacientes||[]).filter(p=>p.tipo==='consulta-externa'&&p.estado!=='alta'&&p.estado!=='alta-voluntaria'&&p.estado!=='fallecido');
   if(q2)lista=lista.filter(p=>(p.nombre||'').toLowerCase().includes(q2)||(p.cedula||'').includes(q2));
   const rBadge=r=>{if(!r||r==='SIN RIESGO')return'<span class="badge badge-green">Sin riesgo</span>';if(r==='BAJO')return'<span class="badge badge-green">Riesgo bajo</span>';if(r==='MEDIO')return'<span class="badge badge-yellow">Riesgo medio</span>';if(r==='ALTO')return'<span class="badge badge-red">⚠️ Riesgo alto</span>';return'';};
   const hoy=new Date().toISOString().split('T')[0];
