@@ -2165,6 +2165,20 @@ input.toggle-cb{display:none}
     <div class="pac-sheet-body">
       <div id="ps-sesiones-badge" class="pac-sesiones-badge" title="Ver historial completo del paciente">📅 0 sesiones registradas</div>
       <div class="pac-info-grid" id="ps-grid"></div>
+      <!-- TRATAMIENTO FARMACOLÓGICO -->
+      <div style="margin-top:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 14px" id="ps-farma-wrap">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:0.72rem;font-weight:700;color:#9a3412;text-transform:uppercase;letter-spacing:0.06em">💊 Tratamiento farmacológico</span>
+          <button class="btn btn-sm" style="font-size:0.68rem;padding:2px 10px;background:#ea580c;color:#fff;border:none;border-radius:6px;cursor:pointer" onclick="abrirModalFarma(window._psPacId)">✏️ Editar</button>
+        </div>
+        <div id="ps-farma-actual" style="font-size:0.82rem;color:#7c2d12;white-space:pre-wrap;line-height:1.6">—</div>
+        <div id="ps-farma-historial-wrap" style="display:none;margin-top:8px;border-top:1px dashed #fed7aa;padding-top:8px">
+          <div style="font-size:0.68rem;font-weight:700;color:#9a3412;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Historial de cambios</div>
+          <div id="ps-farma-historial" style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+        <button id="ps-farma-toggle-hist" style="display:none;font-size:0.7rem;color:#ea580c;background:none;border:none;cursor:pointer;padding:4px 0;text-decoration:underline" onclick="toggleFarmaHistorial()">Ver historial de cambios</button>
+      </div>
+
       <!-- Plan de tratamiento intrahospitalario -->
       <div id="ps-plan-wrap" style="display:none;margin-top:12px;background:#f0fdf4;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -2269,6 +2283,31 @@ input.toggle-cb{display:none}
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-diferenciales')">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarDiferenciales()">💾 Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TRATAMIENTO FARMACOLÓGICO -->
+<div class="modal-overlay" id="modal-farma" style="z-index:600">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h3>💊 Tratamiento farmacológico</h3>
+      <button class="modal-close" onclick="closeModal('modal-farma')"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px">
+      <p style="font-size:0.8rem;color:var(--text2);margin-bottom:12px">Edita el tratamiento actual. Cada vez que guardes se registrará la fecha del cambio automáticamente.</p>
+      <div class="form-group">
+        <label style="font-size:0.8rem;font-weight:600;color:var(--text2)">Tratamiento actual</label>
+        <textarea id="farma-texto" rows="6" placeholder="Ej: Sertralina 50mg c/24h&#10;Clonazepam 0.5mg c/12h&#10;Omeprazol 20mg en ayunas…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical;margin-top:4px;line-height:1.6"></textarea>
+      </div>
+      <div class="form-group" style="margin-top:10px">
+        <label style="font-size:0.8rem;font-weight:600;color:var(--text2)">Motivo del cambio <span style="font-weight:400;color:var(--text3)">(opcional)</span></label>
+        <input type="text" id="farma-motivo-cambio" placeholder="Ej: Aumento de dosis por respuesta parcial, nuevo medicamento indicado por psiquiatría…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;margin-top:4px">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-farma')">Cancelar</button>
+      <button class="btn btn-primary" style="background:#ea580c;border-color:#ea580c" onclick="guardarFarma()">💾 Guardar cambio</button>
     </div>
   </div>
 </div>
@@ -6021,7 +6060,118 @@ window.generarPDFConPaciente = function(){
   if(guiaId) generarPDFPsico(guiaId);
 };
 
+// ── TRATAMIENTO FARMACOLÓGICO ────────────────────────────────────────
+
+window.abrirModalFarma = function(pacId){
+  if(!pacId) return toast('⚠️ No hay paciente seleccionado');
+  window._farmaPacId = pacId;
+  // Cargar texto actual del paciente
+  const p = pacientes.find(x=>x.id===pacId);
+  document.getElementById('farma-texto').value = (p && p.tratMedico) ? p.tratMedico : '';
+  document.getElementById('farma-motivo-cambio').value = '';
+  openModal('modal-farma');
+};
+
+window.guardarFarma = async function(){
+  const pacId = window._farmaPacId;
+  if(!pacId) return;
+  const p = pacientes.find(x=>x.id===pacId);
+  if(!p) return;
+  const nuevoTrat = document.getElementById('farma-texto').value.trim();
+  const motivo = document.getElementById('farma-motivo-cambio').value.trim();
+  if(!nuevoTrat){ toast('⚠️ El tratamiento no puede estar vacío'); return; }
+
+  // Construir entrada de historial
+  const ahora = new Date();
+  const fechaStr = ahora.toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const horaStr = ahora.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  const entrada = {
+    fecha: fechaStr,
+    hora: horaStr,
+    texto: nuevoTrat,
+    motivo: motivo || null
+  };
+
+  // Actualizar paciente en memoria y Firebase
+  const histPrev = p.tratHistorial || [];
+  // Solo guardar en historial si el texto cambió
+  const textoAnterior = p.tratMedico || '';
+  const historialActualizado = textoAnterior && textoAnterior !== nuevoTrat
+    ? [...histPrev, {fecha: fechaStr, hora: horaStr, texto: textoAnterior, motivo: '(reemplazado)'}]
+    : histPrev;
+
+  p.tratMedico = nuevoTrat;
+  p.tratHistorial = historialActualizado;
+  p.tratUltimoUpdate = fechaStr + ' ' + horaStr;
+  if(motivo) p.tratUltimoMotivo = motivo;
+
+  try{
+    const {doc, updateDoc} = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    await updateDoc(doc(window._db,'pacientes',pacId),{
+      tratMedico: nuevoTrat,
+      tratHistorial: historialActualizado,
+      tratUltimoUpdate: fechaStr + ' ' + horaStr,
+      tratUltimoMotivo: motivo || null
+    });
+    toast('✅ Tratamiento guardado');
+  } catch(e){
+    console.warn('Firebase farma:', e);
+    toast('⚠️ Guardado localmente (sin conexión)');
+  }
+  closeModal('modal-farma');
+  renderFarmaEnFicha(pacId);
+};
+
+window.renderFarmaEnFicha = function(pacId){
+  const p = pacientes.find(x=>x.id===pacId);
+  const actual = document.getElementById('ps-farma-actual');
+  const histWrap = document.getElementById('ps-farma-historial-wrap');
+  const histEl = document.getElementById('ps-farma-historial');
+  const btnToggle = document.getElementById('ps-farma-toggle-hist');
+  if(!p || !p.tratMedico){
+    if(actual) actual.textContent = '—';
+    if(histWrap) histWrap.style.display = 'none';
+    if(btnToggle) btnToggle.style.display = 'none';
+    return;
+  }
+  if(actual){
+    actual.textContent = p.tratMedico;
+    if(p.tratUltimoUpdate){
+      actual.title = 'Última actualización: ' + p.tratUltimoUpdate + (p.tratUltimoMotivo ? ' — ' + p.tratUltimoMotivo : '');
+    }
+  }
+  // Historial
+  const hist = p.tratHistorial || [];
+  if(hist.length > 0 && histEl){
+    histEl.innerHTML = [...hist].reverse().map(h=>`
+      <div style="background:#fff;border:1px solid #fed7aa;border-radius:7px;padding:8px 10px">
+        <div style="font-size:0.68rem;color:#9a3412;font-weight:600;margin-bottom:3px">📅 ${h.fecha} ${h.hora||''}${h.motivo&&h.motivo!=='(reemplazado)'?' — <em>'+h.motivo+'</em>':''}</div>
+        <div style="font-size:0.78rem;color:#7c2d12;white-space:pre-wrap;line-height:1.5">${h.texto}</div>
+      </div>`).join('');
+    if(btnToggle){ btnToggle.style.display=''; btnToggle.textContent='Ver historial de cambios ('+hist.length+')'; }
+    // No mostrar por defecto
+    if(histWrap) histWrap.style.display = 'none';
+    window._farmaHistVisible = false;
+  } else {
+    if(btnToggle) btnToggle.style.display = 'none';
+    if(histWrap) histWrap.style.display = 'none';
+  }
+};
+
+window.toggleFarmaHistorial = function(){
+  const wrap = document.getElementById('ps-farma-historial-wrap');
+  const btn = document.getElementById('ps-farma-toggle-hist');
+  window._farmaHistVisible = !window._farmaHistVisible;
+  if(wrap) wrap.style.display = window._farmaHistVisible ? '' : 'none';
+  if(btn){
+    const p = pacientes.find(x=>x.id===window._psPacId);
+    const n = (p && p.tratHistorial) ? p.tratHistorial.length : 0;
+    btn.textContent = window._farmaHistVisible ? 'Ocultar historial' : 'Ver historial de cambios ('+n+')';
+  }
+};
+
 // ── SUPERVISIÓN DE CASOS ─────────────────────────────────────────────
+
 
 window.abrirNuevaSuperv = function(pacId){
   if(!pacId) return toast('⚠️ No hay paciente seleccionado');
@@ -7522,6 +7672,7 @@ window.abrirPacSheet=async(id)=>{
   `;
   // Cargar plan existente si hay
   cargarPlanTratamiento(id);
+  renderFarmaEnFicha(id);
   cargarNotasRapidas(id);
   cargarPendientesPaciente(id);
   cargarSuperv(id);
