@@ -6737,8 +6737,9 @@ window.mhicNuevaNota=()=>{
     const sel=document.getElementById('ic-paciente-sel');
     if(sel){sel.value=pacId;selectICPaciente(pacId);}
     setICMode('seg');
-    const form=document.getElementById('ic-form-view');
-    if(form)form.scrollIntoView({behavior:'smooth',block:'start'});
+    window.scrollTo({top:0,behavior:'smooth'});
+    const top=document.getElementById('page-interconsultas');
+    if(top)top.scrollIntoView({behavior:'smooth',block:'start'});
     toast('📝 Formulario listo — Modo Seguimiento');
   },200);
 };
@@ -7216,9 +7217,9 @@ window.hpacNuevaNota=()=>{
     const sel=document.getElementById('ic-paciente-sel');
     if(sel){sel.value=_hpacPacId;selectICPaciente(_hpacPacId);}
     setICMode('seg');
-    // Scroll al top del formulario
-    const form=document.getElementById('ic-form-view');
-    if(form)form.scrollIntoView({behavior:'smooth',block:'start'});
+    window.scrollTo({top:0,behavior:'smooth'});
+    const top=document.getElementById('page-interconsultas');
+    if(top)top.scrollIntoView({behavior:'smooth',block:'start'});
     toast('📝 Formulario listo — Modo Seguimiento');
   },200);
 };
@@ -7328,7 +7329,7 @@ window.abrirPacSheet=async(id)=>{
   document.getElementById('ps-grid').innerHTML=grid.map(ri).join('');
   window._psPacId=id;
   document.getElementById('ps-actions').innerHTML=`
-    <button class="btn btn-primary btn-sm" onclick="closePacSheet();goTo('interconsultas');setTimeout(()=>{const sel=document.getElementById('ic-paciente-sel');if(sel){sel.value='${id}';selectICPaciente('${id}');}},250)">💬 IC</button>
+    <button class="btn btn-primary btn-sm" onclick="closePacSheet();goTo('interconsultas');setTimeout(()=>{const sel=document.getElementById('ic-paciente-sel');if(sel){sel.value='${id}';selectICPaciente('${id}');}const top=document.getElementById('page-interconsultas');if(top)top.scrollIntoView({behavior:'smooth',block:'start'});},300)">💬 IC</button>
     <button class="btn btn-secondary btn-sm" onclick="closePacSheet();goTo('anamnesis');setTimeout(()=>{const sel=document.getElementById('anamnesis-paciente-sel');if(sel){sel.value='${id}';if(typeof selectAnamPaciente==='function')selectAnamPaciente('${id}');}},250)">📋 Anamnesis</button>
     <button class="btn btn-secondary btn-sm" onclick="closePacSheet();goTo('tests');setTimeout(()=>{const sel=document.getElementById('test-pac-sel');if(sel){sel.value='${id}';if(typeof selectTestPaciente==='function')selectTestPaciente('${id}');}},250)">🧪 Test</button>
     <button class="btn btn-secondary btn-sm" onclick="generarPlanTratamiento('${id}')">🧠 Plan</button>
