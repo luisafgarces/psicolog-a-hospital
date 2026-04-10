@@ -4863,11 +4863,21 @@ window.generarOrientacionIC = async function(){
 
   try{
     const texto = await window.geminiCall(apiKey, prompt, 3000);
-    if(!texto)throw new Error('Respuesta vacía de Gemini');
-    if(outEl)outEl.textContent=texto;
+    if(!texto) throw new Error('Respuesta vacía de Gemini');
+    // Renderizar con formato markdown básico
+    if(out){
+      out.style.display='';
+      out.innerHTML = texto
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--accent);display:block;margin-top:10px;margin-bottom:3px;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em">$1</strong>')
+        .replace(/\n/g,'<br>');
+    }
+    if(btn){ btn.textContent='✨ Generar guía'; btn.disabled=false; }
+    toast('✅ Guía generada');
   }catch(e){
-    console.error('IA anamnesis error:',e);
-    if(outEl)outEl.textContent='❌ Error al generar con Gemini: '+e.message+'. Verifica tu API key e intenta de nuevo.';
+    console.error('generarOrientacionIC error:',e);
+    if(out){ out.style.display=''; out.textContent='❌ Error: '+e.message+'. Verifica tu API key e intenta de nuevo.'; }
+    if(btn){ btn.textContent='✨ Generar guía'; btn.disabled=false; }
     toast('❌ Error Gemini: '+e.message);
   }
 }
