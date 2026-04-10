@@ -565,7 +565,6 @@ input.toggle-cb{display:none}
           <div class="ic-pat-field" style="flex:2;min-width:160px"><label>Diagnóstico / Motivo IC</label><div id="ic-pdx-display" style="font-size:0.82rem;color:#e5e7eb;padding:2px 0;border-bottom:1px solid #3a3835;min-height:20px;font-style:italic;opacity:0.8">— se carga del paciente —</div><input type="hidden" id="ic-pdx" value=""></div>
           <div class="ic-pat-field"><label>Fecha</label><input type="date" id="ic-pfecha"></div>
           <div class="ic-pat-field"><label>Médico solicitante</label><input type="text" id="ic-medico-sol" placeholder="Dr. García — Medicina Interna"></div>
-          <div class="ic-pat-field"><label>Escolaridad</label><select id="ic-escolaridad" style="background:transparent;border:none;border-bottom:1px solid #3a3835;color:#fff;font-size:0.85rem;font-family:'DM Sans',sans-serif;outline:none;padding:2px 0;width:100%"><option value="" style="background:#1a1714;color:#fff">— Seleccionar —</option><option style="background:#1a1714;color:#fff">Ninguna</option><option style="background:#1a1714;color:#fff">Primaria</option><option style="background:#1a1714;color:#fff">Secundaria</option><option style="background:#1a1714;color:#fff">Técnico/Tecnólogo</option><option style="background:#1a1714;color:#fff">Universitario</option><option style="background:#1a1714;color:#fff">Posgrado</option></select></div>
 
         </div>
         <!-- ORIENTACIÓN DE VALORACIÓN CON IA -->
@@ -653,6 +652,20 @@ input.toggle-cb{display:none}
                   <div id="ic-dias-display" style="font-size:0.85rem;color:var(--text2);background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;min-height:34px">— se calcula del ingreso —</div>
                   <input type="hidden" id="ic-dias-internacion" value="">
                   <input type="hidden" id="ic-trat-medico" value="">
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Nivel educativo del paciente</div>
+                  <select id="ic-escolaridad" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none">
+                    <option value="">— Seleccionar —</option>
+                    <option>Ninguna</option>
+                    <option>Primaria incompleta</option>
+                    <option>Primaria completa</option>
+                    <option>Secundaria incompleta</option>
+                    <option>Secundaria completa</option>
+                    <option>Técnico/Tecnólogo</option>
+                    <option>Universitario</option>
+                    <option>Posgrado</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -7559,20 +7572,30 @@ async function generarNotaIcConGemini(apiKey){
   var _medSol=icv('ic-medico-sol')||'';
   var _preguntaIC=chips('Pregunta específica a responder')||'';
   var escolaridad=icv('ic-escolaridad')||'';
-  var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}${escolaridad?' | Escolaridad: '+escolaridad:''}. Dx médico: ${dx}. Días internado: ${_diasInternacion||'no registrado'}. Riesgo suicida: ${sev}.${_urgencia?' Urgencia IC: '+_urgencia+'.':''}${_medSol?' Médico solicitante: '+_medSol+'.':''}${_motivoMedico?' Pedido médico: '+_motivoMedico+'.':''}${_preguntaIC?' Pregunta IC: '+_preguntaIC+'.':''}${_tratMedico?' Tratamiento médico: '+_tratMedico+'.':''}${_inicioEvolucion?' Inicio/evolución: '+_inicioEvolucion+'.':''}`;
+  // Campos adicionales no capturados antes
+  var _tipoHosp=chips('Tipo de hospitalización')||'';
+  var _eventoCritico=chips('Evento crítico reciente')||'';
+  var _inicioEvHosp=chips('Inicio y evolución en contexto hospitalario')||'';
+  var _ideacionActual=chips('Ideación autolítica actual')||'';
+  var _clasifRiesgo=chips('Clasificación del riesgo suicida')||icv('ic-riesgo-nivel')||'';
+  var _obsDx=chips('Observaciones diagnósticas')||'';
+  var _notasEquipo=chips('Notas adicionales al equipo')||'';
+  var _impresionIA=(document.getElementById('ic-impresion-hidden')?.value||'').trim();
+  var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}${escolaridad?' | Escolaridad: '+escolaridad:''}. Dx médico: ${dx}. Días internado: ${_diasInternacion||'no registrado'}. Riesgo suicida: ${_clasifRiesgo||sev}.${_tipoHosp?' Tipo hospitalización: '+_tipoHosp+'.':''}${_urgencia?' Urgencia IC: '+_urgencia+'.':''}${_medSol?' Médico solicitante: '+_medSol+'.':''}${_motivoMedico?' Pedido médico: '+_motivoMedico+'.':''}${_preguntaIC?' Pregunta IC: '+_preguntaIC+'.':''}${_tratMedico?' Tratamiento médico: '+_tratMedico+'.':''}${_eventoCritico?' Evento crítico: '+_eventoCritico+'.':''}${_inicioEvolucion?' Inicio/evolución: '+_inicioEvolucion+'.':''}${_inicioEvHosp?' Evolución hospitalaria: '+_inicioEvHosp+'.':''}`;
   if(_testsResumen)ctx+=`\n\n${_testsResumen}`;
+  if(_impresionIA)ctx+=`\n\nIMPRESIÓN DIAGNÓSTICA IA (previa): ${_impresionIA}`;
   // Incluir valoración de capacidad si se llenó
   var _capTextoIC=getCapInlineTexto('ic');
   if(_capTextoIC)ctx+='\n\n'+_capTextoIC;
 
   // Datos por sección
-  var dSub=`Estado emocional: ${chips('Estado emocional referido')||'no especificado'}. Pensamientos automáticos: ${chips('Pensamientos automáticos sobre enfermedad/internación/procedimiento')||chips('Pensamientos automáticos (CC)')||'no identificados'}${_tccPensamientos?' — '+_tccPensamientos:''}. Conductas de evitación: ${chips('Conductas de evitación / seguridad')||'no exploradas'}${_tccEvitacion?' — '+_tccEvitacion:''}. Activación conductual: ${chips('Activación conductual — nivel de actividad en hospital')||chips('Activación conductual')||'no evaluada'}${_tccActivacion?' — '+_tccActivacion:''}. Adherencia: ${chips('Adherencia al tratamiento médico')||'no evaluada'}${_tccAdherencia?' — '+_tccAdherencia:''}. Intensidad malestar: ${intensidad||'no cuantificada'}. Cita textual: ${cita||'ninguna'}. Riesgo previo: ${chips('Intentos previos')||'ninguno'}. Red de apoyo: ${chips('Red de apoyo funcional')||'no explorada'}${_redApoyoDetalle?' — '+_redApoyoDetalle:''}.`;
+  var dSub=`Estado emocional: ${chips('Estado emocional referido')||'no especificado'}. Pensamientos automáticos: ${chips('Pensamientos automáticos sobre enfermedad/internación/procedimiento')||chips('Pensamientos automáticos (CC)')||'no identificados'}${_tccPensamientos?' — '+_tccPensamientos:''}. Conductas de evitación: ${chips('Conductas de evitación / seguridad')||'no exploradas'}${_tccEvitacion?' — '+_tccEvitacion:''}. Activación conductual: ${chips('Activación conductual — nivel de actividad en hospital')||chips('Activación conductual')||'no evaluada'}${_tccActivacion?' — '+_tccActivacion:''}. Adherencia: ${chips('Adherencia al tratamiento médico')||'no evaluada'}${_tccAdherencia?' — '+_tccAdherencia:''}. Intensidad malestar: ${intensidad||'no cuantificada'}. Cita textual: ${cita||'ninguna'}. Ideación autolítica actual: ${_ideacionActual||'niega'}. Riesgo previo: ${chips('Intentos previos')||'ninguno'}. Clasificación riesgo: ${_clasifRiesgo||sev}. Red de apoyo: ${chips('Red de apoyo funcional')||'no explorada'}${_redApoyoDetalle?' — '+_redApoyoDetalle:''}.${sustNotas?' Notas sustancias: '+sustNotas:''}.`;
 
-  var dObj=`Orientación: ${chips('Orientación')||'conservada'}. Conciencia: ${chips('Conciencia / Colaboración')||'consciente'}. Conducta: ${chips('Conducta')||'adecuada'}. Afecto: ${chips('Afecto')||'observable'}. Pensamiento: ${chips('Pensamiento')||'organizado'}. Insight: ${chips('Insight')||chips('Lenguaje / Insight')||'conservado'}. Regulación emocional: ${chips('Regulación emocional')||'no explorada'}. Comprensión Dx: ${chips('Comprensión del Dx')||chips('Comprensión del Dx / pronóstico')||'no evaluada'}. Factores protectores: ${chips('Factores protectores')||'no explorados'}. Análisis CC: ${analisisLibre||_respObs||'no registrado'}.`;
+  var dObj=`Orientación: ${chips('Orientación')||'conservada'}. Conciencia: ${chips('Conciencia / Colaboración')||'consciente'}. Conducta: ${chips('Conducta')||'adecuada'}. Afecto: ${chips('Afecto')||'observable'}. Pensamiento: ${chips('Pensamiento')||'organizado'}. Insight: ${chips('Insight')||chips('Lenguaje / Insight')||'conservado'}. Regulación emocional: ${chips('Regulación emocional')||'no explorada'}. Comprensión Dx: ${chips('Comprensión del Dx')||chips('Comprensión del Dx / pronóstico')||'no evaluada'}. Ideación: ${_ideacionActual||'niega ideación'}. Riesgo suicida: ${_clasifRiesgo||sev}. Factores protectores: ${chips('Factores protectores')||'no explorados'}. Análisis CC: ${analisisLibre||_respObs||'no registrado'}.${riesgoNotas?' Notas riesgo: '+riesgoNotas:''}.`;
 
-  var dResp=`Tipo respuesta emocional: ${chips('Tipo de respuesta emocional')||'esperable'}. Impresión clínica: ${chips('Impresión clínica')||chips('Impresión diagnóstica (chips CIE-11)')||'respuesta adaptativa'}. Código CIE-11: ${icv('ic-cie')||'pendiente'}.${_respObs?' Observaciones: '+_respObs:''}.`;
+  var dResp=`Tipo respuesta emocional: ${chips('Tipo de respuesta emocional')||'esperable'}. Impresión clínica: ${chips('Impresión clínica')||chips('Impresión diagnóstica (chips CIE-11)')||'respuesta adaptativa'}. Código CIE-11: ${icv('ic-cie')||'pendiente'}.${_obsDx?' Observaciones diagnósticas: '+_obsDx:''}.${_respObs?' Análisis libre: '+_respObs:''}.${_impresionIA?' Impresión diagnóstica (IA previa): '+_impresionIA:''}.`;
 
-  var dTrat=`Intervención: ${chips('Intervención realizada / sugerida')||chips('Intervención realizada hoy')||'valoración clínica'}. Respuesta al médico derivante: ${_respMedico||'ver análisis clínico'}. Seguimiento: ${chips('Seguimiento')||'según evolución'}${_seguimientoPlazo?' — plazo: '+_seguimientoPlazo:''}. Alertas al equipo: ${tratNotas||'ninguna'}.`;
+  var dTrat=`Intervención: ${chips('Intervención realizada / sugerida')||chips('Intervención realizada hoy')||'valoración clínica'}. Respuesta al médico derivante: ${_respMedico||'ver análisis clínico'}. Seguimiento: ${chips('Seguimiento')||'según evolución'}${_seguimientoPlazo?' — plazo: '+_seguimientoPlazo:''}. Alertas al equipo: ${_notasEquipo||tratNotas||'ninguna'}.`;
   // Instrucción para incluir capacidad decisional literal al final de TRATAMIENTO
   const _capIcInstruccion = _capTextoIC && _capTextoIC.trim()
     ? '\n\nINSTRUCCIÓN FINAL OBLIGATORIA: Después del párrafo de tratamiento, agrega una sección llamada "VALORACIÓN DE CAPACIDAD DECISIONAL" y copia EXACTAMENTE este texto sin modificarlo:\n' + _capTextoIC
