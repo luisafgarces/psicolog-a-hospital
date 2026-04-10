@@ -565,6 +565,7 @@ input.toggle-cb{display:none}
           <div class="ic-pat-field" style="flex:2;min-width:160px"><label>Diagnóstico / Motivo IC</label><div id="ic-pdx-display" style="font-size:0.82rem;color:#e5e7eb;padding:2px 0;border-bottom:1px solid #3a3835;min-height:20px;font-style:italic;opacity:0.8">— se carga del paciente —</div><input type="hidden" id="ic-pdx" value=""></div>
           <div class="ic-pat-field"><label>Fecha</label><input type="date" id="ic-pfecha"></div>
           <div class="ic-pat-field"><label>Médico solicitante</label><input type="text" id="ic-medico-sol" placeholder="Dr. García — Medicina Interna"></div>
+          <div class="ic-pat-field"><label>Escolaridad</label><select id="ic-escolaridad" style="background:transparent;border:none;border-bottom:1px solid #3a3835;color:#fff;font-size:0.85rem;font-family:'DM Sans',sans-serif;outline:none;padding:2px 0;width:100%"><option value="" style="background:#1a1714;color:#fff">— Seleccionar —</option><option style="background:#1a1714;color:#fff">Ninguna</option><option style="background:#1a1714;color:#fff">Primaria</option><option style="background:#1a1714;color:#fff">Secundaria</option><option style="background:#1a1714;color:#fff">Técnico/Tecnólogo</option><option style="background:#1a1714;color:#fff">Universitario</option><option style="background:#1a1714;color:#fff">Posgrado</option></select></div>
 
         </div>
         <!-- ORIENTACIÓN DE VALORACIÓN CON IA -->
@@ -2274,6 +2275,15 @@ input.toggle-cb{display:none}
         </div>
       </div>
       <div class="form-group" id="p-hab-group"><label>Habitación / Servicio</label><input type="text" id="p-hab" placeholder="Ej: 304B, URG-12, UCI-3, AZU-5"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px"><button type="button" onclick="document.getElementById('p-hab').value='AZU-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔵 Bloque Azul</button><button type="button" onclick="document.getElementById('p-hab').value='URG-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🟡 Urgencias</button><button type="button" onclick="document.getElementById('p-hab').value='UCI-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔴 UCI</button></div></div>
+      <div class="form-group"><label>Médico que solicita la IC</label><input type="text" id="p-medico-sol" placeholder="Ej: Dr. Ramírez"></div>
+      <div class="form-group"><label>Especialidad</label><input type="text" id="p-medico-esp" placeholder="Ej: Medicina Interna, Oncología…"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">
+        <button type="button" onclick="document.getElementById('p-medico-esp').value='Medicina Interna'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">Medicina Interna</button>
+        <button type="button" onclick="document.getElementById('p-medico-esp').value='Cirugía'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">Cirugía</button>
+        <button type="button" onclick="document.getElementById('p-medico-esp').value='Oncología'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">Oncología</button>
+        <button type="button" onclick="document.getElementById('p-medico-esp').value='Urgencias'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">Urgencias</button>
+        <button type="button" onclick="document.getElementById('p-medico-esp').value='UCI'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">UCI</button>
+        <button type="button" onclick="document.getElementById('p-medico-esp').value='Pediatría'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">Pediatría</button>
+      </div></div>
       <div class="form-group full"><label id="p-motivo-label">Diagnóstico médico / Motivo de interconsulta</label><textarea id="p-motivo" rows="2" placeholder="Ej: Ca. de mama, impacto emocional dx reciente"></textarea></div>
       <div class="form-group full"><label>Tratamiento médico actual</label><textarea id="p-trat-medico" rows="2" placeholder="Ej: Quimioterapia ciclo 3, Morfina 10mg c/8h, O2 suplementario…"></textarea></div>
       <div class="form-group full"><label>Prioridad de la interconsulta</label>
@@ -2519,6 +2529,8 @@ window.guardarPaciente=async()=>{
       nombre, cedula,
       edad:gv('p-edad'), sexo:gv('p-sexo'),
       fecha:gv('p-fecha'), hab:gv('p-hab'),
+      medicoSol:gv('p-medico-sol'),
+      medicoEsp:gv('p-medico-esp'),
       motivo:gv('p-motivo'),
       tipo:gv('p-tipo')||'hospitalizado',
       estado:gv('p-estado')||'seguimiento',
@@ -2531,7 +2543,7 @@ window.guardarPaciente=async()=>{
     });
     closeModal('modal-paciente');
     toast('✅ Paciente registrado');
-    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad','p-medico-sol','p-medico-esp'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.querySelectorAll('#p-prioridad-btns .risk-btn').forEach(b=>b.classList.remove('sel'));
   }
   catch(e){setSyncStatus('offline');toast('❌ Error: '+e.message);}
@@ -2754,6 +2766,7 @@ window.selectICPaciente=(id)=>{
   if(nombre)nombre.value=p.nombre;
   if(edad&&(p.edad||p.sexo))edad.value=(p.edad?p.edad+' años':'')+(p.sexo?' '+p.sexo.charAt(0):'');
   if(dx&&p.motivo){dx.value=p.motivo;const disp=document.getElementById('ic-pdx-display');if(disp){disp.textContent=p.motivo;disp.style.opacity='1';disp.style.fontStyle='normal';}}
+  const icEsc=document.getElementById('ic-escolaridad');if(icEsc&&p.escolaridad)icEsc.value=p.escolaridad;
   const tratEl=document.getElementById('ic-trat-medico');if(tratEl&&p.tratMedico)tratEl.value=p.tratMedico;
   const diasVal=calcularDiasInternacion(p.fecha);
   const diasEl=document.getElementById('ic-dias-internacion');if(diasEl)diasEl.value=diasVal!==null?diasVal:'';
@@ -2786,7 +2799,7 @@ window.openModal=(id)=>{
   m.classList.add('open');
   // Reset patient modal fields if opening patient modal
   if(id==='modal-paciente'){
-    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad'].forEach(fid=>{
+    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad','p-medico-sol','p-medico-esp'].forEach(fid=>{
       const el=document.getElementById(fid);if(el)el.value='';
     });
     const riesgo=document.getElementById('p-riesgo');if(riesgo)riesgo.value='';
@@ -2823,6 +2836,8 @@ window.editarPaciente=(id)=>{
   _sv('p-trat-medico',p.tratMedico);
   _sv('p-fecha-ic',p.fechaIC);
   _sv('p-prioridad',p.prioridad);
+  _sv('p-medico-sol',p.medicoSol);
+  _sv('p-medico-esp',p.medicoEsp);
   setPTipo(p.tipo||'hospitalizado');
   document.querySelectorAll('#p-prioridad-btns .risk-btn').forEach(b=>b.classList.toggle('sel',b.dataset.val===(p.prioridad||'')));
   // Change button to update
@@ -2847,7 +2862,9 @@ window.actualizarPaciente=async(id)=>{
       notas:document.getElementById('p-notas').value,
       tratMedico:document.getElementById('p-trat-medico').value,
       fechaIC:document.getElementById('p-fecha-ic').value,
-      prioridad:document.getElementById('p-prioridad').value
+      prioridad:document.getElementById('p-prioridad').value,
+      medicoSol:document.getElementById('p-medico-sol').value,
+      medicoEsp:document.getElementById('p-medico-esp').value
     });
     closeModal('modal-paciente');toast('✅ Paciente actualizado');
     const btn=document.querySelector('#modal-paciente .btn-primary');
@@ -3190,7 +3207,7 @@ window.guardarICFirebase=async()=>{
   const sinNotaIA=!sub&&!obj&&!resp&&!trat&&window.icCurrentMode==='nueva';
   const needsAI=sinNotaIA;
   const formulario=window.icCurrentMode==='nueva'?{
-    edad:icv('ic-edad'),sexo:icv('ic-sexo'),dx:dx,hab:hab,riesgo:riesgo,
+    edad:icv('ic-edad'),sexo:icv('ic-sexo'),escolaridad:icv('ic-escolaridad'),dx:dx,hab:hab,riesgo:riesgo,
     sub:{
       emoc:icChipsBySubLabel('Estado emocional referido').join(', '),
       preoc:icChipsBySubLabel('Principales preocupaciones').join(', '),
@@ -3244,7 +3261,7 @@ window.guardarICFirebase=async()=>{
       pacienteId:pacIdFinal||null,
       pacienteNombre:nombre,
       pacienteCedula:pacObj?.cedula||'',
-      hab,edad,dx,riesgo,
+      hab,edad,dx,riesgo,escolaridad:icv('ic-escolaridad'),
       modo:window.icCurrentMode==='nueva'?'IC Nueva':window.icCurrentMode==='seg'?'Seguimiento':window.icCurrentMode==='fam'?'Intervención Familiar':'Nota especial',
       fecha,nota:notaTexto,sub,obj,resp,trat,
       fechaGuardado:new Date().toISOString().split('T')[0],
@@ -3293,6 +3310,7 @@ window.guardarAnamnesis=async()=>{
       edad:document.getElementById('an-edad')?.value||'',
       ecivil:document.getElementById('an-ecivil')?.value||'',
       ocupacion:document.getElementById('an-ocupacion')?.value||'',
+      escolaridad:document.getElementById('an-esc')?.value||'',
       motivo:document.getElementById('an-motivo')?.value||'',
       evolucion:document.getElementById('an-evolucion')?.value||'',
       intens:document.getElementById('an-intens')?.value||'',
@@ -4856,7 +4874,7 @@ window.generarNota = async function(){
   if(out){ out.textContent='⏳ Generando nota con Gemini…'; }
 
   const datos = [
-    'Paciente: '+v('an-edad')+'a, '+v('an-ecivil')+', '+v('an-ocupacion'),
+    'Paciente: '+v('an-edad')+'a, '+v('an-ecivil')+', '+v('an-ocupacion')+(v('an-esc')?', Escolaridad: '+v('an-esc'):''),
     'Motivo de consulta: '+(v('an-motivo')||'no registrado'),
     'Historia: inicio '+rc('an-inicio')+', evolución '+v('an-evolucion')+', intensidad '+v('an-intens')+'/10',
     'Síntomas: '+chk('an-sint'),
@@ -7265,6 +7283,7 @@ window.abrirPacSheet=async(id)=>{
     p.prioridad?{l:'Prioridad IC',v:p.prioridad==='URGENTE'?'🔴 URGENTE':p.prioridad==='PRIORITARIA'?'🟡 PRIORITARIA':'🟢 REGULAR',color:p.prioridad==='URGENTE'?'var(--danger)':p.prioridad==='PRIORITARIA'?'var(--warning)':'var(--success)'}:null,
     {l:'Fecha ingreso',v:p.fecha?formatDate(p.fecha):'—'},
     p.fechaIC?{l:'Fecha solicitud IC',v:formatDate(p.fechaIC)}:null,
+    (p.medicoSol||p.medicoEsp)?{l:'Médico solicitante',v:(p.medicoSol||'')+(p.medicoEsp?' · '+p.medicoEsp:''),full:false}:null,
     (()=>{
       const d=calcularDiasInternacion(p.fecha);
       if(d===null) return null;
@@ -7539,7 +7558,8 @@ async function generarNotaIcConGemini(apiKey){
   var _urgencia=icv('ic-urgencia-val')||icv('ic-urgencia')||'';
   var _medSol=icv('ic-medico-sol')||'';
   var _preguntaIC=chips('Pregunta específica a responder')||'';
-  var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}. Dx médico: ${dx}. Días internado: ${_diasInternacion||'no registrado'}. Riesgo suicida: ${sev}.${_urgencia?' Urgencia IC: '+_urgencia+'.':''}${_medSol?' Médico solicitante: '+_medSol+'.':''}${_motivoMedico?' Pedido médico: '+_motivoMedico+'.':''}${_preguntaIC?' Pregunta IC: '+_preguntaIC+'.':''}${_tratMedico?' Tratamiento médico: '+_tratMedico+'.':''}${_inicioEvolucion?' Inicio/evolución: '+_inicioEvolucion+'.':''}`;
+  var escolaridad=icv('ic-escolaridad')||'';
+  var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}${escolaridad?' | Escolaridad: '+escolaridad:''}. Dx médico: ${dx}. Días internado: ${_diasInternacion||'no registrado'}. Riesgo suicida: ${sev}.${_urgencia?' Urgencia IC: '+_urgencia+'.':''}${_medSol?' Médico solicitante: '+_medSol+'.':''}${_motivoMedico?' Pedido médico: '+_motivoMedico+'.':''}${_preguntaIC?' Pregunta IC: '+_preguntaIC+'.':''}${_tratMedico?' Tratamiento médico: '+_tratMedico+'.':''}${_inicioEvolucion?' Inicio/evolución: '+_inicioEvolucion+'.':''}`;
   if(_testsResumen)ctx+=`\n\n${_testsResumen}`;
   // Incluir valoración de capacidad si se llenó
   var _capTextoIC=getCapInlineTexto('ic');
