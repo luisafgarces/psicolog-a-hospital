@@ -2828,7 +2828,7 @@ window.selectICPaciente=(id)=>{
   }
   if(fecha)fecha.value=new Date().toISOString().split('T')[0];
   // Auto-set mode based on patient estado
-  if(p.estado==='nueva-interconsulta-pendiente')setICMode('nueva');
+  if(p.estado==='nueva-interconsulta-pendiente'||p.estado==='revaloracion')setICMode('nueva');
   else if(p.estado==='seguimiento')setICMode('seg');
   // Mostrar bloque de orientación si hay motivo
   if(p.motivo||(dx&&dx.value)){
