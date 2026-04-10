@@ -567,6 +567,23 @@ input.toggle-cb{display:none}
           <div class="ic-pat-field"><label>Médico solicitante</label><input type="text" id="ic-medico-sol" placeholder="Dr. García — Medicina Interna"></div>
 
         </div>
+        <!-- PENDIENTES DEL PACIENTE (IC) -->
+        <div id="ic-pendientes-wrap" style="display:none;margin-bottom:10px;background:#fffbeb;border:1.5px solid #d97706;border-radius:10px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#fef3c7;border-bottom:1px solid #fde68a">
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="font-size:0.9rem">📋</span>
+              <span style="font-size:0.8rem;font-weight:700;color:#92400e">Pendientes del paciente</span>
+              <span style="font-size:0.72rem;color:#b45309">— revísalos antes de iniciar</span>
+            </div>
+            <button onclick="document.getElementById('ic-pendientes-wrap').style.display='none'" style="background:none;border:none;cursor:pointer;color:#92400e;font-size:1rem;padding:0 4px;line-height:1">✕</button>
+          </div>
+          <div id="ic-pendientes-lista" style="padding:10px 14px;display:flex;flex-direction:column;gap:5px;max-height:200px;overflow-y:auto"></div>
+          <div style="padding:6px 14px 10px;border-top:1px solid #fde68a;display:flex;gap:8px;align-items:center">
+            <span style="font-size:0.72rem;color:#92400e;font-style:italic">Marca los que abordes en esta sesión</span>
+            <button onclick="icMarcarTodosPendientes()" style="background:#d97706;color:#fff;border:none;border-radius:5px;padding:3px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;margin-left:auto">✓ Marcar todos</button>
+          </div>
+        </div>
+
         <!-- ORIENTACIÓN DE VALORACIÓN CON IA -->
         <div id="ic-orientacion-wrap" style="margin-bottom:10px;background:var(--surface);border:1.5px solid var(--accent2);border-radius:10px;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--accent2)11;border-bottom:1px solid var(--accent2)33">
@@ -1278,6 +1295,22 @@ input.toggle-cb{display:none}
             </div>
             <div class="form-group"><label>Fecha</label><input type="date" id="seg-fecha" style="width:140px"></div>
             <div class="form-group"><label>Sesión #</label><input type="number" id="seg-num" min="1" placeholder="—" style="width:80px;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem"></div>
+          </div>
+
+          <!-- PENDIENTES DEL PACIENTE -->
+          <div id="seg-pendientes-wrap" style="display:none;margin-bottom:14px;background:#fffbeb;border:1.5px solid #d97706;border-radius:10px;overflow:hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#fef3c7;border-bottom:1px solid #fde68a">
+              <div style="display:flex;align-items:center;gap:7px">
+                <span style="font-size:0.9rem">📋</span>
+                <span style="font-size:0.8rem;font-weight:700;color:#92400e">Pendientes de la sesión anterior</span>
+              </div>
+              <button onclick="document.getElementById('seg-pendientes-wrap').style.display='none'" style="background:none;border:none;cursor:pointer;color:#92400e;font-size:1rem;padding:0 4px;line-height:1">✕</button>
+            </div>
+            <div id="seg-pendientes-lista" style="padding:10px 14px;display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto"></div>
+            <div style="padding:6px 14px 10px;border-top:1px solid #fde68a;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:0.72rem;color:#92400e;font-style:italic">Marca los que abordaste en esta sesión</span>
+              <button onclick="segMarcarTodosPendientes()" style="background:#d97706;color:#fff;border:none;border-radius:5px;padding:3px 10px;font-size:0.72rem;font-weight:600;cursor:pointer;margin-left:auto">✓ Marcar todos</button>
+            </div>
           </div>
 
           <!-- ORIENTACIÓN DE SEGUIMIENTO CON IA -->
@@ -2804,6 +2837,8 @@ window.selectICPaciente=(id)=>{
     const btn=document.getElementById('ic-orientacion-btn');
     if(btn){btn.textContent='✨ Generar guía';btn.disabled=false;}
   }
+  // Cargar pendientes en el panel de seguimiento IC
+  if(typeof window.cargarPendientesEnIC === 'function') window.cargarPendientesEnIC(id);
 };
 
 window.openModal=(id)=>{
@@ -6183,14 +6218,101 @@ window.anamSwitchTab = function(tab){
 
 // Seleccionar paciente para nota de sesión
 window.anamSegSelectPac = function(pacId){
-  if(!pacId) return;
+  if(!pacId){
+    document.getElementById('seg-pendientes-wrap').style.display='none';
+    return;
+  }
   const p=(window.pacientes||[]).find(x=>x.id===pacId);
   if(!p) return;
-  // Fill known fields
   const fn=(id,v)=>{const el=document.getElementById(id);if(el&&v)el.value=v;};
   fn('seg-fecha', new Date().toISOString().split('T')[0]);
   window._segPacId = pacId;
   window._segPacNombre = p.nombre;
+  // Cargar pendientes del paciente
+  cargarPendientesEnSeg(pacId);
+};
+
+window.cargarPendientesEnSeg = async function(pacId){
+  const wrap = document.getElementById('seg-pendientes-wrap');
+  const lista = document.getElementById('seg-pendientes-lista');
+  if(!wrap || !lista) return;
+
+  lista.innerHTML = '<div style="font-size:0.78rem;color:#92400e;font-style:italic">Cargando pendientes…</div>';
+  wrap.style.display = 'block';
+
+  try{
+    const snap = await window._getDocs(
+      window._query(
+        window._collection(window.db, 'pendientes'),
+        window._where('pacienteId', '==', pacId)
+      )
+    );
+    const todos = snap.docs.map(d=>({id:d.id,...d.data()}))
+      .filter(p=>!p.completado && p.fechaCompletado !== 'eliminado')
+      .sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+
+    if(!todos.length){
+      wrap.style.display = 'none';
+      return;
+    }
+
+    lista.innerHTML = '';
+    todos.forEach(function(p){
+      var item = document.createElement('div');
+      item.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid #fde68a';
+      item.dataset.id = p.id;
+
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = 'seg-pend-' + p.id;
+      cb.style.cssText = 'margin-top:3px;accent-color:#d97706;flex-shrink:0;width:15px;height:15px;cursor:pointer';
+      cb.onchange = function(){ segMarcarPendiente(p.id, this.checked, item); };
+
+      var lbl = document.createElement('label');
+      lbl.htmlFor = 'seg-pend-' + p.id;
+      lbl.style.cssText = 'flex:1;font-size:0.8rem;color:#451a03;line-height:1.5;cursor:pointer';
+      lbl.textContent = p.texto;
+
+      var fecha = document.createElement('span');
+      fecha.style.cssText = 'font-size:0.65rem;color:#92400e;flex-shrink:0;margin-top:2px';
+      fecha.textContent = p.fecha || '';
+
+      item.appendChild(cb);
+      item.appendChild(lbl);
+      item.appendChild(fecha);
+      lista.appendChild(item);
+    });
+    wrap.style.display = 'block';
+  }catch(e){
+    lista.innerHTML = '<div style="font-size:0.78rem;color:#c0392b">Error al cargar pendientes.</div>';
+    console.error('cargarPendientesEnSeg:', e);
+  }
+};
+
+window.segMarcarPendiente = function(docId, checked, itemEl){
+  if(checked && itemEl){
+    itemEl.style.opacity = '0.45';
+    itemEl.querySelector('label') && (itemEl.querySelector('label').style.textDecoration = 'line-through');
+  } else if(itemEl){
+    itemEl.style.opacity = '1';
+    itemEl.querySelector('label') && (itemEl.querySelector('label').style.textDecoration = '');
+  }
+  // Actualizar en Firebase
+  try{
+    window._updateDoc(window._doc(window.db,'pendientes',docId),{
+      completado: checked,
+      fechaCompletado: checked ? new Date().toISOString().split('T')[0] : null
+    });
+  }catch(e){ console.warn('segMarcarPendiente error:', e); }
+};
+
+window.segMarcarTodosPendientes = function(){
+  document.querySelectorAll('#seg-pendientes-lista input[type=checkbox]').forEach(function(cb){
+    if(!cb.checked){
+      cb.checked = true;
+      cb.onchange && cb.onchange.call(cb);
+    }
+  });
 };
 
 // Limpiar formulario de nota de sesión
@@ -9333,6 +9455,83 @@ window.imprimirBorradorLocal = function(entry) {
   var w = window.open('', '_blank', 'width=820,height=1000,scrollbars=yes');
   if (w) { w.document.write(html); w.document.close(); }
   else toast('⚠️ Activa ventanas emergentes para imprimir');
+};
+
+
+// ── PENDIENTES EN FORMULARIOS DE SESIÓN ─────────────────────────────
+
+window.cargarPendientesEnIC = async function(pacId){
+  const wrap = document.getElementById('ic-pendientes-wrap');
+  const lista = document.getElementById('ic-pendientes-lista');
+  if(!wrap || !lista) return;
+  if(!pacId){ wrap.style.display='none'; return; }
+
+  lista.innerHTML = '<div style="font-size:0.78rem;color:#92400e;font-style:italic">Cargando…</div>';
+
+  try{
+    const snap = await window._getDocs(
+      window._query(
+        window._collection(window.db, 'pendientes'),
+        window._where('pacienteId', '==', pacId)
+      )
+    );
+    const activos = snap.docs.map(d=>({id:d.id,...d.data()}))
+      .filter(p=>!p.completado && p.fechaCompletado !== 'eliminado')
+      .sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+
+    if(!activos.length){ wrap.style.display='none'; return; }
+
+    lista.innerHTML = '';
+    activos.forEach(function(p){
+      var item = document.createElement('div');
+      item.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:4px 0;border-bottom:1px solid #fde68a';
+      item.dataset.id = p.id;
+
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = 'ic-pend-' + p.id;
+      cb.style.cssText = 'margin-top:3px;accent-color:#d97706;flex-shrink:0;width:15px;height:15px;cursor:pointer';
+      cb.onchange = function(){ icMarcarPendiente(p.id, this.checked, item); };
+
+      var lbl = document.createElement('label');
+      lbl.htmlFor = 'ic-pend-' + p.id;
+      lbl.style.cssText = 'flex:1;font-size:0.8rem;color:#451a03;line-height:1.5;cursor:pointer';
+      lbl.textContent = p.texto;
+
+      var fecha = document.createElement('span');
+      fecha.style.cssText = 'font-size:0.65rem;color:#92400e;flex-shrink:0;margin-top:2px';
+      fecha.textContent = p.fecha || '';
+
+      item.appendChild(cb);
+      item.appendChild(lbl);
+      item.appendChild(fecha);
+      lista.appendChild(item);
+    });
+    wrap.style.display = 'block';
+  }catch(e){
+    lista.innerHTML = '<div style="font-size:0.78rem;color:#c0392b">Error al cargar.</div>';
+    console.error('cargarPendientesEnIC:', e);
+  }
+};
+
+window.icMarcarPendiente = function(docId, checked, itemEl){
+  if(itemEl){
+    itemEl.style.opacity = checked ? '0.45' : '1';
+    var lbl = itemEl.querySelector('label');
+    if(lbl) lbl.style.textDecoration = checked ? 'line-through' : '';
+  }
+  try{
+    window._updateDoc(window._doc(window.db,'pendientes',docId),{
+      completado: checked,
+      fechaCompletado: checked ? new Date().toISOString().split('T')[0] : null
+    });
+  }catch(e){ console.warn('icMarcarPendiente error:', e); }
+};
+
+window.icMarcarTodosPendientes = function(){
+  document.querySelectorAll('#ic-pendientes-lista input[type=checkbox]').forEach(function(cb){
+    if(!cb.checked){ cb.checked=true; cb.onchange && cb.onchange.call(cb); }
+  });
 };
 
 // ── INIT ────────────────────────────────────────────────────
