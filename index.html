@@ -8180,6 +8180,10 @@ window.showTest=function(id){
     if(sel) sel.value = '';
     document.getElementById('test-dynamic-area').style.display='none';
     document.getElementById('tests-tip').style.display='';
+    // Desactivar todas las pantallas dedicadas y reactivar la pantalla principal
+    document.querySelectorAll('.test-screen').forEach(function(s){ s.classList.remove('active'); });
+    var testsHome = document.getElementById('tests-home');
+    if(testsHome) testsHome.classList.add('active');
     _currentTest = null;
     return;
   }
@@ -8372,85 +8376,166 @@ window.renderHADS = renderHADSInContainer;
 function renderMMSEInContainer(){
   var cont = document.getElementById('test-questions');
   if(!cont) return;
-  cont.innerHTML = mmseQs.map(function(item,i){
+  var intro = '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#166534;line-height:1.6"><strong>📋 Modo entrevistador:</strong> Lea cada ítem en voz alta y marque el resultado. Para ítems con puntos parciales, marque cuántos logró.</div>';
+  var html = mmseQs.map(function(item,i){
+    var corr = '<label style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+      +'<input type="radio" name="mmse_q'+i+'" value="'+item.pts+'" style="accent-color:#16a34a;flex-shrink:0">'
+      +'<span style="background:#16a34a;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0">✓</span>'
+      +'<span style="font-size:0.82rem;color:var(--text)">✅ Correcto / Completo ('+item.pts+' pt'+(item.pts>1?'s':'')+')</span></label>';
+    var inco = '<label style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+      +'<input type="radio" name="mmse_q'+i+'" value="0" style="accent-color:#dc2626;flex-shrink:0">'
+      +'<span style="background:#dc2626;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0">✗</span>'
+      +'<span style="font-size:0.82rem;color:var(--text)">❌ Incorrecto / No pudo</span></label>';
     var partial = '';
     if(item.pts>1 && item.pts<5){
       for(var k=1;k<item.pts;k++){
-        partial += '<div class="test-option"><input type="radio" name="mmse_q'+i+'" id="mmse_q'+i+'_p'+k+'" value="'+k+'"><label class="test-option-label" for="mmse_q'+i+'_p'+k+'">⚠️ Parcial: '+k+' pt'+(k>1?'s':'')+'</label></div>';
+        partial += '<label style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+          +'<input type="radio" name="mmse_q'+i+'" value="'+k+'" style="accent-color:#d97706;flex-shrink:0">'
+          +'<span style="background:#d97706;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0">'+k+'</span>'
+          +'<span style="font-size:0.82rem;color:var(--text)">⚠️ Parcial: '+k+' pt'+(k>1?'s':'')+'</span></label>';
       }
     }
-    return '<div class="test-question"><div class="test-question-num">Ítem '+(i+1)+' · '+item.pts+' pt'+(item.pts>1?'s':'')+'</div><div class="test-question-text">'+item.q+'</div><div class="test-options">'+
-      '<div class="test-option"><input type="radio" name="mmse_q'+i+'" id="mmse_q'+i+'_1" value="'+item.pts+'"><label class="test-option-label" for="mmse_q'+i+'_1">✅ Correcto / Completo</label></div>'+
-      '<div class="test-option"><input type="radio" name="mmse_q'+i+'" id="mmse_q'+i+'_0" value="0"><label class="test-option-label" for="mmse_q'+i+'_0">❌ Incorrecto / No pudo</label></div>'+
-      partial+'</div></div>';
+    return '<div style="margin-bottom:10px;padding:12px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px">'
+      +'<div style="font-size:0.65rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px">Ítem '+(i+1)+' · '+item.pts+' pt'+(item.pts>1?'s':'')+'</div>'
+      +'<div style="font-size:0.88rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:9px">'+item.q+'</div>'
+      + corr + partial + inco
+      +'</div>';
   }).join('');
+  cont.innerHTML = intro + html;
 }
 window.renderMMSE = renderMMSEInContainer;
 
 function renderMoCAInContainer(){
   var cont = document.getElementById('test-questions');
   if(!cont) return;
-  cont.innerHTML = mocaQs.map(function(item,i){
-    if(item.pts===0) return '<div class="test-question"><div class="test-question-num" style="color:var(--text3)">Ítem '+(i+1)+' · No puntúa</div><div class="test-question-text">'+item.q+'</div></div>';
+  var intro = '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#166534;line-height:1.6"><strong>📋 Modo entrevistador:</strong> Aplique cada ítem siguiendo el protocolo. Marque el resultado. Los ítems de dibujo/escritura pueden omitirse en analfabetas.</div>';
+  var html = mocaQs.map(function(item,i){
+    if(item.pts===0) return '<div style="margin-bottom:8px;padding:10px 14px;background:#f8fafc;border:1px dashed var(--border);border-radius:8px;opacity:0.7"><div style="font-size:0.65rem;color:var(--text3);font-weight:700;text-transform:uppercase">Ítem '+(i+1)+' · No puntúa</div><div style="font-size:0.82rem;color:var(--text2);margin-top:4px">'+item.q+'</div></div>';
+    var corr = '<label style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+      +'<input type="radio" name="moca_q'+i+'" value="'+item.pts+'" style="accent-color:#16a34a;flex-shrink:0">'
+      +'<span style="background:#16a34a;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0">✓</span>'
+      +'<span style="font-size:0.82rem;color:var(--text)">✅ Correcto ('+item.pts+' pt'+(item.pts>1?'s':'')+')</span></label>';
+    var inco = '<label style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+      +'<input type="radio" name="moca_q'+i+'" value="0" style="accent-color:#dc2626;flex-shrink:0">'
+      +'<span style="background:#dc2626;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0">✗</span>'
+      +'<span style="font-size:0.82rem;color:var(--text)">❌ Incorrecto</span></label>';
     var partial = '';
     if(item.pts===3){
-      partial = '<div class="test-option"><input type="radio" name="moca_q'+i+'" id="moca_q'+i+'_p1" value="1"><label class="test-option-label" for="moca_q'+i+'_p1">⚠️ 1 pt</label></div>'+
-                '<div class="test-option"><input type="radio" name="moca_q'+i+'" id="moca_q'+i+'_p2" value="2"><label class="test-option-label" for="moca_q'+i+'_p2">⚠️ 2 pts</label></div>';
+      partial = '<label style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+        +'<input type="radio" name="moca_q'+i+'" value="1" style="accent-color:#d97706;flex-shrink:0">'
+        +'<span style="background:#d97706;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0">1</span>'
+        +'<span style="font-size:0.82rem;color:var(--text)">⚠️ Parcial: 1 pt</span></label>'
+        +'<label style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+        +'<input type="radio" name="moca_q'+i+'" value="2" style="accent-color:#d97706;flex-shrink:0">'
+        +'<span style="background:#d97706;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0">2</span>'
+        +'<span style="font-size:0.82rem;color:var(--text)">⚠️ Parcial: 2 pts</span></label>';
     }
-    return '<div class="test-question"><div class="test-question-num">Ítem '+(i+1)+' · '+item.pts+' pt'+(item.pts>1?'s':'')+'</div><div class="test-question-text">'+item.q+'</div><div class="test-options">'+
-      '<div class="test-option"><input type="radio" name="moca_q'+i+'" id="moca_q'+i+'_1" value="'+item.pts+'"><label class="test-option-label" for="moca_q'+i+'_1">✅ Correcto</label></div>'+
-      '<div class="test-option"><input type="radio" name="moca_q'+i+'" id="moca_q'+i+'_0" value="0"><label class="test-option-label" for="moca_q'+i+'_0">❌ Incorrecto</label></div>'+
-      partial+'</div></div>';
+    return '<div style="margin-bottom:10px;padding:12px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px">'
+      +'<div style="font-size:0.65rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px">Ítem '+(i+1)+' · '+item.pts+' pt'+(item.pts>1?'s':'')+'</div>'
+      +'<div style="font-size:0.88rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:9px">'+item.q+'</div>'
+      + corr + partial + inco
+      +'</div>';
   }).join('');
+  cont.innerHTML = intro + html;
 }
 window.renderMoCA = renderMoCAInContainer;
 
 function renderCAMInContainer(){
   var cont = document.getElementById('test-questions');
   if(!cont) return;
-  cont.innerHTML = camQs.map(function(item,i){
-    return '<div class="test-question"><div class="test-question-num">Criterio '+(i+1)+'</div><div class="test-question-text">'+item.q+'</div><div class="test-options">'+
-      item.opts.map(function(opt,v){
-        return '<div class="test-option"><input type="radio" name="cam_q'+i+'" id="cam_q'+i+'_'+v+'" value="'+opt+'"><label class="test-option-label" for="cam_q'+i+'_'+v+'">'+opt+'</label></div>';
-      }).join('')+'</div></div>';
+  var intro = '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#166534;line-height:1.6"><strong>📋 Modo entrevistador:</strong> Evalúe cada criterio por observación directa y/o información del equipo de enfermería. Delirium = C1 + C2 + (C3 o C4).</div>';
+  var camColors = ['#7c3aed','#dc2626','#d97706','#0369a1'];
+  var html = camQs.map(function(item, i){
+    var col = camColors[i]||'var(--accent)';
+    var optsHtml = item.opts.map(function(opt){
+      var isYes = opt==='Sí'||opt==='Hiperalerta'||opt==='Somnoliento'||opt==='Estuporoso';
+      var c = (opt==='Sí') ? '#dc2626' : (opt==='No') ? '#16a34a' : col;
+      return '<label style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+        +'<input type="radio" name="cam_q'+i+'" value="'+opt+'" style="accent-color:'+c+';flex-shrink:0">'
+        +'<span style="font-size:0.82rem;color:var(--text)">'+opt+'</span></label>';
+    }).join('');
+    return '<div style="margin-bottom:10px;padding:12px 14px;background:var(--surface2);border:1.5px solid '+col+'44;border-radius:10px">'
+      +'<div style="font-size:0.65rem;font-weight:700;color:'+col+';text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px">Criterio '+(i+1)+'</div>'
+      +'<div style="font-size:0.85rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:9px">'+item.q+'</div>'
+      + optsHtml +'</div>';
   }).join('');
+  cont.innerHTML = intro + html;
 }
 window.renderCAM = renderCAMInContainer;
 
 function renderCSSRSInContainer(){
   var cont = document.getElementById('test-questions');
   if(!cont) return;
-  cont.innerHTML = cssrsQs.map(function(item,i){
-    return '<div class="test-question"><div class="test-question-num">Pregunta '+(i+1)+'</div><div class="test-question-text">'+item.q+'</div><div class="test-options">'+
-      item.opts.map(function(opt,v){
-        return '<div class="test-option"><input type="radio" name="cssrs_q'+i+'" id="cssrs_q'+i+'_'+v+'" value="'+opt+'"><label class="test-option-label" for="cssrs_q'+i+'_'+v+'">'+opt+'</label></div>';
-      }).join('')+'</div></div>';
+  var intro = '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#991b1b;line-height:1.6"><strong>⚠️ Modo entrevistador:</strong> Pregunte con calma y empatía, sin prisa. Un "Sí" en ítems 4–5 requiere intervención inmediata. Suspenda si el paciente se descompensa.</div>';
+  var riesgoAlto = [3,4,5];
+  var html = cssrsQs.map(function(item, i){
+    var esRiesgo = riesgoAlto.includes(i);
+    var bg   = esRiesgo ? '#fef2f2' : 'var(--surface2)';
+    var bord = esRiesgo ? '#fca5a5' : 'var(--border)';
+    var col  = esRiesgo ? '#dc2626' : 'var(--accent)';
+    var optsHtml = item.opts.map(function(opt){
+      var c = opt==='Sí' ? '#dc2626' : '#16a34a';
+      return '<label style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+        +'<input type="radio" name="cssrs_q'+i+'" value="'+opt+'" style="accent-color:'+c+';flex-shrink:0">'
+        +'<span style="font-size:0.88rem;font-weight:700;color:'+c+'">'+opt+'</span></label>';
+    }).join('');
+    return '<div style="margin-bottom:10px;padding:12px 14px;background:'+bg+';border:1.5px solid '+bord+';border-radius:10px">'
+      +(esRiesgo ? '<div style="font-size:0.68rem;font-weight:700;color:#dc2626;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.07em">⚠️ Ítem de alto riesgo '+(i+1)+'</div>' : '<div style="font-size:0.65rem;font-weight:700;color:'+col+';text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px">Pregunta '+(i+1)+'</div>')
+      +'<div style="font-size:0.88rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:9px">'+item.q+'</div>'
+      + optsHtml +'</div>';
   }).join('');
+  cont.innerHTML = intro + html;
 }
 window.renderCSSRS = renderCSSRSInContainer;
 
 function renderMMAS4InContainer(){
   var cont = document.getElementById('test-questions');
   if(!cont) return;
-  cont.innerHTML = mmas4Qs.map(function(item,i){
-    return '<div class="test-question"><div class="test-question-num">Pregunta '+(i+1)+'</div><div class="test-question-text">'+item.q+'</div><div class="test-options">'+
-      item.opts.map(function(opt,v){
-        return '<div class="test-option"><input type="radio" name="mmas4_q'+i+'" id="mmas4_q'+i+'_'+v+'" value="'+v+'"><label class="test-option-label" for="mmas4_q'+i+'_'+v+'">'+opt+'</label></div>';
-      }).join('')+'</div></div>';
+  var intro = '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#166534;line-height:1.6"><strong>📋 Modo entrevistador:</strong> Pregunte directamente sin juzgar. Si el paciente responde "Sí" explore brevemente la barrera: costo, olvido, efectos secundarios, red de apoyo.</div>';
+  var html = mmas4Qs.map(function(item, i){
+    var optsHtml = item.opts.map(function(opt, v){
+      var txt = opt.replace(/\s*\(\d\)\s*/g,'').trim();
+      var c = v===0 ? '#dc2626' : '#16a34a';
+      var ico = v===0 ? 'Sí' : 'No';
+      return '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+        +'<input type="radio" name="mmas4_q'+i+'" value="'+v+'" style="accent-color:'+c+';flex-shrink:0">'
+        +'<span style="background:'+c+';color:#fff;border-radius:5px;padding:2px 8px;font-size:0.72rem;font-weight:700;flex-shrink:0">'+ico+'</span>'
+        +'<span style="font-size:0.82rem;color:var(--text)">'+txt+'</span></label>';
+    }).join('');
+    return '<div style="margin-bottom:10px;padding:12px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px">'
+      +'<div style="font-size:0.65rem;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px">💊 Ítem '+(i+1)+' de 4</div>'
+      +'<div style="font-size:0.88rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:9px">'+item.q+'</div>'
+      + optsHtml +'</div>';
   }).join('');
+  cont.innerHTML = intro + html;
 }
 window.renderMMAS4 = renderMMAS4InContainer;
 
 function renderDueloInContainer(){
   var cont = document.getElementById('test-questions');
   if(!cont) return;
-  cont.innerHTML = dueloQs.map(function(item,i){
-    return '<div class="test-question"><div class="test-question-num">Pregunta '+(i+1)+'</div><div class="test-question-text">'+item.q+'</div><div class="test-options">'+
-      item.opts.map(function(opt,v){
-        var val = parseInt((opt.match(/\((\d)\)/)||[0,v])[1]);
-        return '<div class="test-option"><input type="radio" name="duelo_q'+i+'" id="duelo_q'+i+'_'+v+'" value="'+val+'"><label class="test-option-label" for="duelo_q'+i+'_'+v+'">'+opt+'</label></div>';
-      }).join('')+'</div></div>';
+  var intro = '<div style="background:#fdf4ff;border:1px solid #e9d5ff;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#6b21a8;line-height:1.6"><strong>📋 Modo entrevistador:</strong> Antes de empezar: <em>"Entiendo que ha pasado por una pérdida muy difícil. Voy a hacerle unas preguntas para entender cómo está. No hay respuestas incorrectas."</em> Pida que responda con un número del 1 al 3.</div>';
+  var dueloColors = ['#6b21a8','#7c3aed','#9333ea','#a855f7','#dc2626'];
+  var html = dueloQs.map(function(item, i){
+    var col = dueloColors[i]||'#7c3aed';
+    var esRiesgo = i===4;
+    var bg   = esRiesgo ? '#fef2f2' : '#fdf4ff';
+    var bord = esRiesgo ? '#fca5a5' : '#e9d5ff';
+    var optsHtml = item.opts.map(function(opt, v){
+      var val = parseInt((opt.match(/\((\d)\)/)||[0,v])[1]);
+      var txt = opt.replace(/\s*\(\d\)\s*/g,'').trim();
+      var c = esRiesgo && v===2 ? '#dc2626' : col;
+      return '<label style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+        +'<input type="radio" name="duelo_q'+i+'" value="'+val+'" style="accent-color:'+c+';flex-shrink:0">'
+        +'<span style="background:'+c+';color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0">'+(v+1)+'</span>'
+        +'<span style="font-size:0.82rem;color:var(--text)">'+txt+'</span></label>';
+    }).join('');
+    return '<div style="margin-bottom:10px;padding:12px 14px;background:'+bg+';border:1.5px solid '+bord+';border-radius:10px">'
+      +(esRiesgo ? '<div style="font-size:0.68rem;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px">⚠️ Ítem de riesgo suicida</div>' : '<div style="font-size:0.65rem;font-weight:700;color:'+col+';text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px">🕊️ Pregunta '+(i+1)+' de 5</div>')
+      +'<div style="font-size:0.88rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:9px">'+item.q+'</div>'
+      + optsHtml +'</div>';
   }).join('');
+  cont.innerHTML = intro + html;
 }
 window.renderDuelo = renderDueloInContainer;
 
@@ -8555,13 +8640,14 @@ function renderSIMSInContainer(){
 }
 
 function renderSVACBCAInContainer(){
-  // SVA/CBCA has a dedicated screen — redirect to it
   var el = document.getElementById('test-svacbca');
   if(el){
     document.querySelectorAll('.test-screen').forEach(function(s){s.classList.remove('active');});
     el.classList.add('active');
     document.getElementById('test-dynamic-area').style.display='none';
     document.getElementById('tests-tip').style.display='none';
+    // Llenar los criterios en las secciones
+    if(typeof renderSVACBCA === 'function') renderSVACBCA();
   } else {
     toast('⚠️ La pantalla SVA/CBCA no está disponible');
   }
