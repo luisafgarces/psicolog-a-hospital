@@ -890,9 +890,72 @@ input.toggle-cb{display:none}
             </div>
           </div>
 
-          <!-- S8: RECOMENDACIONES -->
+          <!-- S7B: ANTECEDENTES SM + HÁBITOS + SPA -->
+          <div class="ic-form-section ic-only-nueva">
+            <div class="ic-form-head slate"><span class="ft">🗂️ Antecedentes relevantes</span></div>
+            <div class="ic-form-body">
+              <div class="ic-field">
+                <div class="ic-sublabel">Antecedentes de salud mental</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTog(this)">Sin antecedentes conocidos</span>
+                  <span class="ic-chip" onclick="icTog(this)">Trastorno depresivo previo</span>
+                  <span class="ic-chip" onclick="icTog(this)">Trastorno de ansiedad</span>
+                  <span class="ic-chip" onclick="icTog(this)">Trastorno bipolar</span>
+                  <span class="ic-chip" onclick="icTog(this)">Psicosis / esquizofrenia</span>
+                  <span class="ic-chip" onclick="icTog(this)">TEPT</span>
+                  <span class="ic-chip" onclick="icTog(this)">Trastorno de personalidad</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Hospitalización psiquiátrica previa</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Intento de suicidio previo</span>
+                  <span class="ic-chip" onclick="icTog(this)">Tratamiento psicológico previo</span>
+                  <span class="ic-chip" onclick="icTog(this)">Tratamiento psiquiátrico previo</span>
+                </div>
+              </div>
+              <div class="ic-g2">
+                <div class="ic-field">
+                  <div class="ic-sublabel">Hábitos de sueño</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogG(this)">Conservado</span>
+                    <span class="ic-chip" onclick="icTog(this)">Insomnio de conciliación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Insomnio de mantenimiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hipersomnia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Pesadillas</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alterado por hospitalización</span>
+                  </div>
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Hábitos de alimentación</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogG(this)">Adecuada</span>
+                    <span class="ic-chip" onclick="icTog(this)">Apetito reducido</span>
+                    <span class="ic-chip" onclick="icTog(this)">Apetito aumentado</span>
+                    <span class="ic-chip" onclick="icTog(this)">Pérdida de peso significativa</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ayuno / restricción</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Consumo de SPA</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogG(this)">Niega consumo</span>
+                  <span class="ic-chip" onclick="icTog(this)">Alcohol ocasional</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Alcohol problemático</span>
+                  <span class="ic-chip" onclick="icTog(this)">Tabaco</span>
+                  <span class="ic-chip" onclick="icTog(this)">Cannabis</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Cocaína / bazuco</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Benzodiacepinas sin prescripción</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Policonsumo</span>
+                </div>
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Notas sobre antecedentes</div>
+                <textarea id="ic-sustancias-notas" rows="2" placeholder="Detalles sobre antecedentes psiquiátricos, patrón de consumo, contexto relevante…"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- S8: TRATAMIENTO Y PLAN -->
           <div class="ic-form-section">
-            <div class="ic-form-head green"><span class="ft">📤 Recomendaciones al médico derivante</span><span class="ic-form-badge red">OBLIGATORIO</span></div>
+            <div class="ic-form-head green"><span class="ft">📤 Tratamiento y plan</span></div>
             <div class="ic-form-body">
               <div class="ic-field">
                 <div class="ic-sublabel">Respuesta a la pregunta clínica planteada</div>
@@ -927,7 +990,7 @@ input.toggle-cb{display:none}
                   <input type="text" id="ic-seguimiento-plazo" placeholder="Ej: En 48h, Mañana, En 3 días">
                 </div>
               </div>
-              <div class="ic-field"><div class="ic-sublabel">Notas adicionales al equipo</div><textarea id="ic-trat-notas" rows="2" placeholder="Alertas para el equipo, recomendaciones de comunicación con el paciente, condiciones del entorno…"></textarea></div>
+              <div class="ic-field"><div class="ic-sublabel">Recomendaciones al equipo médico</div><textarea id="ic-trat-notas" rows="2" placeholder="Alertas, recomendaciones de comunicación con el paciente, condiciones del entorno, indicaciones de manejo…"></textarea></div>
             </div>
           </div>
 
@@ -1197,18 +1260,7 @@ input.toggle-cb{display:none}
             </div>
           </div>
         </div>
-        <!-- RECOMENDACIONES -->
-        <div class="ic-form-section ic-only-nueva">
-          <div class="ic-form-head green"><span class="ft">📤 Recomendaciones al médico derivante</span><span class="ic-form-badge red">OBLIGATORIO</span></div>
-          <div class="ic-form-body">
-            <div class="ic-field"><div class="ic-sublabel">Respuesta a la pregunta clínica planteada</div><textarea id="ic-resp-medico" placeholder="Respuesta directa al médico sobre lo evaluado. Ej: 'Se evalúa adherencia — se identifica creencia de que el medicamento causa daño renal. Se sugiere…'" rows="3" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);outline:none"></textarea></div>
-            <div class="ic-field"><div class="ic-sublabel">Intervención inmediata realizada / sugerida</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Contención emocional</span><span class="ic-chip" onclick="icTog(this)">Psicoeducación</span><span class="ic-chip" onclick="icTog(this)">Regulación emocional</span><span class="ic-chip" onclick="icTog(this)">Activación conductual</span><span class="ic-chip" onclick="icTog(this)">Reestructuración cognitiva</span><span class="ic-chip" onclick="icTog(this)">Orientación familiar</span><span class="ic-chip" onclick="icTog(this)">Coordinación con equipo</span><span class="ic-chip" onclick="icTogA(this)">Remisión a psiquiatría</span><span class="ic-chip" onclick="icTogA(this)">Remisión a trabajo social</span></div></div>
-            <div class="ic-g2">
-              <div class="ic-field"><div class="ic-sublabel">Seguimiento psicológico</div><div class="ic-chips"><span class="ic-chip" onclick="icTogG(this)">Sí — programar seguimiento</span><span class="ic-chip" onclick="icTog(this)">No requiere seguimiento</span><span class="ic-chip" onclick="icTog(this)">Alta de psicología</span></div></div>
-              <div class="ic-field"><div class="ic-sublabel">Plazo de seguimiento</div><input type="text" id="ic-seguimiento-plazo" placeholder="Ej: En 48h, Mañana, En 3 días"></div>
-            </div>
-          </div>
-        </div>
+
         <!-- ADVERTENCIA CLÍNICA -->
         <div style="margin-top:8px;background:#fef9ec;border:1.5px solid #f0d060;border-radius:10px;padding:10px 14px;font-size:0.78rem;color:#7b4f00;line-height:1.6">
           ⚠️ <strong>Nota clínica:</strong> La impresión diagnóstica es <strong>tentativa y no definitiva</strong>. Este instrumento apoya la evaluación en contexto hospitalario agudo. Evitar sobrediagnóstico. La nota generada debe ser revisada y firmada por el psicólogo tratante.
