@@ -2942,7 +2942,7 @@ window.cargarPendientesIC = async function(pacId){
       lista.innerHTML = activos.map(function(p){
         return '<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #fde68a">'
           + '<input type="checkbox" style="margin-top:3px;accent-color:#d97706;flex-shrink:0;width:15px;height:15px;cursor:pointer"'
-          + ' onchange="togglePendientePaciente('' + p.id + '','' + pacId + '',this.checked)">'
+          + ' onchange="togglePendientePaciente(\'' + p.id + '\',\'' + pacId + '\',this.checked)">'
           + '<div style="flex:1;font-size:0.8rem;color:#451a03;line-height:1.4">' + p.texto + '</div>'
           + '<span style="font-size:0.65rem;color:#92400e;flex-shrink:0">' + (p.fecha||'') + '</span>'
           + '</div>';
