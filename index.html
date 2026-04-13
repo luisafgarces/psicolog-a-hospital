@@ -7274,11 +7274,15 @@ window.abrirPacSheetSilent = function(p) {
   ].filter(x=>x&&x.v);
   const gridEl = document.getElementById('ps-grid');
   if(gridEl) gridEl.innerHTML = grid.map(ri).join('');
-  // También refrescar el ic-trat-medico hidden si el formulario está activo para este paciente
+  // Refrescar ic-trat-medico si el formulario IC está activo para este paciente
   const sel = document.getElementById('ic-paciente-sel');
   if(sel && sel.value === p.id) {
     const tratEl = document.getElementById('ic-trat-medico');
     if(tratEl && p.tratMedico) tratEl.value = p.tratMedico;
+  }
+  // Si la ficha abierta es de este mismo paciente, recargar plan farmacológico
+  if(window._psPacId === p.id && typeof cargarPlanFarmacologico === 'function') {
+    cargarPlanFarmacologico(p.id);
   }
 };
 
@@ -8800,9 +8804,13 @@ window.calcPCL5=()=>{
 
 window.cargarPlanFarmacologico = async function(pacId) {
   var txtEl   = document.getElementById('ps-farm-texto');
+  var viewEl2 = document.getElementById('ps-farm-view');
   var fechaEl = document.getElementById('ps-farm-fecha');
   if(!txtEl) return;
-  // Primero arrastrar el tratMedico del paciente si no hay plan farmacológico guardado
+  // Limpiar primero para no mostrar datos de otro paciente
+  txtEl.value = '';
+  if(viewEl2) viewEl2.textContent = '';
+  if(fechaEl) fechaEl.textContent = '';
   var pac = (window.pacientes||[]).find(p=>p.id===pacId);
   if(!pac) return;
   try {
