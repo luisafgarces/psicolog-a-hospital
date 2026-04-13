@@ -1903,7 +1903,13 @@ input.toggle-cb{display:none}
             <optgroup label="🧠 Cognitivo">
               <option value="mmse">MMSE — Tamizaje cognitivo general (30 pts · 7–10 min)</option>
               <option value="moca">MoCA — Deterioro leve y función ejecutiva (30 pts · 10 min)</option>
+              <option value="mocab">MoCA-B — Versión oral hospitalaria / analfabetas (22 pts · 5 min)</option>
               <option value="cam">CAM — Delirium en hospitalización (4 criterios · 3–5 min)</option>
+            </optgroup>
+            <optgroup label="🧠 Neurológico / UCI">
+              <option value="glasgow">Glasgow — Nivel de conciencia (3–15 pts · 1 min)</option>
+              <option value="rass">RASS — Agitación y sedación en UCI (-5 a +4 · 1 min)</option>
+              <option value="hunter">Hunter — Criterio Síndrome Serotoninérgico (2 min)</option>
             </optgroup>
             <optgroup label="💙 Ánimo">
               <option value="phq9">PHQ-9 — Depresión + ideación suicida (27 pts · 3–5 min)</option>
@@ -8152,6 +8158,7 @@ var TEST_META = {
   gad7:   {label:'GAD-7 — Ansiedad', icon:'⚡', note:'Si el paciente pregunta qué es "preocuparse demasiado", use ejemplos del contexto: la familia, la plata, la salud.', extra:'', pts:'21 pts', calcFn:'calcGAD7'},
   hads:   {label:'HADS — Ansiedad y Depresión Hospitalaria', icon:'🏥', note:'Preguntar: "¿Cómo se ha sentido durante esta semana que está aquí?" No pregunta por síntomas físicos — ideal para hospitalizados.', extra:'', pts:'42 pts', calcFn:'calcHADS'},
   mmse:   {label:'MMSE — Evaluación Cognitiva', icon:'🧠', note:'En pacientes sin escolaridad, tolerar 3–4 pts menos. No penalizar ítems de escritura/lectura si nunca aprendieron. Usar referencias locales para orientación.', extra:'', pts:'30 pts', calcFn:'calcMMSE'},
+  mocab:  {label:'MoCA-B — Versión oral / hospitalaria', icon:'🧩', note:'Versión BLIND del MoCA — 100% oral, sin lápiz ni papel. Ideal para analfabetas, UCI, postquirúrgico. Corrección +1 pt automática si escolaridad ≤ 6 años. Máx. 22 pts. Punto de corte sugerido: ≤ 17 deterioro cognitivo.', extra:'', pts:'22 pts', calcFn:'calcMoCAB'},
   moca:   {label:'MoCA — Evaluación Cognitiva Completa', icon:'🧩', note:'En analfabetos, omitir ítems de escritura. Corrección automática +1 pt si escolaridad ≤ bachillerato.', extra:'', pts:'30 pts', calcFn:'calcMoCA'},
   cam:    {label:'CAM — Diagnóstico de Delirium', icon:'🌀', note:'Algoritmo CAM: Delirium = C1 (inicio agudo + fluctuante) Y C2 (inatención) Y (C3 ó C4)', extra:'', pts:'4 criterios', calcFn:'calcCAM'},
   cssrs:  {label:'C-SSRS — Riesgo Suicida Columbia', icon:'🔴', note:'Preguntar con calma, sin prisa y con empatía. Positivo en ítems 4–5 requiere evaluación inmediata. En contexto colombiano: desplazamiento y pérdida por violencia son factores adicionales.', extra:'', pts:'5 preguntas', calcFn:'calcCSSRS'},
@@ -8159,7 +8166,10 @@ var TEST_META = {
   duelo:  {label:'Duelo — Proceso de Duelo Colombia', icon:'🕊️', note:'Aplicar ante pérdida reciente (persona querida, función corporal, hogar, desplazamiento forzado). Validar con: "Entiendo que ha sido muy difícil para usted…"', extra:'', pts:'5 preguntas', calcFn:'calcDuelo'},
   pcl5:   {label:'PCL-5 — TEPT según DSM-5', icon:'🌪️', note:'"A continuación hay una lista de problemas que a veces tiene la gente en respuesta a una experiencia muy estresante. Marque qué tanto le ha molestado ese problema en el último mes." Antes de aplicar, identifique el evento traumático.', extra:'pcl5', pts:'80 pts', calcFn:'calcPCL5'},
   svacbca:{label:'SVA/CBCA — Credibilidad del Testimonio', icon:'⚖️', note:'Este instrumento evalúa la credibilidad del relato, no la veracidad del evento. No es diagnóstico ni prueba legal — es apoyo clínico hospitalario.', extra:'svacbca', pts:'19 criterios', calcFn:'calcSVACBCA'},
-  sims:   {label:'SIMS — Detección de Simulación', icon:'🎭', note:'Detecta presentación no creíble de síntomas. Punto de corte ≥ 16 sugiere simulación (sensibilidad 75%, especificidad 90%).', extra:'', pts:'75 ítems V/F', calcFn:'calcularSIMS'}
+  sims:   {label:'SIMS — Detección de Simulación', icon:'🎭', note:'Detecta presentación no creíble de síntomas. Punto de corte ≥ 16 sugiere simulación (sensibilidad 75%, especificidad 90%).', extra:'', pts:'75 ítems V/F', calcFn:'calcularSIMS'},
+  glasgow:{label:'Escala de Glasgow', icon:'🧠', note:'Evalúa apertura ocular, respuesta verbal y motora. Aplicar antes de cualquier evaluación cognitiva en UCI/urgencias. Puntaje < 8: coma, requiere vía aérea protegida.', extra:'glasgow', pts:'3–15 pts', calcFn:'calcGlasgow'},
+  hunter: {label:'Hunter — Síndrome Serotoninérgico', icon:'⚗️', note:'Requiere exposición a agente serotoninérgico en las últimas 24 h. Si no hay exposición conocida el criterio no aplica. No es un puntaje — es un algoritmo de decisión clínica basado en signos físicos observables.', extra:'hunter', pts:'Algoritmo', calcFn:'calcHunter'},
+  rass:   {label:'RASS — Richmond Agitation-Sedation Scale', icon:'🌡️', note:'Evaluar observando primero (pasos 1–2), luego con voz y si no responde con estimulación física. Clave en UCI para ajuste de sedoanalgesia y detección de delirium.', extra:'rass', pts:'-5 a +4', calcFn:'calcRASS'}
 };
 
 window.showTest=function(id){
@@ -8211,6 +8221,8 @@ window.showTest=function(id){
     extraHtml = '<div style="background:var(--accent-light);border:1px solid var(--accent2);border-radius:8px;padding:10px 14px;font-size:0.82rem;color:var(--accent)"><strong>Evento de referencia:</strong> <input type="text" id="pcl5-evento" placeholder="Ej: Accidente, p\u00e9rdida de familiar, diagn\u00f3stico\u2026" style="background:transparent;border:none;border-bottom:1px dashed var(--accent2);outline:none;font-size:0.82rem;color:var(--text);width:calc(100% - 180px)"></div>';
   } else if(meta.extra === 'svacbca'){
     extraHtml = ''; // SVA/CBCA renders its own content
+  } else if(meta.extra === 'glasgow' || meta.extra === 'rass'){
+    extraHtml = ''; // self-contained
   }
   document.getElementById('test-dynamic-extra').innerHTML = extraHtml;
 
@@ -8227,6 +8239,10 @@ window.showTest=function(id){
     else if(id === 'mmas4') renderMMAS4InContainer();
     else if(id === 'duelo') renderDueloInContainer();
     else if(id === 'pcl5') renderPCL5InContainer();
+    else if(id === 'mocab') renderMoCABInContainer();
+    else if(id === 'glasgow') renderGlasgowInContainer();
+    else if(id === 'rass') renderRASSInContainer();
+    else if(id === 'hunter') renderHunterInContainer();
   }, 50);
 
   document.getElementById('topbar-title').textContent='Tests Clínicos';
@@ -8243,6 +8259,10 @@ window.calcTestActual = function(){
   else if(_currentTest === 'cam') calcCAM();
   else if(_currentTest === 'cssrs') calcCSSRS();
   else if(_currentTest === 'mmas4') calcMMAS4();
+  else if(_currentTest === 'mocab') calcMoCAB();
+  else if(_currentTest === 'glasgow') calcGlasgow();
+  else if(_currentTest === 'rass') calcRASS();
+  else if(_currentTest === 'hunter') calcHunter();
   else if(_currentTest === 'duelo') calcDuelo();
   else if(_currentTest === 'pcl5') calcPCL5();
   else if(_currentTest === 'sims') calcularSIMS();
@@ -9360,6 +9380,375 @@ window.getDiferencialesParaIA = function(){
   var txt='DIAGNÓSTICOS DIFERENCIALES:\n'+partes.join(' | ');
   if(_difData.notas) txt+='\nArgumento clínico: '+_difData.notas;
   return txt;
+};
+
+
+// ══════════════════════════════════════════════════════════════
+// ESCALA DE GLASGOW
+// ══════════════════════════════════════════════════════════════
+var glasgowOpts = {
+  ocular: [
+    {v:4, l:'4 — Espontánea'},
+    {v:3, l:'3 — A la voz'},
+    {v:2, l:'2 — Al dolor'},
+    {v:1, l:'1 — Sin respuesta'},
+  ],
+  verbal: [
+    {v:5, l:'5 — Orientado'},
+    {v:4, l:'4 — Confuso'},
+    {v:3, l:'3 — Palabras inapropiadas'},
+    {v:2, l:'2 — Sonidos incomprensibles'},
+    {v:1, l:'1 — Sin respuesta'},
+  ],
+  motora: [
+    {v:6, l:'6 — Obedece órdenes'},
+    {v:5, l:'5 — Localiza el dolor'},
+    {v:4, l:'4 — Retirada al dolor'},
+    {v:3, l:'3 — Flexión anormal (decorticación)'},
+    {v:2, l:'2 — Extensión anormal (descerebración)'},
+    {v:1, l:'1 — Sin respuesta'},
+  ]
+};
+
+window.renderGlasgowInContainer = function() {
+  var cont = document.getElementById('test-questions');
+  if(!cont) return;
+  function renderSub(label, name, opts) {
+    return '<div style="margin-bottom:14px"><div style="font-size:0.8rem;font-weight:700;color:var(--accent);margin-bottom:6px">'+label+'</div>'
+      + opts.map(function(o){
+        return '<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:7px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+          +'<input type="radio" name="'+name+'" value="'+o.v+'" onchange="calcGlasgow()" style="accent-color:var(--accent)">'
+          +'<span style="font-size:0.82rem">'+o.l+'</span>'
+          +'</label>';
+      }).join('') + '</div>';
+  }
+  cont.innerHTML =
+    renderSub('👁️ Apertura ocular', 'gcs_ocular', glasgowOpts.ocular) +
+    renderSub('💬 Respuesta verbal', 'gcs_verbal', glasgowOpts.verbal) +
+    renderSub('✋ Respuesta motora', 'gcs_motora', glasgowOpts.motora);
+};
+
+window.calcGlasgow = function() {
+  var o = parseInt(document.querySelector('input[name="gcs_ocular"]:checked')?.value||0);
+  var v = parseInt(document.querySelector('input[name="gcs_verbal"]:checked')?.value||0);
+  var m = parseInt(document.querySelector('input[name="gcs_motora"]:checked')?.value||0);
+  if(!o&&!v&&!m) return;
+  var total = o + v + m;
+  var level, interp;
+  if(total >= 13)      { level='normal';   interp='Leve (13–15) — Conciencia conservada o mínimamente alterada'; }
+  else if(total >= 9)  { level='moderate'; interp='Moderado (9–12) — Alteración moderada de conciencia. Vigilancia estrecha'; }
+  else if(total >= 6)  { level='high';     interp='Grave (6–8) — Compromiso grave. Valorar necesidad de vía aérea'; }
+  else                 { level='critical'; interp='Coma (3–5) — Coma profundo. Manejo en UCI, vía aérea protegida'; }
+  var extra = 'O'+o+' V'+v+' M'+m;
+  showResult('test-result-area', total, 15, level, interp, extra);
+};
+
+// ══════════════════════════════════════════════════════════════
+// RASS — Richmond Agitation-Sedation Scale
+// ══════════════════════════════════════════════════════════════
+var rassItems = [
+  {v:+4, label:'+4 Combativo',      desc:'Violento, peligro inmediato para el personal',               color:'#dc2626'},
+  {v:+3, label:'+3 Muy agitado',    desc:'Jala o retira tubos/catéteres, agresivo',                    color:'#ea580c'},
+  {v:+2, label:'+2 Agitado',        desc:'Movimientos frecuentes sin propósito, lucha con el ventilador',color:'#f97316'},
+  {v:+1, label:'+1 Inquieto',       desc:'Ansioso, movimientos no agresivos ni vigorosos',             color:'#eab308'},
+  {v: 0, label:' 0 Alerta y tranquilo', desc:'Responde a la voz con contacto visual, despierto',      color:'#16a34a'},
+  {v:-1, label:'-1 Somnoliento',    desc:'No completamente alerta, despierta con voz (>10 s)',         color:'#0ea5e9'},
+  {v:-2, label:'-2 Sedación leve',  desc:'Despierta brevemente con voz (<10 s), sin contacto visual', color:'#3b82f6'},
+  {v:-3, label:'-3 Sedación moderada','desc':'Movimiento o apertura ocular al estímulo vocal, sin contacto visual',color:'#6366f1'},
+  {v:-4, label:'-4 Sedación profunda','desc':'Sin respuesta a la voz, movimiento o apertura ocular al estímulo físico',color:'#8b5cf6'},
+  {v:-5, label:'-5 No estimulable', desc:'Sin respuesta a la voz ni al estímulo físico',               color:'#6b7280'},
+];
+
+window.renderRASSInContainer = function() {
+  var cont = document.getElementById('test-questions');
+  if(!cont) return;
+  var html = '<div style="font-size:0.78rem;color:var(--text2);margin-bottom:10px;padding:8px 12px;background:var(--surface2);border-radius:7px;line-height:1.6">'
+    +'<strong>Procedimiento:</strong> (1) Observar al paciente → ¿está alerta y tranquilo? ¿agitado? '
+    +'(2) Hablarle en voz alta → ¿abre ojos? ¿contacto visual? ¿cuánto tiempo? '
+    +'(3) Si no responde a la voz → estimulación física (sacudir hombros o frotar esternón).</div>';
+  html += rassItems.map(function(r){
+    var bg = r.v > 0 ? '#fff7ed' : r.v === 0 ? '#f0fdf4' : '#f0f9ff';
+    return '<label style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:5px;background:'+bg+'">'
+      +'<input type="radio" name="rass_val" value="'+r.v+'" style="margin-top:3px;accent-color:'+r.color+'">'
+      +'<div><div style="font-size:0.82rem;font-weight:700;color:'+r.color+'">'+r.label+'</div>'
+      +'<div style="font-size:0.75rem;color:var(--text2);margin-top:1px">'+r.desc+'</div></div>'
+      +'</label>';
+  }).join('');
+  cont.innerHTML = html;
+};
+
+window.calcRASS = function() {
+  var el = document.querySelector('input[name="rass_val"]:checked');
+  if(!el) return;
+  var v = parseInt(el.value);
+  var level, interp;
+  if(v >= 2)       { level='critical'; interp='Agitación severa — Riesgo de autoextubación/retirada de dispositivos. Valorar sedoanalgesia urgente'; }
+  else if(v === 1) { level='high';     interp='Inquieto — Monitorizar estrechamente, explorar causa (dolor, delirium, hipoxia)'; }
+  else if(v === 0) { level='normal';   interp='Nivel objetivo — Paciente alerta y cooperador'; }
+  else if(v === -1){ level='mild';     interp='Somnoliento — Sedación leve, generalmente aceptable si es el objetivo clínico'; }
+  else if(v >= -3) { level='moderate'; interp='Sedación leve-moderada — Verificar objetivo de sedación y ajustar si es necesario'; }
+  else if(v === -4){ level='high';     interp='Sedación profunda — Evaluar si está justificado. Riesgo de delirium post-UCI'; }
+  else             { level='critical'; interp='No estimulable — Sedación máxima o deterioro neurológico grave. Evaluación urgente'; }
+  var label = rassItems.find(function(r){return r.v===v;})?.label||'';
+  showResult('test-result-area', v, null, level, interp, label);
+};
+
+
+// ══════════════════════════════════════════════════════════════
+// HUNTER SEROTONIN TOXICITY CRITERIA
+// ══════════════════════════════════════════════════════════════
+// Dunkley et al. (2003). Decision rules for serotonin toxicity.
+// Criterio: exposición a agente serotoninérgico + al menos uno de:
+// 1. Clonus espontáneo
+// 2. Clonus inducible + agitación o diaforesis
+// 3. Clonus ocular + agitación o diaforesis
+// 4. Temblor + hiperreflexia
+// 5. Hipertonía + temperatura > 38°C + clonus ocular o inducible
+
+var hunterSignos = [
+  {id:'h_clonus_esp',   label:'Clonus espontáneo',          desc:'Movimiento rítmico involuntario sin estimulación — tobillo, muñeca o mandíbula'},
+  {id:'h_clonus_ind',   label:'Clonus inducible',           desc:'Al dorsiflexión sostenida del pie ≥ 3 latidos'},
+  {id:'h_clonus_ocu',   label:'Clonus ocular',              desc:'Desviación lenta seguida de corrección rápida al pedir al paciente mirar lateralmente'},
+  {id:'h_agit',         label:'Agitación',                  desc:'Inquietud psicomotora marcada, no explicable por otra causa'},
+  {id:'h_diaforesis',   label:'Diaforesis',                 desc:'Sudoración profusa sin causa aparente (fiebre, esfuerzo)'},
+  {id:'h_temblor',      label:'Temblor',                    desc:'Temblor de reposo o acción, generalmente en extremidades'},
+  {id:'h_hiperref',     label:'Hiperreflexia',              desc:'Reflejos osteotendinosos exagerados (++/+++ o mayor)'},
+  {id:'h_hipertonia',   label:'Hipertonía muscular',        desc:'Rigidez muscular marcada — "lead-pipe" o en rueda dentada'},
+  {id:'h_fiebre',       label:'Temperatura > 38 °C',        desc:'Medida en el momento de la evaluación'},
+];
+
+window.renderHunterInContainer = function() {
+  var cont = document.getElementById('test-questions');
+  if(!cont) return;
+
+  var html = '<div style="margin-bottom:12px;padding:10px 14px;background:#fef9ec;border:1px solid #fcd34d;border-radius:8px;font-size:0.78rem;color:#713f12;line-height:1.6">'
+    +'<strong>⚠️ Requisito previo:</strong> El paciente debe haber recibido un agente serotoninérgico en las últimas 24 horas '
+    +'(ISRS, IRSN, IMAO, tramadol, triptanos, linezolid, fentanilo, litio, entre otros).</div>';
+
+  html += '<div style="margin-bottom:8px;font-size:0.75rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.07em">Signos presentes en este momento:</div>';
+
+  hunterSignos.forEach(function(s) {
+    html += '<label style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:5px;background:var(--surface)">'
+      +'<input type="checkbox" id="'+s.id+'" onchange="calcHunter()" style="margin-top:3px;accent-color:#dc2626;width:15px;height:15px;flex-shrink:0">'
+      +'<div><div style="font-size:0.82rem;font-weight:600;color:var(--text)">'+s.label+'</div>'
+      +'<div style="font-size:0.73rem;color:var(--text2);margin-top:1px">'+s.desc+'</div></div>'
+      +'</label>';
+  });
+
+  html += '<div style="margin-top:14px;padding:10px 14px;background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;font-size:0.75rem;color:#5b21b6;line-height:1.6">'
+    +'<strong>Algoritmo de Hunter:</strong> SS confirmado si cumple cualquiera de:<br>'
+    +'① Clonus <strong>espontáneo</strong><br>'
+    +'② Clonus <strong>inducible</strong> + (agitación <em>o</em> diaforesis)<br>'
+    +'③ Clonus <strong>ocular</strong> + (agitación <em>o</em> diaforesis)<br>'
+    +'④ Temblor + hiperreflexia<br>'
+    +'⑤ Hipertonía + fiebre >38°C + (clonus ocular <em>o</em> inducible)</div>';
+
+  cont.innerHTML = html;
+};
+
+window.calcHunter = function() {
+  var v = function(id){ var el=document.getElementById(id); return el?el.checked:false; };
+
+  var crit1 = v('h_clonus_esp');
+  var crit2 = v('h_clonus_ind') && (v('h_agit') || v('h_diaforesis'));
+  var crit3 = v('h_clonus_ocu') && (v('h_agit') || v('h_diaforesis'));
+  var crit4 = v('h_temblor') && v('h_hiperref');
+  var crit5 = v('h_hipertonia') && v('h_fiebre') && (v('h_clonus_ocu') || v('h_clonus_ind'));
+
+  var positivo = crit1 || crit2 || crit3 || crit4 || crit5;
+
+  // Construir detalle de criterios cumplidos
+  var cumplidos = [];
+  if(crit1) cumplidos.push('① Clonus espontáneo');
+  if(crit2) cumplidos.push('② Clonus inducible + agitación/diaforesis');
+  if(crit3) cumplidos.push('③ Clonus ocular + agitación/diaforesis');
+  if(crit4) cumplidos.push('④ Temblor + hiperreflexia');
+  if(crit5) cumplidos.push('⑤ Hipertonía + fiebre + clonus');
+
+  var nivel, interp, extra;
+  if(positivo) {
+    nivel  = 'critical';
+    interp = '⚠️ CRITERIO DE HUNTER POSITIVO — Síndrome Serotoninérgico confirmado. Suspender agente serotoninérgico, manejo de soporte, considerar ciproheptadina y evaluación por urgencias/UCI';
+    extra  = 'Criterios cumplidos: ' + cumplidos.join(' | ');
+  } else {
+    // Ningún criterio formal pero hay signos — advertencia
+    var nSignos = hunterSignos.filter(function(s){ return v(s.id); }).length;
+    if(nSignos > 0) {
+      nivel  = 'moderate';
+      interp = 'Criterio de Hunter negativo con ' + nSignos + ' signo(s) presente(s) — No cumple criterios formales de SS. Vigilar evolución y reevaluar si aparecen más signos';
+      extra  = 'Signos presentes no alcanzan umbral diagnóstico';
+    } else {
+      nivel  = 'normal';
+      interp = 'Sin signos de síndrome serotoninérgico en este momento';
+      extra  = '';
+    }
+  }
+
+  showResult('test-result-area', null, null, nivel, interp, extra);
+};
+
+
+// ══════════════════════════════════════════════════════════════
+// MoCA-B — VERSIÓN ORAL HOSPITALARIA (Blind / Sin papel)
+// Adaptado de Nasreddine et al. + protocolo MoCA-BLIND
+// 22 puntos máximos — 100% verbal
+// ══════════════════════════════════════════════════════════════
+
+var MOCAB_SECCIONES = [
+
+  // ── MEMORIA (encoding — no puntúa aquí) ─────────────────────
+  { id:'mem_enc', tipo:'instruccion', pts:0,
+    titulo:'MEMORIA — Codificación (no puntúa)',
+    instruccion:'Lea las 5 palabras en voz alta, una por una, a ~1 seg de intervalo. Pida al paciente que las repita. Puede repetirlas hasta 2 veces. <strong>No puntúa aquí — se evalúa en recuerdo diferido al final.</strong>',
+    palabras: ['CARA', 'SEDA', 'IGLESIA', 'CLAVEL', 'ROJO']
+  },
+
+  // ── DÍGITOS ─────────────────────────────────────────────────
+  { id:'digitos_dir', tipo:'radio', pts:1,
+    titulo:'ATENCIÓN — Dígitos en orden directo (1 pt)',
+    instruccion:'Lea los números despacio (1/seg): <strong>"2 — 1 — 8 — 5 — 4"</strong>. Pida que los repita en el mismo orden.',
+    opciones:[{v:1,l:'Correcto (2-1-8-5-4)'},{v:0,l:'Incorrecto'}]
+  },
+  { id:'digitos_inv', tipo:'radio', pts:1,
+    titulo:'ATENCIÓN — Dígitos en orden inverso (1 pt)',
+    instruccion:'Lea los números: <strong>"7 — 4 — 2"</strong>. Pida que los diga al revés.',
+    opciones:[{v:1,l:'Correcto (2-4-7)'},{v:0,l:'Incorrecto'}]
+  },
+
+  // ── VIGILANCIA ───────────────────────────────────────────────
+  { id:'vigilancia', tipo:'radio', pts:1,
+    titulo:'ATENCIÓN — Vigilancia (1 pt)',
+    instruccion:'Lea esta serie de letras a 1/seg y pida que dé un golpe cada vez que escuche la letra <strong>A</strong>:<br><em>"F B A C M N A A J K L B A F A K D E A A A J A M O F A A B"</em><br>Error = omisión o golpe incorrecto.',
+    opciones:[{v:1,l:'≤ 1 error'},{v:0,l:'≥ 2 errores'}]
+  },
+
+  // ── SERIES ───────────────────────────────────────────────────
+  { id:'series', tipo:'radio', pts:1,
+    titulo:'ATENCIÓN — Series de 7 (1 pt)',
+    instruccion:'Pida al paciente: <strong>"Cuénteme desde 100 restando de 7 en 7"</strong>.<br>Detenga después de 5 sustracciones (100, 93, 86, 79, 72, 65).',
+    opciones:[{v:1,l:'4–5 correctas'},{v:0,l:'0–3 correctas'}]
+  },
+
+  // ── FLUIDEZ VERBAL ───────────────────────────────────────────
+  { id:'fluidez', tipo:'radio', pts:1,
+    titulo:'LENGUAJE — Fluidez verbal (1 pt)',
+    instruccion:'Pida: <strong>"Dígame todas las palabras que recuerde que empiecen con la letra F. Tiene 1 minuto. No valen nombres propios ni la misma palabra con diferente terminación."</strong>',
+    opciones:[{v:1,l:'≥ 11 palabras'},{v:0,l:'< 11 palabras'}]
+  },
+
+  // ── ABSTRACCIÓN ──────────────────────────────────────────────
+  { id:'abst1', tipo:'radio', pts:1,
+    titulo:'ABSTRACCIÓN — Par 1 (1 pt)',
+    instruccion:'Pregunte: <strong>"¿En qué se parecen un tren y una bicicleta?"</strong><br>Respuesta correcta: medios de transporte / sirven para moverse / vehículos.',
+    opciones:[{v:1,l:'Respuesta abstracta correcta'},{v:0,l:'Respuesta concreta o incorrecta'}]
+  },
+  { id:'abst2', tipo:'radio', pts:1,
+    titulo:'ABSTRACCIÓN — Par 2 (1 pt)',
+    instruccion:'Pregunte: <strong>"¿En qué se parecen un reloj y una regla?"</strong><br>Respuesta correcta: instrumentos de medición / sirven para medir.',
+    opciones:[{v:1,l:'Respuesta abstracta correcta'},{v:0,l:'Respuesta concreta o incorrecta'}]
+  },
+
+  // ── ORIENTACIÓN ──────────────────────────────────────────────
+  { id:'ori_fecha', tipo:'radio', pts:1,
+    titulo:'ORIENTACIÓN — Fecha (1 pt)',
+    instruccion:'Pregunte: <strong>"¿Qué fecha es hoy?"</strong> (día, mes y año — todos correctos).',
+    opciones:[{v:1,l:'Correcto'},{v:0,l:'Incorrecto'}]
+  },
+  { id:'ori_dia', tipo:'radio', pts:1,
+    titulo:'ORIENTACIÓN — Día de la semana (1 pt)',
+    instruccion:'Pregunte: <strong>"¿Qué día de la semana es hoy?"</strong>',
+    opciones:[{v:1,l:'Correcto'},{v:0,l:'Incorrecto'}]
+  },
+  { id:'ori_lugar', tipo:'radio', pts:1,
+    titulo:'ORIENTACIÓN — Lugar (1 pt)',
+    instruccion:'Pregunte: <strong>"¿En qué lugar estamos ahora?"</strong> (hospital / clínica).',
+    opciones:[{v:1,l:'Correcto'},{v:0,l:'Incorrecto'}]
+  },
+  { id:'ori_ciudad', tipo:'radio', pts:1,
+    titulo:'ORIENTACIÓN — Ciudad (1 pt)',
+    instruccion:'Pregunte: <strong>"¿En qué ciudad estamos?"</strong>',
+    opciones:[{v:1,l:'Correcto'},{v:0,l:'Incorrecto'}]
+  },
+
+  // ── RECUERDO DIFERIDO ────────────────────────────────────────
+  { id:'rec_libre', tipo:'check5', pts:5,
+    titulo:'MEMORIA — Recuerdo diferido sin pistas (1 pt c/u, máx 5)',
+    instruccion:'Pida: <strong>"¿Recuerda las 5 palabras que le dije al inicio?"</strong><br>Marque las que recuerde sin ayuda.',
+    palabras:['CARA','SEDA','IGLESIA','CLAVEL','ROJO']
+  },
+
+  // ── ESCOLARIDAD (corrección) ──────────────────────────────────
+  { id:'escolaridad', tipo:'radio_esc', pts:1,
+    titulo:'CORRECCIÓN POR ESCOLARIDAD (+1 pt automático)',
+    instruccion:'Si la escolaridad del paciente es <strong>6 años o menos</strong> se suma 1 punto al total.',
+    opciones:[{v:1,l:'≤ 6 años de escolaridad'},{v:0,l:'> 6 años de escolaridad'}]
+  },
+];
+
+window.renderMoCABInContainer = function() {
+  var cont = document.getElementById('test-questions');
+  if(!cont) return;
+  var html = '';
+  MOCAB_SECCIONES.forEach(function(sec, idx) {
+    html += '<div style="margin-bottom:14px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">';
+    html += '<div style="font-size:0.78rem;font-weight:700;color:var(--accent);margin-bottom:6px">'+sec.titulo+'</div>';
+    html += '<div style="font-size:0.8rem;color:var(--text2);line-height:1.6;margin-bottom:8px">'+sec.instruccion+'</div>';
+
+    if(sec.tipo === 'instruccion') {
+      html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
+      sec.palabras.forEach(function(p){
+        html += '<span style="background:var(--accent2)22;border:1px solid var(--accent2);border-radius:6px;padding:4px 12px;font-size:0.85rem;font-weight:700;color:var(--accent2)">'+p+'</span>';
+      });
+      html += '</div>';
+    }
+    else if(sec.tipo === 'radio' || sec.tipo === 'radio_esc') {
+      sec.opciones.forEach(function(o){
+        html += '<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:7px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+          +'<input type="radio" name="mocab_'+sec.id+'" value="'+o.v+'" style="accent-color:var(--accent)">'
+          +'<span style="font-size:0.82rem">'+o.l+'</span>'
+          +'</label>';
+      });
+    }
+    else if(sec.tipo === 'check5') {
+      sec.palabras.forEach(function(p){
+        html += '<label style="display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:7px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+          +'<input type="checkbox" name="mocab_rec" value="'+p+'" style="accent-color:var(--accent)">'
+          +'<span style="font-size:0.82rem;font-weight:600">'+p+'</span>'
+          +'</label>';
+      });
+    }
+    html += '</div>';
+  });
+  cont.innerHTML = html;
+};
+
+window.calcMoCAB = function() {
+  var total = 0;
+  var detalle = [];
+
+  // Radio items
+  MOCAB_SECCIONES.forEach(function(sec){
+    if(sec.tipo === 'radio' || sec.tipo === 'radio_esc') {
+      var el = document.querySelector('input[name="mocab_'+sec.id+'"]:checked');
+      var v = el ? parseInt(el.value) : 0;
+      total += v;
+      if(sec.tipo === 'radio') detalle.push(sec.titulo.split('—')[0].trim() + ': ' + v + '/' + sec.pts);
+    }
+  });
+
+  // Checkboxes recuerdo diferido
+  var recuerdos = document.querySelectorAll('input[name="mocab_rec"]:checked').length;
+  total += recuerdos;
+  detalle.push('Recuerdo diferido: ' + recuerdos + '/5');
+
+  var max = 22;
+  var level, interp;
+  if(total >= 18)      { level='normal';   interp='Sin deterioro cognitivo significativo ('+total+'/'+max+')'; }
+  else if(total >= 14) { level='moderate'; interp='Deterioro cognitivo leve probable — Seguimiento neurológico recomendado ('+total+'/'+max+')'; }
+  else if(total >= 10) { level='high';     interp='Deterioro cognitivo moderado — Evaluación especializada indicada ('+total+'/'+max+')'; }
+  else                 { level='critical'; interp='Deterioro cognitivo severo — Compromiso funcional significativo ('+total+'/'+max+')'; }
+
+  showResult('test-result-area', total, max, level, interp, detalle.join(' | '));
 };
 
 // ── INIT ────────────────────────────────────────────────────
