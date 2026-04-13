@@ -2907,6 +2907,59 @@ window.selectICPaciente=(id)=>{
     const btn=document.getElementById('ic-orientacion-btn');
     if(btn){btn.textContent='✨ Generar guía';btn.disabled=false;}
   }
+  // Cargar pendientes del paciente en el panel IC
+  if(typeof window.cargarPendientesIC === 'function') window.cargarPendientesIC(id);
+};
+
+// ── PENDIENTES EN FORMULARIO IC ──────────────────────────────────────
+window.cargarPendientesIC = async function(pacId){
+  if(!pacId) return;
+  const wrap  = document.getElementById('ic-pendientes-wrap');
+  const lista = document.getElementById('ic-pendientes-lista');
+  if(!wrap || !lista) return;
+
+  lista.innerHTML = '<p style="font-size:0.72rem;color:#92400e;font-style:italic">Cargando…</p>';
+  wrap.style.display = '';
+
+  try {
+    var todos = (window._pendientesCache && window._pendientesCache[pacId]) || null;
+    if(!todos){
+      const snap = await window._getDocs(
+        window._query(
+          window._collection(window.db,'pendientes'),
+          window._where('pacienteId','==',pacId)
+        )
+      );
+      todos = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); })
+        .sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||''); });
+      if(!window._pendientesCache) window._pendientesCache = {};
+      window._pendientesCache[pacId] = todos;
+    }
+    const activos = todos.filter(function(p){ return !p.completado; });
+    if(!activos.length){
+      lista.innerHTML = '<p style="font-size:0.72rem;color:#92400e;font-style:italic;opacity:0.7">Sin pendientes activos.</p>';
+    } else {
+      lista.innerHTML = activos.map(function(p){
+        return '<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #fde68a">'
+          + '<input type="checkbox" style="margin-top:3px;accent-color:#d97706;flex-shrink:0;width:15px;height:15px;cursor:pointer"'
+          + ' onchange="togglePendientePaciente('' + p.id + '','' + pacId + '',this.checked)">'
+          + '<div style="flex:1;font-size:0.8rem;color:#451a03;line-height:1.4">' + p.texto + '</div>'
+          + '<span style="font-size:0.65rem;color:#92400e;flex-shrink:0">' + (p.fecha||'') + '</span>'
+          + '</div>';
+      }).join('');
+    }
+  } catch(e){
+    lista.innerHTML = '<p style="font-size:0.72rem;color:#c0392b">Error al cargar.</p>';
+    console.error('cargarPendientesIC:', e);
+  }
+};
+
+window.icMarcarTodosPendientes = function(){
+  const lista = document.getElementById('ic-pendientes-lista');
+  if(!lista) return;
+  lista.querySelectorAll('input[type=checkbox]').forEach(function(cb){
+    if(!cb.checked){ cb.checked = true; cb.dispatchEvent(new Event('change',{bubbles:true})); }
+  });
 };
 
 window.openModal=(id)=>{
@@ -6223,9 +6276,16 @@ window.anamSwitchTab = function(tab){
   // Populate seg pac selector when switching to sesion
   if(tab==='sesion'){
     const sel=document.getElementById('seg-pac-sel');
-    if(sel && sel.options.length<=1){
-      sel.innerHTML='<option value="">— Seleccionar paciente —</option>'
-        +(window.pacientes||[]).map(p=>`<option value="${p.id}">${p.nombre}${p.hab?' · Hab. '+p.hab:''}</option>`).join('');
+    // Siempre repoblar para tener lista actualizada
+    sel.innerHTML='<option value="">— Seleccionar paciente —</option>'
+      +(window.pacientes||[]).map(p=>'<option value="'+p.id+'">'+p.nombre+(p.hab?' · Hab. '+p.hab:'')+'</option>').join('');
+    // Si hay un paciente ya seleccionado en el selector principal de anamnesis, preseleccionarlo
+    var pacPrincipal = (document.getElementById('anamnesis-paciente-sel')||{}).value || '';
+    // O si viene de _segPacId ya seteado
+    var pacPrevio = window._segPacId || pacPrincipal;
+    if(pacPrevio){
+      sel.value = pacPrevio;
+      if(sel.value) window.anamSegSelectPac(pacPrevio);
     }
   }
 };
