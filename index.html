@@ -1277,10 +1277,10 @@ input.toggle-cb{display:none}
             💾 Guardar nota
           </button>
           <button class="btn btn-primary" onclick="generarNotaIC()">✨ Generar nota con IA</button>
-          <button class="btn btn-secondary" onclick="guardarFormularioLocal('ic')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Borrador de emergencia — no aparece en historial">
+          <button class="btn btn-secondary" onclick="guardarBorradorFirebase('ic')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Guarda en la nube — disponible en todos tus dispositivos">
             📋 Borrador local
           </button>
-          <button class="btn btn-secondary" onclick="mostrarFormulariosGuardados('ic')" style="color:#92400e" title="Ver borradores guardados localmente">
+          <button class="btn btn-secondary" onclick="mostrarBorradoresFirebase('ic')" style="color:#92400e" title="Ver borradores guardados (nube + este dispositivo)">
             📂 Ver borradores
           </button>
         </div>
@@ -1295,7 +1295,7 @@ input.toggle-cb{display:none}
         <!-- OUTPUT -->
         <div id="ic-output-wrap" style="display:none;margin-top:16px">
           <div class="out-section">
-            <div class="out-section-head"><span>Nota clínica — lista para copiar al sistema</span><button class="btn btn-secondary btn-sm" onclick="copiarTodoIC()">Copiar todo</button></div>
+            <div class="out-section-head"><span>Nota clínica — lista para copiar al sistema</span><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn btn-secondary btn-sm" onclick="copiarTodoIC()">Copiar todo</button><button class="btn btn-secondary btn-sm" onclick="descargarNotaICPDF()" style="background:#e0f2fe;border:1.5px solid #0ea5e9;color:#0369a1;font-weight:700" title="Descargar nota como PDF">📄 Descargar PDF</button></div></div>
             <div id="ic-out-4campos">
               <div class="out-fields">
                 <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-sub',this)">Copiar</button><div class="out-field-label-ic">Análisis Subjetivo</div><div class="out-text-ic ph" id="ic-out-sub">Genera la nota para ver el contenido…</div></div>
@@ -2448,6 +2448,7 @@ window._getDocs=getDocs;
 window._query=query;
 window._where=where;
 window._orderBy=orderBy;
+window._deleteDoc=deleteDoc;
 window._limit=limit;
 window._fdb={collection,addDoc,deleteDoc,doc,updateDoc,serverTimestamp,query,orderBy};
 let pacientes=[],interconsultas=[],anamnesisList=[],testHistory=[];
@@ -6662,7 +6663,7 @@ ${notaTexto?'<div class="nota-title">📄 Nota clínica generada</div><div class
 // Intenta gemini-2.5-flash primero; si hay alta demanda, cae a gemini-2.0-flash-lite
 window.geminiCall = async function(apiKey, prompt, maxTokens){
   maxTokens = maxTokens || 4000;
-  const models = ['gemini-2.5-flash', 'gemini-2.0-flash-lite'];
+  const models = ['gemini-2.0-flash-lite', 'gemini-2.5-flash'];
   let lastErr = null;
   for(const model of models){
     try{
@@ -10325,6 +10326,281 @@ window._eliminarBorrador = function(tipo, idx) {
   localStorage.setItem(KEY, JSON.stringify(list));
   window.mostrarFormulariosGuardados(tipo);
 };
+
+// ── DESCARGAR NOTA IC COMO PDF ────────────────────────────────────
+window.descargarNotaICPDF = function() {
+  var nombre = (document.getElementById('ic-pnombre') || {}).value || 'Paciente';
+  var fecha  = (document.getElementById('ic-pfecha')  || {}).value || new Date().toISOString().split('T')[0];
+  var hab    = (document.getElementById('ic-hab')     || {}).value || '';
+  var dx     = (document.getElementById('ic-pdx')     || {}).value || '';
+
+  var getField = function(id) {
+    var el = document.getElementById(id);
+    if (!el) return '';
+    var v = (el.textContent || '').trim();
+    if (!v || v.startsWith('Genera la nota') || v.startsWith('⏳') || v.startsWith('❌')) return '';
+    return v;
+  };
+
+  var sub  = getField('ic-out-sub');
+  var obj  = getField('ic-out-obj');
+  var resp = getField('ic-out-resp');
+  var trat = getField('ic-out-trat');
+  var seg  = getField('ic-out-seg-texto');
+
+  if (!sub && !obj && !resp && !trat && !seg) {
+    toast('⚠️ Genera la nota con IA primero antes de descargar el PDF.');
+    return;
+  }
+
+  var lineas = [];
+  lineas.push('NOTA DE INTERCONSULTA PSICOLÓGICA');
+  lineas.push('');
+  lineas.push('Paciente: ' + nombre + (hab ? '   |   Hab: ' + hab : '') + (dx ? '   |   Dx: ' + dx : ''));
+  lineas.push('Fecha: ' + fecha + '   |   Psicóloga: Luisa Fernanda Garcés García — TP 174366');
+  lineas.push('─────────────────────────────────────────────────────────');
+  lineas.push('');
+
+  if (sub)  { lineas.push('ANÁLISIS SUBJETIVO'); lineas.push(sub);  lineas.push(''); }
+  if (obj)  { lineas.push('ANÁLISIS OBJETIVO');  lineas.push(obj);  lineas.push(''); }
+  if (resp) { lineas.push('RESPUESTA');           lineas.push(resp); lineas.push(''); }
+  if (trat) { lineas.push('TRATAMIENTO');         lineas.push(trat); lineas.push(''); }
+  if (seg)  { lineas.push('NOTA DE SEGUIMIENTO'); lineas.push(seg);  lineas.push(''); }
+
+  var texto = lineas.join('\n');
+
+  // Abrir ventana de impresión con formato limpio
+  var win = window.open('', '_blank');
+  if (!win) { toast('⚠️ Permite las ventanas emergentes para descargar el PDF.'); return; }
+  win.document.write(
+    '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Nota IC — ' + nombre + '</title>' +
+    '<style>' +
+    'body{font-family:Georgia,serif;max-width:720px;margin:32px auto;padding:0 24px;color:#1a1a1a;font-size:13px;line-height:1.65}' +
+    'h1{font-size:1.05rem;letter-spacing:0.05em;text-transform:uppercase;color:#1e3a5f;margin-bottom:4px}' +
+    '.meta{font-size:0.82rem;color:#555;margin-bottom:2px}' +
+    '.hr{border:none;border-top:1.5px solid #c2d9ef;margin:12px 0 16px}' +
+    'h2{font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#2563a8;margin:18px 0 5px}' +
+    'p{margin:0 0 12px;white-space:pre-wrap;text-align:justify}' +
+    '.firma{margin-top:48px;border-top:1px solid #888;padding-top:10px;font-size:0.8rem;color:#555;text-align:center}' +
+    '@media print{body{margin:16px}button{display:none}}' +
+    '</style></head><body>' +
+    '<button onclick="window.print()" style="background:#2563a8;color:#fff;border:none;border-radius:6px;padding:7px 18px;font-size:12px;cursor:pointer;font-weight:600;margin-bottom:20px">🖨️ Imprimir / Guardar PDF</button>' +
+    '<h1>Nota de Interconsulta Psicológica</h1>' +
+    '<div class="meta">Paciente: <strong>' + nombre + '</strong>' + (hab ? ' &nbsp;|&nbsp; Hab: ' + hab : '') + (dx ? ' &nbsp;|&nbsp; Dx: ' + dx : '') + '</div>' +
+    '<div class="meta">Fecha: ' + fecha + '</div>' +
+    '<div class="meta">Psicóloga: Luisa Fernanda Garcés García &nbsp;|&nbsp; TP 174366</div>' +
+    '<hr class="hr">' +
+    (sub  ? '<h2>Análisis Subjetivo</h2><p>' + sub.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>' : '') +
+    (obj  ? '<h2>Análisis Objetivo</h2><p>'  + obj.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>' : '') +
+    (resp ? '<h2>Respuesta</h2><p>'           + resp.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>' : '') +
+    (trat ? '<h2>Tratamiento</h2><p>'         + trat.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>' : '') +
+    (seg  ? '<h2>Nota de Seguimiento</h2><p>' + seg.replace(/</g,'&lt;').replace(/>/g,'&gt;')  + '</p>' : '') +
+    '<div class="firma">Luisa Fernanda Garcés García &nbsp;|&nbsp; Psicóloga Clínica &nbsp;|&nbsp; TP 174366 &nbsp;|&nbsp; CC 1036602429</div>' +
+    '</body></html>'
+  );
+  win.document.close();
+};
+
+// ── GUARDAR BORRADOR IC EN FIREBASE (multi-dispositivo) ───────────
+window.guardarBorradorFirebase = async function(tipo) {
+  try {
+    var pageId = tipo === 'ic' ? 'page-interconsultas' : 'page-anamnesis';
+    var page = document.getElementById(pageId);
+    if (!page) { toast('⚠️ No se encontró el formulario.'); return; }
+
+    var snap = {};
+    page.querySelectorAll('input[id]:not([type=button]):not([type=submit]), textarea[id], select[id]').forEach(function(el) {
+      if (el.type === 'checkbox') {
+        snap['cb||' + el.id + '||' + el.value] = el.checked;
+      } else if (el.type === 'radio') {
+        snap['rb||' + el.id + '||' + el.value] = el.checked;
+      } else {
+        snap[el.id] = el.value;
+      }
+    });
+    page.querySelectorAll('[id] input[type=checkbox]:not([id])').forEach(function(cb) {
+      var cont = cb.closest('[id]');
+      if (!cont) return;
+      snap['cbx||' + cont.id + '||' + cb.value] = cb.checked;
+    });
+    page.querySelectorAll('.ic-chip').forEach(function(chip) {
+      var cont = chip.closest('[id]');
+      if (!cont) return;
+      snap['chip||' + cont.id + '||' + (chip.textContent || '').trim()] =
+        chip.classList.contains('on') || chip.classList.contains('on-r') ||
+        chip.classList.contains('on-a') || chip.classList.contains('on-g');
+    });
+
+    var nombre = tipo === 'ic'
+      ? ((document.getElementById('ic-pnombre') || {}).value || '').trim()
+      : ((document.getElementById('an-nombre')  || {}).value || '').trim();
+
+    var registro = {
+      tipo: tipo,
+      nombre: nombre || '(sin nombre)',
+      fecha: new Date().toLocaleString('es-CO'),
+      fechaTS: new Date().toISOString(),
+      datos: snap
+    };
+
+    // Guardar en Firebase
+    if (window.db && window._addDoc && window._collection) {
+      await window._addDoc(window._collection(window.db, 'borradores_formularios'), registro);
+      toast('✅ Borrador guardado en la nube — disponible en todos tus dispositivos');
+    } else {
+      // Fallback: localStorage si Firebase no está disponible
+      window.guardarFormularioLocal(tipo);
+    }
+  } catch(err) {
+    console.error('Error borrador Firebase:', err);
+    // Fallback a localStorage
+    try { window.guardarFormularioLocal(tipo); } catch(e2) {}
+    toast('⚠️ Sin conexión — borrador guardado solo en este dispositivo');
+  }
+};
+
+// ── MOSTRAR BORRADORES FIREBASE + LOCAL (multi-dispositivo) ───────
+window.mostrarBorradoresFirebase = async function(tipo) {
+  toast('🔄 Cargando borradores…');
+  var borradores = [];
+
+  // 1. Traer de Firebase
+  try {
+    if (window.db && window._getDocs && window._query && window._collection && window._where && window._orderBy) {
+      var snap = await window._getDocs(
+        window._query(
+          window._collection(window.db, 'borradores_formularios'),
+          window._where('tipo', '==', tipo),
+          window._orderBy('fechaTS', 'desc')
+        )
+      );
+      snap.forEach(function(d) {
+        borradores.push(Object.assign({ _fbId: d.id }, d.data()));
+      });
+    }
+  } catch(e) { console.warn('Borrador Firebase read:', e); }
+
+  // 2. Añadir locales (que no estén ya en Firebase)
+  try {
+    var local = JSON.parse(localStorage.getItem('borradores_' + tipo) || '[]');
+    local.forEach(function(b) { borradores.push(b); });
+  } catch(e) {}
+
+  // 3. Limitar a 30
+  if (borradores.length > 30) borradores = borradores.slice(0, 30);
+
+  var buildItems = function(list) {
+    if (!list.length) return '<div style="font-size:0.8rem;color:#92400e;font-style:italic;padding:4px 0">No hay borradores guardados.</div>';
+    return list.map(function(b, i) {
+      var bJson = JSON.stringify({id:b.id,fecha:b.fecha,nombre:b.nombre,datos:b.datos,_fbId:b._fbId||null}).replace(/"/g,'&quot;');
+      var cloudBadge = b._fbId
+        ? '<span style="font-size:0.62rem;color:#16a34a;font-weight:700;margin-right:4px">\u2601\uFE0F nube</span>'
+        : '<span style="font-size:0.62rem;color:#d97706;font-weight:700;margin-right:4px">\uD83D\uDCF1 local</span>';
+      var delBtn = b._fbId
+        ? '<button onclick="window._eliminarBorradorFirebase(\'' + b._fbId + '\',\'' + tipo + '\')" style="background:#fef3c7;color:#92400e;border:1px solid #fbbf24;border-radius:6px;padding:4px 8px;font-size:0.74rem;cursor:pointer;flex-shrink:0">\uD83D\uDDD1</button>'
+        : '<button onclick="window._eliminarBorrador(\'' + tipo + '\',' + i + ')" style="background:#fef3c7;color:#92400e;border:1px solid #fbbf24;border-radius:6px;padding:4px 8px;font-size:0.74rem;cursor:pointer;flex-shrink:0">\uD83D\uDDD1</button>';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#fff;border-radius:7px;border:1px solid #fde68a;margin-bottom:5px">'
+        + '<div style="flex:1;min-width:0">'
+        + cloudBadge
+        + '<span style="font-size:0.82rem;font-weight:700;color:#92400e">' + (b.nombre || '(sin nombre)') + '</span>'
+        + '<div style="font-size:0.71rem;color:#b45309">' + (b.fecha || '') + '</div>'
+        + '</div>'
+        + '<button onclick="window._restaurarBorradorUnificado(' + bJson + ',\'' + tipo + '\')" style="background:#d97706;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.74rem;font-weight:700;cursor:pointer;flex-shrink:0">Restaurar</button>'
+        + delBtn
+        + '</div>';
+    }).join('');
+  };
+
+  if (tipo === 'ic') {
+    var bar   = document.getElementById('ic-saved-bar');
+    var lista = document.getElementById('ic-saved-list');
+    if (!bar || !lista) return;
+    lista.innerHTML = buildItems(borradores);
+    bar.style.display = '';
+  } else {
+    var panelId = 'an-saved-bar-dynamic';
+    var existingPanel = document.getElementById(panelId);
+    if (existingPanel) existingPanel.remove();
+    var panel = document.createElement('div');
+    panel.id = panelId;
+    panel.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:990;background:#fffbeb;border:1.5px solid #d97706;border-radius:12px;padding:14px 16px;width:320px;max-height:70vh;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,0.18)';
+    var closeBtn = document.createElement('button');
+    closeBtn.textContent = '\u2715';
+    closeBtn.style.cssText = 'background:none;border:none;cursor:pointer;color:#92400e;font-size:1.1rem;line-height:1;padding:0 2px';
+    closeBtn.onclick = function(){ panel.remove(); };
+    var header = document.createElement('div');
+    header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:10px';
+    var titleSpan = document.createElement('span');
+    titleSpan.style.cssText = 'font-size:0.8rem;font-weight:700;color:#92400e';
+    titleSpan.textContent = '\uD83D\uDCCB Borradores \u2014 Anamnesis';
+    header.appendChild(titleSpan);
+    header.appendChild(closeBtn);
+    panel.appendChild(header);
+    var itemsDiv = document.createElement('div');
+    itemsDiv.innerHTML = buildItems(borradores);
+    panel.appendChild(itemsDiv);
+    document.body.appendChild(panel);
+  }
+};
+
+// ── RESTAURAR BORRADOR (unificado local + Firebase) ───────────────
+window._restaurarBorradorUnificado = function(b, tipo) {
+  if (!b || !b.datos) { alert('Borrador no encontrado.'); return; }
+  if (!confirm('¿Restaurar este borrador? Los campos actuales serán reemplazados.')) return;
+  var pageId = tipo === 'ic' ? 'page-interconsultas' : 'page-anamnesis';
+  var page = document.getElementById(pageId);
+  if (!page) return;
+  Object.keys(b.datos).forEach(function(key) {
+    var val = b.datos[key];
+    if (key.startsWith('chip||')) {
+      var parts = key.split('||');
+      var cont = document.getElementById(parts[1]);
+      if (!cont) return;
+      cont.querySelectorAll('.ic-chip').forEach(function(chip) {
+        if ((chip.textContent || '').trim() === parts[2]) {
+          var isOn = chip.classList.contains('on') || chip.classList.contains('on-r') || chip.classList.contains('on-a') || chip.classList.contains('on-g');
+          if (!!val !== isOn) { try { chip.click(); } catch(e) {} }
+        }
+      });
+    } else if (key.startsWith('cbx||')) {
+      var parts = key.split('||');
+      var cont = document.getElementById(parts[1]);
+      if (!cont) return;
+      cont.querySelectorAll('input[type=checkbox]').forEach(function(cb) { if (cb.value === parts[2]) cb.checked = !!val; });
+    } else if (key.startsWith('cb||')) {
+      var parts = key.split('||');
+      var el = document.getElementById(parts[1]);
+      if (el && el.value === parts[2]) el.checked = !!val;
+    } else if (key.startsWith('rb||')) {
+      var parts = key.split('||');
+      var el = document.getElementById(parts[1]);
+      if (el && el.value === parts[2]) el.checked = !!val;
+    } else {
+      var el = document.getElementById(key);
+      if (!el || el.tagName === 'BUTTON') return;
+      el.value = val;
+      try { el.dispatchEvent(new Event('input',  { bubbles: true })); } catch(e) {}
+      try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch(e) {}
+    }
+  });
+  if (tipo === 'ic') { var bar = document.getElementById('ic-saved-bar'); if (bar) bar.style.display = 'none'; }
+  else { var p = document.getElementById('an-saved-bar-dynamic'); if (p) p.remove(); }
+  if (typeof toast === 'function') toast('✅ Borrador restaurado');
+  else alert('✅ Borrador restaurado');
+};
+
+// ── ELIMINAR BORRADOR FIREBASE ─────────────────────────────────────
+window._eliminarBorradorFirebase = async function(fbId, tipo) {
+  if (!confirm('¿Eliminar este borrador?')) return;
+  try {
+    if (window.db && window._deleteDoc && window._doc) {
+      await window._deleteDoc(window._doc(window.db, 'borradores_formularios', fbId));
+      toast('🗑️ Borrador eliminado');
+    }
+  } catch(e) { toast('❌ ' + e.message); }
+  window.mostrarBorradoresFirebase(tipo);
+};
+
 </script>
 
 </body>
