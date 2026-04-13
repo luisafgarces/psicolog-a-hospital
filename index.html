@@ -7640,6 +7640,20 @@ async function generarNotaIcConGemini(apiKey){
   var _seguimientoPlazo=icv('ic-seguimiento-plazo')||'';
   function chips(label){return icChipsBySubLabel(label).join(', ');}
 
+  // Variables que en otras funciones se leen de scope externo — aquí las leemos del DOM
+  var _ideacionActual = icChipsBySubLabel('Ideación actual').join(', ') || icv('ic-riesgo-notas') && '' || '';
+  // Leer ideación de chips
+  var _ideacionChips = icChipsBySubLabel('Ideación actual');
+  _ideacionActual = _ideacionChips.length ? _ideacionChips.join(', ') : 'niega';
+  // Clasificación riesgo = nivel del select
+  var _clasifRiesgo = icv('ic-riesgo-nivel') || sev || 'No clasificado';
+  // Observaciones diagnósticas
+  var _obsDx = icv('ic-resp-obs') || '';
+  // Impresión diagnóstica IA previa (hidden input)
+  var _impresionIA = (document.getElementById('ic-impresion-hidden') || {}).value || '';
+  // Notas al equipo
+  var _notasEquipo = icv('ic-trat-notas') || '';
+
   // Contexto base del paciente
   var selPacIC=document.getElementById('ic-paciente-sel');
   var _icPacId=selPacIC?selPacIC.value:null;
