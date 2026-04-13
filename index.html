@@ -10149,5 +10149,183 @@ document.addEventListener('DOMContentLoaded',()=>{
   </div>
 </div>
 
+
+<!-- ══════════════════════════════════════════════════════════════
+     BORRADORES LOCALES — funciones faltantes (📋 Borrador local / 📂 Ver borradores)
+     Solo se agregan aquí; no se modificó ningún código existente.
+     ══════════════════════════════════════════════════════════════ -->
+<script>
+// ── GUARDAR FORMULARIO LOCAL (localStorage) ───────────────────────
+window.guardarFormularioLocal = function(tipo) {
+  try {
+    var pageId = tipo === 'ic' ? 'page-interconsultas' : 'page-anamnesis';
+    var page = document.getElementById(pageId);
+    if (!page) { alert('No se encontró el formulario.'); return; }
+
+    var snap = {};
+
+    // 1. Inputs / textareas / selects con ID
+    page.querySelectorAll('input[id]:not([type=button]):not([type=submit]), textarea[id], select[id]').forEach(function(el) {
+      if (el.type === 'checkbox') {
+        snap['cb||' + el.id + '||' + el.value] = el.checked;
+      } else if (el.type === 'radio') {
+        snap['rb||' + el.id + '||' + el.value] = el.checked;
+      } else {
+        snap[el.id] = el.value;
+      }
+    });
+
+    // 2. Checkboxes sin ID dentro de contenedores con ID (ej: an-desenc, an-sint…)
+    page.querySelectorAll('[id] input[type=checkbox]:not([id])').forEach(function(cb) {
+      var cont = cb.closest('[id]');
+      if (!cont) return;
+      snap['cbx||' + cont.id + '||' + cb.value] = cb.checked;
+    });
+
+    // 3. ic-chips (botones activos del formulario de IC)
+    page.querySelectorAll('.ic-chip').forEach(function(chip) {
+      var cont = chip.closest('[id]');
+      if (!cont) return;
+      snap['chip||' + cont.id + '||' + (chip.textContent || '').trim()] =
+        chip.classList.contains('on') || chip.classList.contains('on-r') ||
+        chip.classList.contains('on-a') || chip.classList.contains('on-g');
+    });
+
+    var KEY = 'borradores_' + tipo;
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) { list = []; }
+
+    var nombre = tipo === 'ic'
+      ? ((document.getElementById('ic-pnombre') || {}).value || '').trim()
+      : ((document.getElementById('an-nombre')  || {}).value || '').trim();
+
+    list.unshift({ id: Date.now(), fecha: new Date().toLocaleString('es-CO'), nombre: nombre || '(sin nombre)', datos: snap });
+    if (list.length > 20) list = list.slice(0, 20);
+    localStorage.setItem(KEY, JSON.stringify(list));
+
+    if (typeof toast === 'function') toast('✅ Borrador guardado — solo en este dispositivo');
+    else alert('✅ Borrador guardado localmente');
+  } catch(err) {
+    alert('Error al guardar borrador: ' + err.message);
+  }
+};
+
+// ── MOSTRAR BORRADORES GUARDADOS ──────────────────────────────────
+window.mostrarFormulariosGuardados = function(tipo) {
+  var KEY = 'borradores_' + tipo;
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) {}
+
+  var buildItems = function(list, tipoLocal) {
+    if (!list.length) return '<div style="font-size:0.8rem;color:#92400e;font-style:italic;padding:4px 0">No hay borradores guardados en este dispositivo.</div>';
+    return list.map(function(b, i) {
+      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#fff;border-radius:7px;border:1px solid #fde68a;margin-bottom:5px">'
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:0.82rem;font-weight:700;color:#92400e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (b.nombre || '(sin nombre)') + '</div>'
+        + '<div style="font-size:0.71rem;color:#b45309">' + (b.fecha || '') + '</div>'
+        + '</div>'
+        + '<button onclick="window._restaurarBorrador(\'' + tipoLocal + '\',' + i + ')" style="background:#d97706;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.74rem;font-weight:700;cursor:pointer;flex-shrink:0">Restaurar</button>'
+        + '<button onclick="window._eliminarBorrador(\'' + tipoLocal + '\',' + i + ')" style="background:#fef3c7;color:#92400e;border:1px solid #fbbf24;border-radius:6px;padding:4px 8px;font-size:0.74rem;cursor:pointer;flex-shrink:0">🗑</button>'
+        + '</div>';
+    }).join('');
+  };
+
+  if (tipo === 'ic') {
+    var bar   = document.getElementById('ic-saved-bar');
+    var lista = document.getElementById('ic-saved-list');
+    if (!bar || !lista) return;
+    lista.innerHTML = buildItems(list, 'ic');
+    bar.style.display = '';
+  } else {
+    // Anamnesis: panel flotante dinámico (no tiene barra fija en el HTML)
+    var panelId = 'an-saved-bar-dynamic';
+    var old = document.getElementById(panelId);
+    if (old) old.remove();
+    var panel = document.createElement('div');
+    panel.id = panelId;
+    panel.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:990;background:#fffbeb;border:1.5px solid #d97706;border-radius:12px;padding:14px 16px;width:320px;max-height:70vh;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,0.18)';
+    panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+      + '<span style="font-size:0.8rem;font-weight:700;color:#92400e">📋 Borradores locales — Anamnesis</span>'
+      + '<button onclick="document.getElementById(\'an-saved-bar-dynamic\').remove()" style="background:none;border:none;cursor:pointer;color:#92400e;font-size:1.1rem;line-height:1;padding:0 2px">✕</button>'
+      + '</div>'
+      + buildItems(list, 'an');
+    document.body.appendChild(panel);
+  }
+};
+
+// ── RESTAURAR BORRADOR ────────────────────────────────────────────
+window._restaurarBorrador = function(tipo, idx) {
+  var KEY = 'borradores_' + tipo;
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) {}
+  var b = list[idx];
+  if (!b || !b.datos) { alert('Borrador no encontrado.'); return; }
+  if (!confirm('¿Restaurar este borrador? Los campos actuales serán reemplazados.')) return;
+
+  var pageId = tipo === 'ic' ? 'page-interconsultas' : 'page-anamnesis';
+  var page = document.getElementById(pageId);
+  if (!page) return;
+
+  Object.keys(b.datos).forEach(function(key) {
+    var val = b.datos[key];
+    if (key.startsWith('chip||')) {
+      // ic-chip
+      var parts = key.split('||');
+      var cont = document.getElementById(parts[1]);
+      if (!cont) return;
+      cont.querySelectorAll('.ic-chip').forEach(function(chip) {
+        if ((chip.textContent || '').trim() === parts[2]) {
+          var isOn = chip.classList.contains('on') || chip.classList.contains('on-r') || chip.classList.contains('on-a') || chip.classList.contains('on-g');
+          if (!!val !== isOn) { try { chip.click(); } catch(e) {} }
+        }
+      });
+    } else if (key.startsWith('cbx||')) {
+      // checkbox sin ID
+      var parts = key.split('||');
+      var cont = document.getElementById(parts[1]);
+      if (!cont) return;
+      cont.querySelectorAll('input[type=checkbox]').forEach(function(cb) { if (cb.value === parts[2]) cb.checked = !!val; });
+    } else if (key.startsWith('cb||')) {
+      // checkbox con ID
+      var parts = key.split('||');
+      var el = document.getElementById(parts[1]);
+      if (el && el.value === parts[2]) el.checked = !!val;
+    } else if (key.startsWith('rb||')) {
+      // radio
+      var parts = key.split('||');
+      var el = document.getElementById(parts[1]);
+      if (el && el.value === parts[2]) el.checked = !!val;
+    } else {
+      var el = document.getElementById(key);
+      if (!el || el.tagName === 'BUTTON') return;
+      el.value = val;
+      try { el.dispatchEvent(new Event('input',  { bubbles: true })); } catch(e) {}
+      try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch(e) {}
+    }
+  });
+
+  if (tipo === 'ic') {
+    var bar = document.getElementById('ic-saved-bar');
+    if (bar) bar.style.display = 'none';
+  } else {
+    var p = document.getElementById('an-saved-bar-dynamic');
+    if (p) p.remove();
+  }
+  if (typeof toast === 'function') toast('✅ Borrador restaurado');
+  else alert('✅ Borrador restaurado');
+};
+
+// ── ELIMINAR BORRADOR ─────────────────────────────────────────────
+window._eliminarBorrador = function(tipo, idx) {
+  if (!confirm('¿Eliminar este borrador?')) return;
+  var KEY = 'borradores_' + tipo;
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) {}
+  list.splice(idx, 1);
+  localStorage.setItem(KEY, JSON.stringify(list));
+  window.mostrarFormulariosGuardados(tipo);
+};
+</script>
+
 </body>
 </html>
