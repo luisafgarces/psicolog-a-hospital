@@ -10457,19 +10457,42 @@ window.guardarBorradorFirebase = async function(tipo) {
       datos: snap
     };
 
-    // Guardar en Firebase
+    // SIEMPRE guardar en localStorage primero (funciona offline y es instantáneo)
+    try {
+      var KEY = 'borradores_' + tipo;
+      var list = [];
+      try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) { list = []; }
+      list.unshift({ id: Date.now(), fecha: registro.fecha, nombre: registro.nombre, datos: snap });
+      if (list.length > 20) list = list.slice(0, 20);
+      localStorage.setItem(KEY, JSON.stringify(list));
+    } catch(lsErr) { console.warn('localStorage error:', lsErr); }
+
+    // Intentar guardar también en Firebase (para multi-dispositivo)
     if (window.db && window._addDoc && window._collection) {
-      await window._addDoc(window._collection(window.db, 'borradores_formularios'), registro);
-      toast('✅ Borrador guardado en la nube — disponible en todos tus dispositivos');
+      try {
+        // Filtrar solo chips activos y campos con valor para no exceder límite Firebase
+        var snapFiltrado = {};
+        Object.keys(snap).forEach(function(k) {
+          var v = snap[k];
+          if (k.startsWith('chip||')) {
+            if (v === true) snapFiltrado[k] = true; // solo chips activos
+          } else if (v !== '' && v !== null && v !== undefined && v !== false) {
+            snapFiltrado[k] = v;
+          }
+        });
+        registro.datos = snapFiltrado;
+        await window._addDoc(window._collection(window.db, 'borradores_formularios'), registro);
+        toast('✅ Borrador guardado (nube + este dispositivo)');
+      } catch(fbErr) {
+        console.warn('Firebase borrador error:', fbErr);
+        toast('✅ Borrador guardado en este dispositivo');
+      }
     } else {
-      // Fallback: localStorage si Firebase no está disponible
-      window.guardarFormularioLocal(tipo);
+      toast('✅ Borrador guardado en este dispositivo');
     }
   } catch(err) {
-    console.error('Error borrador Firebase:', err);
-    // Fallback a localStorage
-    try { window.guardarFormularioLocal(tipo); } catch(e2) {}
-    toast('⚠️ Sin conexión — borrador guardado solo en este dispositivo');
+    console.error('Error borrador:', err);
+    toast('❌ Error al guardar borrador: ' + err.message);
   }
 };
 
