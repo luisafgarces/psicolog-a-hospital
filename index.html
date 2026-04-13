@@ -8280,28 +8280,92 @@ window.resetTestActual = function(){
 // ── RENDER FUNCTIONS (all use #test-questions container) ─────────────
 
 function renderFreq4InContainer(tid){
-  var qs = tid==='phq9' ? phq9Qs : gad7Qs;
-  var cont = document.getElementById('test-questions');
+  var qs   = tid==='phq9' ? phq9Qs : gad7Qs;
+  var color = tid==='phq9' ? '#1e40af' : '#6d28d9';
+  var bg    = tid==='phq9' ? '#eff6ff' : '#f5f3ff';
+  var bord  = tid==='phq9' ? '#bfdbfe' : '#e9d5ff';
+  var cont  = document.getElementById('test-questions');
   if(!cont) return;
-  cont.innerHTML = qs.map(function(q,i){
-    return '<div class="test-question"><div class="test-question-num">Pregunta '+(i+1)+'</div><div class="test-question-text">'+q+'</div><div class="test-options">'+
-      freq4.map(function(opt,v){
-        return '<div class="test-option"><input type="radio" name="'+tid+'_q'+i+'" id="'+tid+'_q'+i+'_'+v+'" value="'+v+'"><label class="test-option-label" for="'+tid+'_q'+i+'_'+v+'">'+opt+'</label></div>';
-      }).join('')+'</div></div>';
+
+  // Intro para el entrevistador
+  var intro = '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#166534;line-height:1.6">'
+    +'<strong>📋 Modo entrevistador:</strong> Lea cada pregunta en voz alta y diga: <em>"¿En las últimas 2 semanas, con qué frecuencia le ha pasado esto? Respóndame con un número: 1, 2, 3 o 4."</em>'
+    +'<br><span style="font-weight:700">1</span> = Para nada &nbsp;·&nbsp; <span style="font-weight:700">2</span> = Varios días &nbsp;·&nbsp; <span style="font-weight:700">3</span> = Más de la mitad de los días &nbsp;·&nbsp; <span style="font-weight:700">4</span> = Casi todos los días'
+    +'</div>';
+
+  var optsHtml = freq4.map(function(opt, v){
+    var txt = opt.replace(/\s*\(\d\)\s*/g,'').trim();
+    return '<label style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+      +'<input type="radio" name="__NOMBRE__" value="'+v+'" style="accent-color:'+color+';flex-shrink:0">'
+      +'<span style="background:'+color+';color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0">'+(v+1)+'</span>'
+      +'<span style="font-size:0.82rem;color:var(--text)">'+txt+'</span>'
+      +'</label>';
   }).join('');
+
+  var qHtml = qs.map(function(q, i){
+    // Pregunta 9 del PHQ-9 — destacar visualmente
+    var esRiesgo = tid==='phq9' && i===8;
+    var qBg   = esRiesgo ? '#fef2f2' : bg;
+    var qBord = esRiesgo ? '#fca5a5' : bord;
+    var qCol  = esRiesgo ? '#991b1b' : color;
+    return '<div style="margin-bottom:12px;padding:12px 14px;background:'+qBg+';border:1.5px solid '+qBord+';border-radius:10px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">'
+      +'<span style="font-size:0.65rem;font-weight:700;color:'+qCol+';text-transform:uppercase;letter-spacing:0.08em;background:'+qBord+';padding:2px 7px;border-radius:10px">'
+      +(esRiesgo ? '⚠️ Ítem de riesgo' : 'Pregunta '+(i+1)+' de '+qs.length)+'</span>'
+      +'</div>'
+      +'<div style="font-size:0.88rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:9px">'+q+'</div>'
+      +'<div style="font-size:0.72rem;font-weight:600;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.06em">Respuesta del paciente:</div>'
+      + optsHtml.replace(/__NOMBRE__/g, tid+'_q'+i)
+      +'</div>';
+  }).join('');
+
+  cont.innerHTML = intro + qHtml;
 }
 window.renderFreq4 = function(id){ renderFreq4InContainer(id||_currentTest||'phq9'); };
 
 function renderHADSInContainer(){
   var cont = document.getElementById('test-questions');
   if(!cont) return;
-  cont.innerHTML = hadsQs.map(function(item,i){
-    return '<div class="test-question"><div class="test-question-num">Pregunta '+(i+1)+' — '+(item.type==='A'?'Ansiedad':'Depresión')+'</div><div class="test-question-text">'+item.q+'</div><div class="test-options">'+
-      item.opts.map(function(opt,v){
-        var val = parseInt((opt.match(/\((\d)\)/)||[0,v])[1]);
-        return '<div class="test-option"><input type="radio" name="hads_q'+i+'" id="hads_q'+i+'_'+v+'" value="'+val+'"><label class="test-option-label" for="hads_q'+i+'_'+v+'">'+opt+'</label></div>';
-      }).join('')+'</div></div>';
+
+  // Instrucción para el entrevistador
+  var intro = '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#166534;line-height:1.6">'
+    +'<strong>📋 Modo entrevistador:</strong> Lea la pregunta en voz alta. '
+    +'Diga al paciente las opciones numeradas y pida que responda con un número. '
+    +'Toque la opción que responda. El puntaje se calcula automáticamente.</div>';
+
+  var html = hadsQs.map(function(item, i){
+    var tipo = item.type === 'A' ? '😰 Ansiedad' : '😔 Depresión';
+    var color = item.type === 'A' ? '#7c3aed' : '#1e40af';
+    var bg    = item.type === 'A' ? '#fdf4ff' : '#eff6ff';
+    var bord  = item.type === 'A' ? '#e9d5ff' : '#bfdbfe';
+
+    // Limpiar el puntaje entre paréntesis de las opciones para mostrar solo el texto
+    var opcionesLimpias = item.opts.map(function(o){
+      return o.replace(/\s*\(\d\)\s*/g, '').trim();
+    });
+
+    var optsHtml = item.opts.map(function(opt, v){
+      var val  = parseInt((opt.match(/\((\d)\)/)||[0,v])[1]);
+      var txt  = opt.replace(/\s*\(\d\)\s*/g, '').trim();
+      return '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:5px;background:var(--surface);transition:background 0.15s">'
+        +'<input type="radio" name="hads_q'+i+'" value="'+val+'" style="accent-color:'+color+';flex-shrink:0">'
+        +'<span style="background:'+color+';color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0">'+(v+1)+'</span>'
+        +'<span style="font-size:0.82rem;color:var(--text)">'+txt+'</span>'
+        +'</label>';
+    }).join('');
+
+    return '<div style="margin-bottom:14px;padding:12px 14px;background:'+bg+';border:1.5px solid '+bord+';border-radius:10px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+      +'<span style="font-size:0.65rem;font-weight:700;color:'+color+';text-transform:uppercase;letter-spacing:0.08em;background:'+bord+';padding:2px 7px;border-radius:10px">'+tipo+'</span>'
+      +'<span style="font-size:0.65rem;color:var(--text3)">Pregunta '+(i+1)+' de 14</span>'
+      +'</div>'
+      +'<div style="font-size:0.88rem;font-weight:600;color:var(--text);margin-bottom:10px;line-height:1.5">'+item.q+'</div>'
+      +'<div style="font-size:0.72rem;font-weight:600;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Opciones de respuesta:</div>'
+      + optsHtml
+      +'</div>';
   }).join('');
+
+  cont.innerHTML = intro + html;
 }
 window.renderHADS = renderHADSInContainer;
 
@@ -8393,14 +8457,74 @@ window.renderDuelo = renderDueloInContainer;
 function renderPCL5InContainer(){
   var cont = document.getElementById('test-questions');
   if(!cont) return;
-  var pcl5Labels=['Para nada (0)','Un poco (1)','Moderadamente (2)','Bastante (3)','Extremadamente (4)'];
-  var pcl5Qs2=['Recuerdos repetidos, perturbadores e involuntarios de la experiencia estresante','Sueños repetidos y perturbadores de la experiencia estresante','Sentirse o actuar de repente como si la experiencia estresante estuviera ocurriendo de nuevo','Sentirse muy perturbado/a cuando algo le recuerda la experiencia estresante','Tener reacciones físicas fuertes cuando algo le recuerda la experiencia estresante','Evitar recuerdos, pensamientos o sentimientos relacionados con la experiencia estresante','Evitar cosas externas que le recuerdan la experiencia estresante (personas, lugares, conversaciones, actividades, objetos o situaciones)','Dificultad para recordar partes importantes de la experiencia estresante','Tener creencias negativas fuertes acerca de uno mismo, otras personas o el mundo','Culparse a sí mismo/a u otras personas por la experiencia estresante o sus consecuencias','Tener sentimientos negativos fuertes como miedo, horror, ira, culpa o vergüenza','Perder el interés en actividades que antes disfrutaba','Sentirse distante o alejado/a de otras personas','Dificultad para experimentar sentimientos positivos','Comportamiento irritable, explosiones de rabia o actuar agresivamente','Tomar riesgos o hacer cosas que podrían causarle daño a usted u otras personas','Estar en "alerta máxima", vigilante o en guardia','Sentirse sobresaltado/a o asustarse fácilmente','Dificultad para concentrarse','Dificultad para conciliar o mantener el sueño'];
-  cont.innerHTML = pcl5Qs2.map(function(q,i){
-    return '<div class="test-question"><div class="test-question-num">Pregunta '+(i+1)+'</div><div class="test-question-text">'+q+'</div><div class="test-options">'+
-      pcl5Labels.map(function(opt,v){
-        return '<div class="test-option"><input type="radio" name="pcl5_q'+i+'" id="pcl5_q'+i+'_'+v+'" value="'+v+'"><label class="test-option-label" for="pcl5_q'+i+'_'+v+'">'+opt+'</label></div>';
-      }).join('')+'</div></div>';
-  }).join('');
+
+  // Clusters DSM-5 para contexto visual
+  var pcl5Clusters = [
+    {label:'B — Reexperimentación', color:'#dc2626', bg:'#fef2f2', bord:'#fca5a5', qs:[0,1,2,3,4]},
+    {label:'C — Evitación',          color:'#d97706', bg:'#fffbeb', bord:'#fde68a', qs:[5,6]},
+    {label:'D — Cognición y ánimo',  color:'#7c3aed', bg:'#f5f3ff', bord:'#e9d5ff', qs:[7,8,9,10,11,12,13]},
+    {label:'E — Activación y reactividad', color:'#0369a1', bg:'#eff6ff', bord:'#bfdbfe', qs:[14,15,16,17,18,19]},
+  ];
+
+  var pcl5Qs2 = [
+    'Recuerdos repetidos, perturbadores e involuntarios de la experiencia estresante',
+    'Sueños repetidos y perturbadores de la experiencia estresante',
+    'Sentirse o actuar de repente como si la experiencia estresante estuviera ocurriendo de nuevo',
+    'Sentirse muy perturbado/a cuando algo le recuerda la experiencia estresante',
+    'Tener reacciones físicas fuertes cuando algo le recuerda la experiencia estresante',
+    'Evitar recuerdos, pensamientos o sentimientos relacionados con la experiencia estresante',
+    'Evitar cosas externas que le recuerdan la experiencia estresante (personas, lugares, conversaciones, actividades, objetos o situaciones)',
+    'Dificultad para recordar partes importantes de la experiencia estresante',
+    'Tener creencias negativas fuertes acerca de uno mismo, otras personas o el mundo',
+    'Culparse a sí mismo/a u otras personas por la experiencia estresante o sus consecuencias',
+    'Tener sentimientos negativos fuertes como miedo, horror, ira, culpa o vergüenza',
+    'Perder el interés en actividades que antes disfrutaba',
+    'Sentirse distante o alejado/a de otras personas',
+    'Dificultad para experimentar sentimientos positivos',
+    'Comportamiento irritable, explosiones de rabia o actuar agresivamente',
+    'Tomar riesgos o hacer cosas que podrían causarle daño a usted u otras personas',
+    'Estar en "alerta máxima", vigilante o en guardia',
+    'Sentirse sobresaltado/a o asustarse fácilmente',
+    'Dificultad para concentrarse',
+    'Dificultad para conciliar o mantener el sueño'
+  ];
+
+  var pcl5Labels = ['Para nada','Un poco','Moderadamente','Bastante','Extremadamente'];
+
+  var intro = '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#166534;line-height:1.6">'
+    +'<strong>📋 Modo entrevistador:</strong> Lea cada afirmación. Diga: <em>"¿En el último mes, cuánto le ha molestado este problema? Respóndame con un número del 1 al 5."</em>'
+    +'<br><span style="font-weight:700">1</span> = Para nada &nbsp;·&nbsp; <span style="font-weight:700">2</span> = Un poco &nbsp;·&nbsp; <span style="font-weight:700">3</span> = Moderadamente &nbsp;·&nbsp; <span style="font-weight:700">4</span> = Bastante &nbsp;·&nbsp; <span style="font-weight:700">5</span> = Extremadamente'
+    +'</div>';
+
+  // Evento de referencia
+  var eventoEl = document.getElementById('pcl5-evento');
+  var eventoVal = eventoEl ? eventoEl.value : '';
+  var eventoHtml = '<div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.82rem;color:#7c2d12">'
+    +'<strong>Evento de referencia:</strong> <input type="text" id="pcl5-evento" placeholder="Ej: Accidente, pérdida de familiar, diagnóstico…" value="'+(eventoVal||'')+'" style="background:transparent;border:none;border-bottom:1px dashed #f97316;outline:none;font-size:0.82rem;color:var(--text);width:calc(100% - 170px)">'
+    +'</div>';
+
+  var qHtml = '';
+  pcl5Clusters.forEach(function(cluster){
+    qHtml += '<div style="margin-bottom:6px;font-size:0.7rem;font-weight:700;color:'+cluster.color+';text-transform:uppercase;letter-spacing:0.08em;padding:4px 10px;background:'+cluster.bg+';border-left:3px solid '+cluster.color+';border-radius:0 6px 6px 0;margin-bottom:8px">'+cluster.label+'</div>';
+    cluster.qs.forEach(function(i){
+      var q = pcl5Qs2[i];
+      var optsHtml = pcl5Labels.map(function(opt, v){
+        return '<label style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:4px;background:var(--surface)">'
+          +'<input type="radio" name="pcl5_q'+i+'" value="'+v+'" style="accent-color:'+cluster.color+';flex-shrink:0">'
+          +'<span style="background:'+cluster.color+';color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0">'+(v+1)+'</span>'
+          +'<span style="font-size:0.82rem;color:var(--text)">'+opt+'</span>'
+          +'</label>';
+      }).join('');
+      qHtml += '<div style="margin-bottom:10px;padding:12px 14px;background:'+cluster.bg+';border:1.5px solid '+cluster.bord+';border-radius:10px">'
+        +'<div style="font-size:0.65rem;color:'+cluster.color+';font-weight:700;margin-bottom:5px">Ítem '+(i+1)+' de 20</div>'
+        +'<div style="font-size:0.88rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:9px">'+q+'</div>'
+        +'<div style="font-size:0.72rem;font-weight:600;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.06em">Respuesta del paciente:</div>'
+        + optsHtml
+        +'</div>';
+    });
+  });
+
+  cont.innerHTML = intro + eventoHtml + qHtml;
 }
 window.renderPCL5Questions = renderPCL5InContainer;
 
