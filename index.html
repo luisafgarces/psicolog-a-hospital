@@ -4645,7 +4645,8 @@ window.generarPDFPsico = function(guiaId){
     var nombre = window._pdfNombreOverride;
     window._pdfNombreOverride = undefined;
   } else {
-    const pacs = (window.pacientes||[]).filter(p=>p.estado!=='alta'&&p.estado!=='fallecido');
+    const pacs = (window.pacientes||[]).filter(p=>p.estado!=='alta'&&p.estado!=='fallecido'&&p.estado!=='alta-voluntaria')
+      .sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||'','es'));
     const sel = document.getElementById('pdf-pac-sel');
     if(sel){
       sel.innerHTML = '<option value="">— Sin nombre / Genérica —</option>'
