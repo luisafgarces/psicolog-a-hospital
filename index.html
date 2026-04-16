@@ -7250,7 +7250,7 @@ window.hpacRenderNotas=()=>{
       // Panel del formulario diligenciado — siempre visible si existe
       var fd2=e.formulario||e._aiFormSnap||null;
       var formHtml='';
-      if(fd2&&modo==='IC Nueva'){
+      if(fd2){
         var fRows=[];
         if(fd2.dx)fRows.push(['Diagnóstico',fd2.dx]);
         if(fd2.riesgo)fRows.push(['Riesgo',fd2.riesgo]);
@@ -7285,7 +7285,10 @@ window.hpacRenderNotas=()=>{
             +'<div style="margin-top:8px;display:grid;grid-template-columns:minmax(110px,auto) 1fr;gap:4px 12px;font-size:0.73rem">'
             +fRows.map(function(r){return'<span style="font-weight:600;color:var(--text2)">'+r[0]+':</span><span style="color:var(--text)">'+r[1]+'</span>';}).join('')
             +'</div>'
-            +'<div style="margin-top:8px"><button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem" data-id="'+e.id+'" data-ni="'+ni+'" onclick="hpacGenerarNotaIA(this.dataset.id, parseInt(this.dataset.ni))">✨ Generar nota desde este formulario</button></div>'
+            +'<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'
+            +'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem" data-id="'+e.id+'" data-ni="'+ni+'" onclick="hpacGenerarNotaIA(this.dataset.id, parseInt(this.dataset.ni))">✨ Generar nota desde este formulario</button>'
+            +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacDescargarFormPDF('+JSON.stringify({id:'__ID__',modo:'__MODO__',fecha:'__FECHA__',nombre:'__NOMBRE__'}).replace('__ID__',e.id).replace('__MODO__',modo).replace('__FECHA__',e.fecha||'').replace('__NOMBRE__',nombre)+','+JSON.stringify(fRows)+')" >📄 Descargar PDF</button>'
+            +'</div>'
             +'</details>';
         }
       }
@@ -7395,6 +7398,8 @@ window.hpacEditar=(ni)=>{
   window._mneOnSave=()=>setTimeout(hpacRenderNotas,500);
   document.getElementById('modal-nota-edit').style.display='flex';
 };
+
+window.hpacDescargarFormPDF=function(meta, filas){  try{    var rows=Array.isArray(filas)?filas:[];    var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Formulario '+( meta.modo||'')+'</title>';    html+='<style>body{font-family:Arial,sans-serif;font-size:11px;color:#111;padding:20px;margin:0}';    html+='h1{font-size:15px;color:#1a3a6a;margin:0 0 4px}h2{font-size:11px;color:#555;margin:0 0 16px;font-weight:400}';    html+='.grid{display:grid;grid-template-columns:minmax(130px,auto) 1fr;gap:5px 14px;margin-top:8px}';    html+='.label{font-weight:700;color:#3a5a7a}.value{color:#111}';    html+='.footer{font-size:9px;color:#888;border-top:1px solid #ddd;padding-top:8px;margin-top:20px}';    html+='@media print{.np{display:none}}</style></head><body>';    html+='<div class="np" style="margin-bottom:12px"><button onclick="window.print()" style="background:#2563a8;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;cursor:pointer;font-weight:700">🖨️ Imprimir / Guardar PDF</button></div>';    html+='<h1>'+( meta.modo||'Formulario')+' — Psicología Hospitalaria</h1>';    html+='<h2>Paciente: '+(meta.nombre||'—')+' · Fecha: '+(meta.fecha||'—')+'</h2>';    html+='<div class="grid">';    rows.forEach(function(r){html+='<span class="label">'+r[0]+':</span><span class="value">'+r[1]+'</span>';});    html+='</div>';    html+='<div class="footer">Generado desde PsicoHosp · Psicología Hospitalaria · '+(new Date().toLocaleString('es-CO'))+'</div>';    html+='</body></html>';    var win=window.open('','_blank');    if(win){win.document.write(html);win.document.close();}    else alert('El navegador bloqueó la ventana. Habilita popups para este sitio.');  }catch(err){console.error('hpacDescargarFormPDF:',err);}};
 
 window.hpacCopiar=(ni)=>{
   const m=_hMap[ni];if(!m)return;
