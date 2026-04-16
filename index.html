@@ -3353,7 +3353,7 @@ window.guardarICFirebase=async()=>{
   // Capturar SIEMPRE todos los campos del formulario — independiente de si hay nota IA o no
   const sinNotaIA=!sub&&!obj&&!resp&&!trat&&window.icCurrentMode==='nueva';
   const needsAI=sinNotaIA;
-  const formulario=window.icCurrentMode==='nueva'?{
+  const formulario={
     edad:icv('ic-edad'),sexo:icv('ic-sexo'),dx:dx,hab:hab,riesgo:riesgo,
     sub:{
       emoc:icChipsBySubLabel('Estado emocional referido').join(', '),
@@ -3386,7 +3386,7 @@ window.guardarICFirebase=async()=>{
       plan:icChipsBySubLabel('Plan').join(', '),
       freq:icChipsBySubLabel('Frecuencia de seguimiento').join(', ')
     }
-  }:null;
+  };
   const _aiFormSnap=formulario; // mantener compatibilidad
   // Guardar snapshot en localStorage como respaldo antes de intentar Firebase
   if(sinNotaIA&&_aiFormSnap){
