@@ -7265,8 +7265,11 @@ window.hpacRenderNotas=()=>{
           if(fd2.sub.cita)fRows.push(['Cita textual','"'+fd2.sub.cita+'"']);
         }
         if(fd2.obj){
+          if(fd2.obj.orient)fRows.push(['Orientación',fd2.obj.orient]);
+          if(fd2.obj.conc)fRows.push(['Conciencia / Colaboración',fd2.obj.conc]);
           if(fd2.obj.afecto)fRows.push(['Afecto',fd2.obj.afecto]);
           if(fd2.obj.pens)fRows.push(['Pensamiento',fd2.obj.pens]);
+          if(fd2.obj.insight)fRows.push(['Lenguaje / Insight',fd2.obj.insight]);
           if(fd2.obj.regulacion)fRows.push(['Regulación emocional',fd2.obj.regulacion]);
           if(fd2.obj.ideacion)fRows.push(['Ideación suicida',fd2.obj.ideacion]);
           if(fd2.obj.protectores)fRows.push(['Factores protectores',fd2.obj.protectores]);
@@ -7275,6 +7278,8 @@ window.hpacRenderNotas=()=>{
         if(fd2.resp){
           if(fd2.resp.tipoResp)fRows.push(['Tipo de respuesta',fd2.resp.tipoResp]);
           if(fd2.resp.impresion)fRows.push(['Impresión clínica',fd2.resp.impresion]);
+          if(fd2.resp.sintomasDx)fRows.push(['Síntomas / Diagnóstico',fd2.resp.sintomasDx]);
+          if(fd2.resp.impresionIA)fRows.push(['Impresión diagnóstica IA',fd2.resp.impresionIA]);
         }
         if(fd2.trat){
           if(fd2.trat.interv)fRows.push(['Intervención realizada',fd2.trat.interv]);
