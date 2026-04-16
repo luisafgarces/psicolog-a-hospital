@@ -6855,6 +6855,7 @@ window.setPTipo=(tipo)=>{
 let _hPacId=null,_hPacNombre='';
 window._hPacId=null;window._hPacNombre='';
 const _hMap={};window._hMap=_hMap;
+const _hFormMap={};window._hFormMap=_hFormMap;
 
 window.verHistorialIC=(pacId,pacNombre)=>{
   const p=(window.pacientes||[]).find(x=>x.id===pacId)||{nombre:pacNombre||''};
@@ -7135,6 +7136,7 @@ window.hpacRenderNotas=()=>{
   ).sort((a,b)=>_sk(b)-_sk(a));
   const testsSorted=[].concat(tests).sort((a,b)=>_sk(b)-_sk(a));
   for(var k in _hMap)delete _hMap[k];
+  for(var k in _hFormMap)delete _hFormMap[k];
   if(!notas.length&&!testsSorted.length){
     cont.innerHTML='<div class="empty" style="padding:36px"><p>Sin registros para este paciente.</p></div>';return;
   }
@@ -7280,6 +7282,7 @@ window.hpacRenderNotas=()=>{
           if(fd2.trat.freq)fRows.push(['Frecuencia',fd2.trat.freq]);
         }
         if(fRows.length){
+          _hFormMap[e.id]={meta:{id:e.id,modo:modo,fecha:e.fecha||'',nombre:nombre},filas:fRows};
           formHtml='<details style="margin-top:10px;border-top:1px dashed var(--border);padding-top:8px">'
             +'<summary style="font-size:0.72rem;font-weight:700;color:var(--accent2);cursor:pointer;user-select:none;letter-spacing:.04em">📋 Ver formulario diligenciado</summary>'
             +'<div style="margin-top:8px;display:grid;grid-template-columns:minmax(110px,auto) 1fr;gap:4px 12px;font-size:0.73rem">'
@@ -7287,7 +7290,7 @@ window.hpacRenderNotas=()=>{
             +'</div>'
             +'<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'
             +'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem" data-id="'+e.id+'" data-ni="'+ni+'" onclick="hpacGenerarNotaIA(this.dataset.id, parseInt(this.dataset.ni))">✨ Generar nota desde este formulario</button>'
-            +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacDescargarFormPDF('+JSON.stringify({id:'__ID__',modo:'__MODO__',fecha:'__FECHA__',nombre:'__NOMBRE__'}).replace('__ID__',e.id).replace('__MODO__',modo).replace('__FECHA__',e.fecha||'').replace('__NOMBRE__',nombre)+','+JSON.stringify(fRows)+')" >📄 Descargar PDF</button>'
+            +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacDescargarFormPDF(\'' + e.id + '\')" >📄 Descargar PDF</button>'
             +'</div>'
             +'</details>';
         }
@@ -7399,7 +7402,13 @@ window.hpacEditar=(ni)=>{
   document.getElementById('modal-nota-edit').style.display='flex';
 };
 
-window.hpacDescargarFormPDF=function(meta, filas){  try{    var rows=Array.isArray(filas)?filas:[];    var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Formulario '+( meta.modo||'')+'</title>';    html+='<style>body{font-family:Arial,sans-serif;font-size:11px;color:#111;padding:20px;margin:0}';    html+='h1{font-size:15px;color:#1a3a6a;margin:0 0 4px}h2{font-size:11px;color:#555;margin:0 0 16px;font-weight:400}';    html+='.grid{display:grid;grid-template-columns:minmax(130px,auto) 1fr;gap:5px 14px;margin-top:8px}';    html+='.label{font-weight:700;color:#3a5a7a}.value{color:#111}';    html+='.footer{font-size:9px;color:#888;border-top:1px solid #ddd;padding-top:8px;margin-top:20px}';    html+='@media print{.np{display:none}}</style></head><body>';    html+='<div class="np" style="margin-bottom:12px"><button onclick="window.print()" style="background:#2563a8;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;cursor:pointer;font-weight:700">🖨️ Imprimir / Guardar PDF</button></div>';    html+='<h1>'+( meta.modo||'Formulario')+' — Psicología Hospitalaria</h1>';    html+='<h2>Paciente: '+(meta.nombre||'—')+' · Fecha: '+(meta.fecha||'—')+'</h2>';    html+='<div class="grid">';    rows.forEach(function(r){html+='<span class="label">'+r[0]+':</span><span class="value">'+r[1]+'</span>';});    html+='</div>';    html+='<div class="footer">Generado desde PsicoHosp · Psicología Hospitalaria · '+(new Date().toLocaleString('es-CO'))+'</div>';    html+='</body></html>';    var win=window.open('','_blank');    if(win){win.document.write(html);win.document.close();}    else alert('El navegador bloqueó la ventana. Habilita popups para este sitio.');  }catch(err){console.error('hpacDescargarFormPDF:',err);}};
+window.hpacDescargarFormPDF=function(docId){
+  var entry=window._hFormMap&&window._hFormMap[docId];
+  if(!entry){alert('No se encontraron datos del formulario.');return;}
+  var meta=entry.meta;var filas=entry.filas;
+  (function(meta,filas){  try{    var rows=Array.isArray(filas)?filas:[];    var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Formulario '+( meta.modo||'')+'</title>';    html+='<style>body{font-family:Arial,sans-serif;font-size:11px;color:#111;padding:20px;margin:0}';    html+='h1{font-size:15px;color:#1a3a6a;margin:0 0 4px}h2{font-size:11px;color:#555;margin:0 0 16px;font-weight:400}';    html+='.grid{display:grid;grid-template-columns:minmax(130px,auto) 1fr;gap:5px 14px;margin-top:8px}';    html+='.label{font-weight:700;color:#3a5a7a}.value{color:#111}';    html+='.footer{font-size:9px;color:#888;border-top:1px solid #ddd;padding-top:8px;margin-top:20px}';    html+='@media print{.np{display:none}}</style></head><body>';    html+='<div class="np" style="margin-bottom:12px"><button onclick="window.print()" style="background:#2563a8;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;cursor:pointer;font-weight:700">🖨️ Imprimir / Guardar PDF</button></div>';    html+='<h1>'+( meta.modo||'Formulario')+' — Psicología Hospitalaria</h1>';    html+='<h2>Paciente: '+(meta.nombre||'—')+' · Fecha: '+(meta.fecha||'—')+'</h2>';    html+='<div class="grid">';    rows.forEach(function(r){html+='<span class="label">'+r[0]+':</span><span class="value">'+r[1]+'</span>';});    html+='</div>';    html+='<div class="footer">Generado desde PsicoHosp · Psicología Hospitalaria · '+(new Date().toLocaleString('es-CO'))+'</div>';    html+='</body></html>';    var win=window.open('','_blank');    if(win){win.document.write(html);win.document.close();}    else alert('El navegador bloqueó la ventana. Habilita popups para este sitio.');  }catch(err){console.error('hpacDescargarFormPDF:',err);}}
+  )(meta,filas);
+};
 
 window.hpacCopiar=(ni)=>{
   const m=_hMap[ni];if(!m)return;
