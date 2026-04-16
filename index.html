@@ -9125,7 +9125,8 @@ window.calcCSSRS=()=>{
   else if(resp[1]){level='moderate';interp='RIESGO LEVE-MODERADO — Ideación activa sin plan. Seguimiento estrecho';}
   else if(resp[0]){level='moderate';interp='RIESGO BAJO-MODERADO — Deseos pasivos de muerte. Psicoeducación y seguimiento';}
   else{level='normal';interp='Sin ideación suicida activa reportada';}
-  showResult('test-result-area','',null,level,interp,'');
+  _currentTest='cssrs';var score=resp.filter(Boolean).length;
+  showResult('test-result-area',score,6,level,interp,'');
 };
 
 window.calcMMAS4=()=>{
