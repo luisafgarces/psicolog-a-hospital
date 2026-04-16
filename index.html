@@ -10623,17 +10623,17 @@ window.mostrarBorradoresFirebase = async function(tipo) {
 
   // 1. Traer de Firebase
   try {
-    if (window.db && window._getDocs && window._query && window._collection && window._where && window._orderBy) {
+    if (window.db && window._getDocs && window._query && window._collection && window._where) {
       var snap = await window._getDocs(
         window._query(
           window._collection(window.db, 'borradores_formularios'),
-          window._where('tipo', '==', tipo),
-          window._orderBy('fechaTS', 'desc')
+          window._where('tipo', '==', tipo)
         )
       );
       snap.forEach(function(d) {
         borradores.push(Object.assign({ _fbId: d.id }, d.data()));
       });
+      borradores.sort(function(a,b){ return (b.fechaTS||'').localeCompare(a.fechaTS||''); });
     }
   } catch(e) { console.warn('Borrador Firebase read:', e); }
 
