@@ -3144,7 +3144,10 @@ window.guardarICFirebase=async()=>{
     else if(window.icCurrentMode==='seg'){
       // Generar nota con Gemini si hay API key, y esperar el resultado antes de guardar
       const apiKey=(typeof window.getGeminiKey==='function'?window.getGeminiKey():'')||localStorage.getItem('gemini_api_key')||'';
-      if(apiKey){
+      const _elSegPrev=document.getElementById('ic-out-seg-texto');
+      const _vSegPrev=(_elSegPrev?.textContent||'').trim();
+      const _yaGenerada=_vSegPrev&&!_vSegPrev.startsWith('Genera')&&!_vSegPrev.startsWith('⏳')&&!_vSegPrev.startsWith('❌')&&_vSegPrev.length>50;
+      if(apiKey&&!_yaGenerada){
         try{await generarSegConGemini(apiKey);}catch(e){console.warn('[SAVE] generarSegConGemini error:',e);}
       }
       const elSeg=document.getElementById('ic-out-seg-texto');
