@@ -427,6 +427,8 @@ input.toggle-cb{display:none}
     <div class="nav-item" onclick="goTo('psicoeducacion')"><span class="icon">📚</span>Guías Clínicas</div>
     <div class="nav-section">Historial</div>
     <div class="nav-item" onclick="goTo('historial-pac')"><span class="icon">📂</span>Historial Pacientes</div>
+    <div class="nav-section">Registro</div>
+    <div class="nav-item" onclick="goTo('metricas')"><span class="icon">📊</span>Mis Métricas</div>
   </div>
   <div class="sidebar-footer" style="flex-direction:column;align-items:flex-start;gap:6px">
     <div style="display:flex;align-items:center;gap:8px">
@@ -9122,6 +9124,7 @@ window.calcCSSRS=()=>{
   else if(resp[1]){level='moderate';interp='RIESGO LEVE-MODERADO — Ideación activa sin plan. Seguimiento estrecho';}
   else if(resp[0]){level='moderate';interp='RIESGO BAJO-MODERADO — Deseos pasivos de muerte. Psicoeducación y seguimiento';}
   else{level='normal';interp='Sin ideación suicida activa reportada';}
+  _currentTest = 'cssrs';
   showResult('test-result-area','',null,level,interp,'');
 };
 
@@ -10751,6 +10754,439 @@ window._eliminarBorradorFirebase = async function(fbId, tipo) {
   window.mostrarBorradoresFirebase(tipo);
 };
 
+</script>
+
+
+
+<!-- Módulo Métricas de Actividad Clínica -->
+<script>
+(function(){
+  function inyectarPagina(){
+    if(document.getElementById("page-metricas")) return;
+    var cont=document.querySelector(".content");
+    if(!cont) return;
+    var div=document.createElement("div");
+    div.id="page-metricas";
+    div.className="page";
+    var h="";
+    h+='<div class="section-header">';
+    h+='<h2>&#128202; Mis M&eacute;tricas de Actividad Cl&iacute;nica</h2>';
+    h+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
+    h+='<button class="btn btn-secondary btn-sm" onclick="metricasExportarCSV()">&#11015;&#65039; Exportar CSV</button>';
+    h+='<button class="btn btn-primary btn-sm" onclick="metricasImprimir()">&#128424;&#65039; Imprimir / PDF</button>';
+    h+="</div></div>";
+    h+='<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 16px;margin-bottom:20px;font-size:0.82rem;color:#7c2d12">';
+    h+="&#128203; Registro autom&aacute;tico de actividad cl&iacute;nica. Incluye registros manuales. Imprimible como soporte documental.";
+    h+="</div>";
+    h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:20px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap">';
+    h+='<div style="display:flex;flex-direction:column;gap:4px">';
+    h+='<label style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em">Per&iacute;odo</label>';
+    h+='<select id="met-periodo" onchange="metricasCambiarPeriodo()" style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;background:var(--surface)">';
+    h+="<option value='hoy'>Hoy</option><option value='semana'>Esta semana</option>";
+    h+="<option value='mes' selected>Este mes</option><option value='mes_anterior'>Mes anterior</option>";
+    h+="<option value='anio'>Este a&ntilde;o</option><option value='custom'>Rango personalizado</option>";
+    h+="</select></div>";
+    h+='<div id="met-custom-range" style="display:none;gap:10px;flex-wrap:wrap">';
+    h+='<div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em">Desde</label>';
+    h+='<input type="date" id="met-desde" onchange="metricasRender()" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem"></div>';
+    h+='<div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em">Hasta</label>';
+    h+='<input type="date" id="met-hasta" onchange="metricasRender()" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem"></div>';
+    h+="</div>";
+    h+='<button class="btn btn-secondary btn-sm" onclick="metricasRender()">&#8635; Actualizar</button>';
+    h+='<span id="met-periodo-label" style="font-size:0.8rem;color:var(--text3);margin-left:auto;align-self:center"></span>';
+    h+="</div>";
+    h+='<div id="met-kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-bottom:28px"></div>';
+    h+='<div style="margin-bottom:28px"><div class="section-header"><h2 style="font-size:1rem">&#128197; Registro diario detallado</h2></div>';
+    h+='<div class="table-wrap"><table><thead><tr>';
+    h+="<th>Fecha</th><th>D&iacute;a</th><th>IC Nuevas</th><th>Seguimientos</th>";
+    h+="<th>Anamnesis</th><th>Cons. Externa</th><th>Otros</th>";
+    h+='<th style="color:var(--accent)">Total</th><th>Riesgo alto</th>';
+    h+='</tr></thead><tbody id="met-tabla-diaria">';
+    h+='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">Cargando datos&hellip;</td></tr>';
+    h+="</tbody></table></div></div>";
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:28px">';
+    h+='<div><div class="section-header"><h2 style="font-size:1rem">Por tipo de atenci&oacute;n</h2></div>';
+    h+='<div id="met-tipo-chart" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;min-height:100px"></div></div>';
+    h+='<div><div class="section-header"><h2 style="font-size:1rem">Por piso / servicio</h2></div>';
+    h+='<div id="met-piso-chart" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;min-height:100px"></div></div>';
+    h+="</div>";
+    h+='<div style="margin-bottom:28px"><div class="section-header"><h2 style="font-size:1rem">&#128198; Resumen mensual (a&ntilde;o en curso)</h2></div>';
+    h+='<div class="table-wrap"><table><thead><tr>';
+    h+="<th>Mes</th><th>IC Nuevas</th><th>Seguimientos</th><th>Anamnesis</th>";
+    h+='<th>Cons. Externa</th><th>Otros</th><th style="color:var(--accent)">Total</th>';
+    h+="<th>D&iacute;as con registro</th><th>Promedio/d&iacute;a</th>";
+    h+='</tr></thead><tbody id="met-tabla-mensual">';
+    h+='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">Cargando datos&hellip;</td></tr>';
+    h+="</tbody></table></div></div>";
+    h+='<div style="background:var(--surface);border:1.5px solid var(--accent2);border-radius:var(--radius);padding:18px;margin-bottom:24px">';
+    h+='<div style="font-size:0.88rem;font-weight:700;color:var(--accent);margin-bottom:14px">';
+    h+="&#9999;&#65039; Agregar atenci&oacute;n manual ";
+    h+='<span style="font-size:0.72rem;font-weight:400;color:var(--text3)">(para sesiones no registradas por formulario)</span></div>';
+    h+='<div style="display:grid;grid-template-columns:140px 1fr 1fr 1fr auto;gap:10px;align-items:end;flex-wrap:wrap">';
+    h+='<div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:0.72rem;font-weight:700;color:var(--text2)">Fecha</label>';
+    h+='<input type="date" id="met-man-fecha" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem"></div>';
+    h+='<div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:0.72rem;font-weight:700;color:var(--text2)">Tipo</label>';
+    h+='<select id="met-man-tipo" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;background:var(--surface)">';
+    h+="<option value='IC Nueva'>IC Nueva</option><option value='Seguimiento'>Seguimiento</option>";
+    h+="<option value='Anamnesis'>Anamnesis</option><option value='Consulta Externa'>Consulta Externa</option>";
+    h+="<option value='Intervenci\u00f3n Familiar'>Intervenci\u00f3n Familiar</option>";
+    h+="<option value='Nota Especial'>Nota Especial</option><option value='Otro'>Otro</option>";
+    h+="</select></div>";
+    h+='<div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:0.72rem;font-weight:700;color:var(--text2)">Paciente (opcional)</label>';
+    h+='<input type="text" id="met-man-nombre" placeholder="Nombre o iniciales\u2026" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem"></div>';
+    h+='<div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:0.72rem;font-weight:700;color:var(--text2)">Piso / Servicio</label>';
+    h+='<select id="met-man-piso" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;background:var(--surface)">';
+    h+="<option value=''>\u2014 sin especificar \u2014</option>";
+    h+="<option>UCI</option><option>Urgencias</option><option>Bloque Azul</option>";
+    h+="<option>Piso 1</option><option>Piso 2</option><option>Piso 3</option>";
+    h+="<option>Piso 4</option><option>Piso 5</option><option>Piso 6</option>";
+    h+="<option>Consulta Externa</option></select></div>";
+    h+='<button class="btn btn-primary" onclick="metRegistrarManual()" style="height:36px;white-space:nowrap">+ Agregar</button>';
+    h+="</div>";
+    h+='<div style="margin-top:14px"><div style="font-size:0.75rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Registros manuales guardados</div>';
+    h+='<div id="met-man-lista" style="max-height:240px;overflow-y:auto"></div></div>';
+    h+="</div>";
+    div.innerHTML=h;
+    cont.appendChild(div);
+  }
+
+  var MESES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  var DIAS=["Dom","Lun","Mar","Mi\u00e9","Jue","Vie","S\u00e1b"];
+
+  function hoy(){return new Date().toISOString().split("T")[0];}
+  function fechaStr(d){return d.toISOString().split("T")[0];}
+  function parseFecha(str){
+    if(!str) return null;
+    if(typeof str==="object"&&str.toDate) return str.toDate();
+    if(typeof str==="object"&&str.seconds) return new Date(str.seconds*1000);
+    if(/^\d{4}-\d{2}-\d{2}/.test(str)) return new Date(str.substring(0,10)+"T12:00:00");
+    if(/^\d{2}\/\d{2}\/\d{4}/.test(str)){var p=str.split("/");return new Date(p[2]+"-"+p[1]+"-"+p[0]+"T12:00:00");}
+    var d=new Date(str); return isNaN(d)?null:d;
+  }
+  function catTipo(tipo){
+    if(!tipo) return "Otros";
+    var t=tipo.toLowerCase();
+    if(t.includes("ic nueva")||t.includes("interconsulta")||t==="ic") return "IC Nueva";
+    if(t.includes("seguimiento")||t==="seg"||t.includes("evoluci")) return "Seguimiento";
+    if(t.includes("anamnesis")) return "Anamnesis";
+    if(t.includes("consulta externa")||t.includes("consulta-externa")||t.includes("eps")) return "Consulta Externa";
+    if(t.includes("familiar")||t==="fam") return "Intervenci\u00f3n Familiar";
+    if(t.includes("nota especial")||t==="esp") return "Nota Especial";
+    return "Otros";
+  }
+
+  function getRango(){
+    var per=(document.getElementById("met-periodo")||{}).value||"mes";
+    var ahora=new Date(); var desde,hasta;
+    if(per==="hoy"){desde=hasta=hoy();}
+    else if(per==="semana"){var d=new Date(ahora);d.setDate(d.getDate()-d.getDay()+1);desde=fechaStr(d);hasta=hoy();}
+    else if(per==="mes"){desde=ahora.getFullYear()+"-"+String(ahora.getMonth()+1).padStart(2,"0")+"-01";hasta=hoy();}
+    else if(per==="mes_anterior"){var m=new Date(ahora.getFullYear(),ahora.getMonth()-1,1);var fin=new Date(ahora.getFullYear(),ahora.getMonth(),0);desde=fechaStr(m);hasta=fechaStr(fin);}
+    else if(per==="anio"){desde=ahora.getFullYear()+"-01-01";hasta=hoy();}
+    else if(per==="custom"){desde=(document.getElementById("met-desde")||{}).value||"";hasta=(document.getElementById("met-hasta")||{}).value||hoy();}
+    return{desde:desde||hoy(),hasta:hasta||hoy()};
+  }
+
+  window.metricasCambiarPeriodo=function(){
+    var per=(document.getElementById("met-periodo")||{}).value;
+    var rng=document.getElementById("met-custom-range");
+    if(rng) rng.style.display=per==="custom"?"flex":"none";
+    metricasRender();
+  };
+
+  async function leerAtenciones(){
+    var at=[];
+    try{
+      if(window.db&&window._getDocs&&window._collection){
+        try{var s=await window._getDocs(window._collection(window.db,"historial_clinico"));
+          s.forEach(function(d){var n=d.data();var f=parseFecha(n.fecha||n.fechaTS||n.createdAt);if(!f)return;
+            at.push({fecha:fechaStr(f),tipo:n.tipo||"Seguimiento",piso:n.piso||n.habitacion||"",riesgo:n.riesgo||"",fuente:"firebase",nombre:n.pacienteNombre||n.nombre||""});});}catch(e){console.warn("historial_clinico",e);}
+        try{var sIC=await window._getDocs(window._collection(window.db,"interconsultas"));
+          sIC.forEach(function(d){var ic=d.data();var f=parseFecha(ic.fecha||ic.fechaTS||ic.createdAt);if(!f)return;
+            var tipo=ic.modo==="seg"?"Seguimiento":ic.modo==="fam"?"Intervenci\u00f3n Familiar":ic.modo==="esp"?"Nota Especial":"IC Nueva";
+            at.push({fecha:fechaStr(f),tipo:tipo,piso:ic.habitacion||ic.piso||"",riesgo:ic.riesgo||ic.nivelRiesgo||"",fuente:"firebase",nombre:ic.nombre||ic.paciente||""});});}catch(e){console.warn("interconsultas",e);}
+        try{var sAN=await window._getDocs(window._collection(window.db,"anamnesis"));
+          sAN.forEach(function(d){var an=d.data();var f=parseFecha(an.fecha||an.fechaTS||an.createdAt);if(!f)return;
+            at.push({fecha:fechaStr(f),tipo:"Anamnesis",piso:an.piso||"",riesgo:"",fuente:"firebase",nombre:an.nombre||an.paciente||""});});}catch(e){console.warn("anamnesis",e);}
+        try{var sP=await window._getDocs(window._collection(window.db,"pacientes"));
+          sP.forEach(function(d){var pac=d.data();
+            (pac.sesiones||[]).forEach(function(s){var f=parseFecha(s.fecha||s.fechaTS);if(!f)return;
+              var tipo=pac.tipo==="consulta-externa"?"Consulta Externa":(s.tipo||"Seguimiento");
+              at.push({fecha:fechaStr(f),tipo:tipo,piso:pac.piso||"",riesgo:s.riesgo||"",fuente:"firebase",nombre:pac.nombre||""});});
+            (pac.notas||pac.historial||[]).forEach(function(n){var f=parseFecha(n.fecha||n.fechaTS);if(!f)return;
+              at.push({fecha:fechaStr(f),tipo:n.tipo||"Seguimiento",piso:pac.piso||pac.habitacion||"",riesgo:n.riesgo||"",fuente:"firebase",nombre:pac.nombre||""});});
+          });}catch(e){console.warn("pacientes",e);}
+      }
+    }catch(e){console.warn("Firebase",e);}
+    try{var man=JSON.parse(localStorage.getItem("metricas_manuales")||"[]");
+      man.forEach(function(m){at.push({fecha:m.fecha,tipo:m.tipo,piso:m.piso||"",riesgo:"",fuente:"manual",nombre:m.nombre||""});});}catch(e){}
+    return at;
+  }
+
+  window.metricasRender=async function(){
+    ["met-kpi-grid","met-tabla-diaria","met-tabla-mensual","met-tipo-chart","met-piso-chart"].forEach(function(id){
+      var el=document.getElementById(id);if(el) el.innerHTML='<div style="color:var(--text3);font-size:0.82rem;padding:10px">Cargando\u2026</div>';});
+    var rango=getRango();
+    var lbl=document.getElementById("met-periodo-label");if(lbl) lbl.textContent=rango.desde+" \u2192 "+rango.hasta;
+    var todas=await leerAtenciones();
+    var at=todas.filter(function(a){return a.fecha>=rango.desde&&a.fecha<=rango.hasta;});
+    var total=at.length;
+    var icN=at.filter(function(a){return catTipo(a.tipo)==="IC Nueva";}).length;
+    var seg=at.filter(function(a){return catTipo(a.tipo)==="Seguimiento";}).length;
+    var ana=at.filter(function(a){return catTipo(a.tipo)==="Anamnesis";}).length;
+    var ce=at.filter(function(a){return catTipo(a.tipo)==="Consulta Externa";}).length;
+    var otr=total-icN-seg-ana-ce;
+    var rA=at.filter(function(a){return(a.riesgo||"").toUpperCase().includes("ALTO");}).length;
+    var dias=new Set(at.map(function(a){return a.fecha;})).size;
+    var prom=dias>0?(total/dias).toFixed(1):0;
+    var kpiEl=document.getElementById("met-kpi-grid");
+    if(kpiEl){
+      var kpis=[
+        {l:"Total atenciones",v:total,c:"var(--accent)",s:"En el per\u00edodo"},
+        {l:"IC Nuevas",v:icN,c:"#7c3aed",s:"Primeras valoraciones"},
+        {l:"Seguimientos",v:seg,c:"var(--success)",s:"Notas de evoluci\u00f3n"},
+        {l:"Anamnesis",v:ana,c:"var(--warning)",s:"Historias cl\u00ednicas"},
+        {l:"Cons. Externa",v:ce,c:"#0369a1",s:"EPS / ambulatorio"},
+        {l:"Riesgo alto",v:rA,c:"var(--danger)",s:"Con alerta de riesgo"},
+        {l:"D\u00edas con atenci\u00f3n",v:dias,c:"var(--text2)",s:"D\u00edas laborados"},
+        {l:"Promedio / d\u00eda",v:prom,c:"var(--accent2)",s:"Atenciones por d\u00eda"},
+      ];
+      kpiEl.innerHTML=kpis.map(function(k){
+        return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px">'
+          +'<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text2)">'+k.l+"</div>"
+          +'<div style="font-family:DM Serif Display,serif;font-size:2rem;line-height:1.1;margin:4px 0;color:'+k.c+'">'+k.v+"</div>"
+          +'<div style="font-size:0.72rem;color:var(--text3)">'+k.s+"</div></div>";
+      }).join("");
+    }
+    var pF={};
+    at.forEach(function(a){
+      if(!pF[a.fecha]) pF[a.fecha]={icN:0,seg:0,an:0,ce:0,otr:0,rA:0};
+      var cat=catTipo(a.tipo);
+      if(cat==="IC Nueva") pF[a.fecha].icN++;
+      else if(cat==="Seguimiento") pF[a.fecha].seg++;
+      else if(cat==="Anamnesis") pF[a.fecha].an++;
+      else if(cat==="Consulta Externa") pF[a.fecha].ce++;
+      else pF[a.fecha].otr++;
+      if((a.riesgo||"").toUpperCase().includes("ALTO")) pF[a.fecha].rA++;
+    });
+    var fechas=Object.keys(pF).sort().reverse();
+    var tbD=document.getElementById("met-tabla-diaria");
+    if(tbD){
+      if(!fechas.length){tbD.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">Sin registros en este per\u00edodo.</td></tr>';}
+      else{tbD.innerHTML=fechas.map(function(f){
+        var r=pF[f];var tot=r.icN+r.seg+r.an+r.ce+r.otr;
+        var d=parseFecha(f);var dn=d?DIAS[d.getDay()]:"";
+        var fd=d?(d.getDate()+" "+MESES[d.getMonth()].substring(0,3)+" "+d.getFullYear()):f;
+        return "<tr><td><strong>"+fd+"</strong></td><td>"+dn+"</td>"
+          +'<td style="color:#7c3aed;font-weight:700">'+(r.icN||"\u2014")+"</td>"
+          +'<td style="color:var(--success);font-weight:700">'+(r.seg||"\u2014")+"</td>"
+          +'<td style="color:var(--warning);font-weight:700">'+(r.an||"\u2014")+"</td>"
+          +'<td style="color:#0369a1;font-weight:700">'+(r.ce||"\u2014")+"</td>"
+          +'<td style="color:var(--text3)">'+(r.otr||"\u2014")+"</td>"
+          +'<td style="font-weight:800;color:var(--accent);font-size:1rem">'+tot+"</td>"
+          +"<td>"+(r.rA>0?'<span style="background:var(--danger-light);color:var(--danger);padding:2px 8px;border-radius:20px;font-size:0.72rem;font-weight:700">\u26a0\ufe0f '+r.rA+"</span>":"\u2014")+"</td></tr>";
+      }).join("");}
+    }
+    var pT={};
+    at.forEach(function(a){var ct=catTipo(a.tipo);pT[ct]=(pT[ct]||0)+1;});
+    var tipoEl=document.getElementById("met-tipo-chart");
+    if(tipoEl){
+      if(!Object.keys(pT).length){tipoEl.innerHTML='<div style="color:var(--text3);font-size:0.82rem">Sin datos.</div>';}
+      else{var maxT=Math.max.apply(null,Object.values(pT));
+        var cols={"IC Nueva":"#7c3aed","Seguimiento":"#16a34a","Anamnesis":"#d97706","Consulta Externa":"#0369a1","Intervenci\u00f3n Familiar":"#0891b2","Nota Especial":"#dc2626","Otros":"#6b7280"};
+        tipoEl.innerHTML=Object.keys(pT).sort(function(a,b){return pT[b]-pT[a];}).map(function(t){
+          var v=pT[t];var pct=maxT>0?Math.round(v/maxT*100):0;var col=cols[t]||"#6b7280";
+          return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:3px">'
+            +'<span style="font-weight:600;color:var(--text)">'+t+"</span>"
+            +'<span style="font-weight:800;color:'+col+'">'+v+"</span></div>"
+            +'<div style="background:var(--surface2);border-radius:20px;height:8px;overflow:hidden">'
+            +'<div style="height:100%;width:'+pct+'%;background:'+col+';border-radius:20px"></div></div></div>';
+        }).join("");}
+    }
+    var pP={};
+    at.forEach(function(a){var p=(a.piso||"").trim()||"Sin especificar";pP[p]=(pP[p]||0)+1;});
+    var pisoEl=document.getElementById("met-piso-chart");
+    if(pisoEl){
+      if(!Object.keys(pP).length){pisoEl.innerHTML='<div style="color:var(--text3);font-size:0.82rem">Sin datos.</div>';}
+      else{var maxP=Math.max.apply(null,Object.values(pP));
+        pisoEl.innerHTML=Object.keys(pP).sort(function(a,b){return pP[b]-pP[a];}).map(function(p){
+          var v=pP[p];var pct=maxP>0?Math.round(v/maxP*100):0;
+          return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:3px">'
+            +'<span style="font-weight:600;color:var(--text)">'+p+"</span>"
+            +'<span style="font-weight:800;color:var(--accent)">'+v+"</span></div>"
+            +'<div style="background:var(--surface2);border-radius:20px;height:8px;overflow:hidden">'
+            +'<div style="height:100%;width:'+pct+'%;background:var(--accent2);border-radius:20px"></div></div></div>';
+        }).join("");}
+    }
+    var anioAct=new Date().getFullYear();
+    var pM={};for(var mi=0;mi<12;mi++) pM[mi]={icN:0,seg:0,an:0,ce:0,otr:0,dias:new Set()};
+    todas.filter(function(a){return a.fecha&&a.fecha.startsWith(String(anioAct));}).forEach(function(a){
+      var d=parseFecha(a.fecha);if(!d) return;var m=d.getMonth();var cat=catTipo(a.tipo);
+      if(cat==="IC Nueva") pM[m].icN++;else if(cat==="Seguimiento") pM[m].seg++;
+      else if(cat==="Anamnesis") pM[m].an++;else if(cat==="Consulta Externa") pM[m].ce++;
+      else pM[m].otr++;pM[m].dias.add(a.fecha);
+    });
+    var tbM=document.getElementById("met-tabla-mensual");
+    if(tbM){
+      var mesAct=new Date().getMonth();
+      tbM.innerHTML=Array.from({length:mesAct+1},function(_,i){return i;}).reverse().map(function(mi){
+        var r=pM[mi];var tot=r.icN+r.seg+r.an+r.ce+r.otr;var ds=r.dias.size;
+        var pr=ds>0?(tot/ds).toFixed(1):"\u2014";var esAct=mi===mesAct;
+        return "<tr"+(esAct?' style="background:var(--accent-light)"':"")+
+          "><td style='font-weight:700'>"+MESES[mi]+" "+anioAct+(esAct?' <span style="font-size:0.68rem;color:var(--accent)">(en curso)</span>':"")+"</td>"
+          +'<td style="color:#7c3aed;font-weight:700">'+(r.icN||"\u2014")+"</td>"
+          +'<td style="color:var(--success);font-weight:700">'+(r.seg||"\u2014")+"</td>"
+          +'<td style="color:var(--warning);font-weight:700">'+(r.an||"\u2014")+"</td>"
+          +'<td style="color:#0369a1;font-weight:700">'+(r.ce||"\u2014")+"</td>"
+          +'<td style="color:var(--text3)">'+(r.otr||"\u2014")+"</td>"
+          +'<td style="font-weight:800;color:var(--accent);font-size:1rem">'+(tot||"\u2014")+"</td>"
+          +"<td>"+(ds||"\u2014")+"</td>"
+          +'<td style="font-weight:600;color:var(--accent2)">'+pr+"</td></tr>";
+      }).join("");
+    }
+    metRenderManualLista();
+  };
+
+  function metRenderManualLista(){
+    var lista=document.getElementById("met-man-lista");if(!lista) return;
+    var man=[];try{man=JSON.parse(localStorage.getItem("metricas_manuales")||"[]");}catch(e){}
+    if(!man.length){lista.innerHTML='<div style="font-size:0.8rem;color:var(--text3);font-style:italic;padding:6px 0">Sin registros manuales a\u00fan.</div>';return;}
+    lista.innerHTML=man.slice().reverse().map(function(m,ri){
+      var idx=man.length-1-ri;
+      return '<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-bottom:5px">'
+        +'<div style="flex:1;min-width:0"><span style="font-weight:700;font-size:0.82rem;color:var(--text)">'+(m.tipo||"")+"</span>"
+        +(m.nombre?' <span style="font-size:0.78rem;color:var(--text2)">\u00b7 '+m.nombre+"</span>":"")
+        +'<div style="font-size:0.72rem;color:var(--text3)">'+(m.fecha||"")+(m.piso?" \u00b7 "+m.piso:"")+"</div></div>"
+        +'<span style="font-size:0.65rem;background:#d1fae5;color:#065f46;padding:2px 7px;border-radius:20px;font-weight:700;flex-shrink:0">manual</span>'
+        +'<button onclick="metEliminarManual('+idx+')" style="background:var(--danger-light);color:var(--danger);border:1px solid #f0c0bb;border-radius:6px;padding:3px 8px;font-size:0.72rem;cursor:pointer;flex-shrink:0">\ud83d\uddd1</button>'
+        +"</div>";
+    }).join("");
+  }
+
+  window.metRegistrarManual=function(){
+    var fecha=(document.getElementById("met-man-fecha")||{}).value;
+    var tipo=(document.getElementById("met-man-tipo")||{}).value;
+    var nombre=((document.getElementById("met-man-nombre")||{}).value||"").trim();
+    var piso=(document.getElementById("met-man-piso")||{}).value;
+    if(!fecha){alert("Selecciona una fecha.");return;}
+    var man=[];try{man=JSON.parse(localStorage.getItem("metricas_manuales")||"[]");}catch(e){}
+    man.push({fecha:fecha,tipo:tipo,nombre:nombre,piso:piso,ts:Date.now()});
+    localStorage.setItem("metricas_manuales",JSON.stringify(man));
+    var nomEl=document.getElementById("met-man-nombre");if(nomEl) nomEl.value="";
+    if(typeof toast==="function") toast("\u2705 Atenci\u00f3n registrada");
+    metricasRender();
+  };
+
+  window.metEliminarManual=function(idx){
+    if(!confirm("\u00bfEliminar este registro?")) return;
+    var man=[];try{man=JSON.parse(localStorage.getItem("metricas_manuales")||"[]");}catch(e){}
+    man.splice(idx,1);localStorage.setItem("metricas_manuales",JSON.stringify(man));
+    metricasRender();
+  };
+
+  window.metricasExportarCSV=async function(){
+    var rango=getRango();var todas=await leerAtenciones();
+    var fil=todas.filter(function(a){return a.fecha>=rango.desde&&a.fecha<=rango.hasta;});
+    fil.sort(function(a,b){return a.fecha.localeCompare(b.fecha);});
+    var csv="\uFEFFfecha,dia,tipo,categoria,paciente,piso,riesgo,fuente\n";
+    fil.forEach(function(a){
+      var d=parseFecha(a.fecha);var dia=d?DIAS[d.getDay()]:"";
+      csv+=[a.fecha,dia,a.tipo,catTipo(a.tipo),a.nombre||"",a.piso||"",a.riesgo||"",a.fuente||""].map(function(v){return'"'+String(v).replace(/"/g,'""')+'"';}).join(",")+"\n";
+    });
+    var blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");a.href=url;
+    a.download="actividad_clinica_"+rango.desde+"_"+rango.hasta+".csv";
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  };
+
+  window.metricasImprimir=async function(){
+    var rango=getRango();var todas=await leerAtenciones();
+    var at=todas.filter(function(a){return a.fecha>=rango.desde&&a.fecha<=rango.hasta;});
+    var total=at.length,icN=0,seg=0,ana=0,ce=0,rA=0;
+    at.forEach(function(a){
+      var cat=catTipo(a.tipo);
+      if(cat==="IC Nueva") icN++;else if(cat==="Seguimiento") seg++;
+      else if(cat==="Anamnesis") ana++;else if(cat==="Consulta Externa") ce++;
+      if((a.riesgo||"").toUpperCase().includes("ALTO")) rA++;
+    });
+    var otr=total-icN-seg-ana-ce;
+    var dias=new Set(at.map(function(a){return a.fecha;})).size;
+    var pF={};
+    at.forEach(function(a){
+      if(!pF[a.fecha]) pF[a.fecha]={icN:0,seg:0,an:0,ce:0,otr:0,rA:0};
+      var cat=catTipo(a.tipo);
+      if(cat==="IC Nueva") pF[a.fecha].icN++;else if(cat==="Seguimiento") pF[a.fecha].seg++;
+      else if(cat==="Anamnesis") pF[a.fecha].an++;else if(cat==="Consulta Externa") pF[a.fecha].ce++;
+      else pF[a.fecha].otr++;
+      if((a.riesgo||"").toUpperCase().includes("ALTO")) pF[a.fecha].rA++;
+    });
+    var fi=new Date().toLocaleDateString("es-CO",{weekday:"long",year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"});
+    var filas=Object.keys(pF).sort().map(function(f){
+      var r=pF[f];var tot=r.icN+r.seg+r.an+r.ce+r.otr;
+      var d=parseFecha(f);var ds=d?(DIAS[d.getDay()]+" "+d.getDate()+" "+MESES[d.getMonth()].substring(0,3)+" "+d.getFullYear()):f;
+      return "<tr><td>"+ds+"</td><td>"+(r.icN||0)+"</td><td>"+(r.seg||0)+"</td><td>"+(r.an||0)+"</td><td>"+(r.ce||0)+"</td><td>"+(r.otr||0)+"</td><td><b>"+tot+"</b></td><td>"+(r.rA||0)+"</td></tr>";
+    }).join("");
+    var p=[];
+    p.push("<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'>");
+    p.push("<title>Actividad Cl\u00ednica "+rango.desde+" a "+rango.hasta+"<\/title>");
+    p.push("<style>");
+    p.push("body{font-family:Arial,sans-serif;font-size:11px;color:#111;margin:0;padding:20px}");
+    p.push("h1{font-size:16px;margin:0 0 2px;color:#1a3a6a}h2{font-size:12px;color:#1a3a6a;margin:16px 0 6px}");
+    p.push(".sub{font-size:10px;color:#555;margin-bottom:18px}");
+    p.push(".g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}");
+    p.push(".k{border:1.5px solid #c2d9ef;border-radius:8px;padding:10px 12px;text-align:center}");
+    p.push(".k .v{font-size:22px;font-weight:900;color:#2563a8;line-height:1}");
+    p.push(".k .l{font-size:8px;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-top:3px}");
+    p.push("table{width:100%;border-collapse:collapse;margin-bottom:20px}");
+    p.push("th{background:#2563a8;color:#fff;padding:6px 8px;text-align:left;font-size:9px;text-transform:uppercase}");
+    p.push("td{padding:5px 8px;border-bottom:1px solid #dde8f5;font-size:10px}");
+    p.push("tr:nth-child(even){background:#f3f8fd}");
+    p.push(".footer{font-size:9px;color:#888;border-top:1px solid #ddd;padding-top:8px;margin-top:10px}");
+    p.push("@media print{.np{display:none}}");
+    p.push("<\/style><\/head><body>");
+    p.push("<div class='np' style='margin-bottom:14px'>");
+    p.push("<button onclick='window.print()' style='background:#2563a8;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer;margin-right:8px'>\ud83d\udda8\ufe0f Imprimir \/ Guardar PDF<\/button>");
+    p.push("<button onclick='window.close()' style='background:#eef4fb;color:#2563a8;border:1.5px solid #c2d9ef;border-radius:6px;padding:8px 14px;font-size:12px;cursor:pointer'>\u2715 Cerrar<\/button><\/div>");
+    p.push("<h1>Registro de Actividad Cl\u00ednica \u2014 Psicolog\u00eda Hospitalaria<\/h1>");
+    p.push("<div class='sub'>Per\u00edodo: <strong>"+rango.desde+" a "+rango.hasta+"<\/strong> &nbsp;|&nbsp; Generado: "+fi+"<\/div>");
+    p.push("<div class='g'>");
+    p.push("<div class='k'><div class='v'>"+total+"<\/div><div class='l'>Total atenciones<\/div><\/div>");
+    p.push("<div class='k'><div class='v'>"+icN+"<\/div><div class='l'>IC Nuevas<\/div><\/div>");
+    p.push("<div class='k'><div class='v'>"+seg+"<\/div><div class='l'>Seguimientos<\/div><\/div>");
+    p.push("<div class='k'><div class='v'>"+ana+"<\/div><div class='l'>Anamnesis<\/div><\/div>");
+    p.push("<div class='k'><div class='v'>"+ce+"<\/div><div class='l'>Cons. Externa<\/div><\/div>");
+    p.push("<div class='k'><div class='v'>"+otr+"<\/div><div class='l'>Otros<\/div><\/div>");
+    p.push("<div class='k'><div class='v'>"+dias+"<\/div><div class='l'>D\u00edas con atenci\u00f3n<\/div><\/div>");
+    p.push("<div class='k'><div class='v'>"+(dias>0?(total/dias).toFixed(1):0)+"<\/div><div class='l'>Promedio\/d\u00eda<\/div><\/div>");
+    p.push("<\/div>");
+    p.push("<h2>Detalle diario<\/h2>");
+    p.push("<table><thead><tr><th>Fecha<\/th><th>IC Nuevas<\/th><th>Seguimientos<\/th><th>Anamnesis<\/th><th>Cons. Externa<\/th><th>Otros<\/th><th>Total<\/th><th>Riesgo alto<\/th><\/tr><\/thead><tbody>"+filas+"<\/tbody><\/table>");
+    p.push("<div class='footer'>Documento generado desde PsicoHosp \u00b7 Psicolog\u00eda Hospitalaria<br>"+fi+"<\/div>");
+    p.push("<\/body><\/html>");
+    var html=p.join("");
+    var win=window.open("","_blank");
+    if(win){win.document.write(html);win.document.close();}
+    else alert("El navegador bloque\u00f3 la ventana emergente. Habilita los popups para este sitio.");
+  };
+
+  var _origGoTo=window.goTo;
+  window.goTo=function(page){
+    if(typeof _origGoTo==="function") _origGoTo(page);
+    if(page==="metricas"){
+      inyectarPagina();
+      setTimeout(function(){
+        var mf=document.getElementById("met-man-fecha");
+        if(mf&&!mf.value) mf.value=new Date().toISOString().split("T")[0];
+        metricasRender();
+      },60);
+    }
+  };
+
+  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",inyectarPagina);}
+  else{inyectarPagina();}
+
+})();
 </script>
 
 </body>
