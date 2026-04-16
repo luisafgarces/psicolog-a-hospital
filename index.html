@@ -3425,6 +3425,8 @@ window.guardarICFirebase=async()=>{
     } else {
       toast('✅ IC guardada en Firebase');
       setSyncStatus('online');
+      // Autoguardar borrador en Firebase sin necesidad de presionar el botón
+      try{if(typeof guardarBorradorFirebase==='function')guardarBorradorFirebase('ic');}catch(e){console.warn('autoborrador:',e);}
       // Limpiar backups de localStorage ya sincronizados
       try{const bkList=JSON.parse(localStorage.getItem('ic_backups')||'[]');if(bkList.length){const last=bkList[bkList.length-1];localStorage.removeItem(last);localStorage.setItem('ic_backups',JSON.stringify(bkList.slice(0,-1)));}}catch(e){}
       setTimeout(()=>limpiarFormIC(false),300);
