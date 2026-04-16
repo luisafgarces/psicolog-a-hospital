@@ -10912,7 +10912,7 @@ window._eliminarBorradorFirebase = async function(fbId, tipo) {
             (pac.sesiones||[]).forEach(function(s){var f=parseFecha(s.fecha||s.fechaTS);if(!f)return;
               var tipo=pac.tipo==="consulta-externa"?"Consulta Externa":(s.tipo||"Seguimiento");
               at.push({fecha:fechaStr(f),tipo:tipo,piso:pac.piso||"",riesgo:s.riesgo||"",fuente:"firebase",nombre:pac.nombre||""});});
-            (pac.notas||pac.historial||[]).forEach(function(n){var f=parseFecha(n.fecha||n.fechaTS);if(!f)return;
+            (Array.isArray(pac.notas)?pac.notas:Array.isArray(pac.historial)?pac.historial:[]).forEach(function(n){var f=parseFecha(n.fecha||n.fechaTS);if(!f)return;
               at.push({fecha:fechaStr(f),tipo:n.tipo||"Seguimiento",piso:pac.piso||pac.habitacion||"",riesgo:n.riesgo||"",fuente:"firebase",nombre:pac.nombre||""});});
           });}catch(e){console.warn("pacientes",e);}
       }
