@@ -4704,7 +4704,7 @@ window.filtrarPsico = function(filtro, btn){
 window.goTo = function(page){
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
-    'psicoeducacion'];
+    'psicoeducacion','metricas'];
   const titles = {
     dashboard:'Inicio', pacientes:'Registro de Pacientes',
     'consulta-externa':'Consulta Externa EPS',
@@ -4713,7 +4713,8 @@ window.goTo = function(page){
     capacidad:'Valoración de Capacidad Decisional',
     historial:'Historial de Tests',
     'historial-pac':'Historial de Pacientes',
-    psicoeducacion:'Psicoeducación Clínica'
+    psicoeducacion:'Psicoeducación Clínica',
+    metricas:'Mis Métricas de Actividad Clínica'
   };
   // Hide all pages, show target
   pages.forEach(function(p){
