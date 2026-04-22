@@ -4228,10 +4228,12 @@ window.verBackupsLocales=function(){
       modal.id='modal-backups';
       modal.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:600;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
       modal.innerHTML='<div style="background:var(--surface);border-radius:16px;width:100%;max-width:620px;margin:auto;box-shadow:0 8px 40px rgba(0,0,0,0.2)">'+
-        '<div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'+
+        '<div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px">'+
         '<div style="font-weight:700">💾 Formularios guardados localmente</div>'+
+        '<div style="display:flex;gap:8px;align-items:center">'+
+        '<button onclick="eliminarTodosBackups()" style="background:#fef2f2;border:1px solid #fca5a5;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:0.78rem;font-weight:700;color:#dc2626">🗑 Borrar todos</button>'+
         '<button onclick="verBackupsLocales_cerrar()" style="background:var(--surface2);border:none;border-radius:7px;padding:5px 10px;cursor:pointer">✕</button>'+
-        '</div><div id="backups-body" style="padding:16px 20px"></div></div>';
+        '</div></div><div id="backups-body" style="padding:16px 20px"></div></div>';
       document.body.appendChild(modal);
     }
 
@@ -4328,6 +4330,19 @@ window.eliminarBackup=function(key){
     if(modal&&modal.style.display!=='none')verBackupsLocales();
     toast('🗑 Formulario descartado');
   }catch(e){}
+};
+
+window.eliminarTodosBackups = function(){
+  if(!confirm('¿Borrar todos los formularios guardados? Esta acción no se puede deshacer.')) return;
+  try{
+    const bkList=JSON.parse(localStorage.getItem('ic_backups')||'[]');
+    bkList.forEach(function(k){ localStorage.removeItem(k); });
+    localStorage.removeItem('ic_backups');
+    actualizarBackupBadge();
+    const modal=document.getElementById('modal-backups');
+    if(modal) modal.style.display='none';
+    toast('🗑 Todos los formularios eliminados');
+  }catch(e){ toast('❌ '+e.message); }
 };
 
 // Revisar backups al cargar
