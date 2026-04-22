@@ -1290,7 +1290,10 @@ input.toggle-cb{display:none}
         <div id="ic-saved-bar" style="display:none;margin-top:10px;background:#fffbeb;border:1.5px solid #d97706;border-radius:10px;padding:10px 14px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
             <span style="font-size:0.78rem;font-weight:700;color:#92400e">📋 Borradores locales (solo en este dispositivo — no aparecen en el historial)</span>
-            <button onclick="document.getElementById('ic-saved-bar').style.display='none'" style="background:none;border:none;cursor:pointer;color:#92400e;font-size:1rem;padding:0 4px">✕</button>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button onclick="borrarTodosBorradores('ic')" style="background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:0.74rem;font-weight:700;color:#dc2626">🗑 Borrar todos</button>
+              <button onclick="document.getElementById('ic-saved-bar').style.display='none'" style="background:none;border:none;cursor:pointer;color:#92400e;font-size:1rem;padding:0 4px">✕</button>
+            </div>
           </div>
           <div id="ic-saved-list" style="display:flex;flex-direction:column;gap:6px"></div>
         </div>
@@ -4330,6 +4333,31 @@ window.eliminarBackup=function(key){
     if(modal&&modal.style.display!=='none')verBackupsLocales();
     toast('🗑 Formulario descartado');
   }catch(e){}
+};
+
+window.borrarTodosBorradores = async function(tipo){
+  if(!confirm('¿Borrar todos los borradores? Esta acción no se puede deshacer.')) return;
+  // 1. Borrar de localStorage
+  try{
+    localStorage.removeItem('borradores_' + tipo);
+  }catch(e){}
+  // 2. Borrar de Firebase
+  try{
+    if(window.db && window._getDocs && window._collection && window._deleteDoc && window._doc && window._query && window._where){
+      var snap = await window._getDocs(
+        window._query(window._collection(window.db,'borradores_formularios'), window._where('tipo','==',tipo))
+      );
+      var dels = [];
+      snap.forEach(function(d){ dels.push(window._deleteDoc(window._doc(window.db,'borradores_formularios',d.id))); });
+      await Promise.all(dels);
+    }
+  }catch(e){ console.warn('borrarTodosBorradores Firebase:',e); }
+  // 3. Cerrar panel y confirmar
+  if(tipo==='ic'){
+    var bar = document.getElementById('ic-saved-bar');
+    if(bar) bar.style.display = 'none';
+  }
+  toast('🗑 Todos los borradores eliminados');
 };
 
 window.eliminarTodosBackups = function(){
