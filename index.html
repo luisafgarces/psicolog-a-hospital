@@ -10928,8 +10928,11 @@ window._eliminarBorradorFirebase = async function(fbId, tipo) {
             at.push({fecha:fechaStr(f),tipo:n.tipo||"Seguimiento",piso:n.piso||n.habitacion||"",riesgo:n.riesgo||"",fuente:"firebase",nombre:n.pacienteNombre||n.nombre||""});});}catch(e){console.warn("historial_clinico",e);}
         try{var sIC=await window._getDocs(window._collection(window.db,"interconsultas"));
           sIC.forEach(function(d){var ic=d.data();var f=parseFecha(ic.fecha||ic.fechaTS||ic.createdAt);if(!f)return;
-            var _modo=ic.modo||"";var tipo=(_modo==="seg"||_modo==="Seguimiento")?"Seguimiento":(_modo==="fam"||_modo==="Intervención Familiar")?"Intervención Familiar":(_modo==="esp"||_modo==="Nota especial"||_modo==="Nota Especial")?"Nota Especial":"IC Nueva";
-            at.push({fecha:fechaStr(f),tipo:tipo,piso:ic.habitacion||ic.piso||"",riesgo:ic.riesgo||ic.nivelRiesgo||"",fuente:"firebase",nombre:ic.nombre||ic.paciente||""});});}catch(e){console.warn("interconsultas",e);}
+            var _modo=ic.modo||"";
+            // Excluir notas rápidas — son personales y no cuentan como atención clínica
+            if(_modo==="Nota rápida"||_modo==="nota_rapida"||_modo==="nota rapida") return;
+            var tipo=(_modo==="seg"||_modo==="Seguimiento")?"Seguimiento":(_modo==="fam"||_modo==="Intervención Familiar")?"Intervención Familiar":(_modo==="esp"||_modo==="Nota especial"||_modo==="Nota Especial")?"Nota Especial":"IC Nueva";
+            at.push({fecha:fechaStr(f),tipo:tipo,piso:ic.habitacion||ic.piso||"",riesgo:ic.riesgo||ic.nivelRiesgo||"",fuente:"firebase",nombre:ic.nombre||ic.pacienteNombre||ic.paciente||"",docId:d.id});});}catch(e){console.warn("interconsultas",e);}
         try{var sAN=await window._getDocs(window._collection(window.db,"anamnesis"));
           sAN.forEach(function(d){var an=d.data();var f=parseFecha(an.fecha||an.fechaTS||an.createdAt);if(!f)return;
             at.push({fecha:fechaStr(f),tipo:"Anamnesis",piso:an.piso||"",riesgo:"",fuente:"firebase",nombre:an.nombre||an.paciente||""});});}catch(e){console.warn("anamnesis",e);}
@@ -10945,6 +10948,17 @@ window._eliminarBorradorFirebase = async function(fbId, tipo) {
     }catch(e){console.warn("Firebase",e);}
     try{var man=JSON.parse(localStorage.getItem("metricas_manuales")||"[]");
       man.forEach(function(m){at.push({fecha:m.fecha,tipo:m.tipo,piso:m.piso||"",riesgo:"",fuente:"manual",nombre:m.nombre||""});});}catch(e){}
+    // Deduplicar: misma fecha + mismo tipo + mismo paciente guardado más de una vez
+    var seen={};
+    at=at.filter(function(a){
+      // Los registros manuales nunca se deduplicar
+      if(a.fuente==="manual") return true;
+      // Clave: fecha + tipo normalizado + nombre normalizado
+      var key=(a.fecha||"")+"||"+catTipo(a.tipo)+"||"+(a.nombre||"").toLowerCase().trim();
+      if(seen[key]) return false;
+      seen[key]=true;
+      return true;
+    });
     return at;
   }
 
