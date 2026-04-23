@@ -7359,7 +7359,7 @@ window.hpacRenderNotas=()=>{
         +((e._aiFormSnap||e.formulario||e.nota||e.sub)?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="descargarFormIC(\'' + e.id + '\')">📥 Formulario</button>':'')
         +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacEditar('+ni+')">Editar</button>'
         +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacCopiar('+ni+')">Copiar</button>'
-        +(_hpacPacId?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;background:#f0fdf4;border:1px solid #86efac;color:#166534" onclick="abrirPacSheet(\'' + _hpacPacId + '\')" title="Ir a la ficha del paciente">\uD83D\uDC64 Ficha</button>':'')
+        +(_hpacPacId?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;background:#f0fdf4;border:1px solid #86efac;color:#166534" onclick="editarPaciente(\'' + _hpacPacId + '\')" title="Editar ficha del paciente">\u270F\uFE0F Editar ficha</button>':'')
         +'</div></div>'
         +'<div class="hpac-nota-body">'+camposHtml+formHtml+'</div>'
         +'</div>'
