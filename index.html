@@ -3779,7 +3779,7 @@ window.mneCerrar=()=>{const m=document.getElementById('modal-nota-edit');if(m)m.
 
 window.mneGuardar=async()=>{
   const v=id=>document.getElementById(id)?.value||'';
-  const fecha=v('mne-fecha'),modo=v('mne-tipo'),riesgo=v('mne-riesgo'),estado=v('mne-estado');
+  const fecha=v('mne-fecha'),modo=v('mne-tipo'),riesgo=v('mne-riesgo'),estado=v('mne-estado'),proxSesion=v('mne-prox-sesion');
   if(!fecha){toast('⚠️ Ingresa una fecha');return;}
   // Determinar modo y leer campos correctos
   const orig=window._mneOrig||{};
@@ -3800,10 +3800,10 @@ window.mneGuardar=async()=>{
   setSyncStatus('syncing');
   try{
     if(window._mneId){
-      await updateDoc(doc(db,window._mneCol,window._mneId),{fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,fechaEditado:new Date().toISOString().split('T')[0],editado:serverTimestamp()});
+      await updateDoc(doc(db,window._mneCol,window._mneId),{fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,proxSesion:proxSesion||null,fechaEditado:new Date().toISOString().split('T')[0],editado:serverTimestamp()});
       const arr=window._mneCol==='anamnesis'?(window.anamnesisList||[]):(window.interconsultas||[]);
       const idx=arr.findIndex(function(x){return x.id===window._mneId;});
-      if(idx>=0){arr[idx]=Object.assign({},arr[idx],{fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,fechaEditado:new Date().toISOString().split('T')[0]});}
+      if(idx>=0){arr[idx]=Object.assign({},arr[idx],{fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,proxSesion:proxSesion||null,fechaEditado:new Date().toISOString().split('T')[0]});}
       toast('✅ Nota actualizada');
     } else {
       const pac=pacientes.find(p=>p.id===window._hPacId);
@@ -3813,7 +3813,7 @@ window.mneGuardar=async()=>{
         pacienteCedula:pac?.cedula||'',
         hab:pac?.hab||'',
         dx:pac?.motivo||'',
-        fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,
+        fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,proxSesion:proxSesion||null,
         fechaGuardado:new Date().toISOString().split('T')[0],
         creado:serverTimestamp()
       });
@@ -7359,6 +7359,7 @@ window.hpacRenderNotas=()=>{
         +((e._aiFormSnap||e.formulario||e.nota||e.sub)?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="descargarFormIC(\'' + e.id + '\')">📥 Formulario</button>':'')
         +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacEditar('+ni+')">Editar</button>'
         +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacCopiar('+ni+')">Copiar</button>'
+        +(_hpacPacId?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;background:#f0fdf4;border:1px solid #86efac;color:#166534" onclick="abrirPacSheet(\'' + _hpacPacId + '\')" title="Ir a la ficha del paciente">\uD83D\uDC64 Ficha</button>':'')
         +'</div></div>'
         +'<div class="hpac-nota-body">'+camposHtml+formHtml+'</div>'
         +'</div>'
@@ -7445,6 +7446,9 @@ window.hpacEditar=(ni)=>{
   }
   // mne-nota removed
   document.getElementById('mne-del-btn').style.display='';
+  // Cargar próxima sesión si existe
+  var proxEl=document.getElementById('mne-prox-sesion');
+  if(proxEl) proxEl.value=e.proxSesion||'';
   window._mneId=m.id;window._mneCol=m.col;
   window._mneOnSave=()=>setTimeout(hpacRenderNotas,500);
   document.getElementById('modal-nota-edit').style.display='flex';
@@ -10277,6 +10281,11 @@ document.addEventListener('DOMContentLoaded',()=>{
         <div class="form-group"><label>Estado</label>
           <select id="mne-estado"><option value="respondida">Completada</option><option value="pendiente">Pendiente</option></select>
         </div>
+      </div>
+      <!-- Próxima sesión -->
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Próxima sesión / intervención</label>
+        <input type="date" id="mne-prox-sesion" placeholder="Fecha próxima sesión">
       </div>
       <!-- 4 campos para IC Nueva / Anamnesis -->
       <div id="mne-campos-4">
