@@ -1972,6 +1972,7 @@ input.toggle-cb{display:none}
               <option value="phq9">PHQ-9 — Depresión + ideación suicida (27 pts · 3–5 min)</option>
               <option value="gad7">GAD-7 — Ansiedad generalizada (21 pts · 3 min)</option>
               <option value="hads">HADS — Ansiedad y depresión hospitalaria (42 pts · 5–7 min)</option>
+              <option value="madrs">MADRS — Depresión Montgomery-Åsberg (60 pts · 15–20 min)</option>
             </optgroup>
             <optgroup label="🔴 Riesgo & Adherencia">
               <option value="cssrs">C-SSRS — Riesgo suicida Columbia (5 min)</option>
@@ -8423,7 +8424,8 @@ var TEST_META = {
   sims:   {label:'SIMS — Detección de Simulación', icon:'🎭', note:'Detecta presentación no creíble de síntomas. Punto de corte ≥ 16 sugiere simulación (sensibilidad 75%, especificidad 90%).', extra:'', pts:'75 ítems V/F', calcFn:'calcularSIMS'},
   glasgow:{label:'Escala de Glasgow', icon:'🧠', note:'Evalúa apertura ocular, respuesta verbal y motora. Aplicar antes de cualquier evaluación cognitiva en UCI/urgencias. Puntaje < 8: coma, requiere vía aérea protegida.', extra:'glasgow', pts:'3–15 pts', calcFn:'calcGlasgow'},
   hunter: {label:'Hunter — Síndrome Serotoninérgico', icon:'⚗️', note:'Requiere exposición a agente serotoninérgico en las últimas 24 h. Si no hay exposición conocida el criterio no aplica. No es un puntaje — es un algoritmo de decisión clínica basado en signos físicos observables.', extra:'hunter', pts:'Algoritmo', calcFn:'calcHunter'},
-  rass:   {label:'RASS — Richmond Agitation-Sedation Scale', icon:'🌡️', note:'Evaluar observando primero (pasos 1–2), luego con voz y si no responde con estimulación física. Clave en UCI para ajuste de sedoanalgesia y detección de delirium.', extra:'rass', pts:'-5 a +4', calcFn:'calcRASS'}
+  rass:   {label:'RASS — Richmond Agitation-Sedation Scale', icon:'🌡️', note:'Evaluar observando primero (pasos 1–2), luego con voz y si no responde con estimulación física. Clave en UCI para ajuste de sedoanalgesia y detección de delirium.', extra:'rass', pts:'-5 a +4', calcFn:'calcRASS'},
+  madrs:  {label:'MADRS — Montgomery-Åsberg Depression Rating Scale', icon:'🌧️', note:'Escala heteroaplicada: el clínico califica según observación y respuesta del paciente. Lea la pregunta ancla y luego explore con las subpreguntas sugeridas. Cada ítem se puntúa 0–6. Tiempo estimado: 15–20 min.', extra:'', pts:'60 pts', calcFn:'calcMADRS'}
 };
 
 window.showTest=function(id){
@@ -8501,6 +8503,7 @@ window.showTest=function(id){
     else if(id === 'glasgow') renderGlasgowInContainer();
     else if(id === 'rass') renderRASSInContainer();
     else if(id === 'hunter') renderHunterInContainer();
+    else if(id === 'madrs') renderMADRSInContainer();
   }, 50);
 
   document.getElementById('topbar-title').textContent='Tests Clínicos';
@@ -8525,6 +8528,7 @@ window.calcTestActual = function(){
   else if(_currentTest === 'pcl5') calcPCL5();
   else if(_currentTest === 'sims') calcularSIMS();
   else if(_currentTest === 'svacbca') calcSVACBCA();
+  else if(_currentTest === 'madrs') calcMADRS();
   else toast('Función de cálculo no encontrada para: '+_currentTest);
 };
 
@@ -11278,6 +11282,314 @@ window._eliminarBorradorFirebase = async function(fbId, tipo) {
   else{inyectarPagina();}
 
 })();
+
+// ══════════════════════════════════════════════════════════════════
+// MADRS — Montgomery-Åsberg Depression Rating Scale
+// Heteroaplicada · 10 ítems · 0–6 por ítem · Total 0–60
+// ══════════════════════════════════════════════════════════════════
+var madrsItems = [
+  {
+    id: 'tristeza',
+    titulo: '1. Tristeza aparente',
+    descripcion: 'Representa abatimiento, pesimismo y desesperanza en la forma en que el paciente describe su estado. Valorar en función de la intensidad, duración y la medida en que el ánimo es influenciado por los eventos.',
+    ancla: 'Observe el lenguaje no verbal, el tono de voz y la expresión facial. Pregunte: <em>"¿Cómo ha estado de ánimo? ¿Se ha sentido triste o decaído/a?"</em>',
+    opciones: [
+      '0 — Sin tristeza.',
+      '1 — (intermedio)',
+      '2 — Parece desanimado/a, pero se anima sin dificultad.',
+      '3 — (intermedio)',
+      '4 — Triste y abatido/a la mayor parte del tiempo.',
+      '5 — (intermedio)',
+      '6 — Persistentemente deprimido/a. Miserable.'
+    ]
+  },
+  {
+    id: 'tristeza_ref',
+    titulo: '2. Tristeza referida',
+    descripcion: 'Lo que el paciente describe sobre su estado de ánimo, independientemente de cómo se observe. Incluye tristeza, abatimiento o sentimientos de desesperanza.',
+    ancla: 'Pregunte directamente: <em>"¿Siente que está deprimido/a? ¿Siente que le falta algo o que está vacío/a por dentro? ¿Tiene esperanza en el futuro?"</em>',
+    opciones: [
+      '0 — Tristeza ocasional acorde a las circunstancias.',
+      '1 — (intermedio)',
+      '2 — Tristeza o abatimiento, pero se anima.',
+      '3 — (intermedio)',
+      '4 — Tristeza profunda o depresión persistente.',
+      '5 — (intermedio)',
+      '6 — Tristeza o miseria continua o constante, sin posibilidad de ser animado/a.'
+    ]
+  },
+  {
+    id: 'tension',
+    titulo: '3. Tensión interna',
+    descripcion: 'Sentimientos de malestar vago o indefinido, irritabilidad, agitación mental, tensión mental que puede llegar al pánico.',
+    ancla: 'Pregunte: <em>"¿Se ha sentido inquieto/a o nervioso/a por dentro? ¿Ha tenido angustia, pánico o tensión que no puede controlar?"</em>',
+    opciones: [
+      '0 — Apacible. Sin tensión interior.',
+      '1 — (intermedio)',
+      '2 — Sentimientos ocasionales de irritabilidad y malestar vago.',
+      '3 — (intermedio)',
+      '4 — Continua sensación de tensión interna o pánico intermitente que el paciente solo puede dominar con dificultad.',
+      '5 — (intermedio)',
+      '6 — Terror o angustia incoercible. Pánico persistente.'
+    ]
+  },
+  {
+    id: 'sueno',
+    titulo: '4. Sueño reducido',
+    descripcion: 'Experiencia subjetiva de reducción de la duración o profundidad del sueño en comparación con el patrón habitual del paciente.',
+    ancla: 'Pregunte: <em>"¿Cómo ha dormido? ¿Le ha costado quedarse dormido/a? ¿Se despierta de madrugada? ¿Duerme mucho menos que antes?"</em>',
+    opciones: [
+      '0 — Duerme como siempre.',
+      '1 — (intermedio)',
+      '2 — Leve dificultad para conciliar el sueño o sueño algo reducido o poco profundo.',
+      '3 — (intermedio)',
+      '4 — Sueño reducido o interrumpido al menos 2 horas respecto al habitual.',
+      '5 — (intermedio)',
+      '6 — Menos de 2–3 horas de sueño.'
+    ]
+  },
+  {
+    id: 'apetito',
+    titulo: '5. Apetito reducido',
+    descripcion: 'Sensación de pérdida de apetito comparada con el patrón habitual. Puntuar según pérdida de deseo de comer o necesidad de obligarse a comer.',
+    ancla: 'Pregunte: <em>"¿Ha comido bien? ¿Le dan ganas de comer? ¿Ha tenido que obligarse a comer? ¿Ha bajado de peso en la hospitalización?"</em>',
+    opciones: [
+      '0 — Apetito normal o aumentado.',
+      '1 — (intermedio)',
+      '2 — Apetito ligeramente reducido.',
+      '3 — (intermedio)',
+      '4 — No tiene apetito. Los alimentos saben mal.',
+      '5 — (intermedio)',
+      '6 — Necesita persuasión para comer. Come muy poco o nada.'
+    ]
+  },
+  {
+    id: 'concentracion',
+    titulo: '6. Dificultades de concentración',
+    descripcion: 'Dificultad para reunir los pensamientos que llega hasta la incapacidad para concentrarse. Puntuar según intensidad, frecuencia e incapacidad para leer, conversar o realizar tareas cognitivas.',
+    ancla: 'Pregunte: <em>"¿Le ha costado concentrarse o prestar atención? ¿Siente que su mente está vacía o lenta? ¿Puede leer o ver televisión sin dificultad?"</em>',
+    opciones: [
+      '0 — Sin dificultades.',
+      '1 — (intermedio)',
+      '2 — Dificultades ocasionales para reunir los pensamientos.',
+      '3 — (intermedio)',
+      '4 — Dificultades para concentrarse e hilvanar el pensamiento, que interfieren con la lectura o la conversación.',
+      '5 — (intermedio)',
+      '6 — Incapaz de leer o mantener una conversación sin gran dificultad.'
+    ]
+  },
+  {
+    id: 'lentitud',
+    titulo: '7. Lentitud',
+    descripcion: 'Dificultad para iniciar actividades o lentitud de pensamiento, habla y movimientos.',
+    ancla: 'Observe durante la entrevista. Pregunte: <em>"¿Se ha sentido lento/a, sin fuerzas para moverse o hablar? ¿Le cuesta arrancar a hacer cosas?"</em>',
+    opciones: [
+      '0 — Sin lentitud. Pensamiento y gestos normales.',
+      '1 — (intermedio)',
+      '2 — Lentitud moderada al iniciar actividades.',
+      '3 — (intermedio)',
+      '4 — Evidente lentitud en habla y pensamiento.',
+      '5 — (intermedio)',
+      '6 — Entrevista casi imposible por estupor completo.'
+    ]
+  },
+  {
+    id: 'incapacidad',
+    titulo: '8. Incapacidad para sentir',
+    descripcion: 'Experiencia subjetiva de reducción del interés por el entorno o actividades que previamente daban placer. Pérdida de la capacidad para reaccionar emocionalmente ante personas o eventos.',
+    ancla: 'Pregunte: <em>"¿Ha podido disfrutar de algo mientras está aquí? ¿Siente cariño por su familia o amigos? ¿Hay algo que le cause emoción o alegría?"</em>',
+    opciones: [
+      '0 — Interés normal por el entorno y otras personas.',
+      '1 — (intermedio)',
+      '2 — Capacidad reducida para disfrutar de sus intereses habituales.',
+      '3 — (intermedio)',
+      '4 — Pérdida de interés por el entorno. Pérdida de sentimientos hacia amigos y conocidos.',
+      '5 — (intermedio)',
+      '6 — Ausencia de emociones. Incapacidad para sentir angustia o placer. Completa indiferencia afectiva.'
+    ]
+  },
+  {
+    id: 'pesimismo',
+    titulo: '9. Pensamiento pesimista',
+    descripcion: 'Pensamientos de culpa, inferioridad, auto-reproche, pecado, remordimiento y ruina.',
+    ancla: 'Pregunte: <em>"¿Se ha sentido culpable o cree que es una carga para su familia? ¿Siente que no vale nada o que ha fallado? ¿Hay cosas del pasado que le pesen mucho?"</em>',
+    opciones: [
+      '0 — Sin pensamientos pesimistas.',
+      '1 — (intermedio)',
+      '2 — Ideas fluctuantes de haber fallado, auto-reproches o auto-deprecación.',
+      '3 — (intermedio)',
+      '4 — Autoacusaciones persistentes o ideas definitivas de culpa o pecado. Pesimismo sobre el futuro.',
+      '5 — (intermedio)',
+      '6 — Delirios de ruina, remordimiento o pecado irreparable.'
+    ]
+  },
+  {
+    id: 'suicidio',
+    titulo: '10. Pensamientos suicidas',
+    descripcion: 'Sentimientos de que la vida no vale la pena, deseos de muerte, pensamientos suicidas o preparación activa para el suicidio.',
+    ancla: '<span style="color:#991b1b;font-weight:700">⚠️ Ítem de riesgo — Preguntar siempre, con calma y empatía.</span> Diga: <em>"A veces cuando la gente está muy mal, tiene pensamientos de que sería mejor no estar. ¿A usted le ha pasado eso?"</em>',
+    opciones: [
+      '0 — Alegría de vivir o toma las precauciones habituales.',
+      '1 — (intermedio)',
+      '2 — Hastío de vivir. Solo deseos de muerte pasajeros.',
+      '3 — (intermedio)',
+      '4 — Pensamientos suicidas frecuentes. Suicidio considerado como solución posible, sin planes concretos.',
+      '5 — (intermedio)',
+      '6 — Planes explícitos de suicidio cuando se presente la oportunidad. Preparativos activos para suicidarse.'
+    ]
+  }
+];
+
+function renderMADRSInContainer(){
+  var cont = document.getElementById('test-questions');
+  if(!cont) return;
+
+  var intro = '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#166534;line-height:1.7">'
+    +'<strong>📋 Modo entrevistador:</strong> Esta es una escala <strong>heteroaplicada</strong> — usted califica, no el paciente. '
+    +'Lea la pregunta ancla en voz alta y use las subpreguntas sugeridas para explorar cada área. '
+    +'Elija el número que mejor describe al paciente según su observación clínica y lo que refiere. '
+    +'Los valores pares (0, 2, 4, 6) son anclas descriptivas; los impares (1, 3, 5) son intermedios.'
+    +'</div>';
+
+  var html = madrsItems.map(function(item, idx){
+    var esRiesgo = item.id === 'suicidio';
+    var bgItem   = esRiesgo ? '#fef2f2' : '#f0f4ff';
+    var bordItem = esRiesgo ? '#fca5a5' : '#bfdbfe';
+    var colItem  = esRiesgo ? '#991b1b' : '#1e40af';
+
+    var optsHtml = item.opciones.map(function(txt, v){
+      var isAncla = v % 2 === 0;
+      var numBg   = isAncla ? colItem : '#94a3b8';
+      return '<label style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:5px;background:var(--surface)">'
+        +'<input type="radio" name="madrs_'+item.id+'" value="'+v+'" style="accent-color:'+colItem+';flex-shrink:0;margin-top:2px">'
+        +'<span style="background:'+numBg+';color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;margin-top:1px">'+v+'</span>'
+        +'<span style="font-size:0.82rem;color:var(--text);line-height:1.5">'+txt+'</span>'
+        +'</label>';
+    }).join('');
+
+    return '<div style="margin-bottom:16px;padding:14px 16px;background:'+bgItem+';border:1.5px solid '+bordItem+';border-radius:10px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">'
+      +'<span style="font-size:0.65rem;font-weight:700;color:'+colItem+';text-transform:uppercase;letter-spacing:0.08em;background:'+bordItem+';padding:2px 8px;border-radius:10px">'
+      +(esRiesgo ? '⚠️ Ítem de riesgo' : 'Ítem '+(idx+1)+' de 10')+'</span>'
+      +'</div>'
+      +'<div style="font-size:0.93rem;font-weight:700;color:var(--text);margin-bottom:4px">'+item.titulo+'</div>'
+      +'<div style="font-size:0.78rem;color:var(--text2);line-height:1.5;margin-bottom:8px">'+item.descripcion+'</div>'
+      +'<div style="background:rgba(255,255,255,0.7);border-radius:7px;padding:8px 11px;font-size:0.78rem;color:#374151;line-height:1.6;margin-bottom:10px;border:1px solid '+bordItem+'">'
+      +'<strong>🗣️ Pregunte:</strong> '+item.ancla+'</div>'
+      +'<div style="font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">Puntuación clínica:</div>'
+      +optsHtml
+      +'</div>';
+  }).join('');
+
+  cont.innerHTML = intro + html;
+}
+
+window.calcMADRS = function(){
+  var total = 0;
+  var faltantes = [];
+  madrsItems.forEach(function(item){
+    var sel = document.querySelector('input[name="madrs_'+item.id+'"]:checked');
+    if(sel){
+      total += parseInt(sel.value);
+    } else {
+      faltantes.push(item.titulo.split('.')[1].trim());
+    }
+  });
+
+  if(faltantes.length > 0){
+    var cont = document.getElementById('test-result-area');
+    cont.innerHTML = '<div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:14px 16px;color:#991b1b;font-size:0.82rem">'
+      +'<strong>⚠️ Faltan ítems por calificar:</strong><br>'+faltantes.join(', ')
+      +'<br><span style="font-size:0.75rem;color:#7f1d1d;margin-top:4px;display:block">Complete todos los ítems para obtener el resultado.</span>'
+      +'</div>';
+    cont.scrollIntoView({behavior:'smooth', block:'start'});
+    return;
+  }
+
+  // Interpretación
+  var nivel, color, borderColor, desc, recom;
+  if(total <= 6){
+    nivel='Sin depresión'; color='#16a34a'; borderColor='#86efac';
+    desc='Puntaje dentro del rango normal. No se evidencian síntomas depresivos significativos.';
+    recom='No se requiere intervención específica. Monitorear si hay factores de riesgo presentes.';
+  } else if(total <= 19){
+    nivel='Depresión leve'; color='#d97706'; borderColor='#fde68a';
+    desc='Sintomatología depresiva leve presente. Puede afectar el funcionamiento y la adherencia al tratamiento.';
+    recom='Intervención psicológica breve, psicoeducación. Considerar seguimiento y apoyo en el proceso de hospitalización.';
+  } else if(total <= 34){
+    nivel='Depresión moderada'; color='#ea580c'; borderColor='#fdba74';
+    desc='Depresión de intensidad moderada. Impacto clínico significativo sobre el funcionamiento y la recuperación.';
+    recom='Interconsulta a psiquiatría. Psicoterapia de apoyo. Revisión de plan de manejo farmacológico en coordinación con equipo tratante.';
+  } else if(total <= 44){
+    nivel='Depresión severa'; color='#dc2626'; borderColor='#fca5a5';
+    desc='Depresión severa con notable afectación del funcionamiento global. Alta probabilidad de impacto en evolución médica.';
+    recom='Evaluación psiquiátrica urgente. Valorar riesgo suicida (ítem 10). Manejo farmacológico activo. Apoyo familiar.';
+  } else {
+    nivel='Depresión muy severa'; color='#7b1fa2'; borderColor='#e9d5ff';
+    desc='Depresión de máxima severidad. Riesgo clínico elevado. Requiere manejo intensivo.';
+    recom='Evaluación psiquiátrica de urgencia. Valorar conducta suicida. Considerar hospitalización en psiquiatría si hay criterios de riesgo.';
+  }
+
+  var pacNombre = (document.getElementById('test-pac-nombre')||{}).value || ((document.getElementById('test-pac-sel')||{}).options||[{}])[(document.getElementById('test-pac-sel')||{}).selectedIndex||0]?.text || '';
+  if(pacNombre === '— Seleccionar paciente —') pacNombre = '';
+
+  // Desglose por ítem
+  var detalle = '<div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:6px">';
+  madrsItems.forEach(function(item){
+    var sel = document.querySelector('input[name="madrs_'+item.id+'"]:checked');
+    var pts = sel ? parseInt(sel.value) : 0;
+    var ptsColor = pts >= 4 ? '#dc2626' : pts >= 2 ? '#d97706' : '#16a34a';
+    detalle += '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:7px;padding:5px 10px;font-size:0.75rem;border:1px solid var(--border)">'
+      +'<span style="color:var(--text2)">'+item.titulo+'</span>'
+      +'<span style="font-weight:800;color:'+ptsColor+'">'+pts+'</span>'
+      +'</div>';
+  });
+  detalle += '</div>';
+
+  var fechaHoy = new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric'});
+  var notaClinica = 'Se aplica Escala de Depresión de Montgomery-Åsberg (MADRS) en modalidad heteroaplicada'
+    +(pacNombre ? ' al paciente '+pacNombre : '')+', fecha '+fechaHoy
+    +'. Puntaje total: '+total+'/60. Nivel: '+nivel
+    +'. '+desc+' '+recom;
+
+  var cont = document.getElementById('test-result-area');
+  cont.innerHTML = '<div class="test-result '+(total<=6?'normal':total<=19?'moderate':total<=34?'high':'critical')+'" style="text-align:left">'
+    +'<div style="text-align:center;margin-bottom:16px">'
+    +'<div class="result-score" style="color:'+color+'">'+total+'<span style="font-size:1.2rem;color:var(--text3)">/60</span></div>'
+    +'<div class="result-label" style="color:'+color+'">'+nivel+'</div>'
+    +'<div style="font-size:0.78rem;color:var(--text3);margin-top:4px">MADRS — Montgomery-Åsberg Depression Rating Scale</div>'
+    +'</div>'
+    +'<div style="background:var(--surface2);border-radius:8px;padding:12px 14px;margin-bottom:12px">'
+    +'<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:5px">Interpretación clínica</div>'
+    +'<div style="font-size:0.82rem;color:var(--text);line-height:1.6">'+desc+'</div>'
+    +'</div>'
+    +'<div style="background:#fef9ec;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:12px">'
+    +'<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#92400e;margin-bottom:5px">Recomendación</div>'
+    +'<div style="font-size:0.82rem;color:#78350f;line-height:1.6">'+recom+'</div>'
+    +'</div>'
+    +'<div style="margin-bottom:12px"><div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:6px">Desglose por ítems</div>'
+    +detalle+'</div>'
+    +'<div style="margin-top:14px">'
+    +'<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:6px">Nota clínica generada</div>'
+    +'<textarea id="madrs-nota" readonly style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:0.8rem;line-height:1.6;color:var(--text);background:var(--surface2);resize:vertical;min-height:80px">'+notaClinica+'</textarea>'
+    +'<button onclick="(function(){var t=document.getElementById(\'madrs-nota\');if(t){navigator.clipboard?navigator.clipboard.writeText(t.value).then(function(){toast(\'✅ Nota copiada\');}):t.select();}})()" class="btn btn-secondary btn-sm" style="margin-top:6px">📋 Copiar nota</button>'
+    +'</div>'
+    +'</div>';
+
+  cont.scrollIntoView({behavior:'smooth', block:'start'});
+
+  // Guardar en historial tests
+  try{
+    var h=JSON.parse(localStorage.getItem('tests_historial')||'[]');
+    var pac=(document.getElementById('test-pac-sel')||{});
+    var pid=pac.value||'';
+    var pnom=pacNombre||'Paciente no especificado';
+    h.unshift({test:'MADRS',icono:'🌧️',paciente:pnom,pacienteId:pid,score:total,max:60,nivel:nivel,fecha:new Date().toISOString(),ts:Date.now()});
+    if(h.length>200) h=h.slice(0,200);
+    localStorage.setItem('tests_historial',JSON.stringify(h));
+    if(typeof renderHistorialTests==='function') renderHistorialTests();
+  }catch(e){}
+};
 </script>
 
 </body>
