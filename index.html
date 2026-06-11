@@ -81,6 +81,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pac-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:flex-end;justify-content:center}
 .pac-sheet-overlay.open{display:flex}
 .pac-sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 32px 0;animation:slideUp 0.25s ease}
+@media(min-width:768px){
+  .pac-sheet-overlay{align-items:center;justify-content:center}
+  .pac-sheet{border-radius:16px;max-width:min(960px,88vw);width:88vw;max-height:90vh;height:auto;animation:zoomIn 0.2s ease}
+}
+@media(min-width:1200px){
+  .pac-sheet{max-width:min(1100px,82vw);width:82vw}
+}
+@keyframes zoomIn{from{transform:scale(0.95);opacity:0}to{transform:scale(1);opacity:1}}
+@media(min-width:768px){
+  .pac-sheet-body{padding:16px 20px 32px}
+  #ps-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  #ps-col-right>div{margin-top:0}
+  #ps-col-right>div+div{margin-top:12px}
+}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .pac-sheet-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:12px auto 0}
 .pac-sheet-head{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
@@ -429,6 +443,7 @@ input.toggle-cb{display:none}
     <div class="nav-item" onclick="goTo('historial-pac')"><span class="icon">📂</span>Historial Pacientes</div>
     <div class="nav-section">Registro</div>
     <div class="nav-item" onclick="goTo('metricas')"><span class="icon">📊</span>Mis Métricas</div>
+    <div class="nav-item" onclick="goTo('ronda-diaria')"><span class="icon">🏥</span>Ronda Diaria</div>
   </div>
   <div class="sidebar-footer" style="flex-direction:column;align-items:flex-start;gap:6px">
     <div style="display:flex;align-items:center;gap:8px">
@@ -469,11 +484,18 @@ input.toggle-cb{display:none}
         <div class="stat-card"><div class="label">Tests hoy</div><div class="value" id="stat-tests">—</div><div class="sub">Aplicados</div></div><div class="stat-card" id="stat-altas-card" onclick="toggleAltasPanel()" style="cursor:pointer;border:1px solid var(--border)"><div class="label">Altas</div><div class="value" id="stat-altas" style="color:var(--success)">—</div><div class="sub">Este mes &#128196;</div></div>
       </div>
 
-      <!-- CONTROLES DASHBOARD SIMPLIFICADOS -->
-      <div id="dash-nav-wrap" style="margin-top:8px;margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <!-- Acceso rápido a Ronda Diaria -->
+      <div style="margin-top:8px;margin-bottom:4px">
+        <button class="btn btn-primary" onclick="goTo('ronda-diaria')" style="width:100%;justify-content:center;gap:8px;padding:11px">
+          🏥 Ir a Ronda Diaria de hoy
+        </button>
+      </div>
+
+      <!-- CONTROLES Y TARJETAS — ocultos (ver Ronda Diaria) -->
+      <div id="dash-nav-wrap" style="display:none">
         <button class="btn btn-primary btn-sm" id="btn-hoy-dash" onclick="setDashMode('dia')">📅 Hoy</button>
         <button class="btn btn-secondary btn-sm" id="btn-todos-dash" onclick="setDashMode('todos')">👥 Todos los activos</button>
-        <select id="dash-filtro-piso" onchange="window.renderDashboard&&window.renderDashboard()" style="padding:5px 10px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.8rem;background:var(--surface)">
+        <select id="dash-filtro-piso" onchange="window.renderDashboard&&window.renderDashboard()">
           <option value="">Todos los pisos</option>
           <option value="UCI">🔴 UCI</option>
           <option value="Urgencias">🟡 Urgencias</option>
@@ -485,9 +507,8 @@ input.toggle-cb{display:none}
           <option value="Piso 5">Piso 5</option>
           <option value="Piso 6">Piso 6</option>
         </select>
-        <button class="btn btn-secondary btn-sm" onclick="window.renderDashboard&&window.renderDashboard()" title="Actualizar">↺</button>
       </div>
-      <div id="ronda-pisos"></div>
+      <div id="ronda-pisos" style="display:none"></div>
 
       <div class="section-header" style="margin-top:20px">
         <h2>⚠️ Pendientes y alertas</h2>
@@ -837,23 +858,203 @@ input.toggle-cb{display:none}
             </div>
           </div>
 
-          <!-- S6: EXAMEN MENTAL (abreviado — contexto hospitalario agudo) -->
+          <!-- S6: EXAMEN MENTAL (contexto hospitalario agudo) -->
           <div class="ic-form-section">
             <div class="ic-form-head amber"><span class="ft">🧩 Examen mental</span><span class="ic-form-badge amber">OBJETIVO</span></div>
             <div class="ic-form-body">
+
+              <!-- Fila 1: Presentación general -->
+              <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px;margin-top:2px">Presentación general</div>
               <div class="ic-g3">
-                <div><div class="ic-sublabel">Orientación</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Tiempo</span><span class="ic-chip" onclick="icTog(this)">Espacio</span><span class="ic-chip" onclick="icTog(this)">Persona</span><span class="ic-chip" onclick="icTogR(this)">Desorientado/a</span></div></div>
-                <div><div class="ic-sublabel">Conciencia / Colaboración</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Consciente</span><span class="ic-chip" onclick="icTog(this)">Colaborador/a</span><span class="ic-chip" onclick="icTog(this)">Poco colaborador/a</span><span class="ic-chip" onclick="icTogR(this)">Obnubilado/a</span></div></div>
-                <div><div class="ic-sublabel">Conducta</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Adecuada</span><span class="ic-chip" onclick="icTog(this)">Inhibida</span><span class="ic-chip" onclick="icTog(this)">Agitada</span><span class="ic-chip" onclick="icTog(this)">Lloroso/a</span><span class="ic-chip" onclick="icTog(this)">Retraído/a</span></div></div>
-                <div><div class="ic-sublabel">Afecto</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Eutímico</span><span class="ic-chip" onclick="icTog(this)">Depresivo</span><span class="ic-chip" onclick="icTog(this)">Ansioso</span><span class="ic-chip" onclick="icTog(this)">Lábil</span><span class="ic-chip" onclick="icTog(this)">Aplanado</span></div></div>
-                <div><div class="ic-sublabel">Pensamiento</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Organizado</span><span class="ic-chip" onclick="icTogR(this)">Ideas irracionales</span><span class="ic-chip" onclick="icTogR(this)">Bloqueo</span><span class="ic-chip" onclick="icTogR(this)">Bradipsiquia</span></div></div>
-                <div><div class="ic-sublabel">Insight</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Conservado</span><span class="ic-chip" onclick="icTog(this)">Parcial</span><span class="ic-chip" onclick="icTogR(this)">Sin insight</span></div></div>
+                <div>
+                  <div class="ic-sublabel">Porte y apariencia</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Adecuado a la edad</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Descuidado</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Discordante con la edad</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Signos de consumo SPA</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Signo de Russell</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="ic-sublabel">Actitud durante la entrevista</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Colaborador/a</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Aprehensivo/a</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Agresivo/a</span>
+                    <span class="ic-chip" onclick="icTog(this)">Complaciente</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Paranoide</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Manipulador/a</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Pueril</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Inadecuado/a al contexto</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="ic-sublabel">Conciencia / Colaboración</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Alerta</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Hiperalerta</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Obnubilado/a</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Somnoliento/a</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Estupor</span>
+                  </div>
+                </div>
               </div>
-              <div class="ic-g2" style="margin-top:8px">
-                <div class="ic-field"><div class="ic-sublabel">Regulación emocional</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Tolera el malestar</span><span class="ic-chip" onclick="icTogR(this)">Llanto incontenible</span><span class="ic-chip" onclick="icTogR(this)">Ansiedad desbordada</span><span class="ic-chip" onclick="icTog(this)">Bloqueo emocional</span></div></div>
-                <div class="ic-field"><div class="ic-sublabel">Comprensión del Dx</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Adecuada</span><span class="ic-chip" onclick="icTog(this)">Parcial</span><span class="ic-chip" onclick="icTogR(this)">Negación</span><span class="ic-chip" onclick="icTogA(this)">Expectativas irreales</span></div></div>
+
+              <!-- Fila 2: Cognición -->
+              <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px;margin-top:10px">Cognición</div>
+              <div class="ic-g3">
+                <div>
+                  <div class="ic-sublabel">Orientación</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Tiempo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Espacio</span>
+                    <span class="ic-chip" onclick="icTog(this)">Persona</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Desorientado/a</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="ic-sublabel">Atención</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Euprosexia (normal)</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Hipoprosexia</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Hiperprosexia</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Pseudoaprosexia</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Aprosexia</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="ic-sublabel">Juicio y raciocinio</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Conservado</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Desviado / comprometido</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Suspendido</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Delirante</span>
+                  </div>
+                </div>
               </div>
-              <div class="ic-field" style="margin-top:4px"><div class="ic-sublabel">Análisis clínico libre</div><textarea id="ic-resp-analisis" rows="2" placeholder="Formulación clínica breve, hipótesis diagnóstica, observaciones relevantes…"></textarea></div>
+
+              <!-- Fila 3: Pensamiento y lenguaje -->
+              <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px;margin-top:10px">Pensamiento y lenguaje</div>
+              <div class="ic-g3">
+                <div>
+                  <div class="ic-sublabel">Pensamiento — curso</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Lógico</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Taquipsiquia</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Bradipsiquia</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Alogia</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Mente en blanco</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="ic-sublabel">Pensamiento — contenido</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Sin alteraciones</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Ideas de muerte / suicidio</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Ideación delirante</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Ideas obsesivas</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Ideas de minusvalía / autorreproche</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Ideas nihilistas</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="ic-sublabel">Lenguaje</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Normal</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Taquilalia</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Bradilalia</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Mutismo</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Logorrea / prolijo</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Ensalada de palabras</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Neologismos</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Verbigeración</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Ecolalia</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fila 4: Afecto, conducta, sensopercepción -->
+              <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px;margin-top:10px">Afecto, conducta y percepción</div>
+              <div class="ic-g3">
+                <div>
+                  <div class="ic-sublabel">Afecto</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Eutímico</span>
+                    <span class="ic-chip" onclick="icTog(this)">Modulado</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Depresivo</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Ansioso / aprehensivo</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Lábil</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Plano / aplanado</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Exaltado / eufórico</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Disociación ideoafectiva</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Síndrome amotivacional</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="ic-sublabel">Conducta motora</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Sin alteraciones</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Inquietud / agitación</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Bradiquinesia</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Acatisia</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Catatonía</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Manerismos</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Asterixis (delirium)</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Flexibilidad cérea</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Ecopraxia</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="ic-sublabel">Sensopercepción</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Sin alteraciones</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Alucinaciones visuales</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Alucinaciones auditivas</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Alucinaciones táctiles</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Alucinaciones olfativas</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Formicación (delirium)</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Ilusiones</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Pseudoalucinaciones</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Flashbacks</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fila 5: Insight, regulación, comprensión -->
+              <div class="ic-g2" style="margin-top:10px">
+                <div class="ic-field">
+                  <div class="ic-sublabel">Insight</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Conservado</span>
+                    <span class="ic-chip" onclick="icTog(this)">Parcial</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Sin insight</span>
+                  </div>
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Regulación emocional</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Tolera el malestar</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Llanto incontenible</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Ansiedad desbordada</span>
+                    <span class="ic-chip" onclick="icTog(this)">Bloqueo emocional</span>
+                  </div>
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Comprensión del Dx</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Adecuada</span>
+                    <span class="ic-chip" onclick="icTog(this)">Parcial</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Negación</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Expectativas irreales</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ic-field" style="margin-top:8px">
+                <div class="ic-sublabel">Análisis clínico libre</div>
+                <textarea id="ic-resp-analisis" rows="2" placeholder="Formulación clínica breve, hipótesis diagnóstica, observaciones relevantes…"></textarea>
+              </div>
             </div>
           </div>
 
@@ -1712,11 +1913,33 @@ input.toggle-cb{display:none}
         <div class="anamnesis-section">
           <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🧠</span><h4>Examen mental</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
           <div class="anamnesis-section-body"><div class="form-grid">
+
+            <!-- Presentación -->
+            <div class="form-group full" style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);padding-bottom:0;margin-bottom:-4px">Presentación general</div>
+            <div class="form-group full"><label>Porte y apariencia</label><div class="checkgroup"><label><input type="checkbox" value="Adecuado a la edad"><span>Adecuado a la edad</span></label><label><input type="checkbox" value="Descuidado"><span>Descuidado</span></label><label><input type="checkbox" value="Discordante con la edad"><span>Discordante con la edad</span></label><label><input type="checkbox" value="Signos de consumo SPA"><span>Signos de consumo SPA</span></label><label><input type="checkbox" value="Signo de Russell"><span>Signo de Russell</span></label></div></div>
+            <div class="form-group full"><label>Actitud durante la entrevista</label><div class="checkgroup"><label><input type="checkbox" value="Colaborador/a"><span>Colaborador/a</span></label><label><input type="checkbox" value="Aprehensivo/a"><span>Aprehensivo/a</span></label><label><input type="checkbox" value="Agresivo/a"><span>Agresivo/a</span></label><label><input type="checkbox" value="Complaciente"><span>Complaciente</span></label><label><input type="checkbox" value="Paranoide"><span>Paranoide</span></label><label><input type="checkbox" value="Manipulador/a"><span>Manipulador/a</span></label><label><input type="checkbox" value="Pueril"><span>Pueril</span></label><label><input type="checkbox" value="Inadecuado/a al contexto"><span>Inadecuado/a al contexto</span></label></div></div>
+
+            <!-- Cognición -->
+            <div class="form-group full" style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);padding-bottom:0;margin-bottom:-4px">Cognición</div>
+            <div class="form-group full"><label>Conciencia</label><div class="checkgroup"><label><input type="radio" name="an-conciencia" value="Alerta"><span>Alerta</span></label><label><input type="radio" name="an-conciencia" value="Hiperalerta"><span>Hiperalerta</span></label><label><input type="radio" name="an-conciencia" value="Obnubilado/a"><span>Obnubilado/a</span></label><label><input type="radio" name="an-conciencia" value="Somnoliento/a"><span>Somnoliento/a</span></label><label><input type="radio" name="an-conciencia" value="Estupor"><span>Estupor</span></label></div></div>
             <div class="form-group full"><label>Orientación</label><div class="checkgroup" id="an-orient"><label><input type="checkbox" value="Tiempo"><span>Tiempo</span></label><label><input type="checkbox" value="Espacio"><span>Espacio</span></label><label><input type="checkbox" value="Persona"><span>Persona</span></label><label><input type="checkbox" value="Desorientado/a"><span>Desorientado/a</span></label></div></div>
-            <div class="form-group full"><label>Afecto</label><div class="checkgroup" id="an-afecto"><label><input type="checkbox" value="Eutímico"><span>Eutímico</span></label><label><input type="checkbox" value="Depresivo"><span>Depresivo</span></label><label><input type="checkbox" value="Ansioso"><span>Ansioso</span></label><label><input type="checkbox" value="Lábil"><span>Lábil</span></label><label><input type="checkbox" value="Aplanado"><span>Aplanado</span></label></div></div>
-            <div class="form-group full"><label>Pensamiento — Curso</label><div class="checkgroup"><label><input type="radio" name="an-pcurso" value="Lógico"><span>Lógico</span></label><label><input type="radio" name="an-pcurso" value="Bradipsiquia"><span>Bradipsiquia</span></label><label><input type="radio" name="an-pcurso" value="Taquipsiquia"><span>Taquipsiquia</span></label><label><input type="radio" name="an-pcurso" value="Bloqueo"><span>Bloqueo</span></label></div></div>
-            <div class="form-group full"><label>Insight</label><div class="checkgroup" id="an-insight"><label><input type="checkbox" value="Conservado"><span>Conservado</span></label><label><input type="checkbox" value="Parcial"><span>Parcial</span></label><label><input type="checkbox" value="Sin insight"><span>Sin insight</span></label></div></div>
+            <div class="form-group full"><label>Atención</label><div class="checkgroup"><label><input type="radio" name="an-atencion" value="Euprosexia (normal)"><span>Euprosexia (normal)</span></label><label><input type="radio" name="an-atencion" value="Hipoprosexia"><span>Hipoprosexia</span></label><label><input type="radio" name="an-atencion" value="Hiperprosexia"><span>Hiperprosexia</span></label><label><input type="radio" name="an-atencion" value="Pseudoaprosexia"><span>Pseudoaprosexia</span></label><label><input type="radio" name="an-atencion" value="Aprosexia"><span>Aprosexia</span></label></div></div>
             <div class="form-group full"><label>Memoria y atención</label><div class="checkgroup"><label><input type="radio" name="an-mem" value="Conservadas"><span>Conservadas</span></label><label><input type="radio" name="an-mem" value="Atención deteriorada"><span>Atención deteriorada</span></label><label><input type="radio" name="an-mem" value="Memoria deteriorada"><span>Memoria deteriorada</span></label><label><input type="radio" name="an-mem" value="Ambas deterioradas"><span>Ambas deterioradas</span></label></div></div>
+            <div class="form-group full"><label>Juicio y raciocinio</label><div class="checkgroup"><label><input type="radio" name="an-juicio" value="Conservado"><span>Conservado</span></label><label><input type="radio" name="an-juicio" value="Desviado / comprometido"><span>Desviado / comprometido</span></label><label><input type="radio" name="an-juicio" value="Suspendido"><span>Suspendido</span></label><label><input type="radio" name="an-juicio" value="Delirante"><span>Delirante</span></label></div></div>
+
+            <!-- Pensamiento y lenguaje -->
+            <div class="form-group full" style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);padding-bottom:0;margin-bottom:-4px">Pensamiento y lenguaje</div>
+            <div class="form-group full"><label>Pensamiento — Curso</label><div class="checkgroup"><label><input type="radio" name="an-pcurso" value="Lógico"><span>Lógico</span></label><label><input type="radio" name="an-pcurso" value="Bradipsiquia"><span>Bradipsiquia</span></label><label><input type="radio" name="an-pcurso" value="Taquipsiquia"><span>Taquipsiquia</span></label><label><input type="radio" name="an-pcurso" value="Alogia"><span>Alogia</span></label><label><input type="radio" name="an-pcurso" value="Mente en blanco"><span>Mente en blanco</span></label></div></div>
+            <div class="form-group full"><label>Pensamiento — Contenido</label><div class="checkgroup"><label><input type="checkbox" value="Sin alteraciones"><span>Sin alteraciones</span></label><label><input type="checkbox" value="Ideas de muerte / suicidio"><span>Ideas de muerte / suicidio</span></label><label><input type="checkbox" value="Ideación delirante"><span>Ideación delirante</span></label><label><input type="checkbox" value="Ideas obsesivas"><span>Ideas obsesivas</span></label><label><input type="checkbox" value="Ideas de minusvalía / autorreproche"><span>Ideas de minusvalía / autorreproche</span></label><label><input type="checkbox" value="Ideas nihilistas"><span>Ideas nihilistas</span></label><label><input type="checkbox" value="Celotipia de novo"><span title="Posible deterioro cognitivo mayor en ≥60 años">Celotipia de novo</span></label></div></div>
+            <div class="form-group full"><label>Lenguaje</label><div class="checkgroup"><label><input type="checkbox" value="Normal"><span>Normal</span></label><label><input type="checkbox" value="Taquilalia"><span>Taquilalia</span></label><label><input type="checkbox" value="Bradilalia"><span>Bradilalia</span></label><label><input type="checkbox" value="Mutismo"><span>Mutismo</span></label><label><input type="checkbox" value="Logorrea / prolijo"><span>Logorrea / prolijo</span></label><label><input type="checkbox" value="Ensalada de palabras"><span>Ensalada de palabras</span></label><label><input type="checkbox" value="Neologismos"><span>Neologismos</span></label><label><input type="checkbox" value="Verbigeración"><span>Verbigeración</span></label><label><input type="checkbox" value="Ecolalia"><span>Ecolalia</span></label><label><input type="checkbox" value="Palilalia"><span>Palilalia</span></label></div></div>
+
+            <!-- Afecto, conducta, percepción -->
+            <div class="form-group full" style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);padding-bottom:0;margin-bottom:-4px">Afecto, conducta y percepción</div>
+            <div class="form-group full"><label>Afecto</label><div class="checkgroup" id="an-afecto"><label><input type="checkbox" value="Eutímico"><span>Eutímico</span></label><label><input type="checkbox" value="Modulado"><span>Modulado</span></label><label><input type="checkbox" value="Depresivo"><span>Depresivo</span></label><label><input type="checkbox" value="Ansioso"><span>Ansioso</span></label><label><input type="checkbox" value="Lábil"><span>Lábil</span></label><label><input type="checkbox" value="Aplanado"><span>Aplanado / Plano</span></label><label><input type="checkbox" value="Exaltado / eufórico"><span>Exaltado / eufórico</span></label><label><input type="checkbox" value="Disociación ideoafectiva"><span>Disociación ideoafectiva</span></label><label><input type="checkbox" value="Síndrome amotivacional"><span>Síndrome amotivacional</span></label></div></div>
+            <div class="form-group full"><label>Conducta motora</label><div class="checkgroup"><label><input type="checkbox" value="Sin alteraciones"><span>Sin alteraciones</span></label><label><input type="checkbox" value="Inquietud / agitación"><span>Inquietud / agitación</span></label><label><input type="checkbox" value="Bradiquinesia"><span>Bradiquinesia</span></label><label><input type="checkbox" value="Acatisia"><span>Acatisia</span></label><label><input type="checkbox" value="Catatonía"><span>Catatonía</span></label><label><input type="checkbox" value="Manerismos"><span>Manerismos</span></label><label><input type="checkbox" value="Asterixis"><span>Asterixis (delirium)</span></label><label><input type="checkbox" value="Flexibilidad cérea"><span>Flexibilidad cérea</span></label><label><input type="checkbox" value="Ecopraxia"><span>Ecopraxia</span></label></div></div>
+            <div class="form-group full"><label>Sensopercepción</label><div class="checkgroup"><label><input type="checkbox" value="Sin alteraciones"><span>Sin alteraciones</span></label><label><input type="checkbox" value="Alucinaciones visuales"><span>Alucinaciones visuales</span></label><label><input type="checkbox" value="Alucinaciones auditivas"><span>Alucinaciones auditivas</span></label><label><input type="checkbox" value="Alucinaciones táctiles"><span>Alucinaciones táctiles</span></label><label><input type="checkbox" value="Alucinaciones olfativas"><span>Alucinaciones olfativas</span></label><label><input type="checkbox" value="Formicación"><span>Formicación (delirium)</span></label><label><input type="checkbox" value="Ilusiones"><span>Ilusiones</span></label><label><input type="checkbox" value="Pseudoalucinaciones"><span>Pseudoalucinaciones</span></label><label><input type="checkbox" value="Flashbacks"><span>Flashbacks</span></label></div></div>
+            <div class="form-group full"><label>Insight</label><div class="checkgroup" id="an-insight"><label><input type="checkbox" value="Conservado"><span>Conservado</span></label><label><input type="checkbox" value="Parcial"><span>Parcial</span></label><label><input type="checkbox" value="Sin insight"><span>Sin insight</span></label></div></div>
+
           </div></div>
         </div>
         <div class="anamnesis-section">
@@ -2210,6 +2433,309 @@ input.toggle-cb{display:none}
       <div id="ce-lista"></div>
     </div>
 
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- PÁGINA: RONDA DIARIA                                         -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <div id="page-ronda-diaria" class="page">
+
+      <!-- ── TABLERO DEL DÍA ──────────────────────────────────────── -->
+      <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent)">📋 Pacientes de hoy</span>
+            <span id="rd-tablero-resumen" style="font-size:0.72rem;color:var(--text3)"></span>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="rdInit()" title="Refrescar lista">🔄 Actualizar</button>
+        </div>
+        <div id="rd-tablero" style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:0.82rem;color:var(--text3);text-align:center;padding:12px 0">Cargando pacientes…</div>
+        </div>
+      </div>
+
+      <!-- Estado vacío (cuando no hay paciente seleccionado) -->
+      <div id="rd-empty" style="text-align:center;padding:40px 20px;color:var(--text3)">
+        <div style="font-size:2.4rem;margin-bottom:10px">☝️</div>
+        <div style="font-size:0.9rem;font-weight:600;margin-bottom:5px">Selecciona un paciente del tablero</div>
+        <div style="font-size:0.82rem">Toca "Iniciar ficha" en cualquier paciente para registrar su ronda.</div>
+      </div>
+
+      <!-- Ficha de Ronda (oculta hasta seleccionar paciente) -->
+      <div id="rd-ficha" style="display:none">
+
+        <!-- Header de paciente activo -->
+        <div id="rd-pac-header" style="background:var(--accent);color:#fff;border-radius:var(--radius);padding:10px 18px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;opacity:0.8">Registrando ronda para</div>
+            <div id="rd-pac-header-nombre" style="font-size:1rem;font-weight:700"></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4)" onclick="rdGuardar()">💾 Guardar</button>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4)" onclick="rdImprimir()">🖨️ Imprimir</button>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3)" onclick="rdCerrarFicha()">✕ Cerrar</button>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span style="background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">1</span>
+            Identificación y Contexto
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Fecha</div>
+              <input type="date" id="rd-fecha" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Habitación</div>
+              <input type="text" id="rd-hab" placeholder="Ej. AZU-304B" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Edad / Sexo</div>
+              <div style="display:flex;gap:6px">
+                <input type="text" id="rd-edad" placeholder="Edad" style="width:60px;padding:7px 8px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+                <select id="rd-sexo" style="flex:1;padding:7px 8px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+                  <option value="">—</option><option>F</option><option>M</option><option>NB</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Días de estancia</div>
+              <input type="number" id="rd-dias" min="0" placeholder="0" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px">
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Aislamiento</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-aislamiento" value="no" checked> No</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-aislamiento" value="si"> Sí:</label>
+                <input type="text" id="rd-aislamiento-tipo" placeholder="tipo…" style="width:100px;padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Tipo de paciente</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="nuevo" checked> 🆕 Nuevo (IC)</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="seguimiento"> 🔄 Seguimiento</label>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Acompañante</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-acomp" value="solo" checked> Solo</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-acomp" value="familiar"> Familiar</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-acomp" value="cuidador"> Cuidador</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECCIÓN 2: FILTRO CLÍNICO-MÉDICO ─────────────────── -->
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#b45309;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span style="background:#b45309;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">2</span>
+            Filtro Clínico-Médico <span style="font-weight:400;font-size:0.68rem;color:var(--text3);text-transform:none">(Revisión HCE)</span>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Dx Médico Principal</div>
+            <input type="text" id="rd-dx" placeholder="Diagnóstico médico principal…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Cambio de plan médico hoy</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="radio" name="rd-cambio-plan" value="ninguno" checked> Ninguno</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="radio" name="rd-cambio-plan" value="cirugia"> Cirugía cancelada/reprogramada</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="radio" name="rd-cambio-plan" value="alta"> Alta inminente</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="radio" name="rd-cambio-plan" value="pronostico"> Mal pronóstico</label>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Dolor reportado (EVA 0–10)</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="range" id="rd-dolor" min="0" max="10" value="0" oninput="document.getElementById('rd-dolor-val').textContent=this.value" style="flex:1">
+                <strong id="rd-dolor-val" style="min-width:18px;text-align:center">0</strong>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Alerta metabólica / laboratorios</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-lab" value="normal" checked> Normal</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-lab" value="sodio"> Na alterado</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-lab" value="hb"> Hb baja</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-lab" value="deshidratacion"> Deshidratación</label>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Fármacos con impacto conductual</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-cort"> Corticoides</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-opio"> Opioides</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-benzo"> Benzodiacepinas</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-antip"> Antipsicóticos</label>
+              <span style="display:flex;align-items:center;gap:4px;font-size:0.8rem">Descenso de: <input type="text" id="rd-farm-descenso" placeholder="fármaco…" style="width:110px;padding:3px 7px;border:1.5px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none"></span>
+            </div>
+          </div>
+          <!-- Notas de HCE y enfermería -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">📋 Nota del médico tratante (HCE)</div>
+              <textarea id="rd-nota-medico" rows="3" placeholder="Lo más relevante de la última nota médica… Ej: 'Planea cirugía mañana', 'Inicio de QT hoy', 'Paciente con dolor no controlado'" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">🩺 Reporte de enfermería (últimas 24h)</div>
+              <textarea id="rd-nota-enfermeria" rows="3" placeholder="Lo más relevante del reporte de enfermería… Ej: 'Noche agitada', 'Rechazó medicación', 'Llanto persistente', 'Sin novedad'" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECCIÓN 3: MONITOREO CONDUCTUAL ───────────────────── -->
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#6d28d9;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span style="background:#6d28d9;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">3</span>
+            Monitoreo Conductual <span style="font-weight:400;font-size:0.68rem;color:var(--text3);text-transform:none">(reporte enfermería 24h)</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Estado de conciencia</div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conciencia" value="alerta" checked> Alerta</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conciencia" value="fluctuante"> Fluctuante (sospecha delirium)</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conciencia" value="somnoliento"> Somnoliento</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conciencia" value="estuporoso"> Estuporoso</label>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Patrón conductual</div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conducta" value="colaborador" checked> Colaborador</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conducta" value="agresivo-verbal"> Agresivo verbal</label>
+                <label style="display:flex;align-items:center;gap=5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conducta" value="agresivo-fisico"> Agresivo físico</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conducta" value="inhibido"> Inhibido / aislado</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conducta" value="llanto"> Llanto frecuente</label>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Adherencia</div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-adherencia" value="colabora" checked> Colabora con procedimientos</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-adherencia" value="rechaza"> Rechaza medicación / insumos</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-adherencia" value="alta-voluntaria"> Exige alta voluntaria</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECCIÓN 4: MATRIZ DE DECISIÓN ─────────────────────── -->
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#dc2626;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span style="background:#dc2626;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">4</span>
+            Matriz de Decisión Clínica
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">¿Pertenece a Psicología Hospitalaria?</div>
+              <div style="display:flex;gap:10px">
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-pertenece" value="si" checked> Sí</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-pertenece" value="no"> No</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-pertenece" value="mixto"> Mixto</label>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Derivación / Co-gestión</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-psiq"> Psiquiatría</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-ts"> T. Social</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-pal"> C. Paliativos</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-neuro"> Neuropsicología</label>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Razón de derivación</div>
+            <input type="text" id="rd-razon-der" placeholder="Describe la razón de derivación o co-gestión…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+          </div>
+        </div>
+
+        <!-- ── SECCIÓN 5: PLAN DE ACCIÓN ─────────────────────────── -->
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#0369a1;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span style="background:#0369a1;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">5</span>
+            Plan de Acción en Habitación <span style="font-weight:400;font-size:0.68rem;color:var(--text3);text-transform:none">(10–15 min)</span>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Objetivo de hoy</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-objetivo" value="desescalada"> Desescalada verbal</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-objetivo" value="prequirurgica"> Preparación prequirúrgica</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-objetivo" value="aislamiento"> Validación distrés por aislamiento</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-objetivo" value="dolor"> Afrontamiento dolor</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-objetivo" value="otro" checked> Otro</label>
+            </div>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Intervención realizada</div>
+            <input type="text" id="rd-intervencion" placeholder="Describe brevemente la intervención…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+          </div>
+          <div>
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Pacto / Cierre con el paciente</div>
+            <input type="text" id="rd-pacto" placeholder="Acuerdo o cierre con el paciente…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+          </div>
+        </div>
+
+        <!-- ── SECCIÓN 6: CRITERIO DE ALTA / SEGUIMIENTO ──────────── -->
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px">
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#059669;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span style="background:#059669;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">6</span>
+            Criterio de Alta Psicológica / Seguimiento Institucional
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Criterio de alta psicológica hospitalaria cumplido</div>
+            <div style="display:flex;gap:14px">
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.84rem;cursor:pointer">
+                <input type="radio" name="rd-alta" value="si">
+                <span style="color:#16a34a;font-weight:600">✅ Sí — Caso cerrado para PsH</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.84rem;cursor:pointer">
+                <input type="radio" name="rd-alta" value="no" checked>
+                <span style="color:#b45309;font-weight:600">🔄 No — Continúa en seguimiento</span>
+              </label>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Indicación al equipo médico / enfermería</div>
+            <textarea id="rd-indicacion" placeholder="Indicación o alerta para el equipo tratante…" rows="2" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+          </div>
+        </div>
+
+        <!-- ── SECCIÓN 7: PENDIENTES ─────────────────────────────── -->
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#0f766e;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span style="background:#0f766e;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">7</span>
+            Pendientes
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">🩺 Pendientes médicos</div>
+              <textarea id="rd-pendientes-medicos" rows="3" placeholder="Ej: Resultado biopsia, Junta médica programada, Alta pendiente de labs…" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">🧠 Pendientes psicológicos</div>
+              <textarea id="rd-pendientes-psi" rows="3" placeholder="Ej: Aplicar Mini-Cog, Contactar familiar, Continuar valoración capacidad decisional…" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones finales -->
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:8px">
+          <button class="btn btn-primary" onclick="rdGuardar()">💾 Guardar ficha</button>
+          <button class="btn btn-secondary" onclick="rdImprimir()">🖨️ Imprimir</button>
+          <button class="btn btn-secondary" onclick="rdCerrarFicha()" style="color:var(--text3)">✕ Cerrar</button>
+        </div>
+
+      </div><!-- /rd-ficha -->
+    </div><!-- /page-ronda-diaria -->
+
     
 
   </div>
@@ -2226,92 +2752,103 @@ input.toggle-cb{display:none}
       </div>
       <button class="pac-sheet-close" onclick="closePacSheet()">✕</button>
     </div>
-    <div class="pac-sheet-body">
-      <div id="ps-sesiones-badge" class="pac-sesiones-badge" title="Ver historial completo del paciente">📅 0 sesiones registradas</div>
-      <div class="pac-info-grid" id="ps-grid"></div>
-      <!-- Plan farmacológico con historial -->
-      <div style="margin-top:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <span style="font-size:0.72rem;font-weight:700;color:#c2410c;text-transform:uppercase;letter-spacing:0.06em">💊 Plan farmacológico</span>
-          <div style="display:flex;gap:5px;align-items:center">
-            <span id="ps-farm-fecha" style="font-size:0.65rem;color:#ea580c"></span>
-            <button id="ps-farm-edit-btn" class="btn btn-sm" style="font-size:0.68rem;padding:2px 8px;background:#ea580c;color:#fff;border:none;border-radius:5px" onclick="farmToggleEdit()">✏️ Editar</button>
-            <button id="ps-farm-save-btn" class="btn btn-sm" style="display:none;font-size:0.68rem;padding:2px 8px;background:#16a34a;color:#fff;border:none;border-radius:5px" onclick="guardarPlanFarmacologico(window._psPacId)">💾 Guardar</button>
-            <button id="ps-farm-cancel-btn" class="btn btn-sm btn-secondary" style="display:none;font-size:0.68rem;padding:2px 8px" onclick="farmCancelEdit()">Cancelar</button>
+    <div class="pac-sheet-body" id="pac-sheet-body-inner">
+      <!-- En desktop: dos columnas. En móvil: columna única -->
+      <div style="display:grid;grid-template-columns:1fr;gap:0" id="ps-layout">
+
+        <!-- COLUMNA IZQUIERDA: ronda hoy + info básica del paciente -->
+        <div id="ps-col-left">
+          <!-- FICHA DE RONDA DE HOY -->
+          <div id="ps-ronda-hoy" style="display:none;margin-bottom:12px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 14px">
+            <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#15803d;margin-bottom:8px">🏥 Ronda de hoy</div>
+            <div id="ps-ronda-hoy-contenido"></div>
+            <button onclick="closePacSheet();goTo('ronda-diaria');setTimeout(function(){rdCargarPaciente(window._psPacId);},300)" style="margin-top:8px;background:none;border:none;cursor:pointer;font-size:0.72rem;color:#15803d;text-decoration:underline;padding:0">✏️ Editar ficha de ronda</button>
           </div>
+
+          <div id="ps-sesiones-badge" class="pac-sesiones-badge" title="Ver historial completo del paciente">📅 0 sesiones registradas</div>
+          <div class="pac-info-grid" id="ps-grid"></div>
         </div>
-        <!-- Vista lectura -->
-        <div id="ps-farm-view" style="font-size:0.82rem;color:#431407;line-height:1.7;white-space:pre-wrap;min-height:32px;padding:2px 0"></div>
-        <!-- Vista edición (oculta por defecto) -->
-        <textarea id="ps-farm-texto" rows="4" placeholder="Medicamentos, dosis, frecuencia…" style="display:none;width:100%;padding:8px 10px;border:1.5px solid #ea580c;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;resize:vertical;background:#fff;line-height:1.6;outline:none;color:var(--text)"></textarea>
-        <div style="display:flex;align-items:center;justify-content:flex-end;margin-top:6px">
-          <button onclick="toggleFarmHistorial(window._psPacId)" style="background:none;border:none;cursor:pointer;font-size:0.68rem;color:#c2410c;text-decoration:underline;padding:0">📜 Ver historial de cambios</button>
-        </div>
-        <div id="ps-farm-historial" style="display:none;margin-top:8px;border-top:1px solid #fed7aa;padding-top:8px;max-height:180px;overflow-y:auto"></div>
-      </div>
 
-
-
-      <!-- ANÁLISIS CLÍNICO DEL PROCESO -->
-      <div style="margin-top:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <span style="font-size:0.72rem;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:0.06em">🧠 Análisis clínico del proceso</span>
-          <div style="display:flex;gap:5px;align-items:center">
-            <span id="ps-analisis-fecha" style="font-size:0.65rem;color:#0ea5e9"></span>
-            <button id="ps-analisis-edit-btn" class="btn btn-sm" style="font-size:0.68rem;padding:2px 8px;background:#0ea5e9;color:#fff;border:none;border-radius:5px" onclick="analisisToggleEdit()">✏️ Editar</button>
-            <button id="ps-analisis-save-btn" class="btn btn-sm" style="display:none;font-size:0.68rem;padding:2px 8px;background:#16a34a;color:#fff;border:none;border-radius:5px" onclick="guardarAnalisisClinico(window._psPacId)">💾 Guardar</button>
-            <button id="ps-analisis-cancel-btn" class="btn btn-sm btn-secondary" style="display:none;font-size:0.68rem;padding:2px 8px" onclick="analisisCancelEdit()">Cancelar</button>
+        <!-- COLUMNA DERECHA: farmacológico, análisis, notas, pendientes, diferenciales -->
+        <div id="ps-col-right">
+          <!-- Plan farmacológico con historial -->
+          <div style="margin-top:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:0.72rem;font-weight:700;color:#c2410c;text-transform:uppercase;letter-spacing:0.06em">💊 Plan farmacológico</span>
+              <div style="display:flex;gap:5px;align-items:center">
+                <span id="ps-farm-fecha" style="font-size:0.65rem;color:#ea580c"></span>
+                <button id="ps-farm-edit-btn" class="btn btn-sm" style="font-size:0.68rem;padding:2px 8px;background:#ea580c;color:#fff;border:none;border-radius:5px" onclick="farmToggleEdit()">✏️ Editar</button>
+                <button id="ps-farm-save-btn" class="btn btn-sm" style="display:none;font-size:0.68rem;padding:2px 8px;background:#16a34a;color:#fff;border:none;border-radius:5px" onclick="guardarPlanFarmacologico(window._psPacId)">💾 Guardar</button>
+                <button id="ps-farm-cancel-btn" class="btn btn-sm btn-secondary" style="display:none;font-size:0.68rem;padding:2px 8px" onclick="farmCancelEdit()">Cancelar</button>
+              </div>
+            </div>
+            <div id="ps-farm-view" style="font-size:0.82rem;color:#431407;line-height:1.7;white-space:pre-wrap;min-height:32px;padding:2px 0"></div>
+            <textarea id="ps-farm-texto" rows="4" placeholder="Medicamentos, dosis, frecuencia…" style="display:none;width:100%;padding:8px 10px;border:1.5px solid #ea580c;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;resize:vertical;background:#fff;line-height:1.6;outline:none;color:var(--text)"></textarea>
+            <div style="display:flex;align-items:center;justify-content:flex-end;margin-top:6px">
+              <button onclick="toggleFarmHistorial(window._psPacId)" style="background:none;border:none;cursor:pointer;font-size:0.68rem;color:#c2410c;text-decoration:underline;padding:0">📜 Ver historial de cambios</button>
+            </div>
+            <div id="ps-farm-historial" style="display:none;margin-top:8px;border-top:1px solid #fed7aa;padding-top:8px;max-height:180px;overflow-y:auto"></div>
           </div>
-        </div>
-        <!-- Vista lectura -->
-        <div id="ps-analisis-view" style="font-size:0.82rem;color:#0c4a6e;line-height:1.7;white-space:pre-wrap;min-height:32px;padding:2px 0"></div>
-        <!-- Vista edición -->
-        <textarea id="ps-analisis-texto" rows="5" placeholder="Formulación del caso, hipótesis de trabajo, evolución del proceso terapéutico, conexiones entre sesiones, reflexiones clínicas…" style="display:none;width:100%;padding:8px 10px;border:1.5px solid #0ea5e9;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;resize:vertical;background:#fff;line-height:1.6;outline:none;color:var(--text)"></textarea>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
-          <button onclick="toggleAnalisisFechas(window._psPacId)" style="background:none;border:none;cursor:pointer;font-size:0.68rem;color:#0369a1;text-decoration:underline;padding:0">📜 Ver historial de ediciones</button>
-        </div>
-        <div id="ps-analisis-historial" style="display:none;margin-top:8px;border-top:1px solid #bae6fd;padding-top:8px;max-height:180px;overflow-y:auto"></div>
-      </div>
 
-      <!-- NOTAS RÁPIDAS -->
-      <div style="margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <span style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em">📝 Notas rápidas</span>
-          <button class="btn btn-sm btn-primary" style="font-size:0.68rem;padding:2px 10px" onclick="guardarNotaRapida(window._psPacId)">💾 Guardar</button>
-        </div>
-        <textarea id="ps-nota-rapida" rows="3" placeholder="Información adicional post-sesión, eventos relevantes, comunicaciones del equipo…" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.8rem;resize:vertical;background:var(--surface)"></textarea>
-        <div id="ps-notas-historial" style="margin-top:8px;max-height:140px;overflow-y:auto"></div>
-      </div>
-
-      <!-- PENDIENTES -->
-      <div style="margin-top:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <span style="font-size:0.72rem;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:0.06em">📋 Pendientes</span>
-          <div style="display:flex;gap:6px">
-            <button class="btn btn-sm" style="font-size:0.68rem;padding:2px 8px;background:#fef3c7;border:1px solid #fde68a;color:#92400e" onclick="togglePendientesCompletadosPac(window._psPacId)">Ver completados</button>
+          <!-- ANÁLISIS CLÍNICO DEL PROCESO -->
+          <div style="margin-top:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:0.72rem;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:0.06em">🧠 Análisis clínico del proceso</span>
+              <div style="display:flex;gap:5px;align-items:center">
+                <span id="ps-analisis-fecha" style="font-size:0.65rem;color:#0ea5e9"></span>
+                <button id="ps-analisis-edit-btn" class="btn btn-sm" style="font-size:0.68rem;padding:2px 8px;background:#0ea5e9;color:#fff;border:none;border-radius:5px" onclick="analisisToggleEdit()">✏️ Editar</button>
+                <button id="ps-analisis-save-btn" class="btn btn-sm" style="display:none;font-size:0.68rem;padding:2px 8px;background:#16a34a;color:#fff;border:none;border-radius:5px" onclick="guardarAnalisisClinico(window._psPacId)">💾 Guardar</button>
+                <button id="ps-analisis-cancel-btn" class="btn btn-sm btn-secondary" style="display:none;font-size:0.68rem;padding:2px 8px" onclick="analisisCancelEdit()">Cancelar</button>
+              </div>
+            </div>
+            <div id="ps-analisis-view" style="font-size:0.82rem;color:#0c4a6e;line-height:1.7;white-space:pre-wrap;min-height:32px;padding:2px 0"></div>
+            <textarea id="ps-analisis-texto" rows="5" placeholder="Formulación del caso, hipótesis de trabajo, evolución del proceso terapéutico, conexiones entre sesiones, reflexiones clínicas…" style="display:none;width:100%;padding:8px 10px;border:1.5px solid #0ea5e9;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;resize:vertical;background:#fff;line-height:1.6;outline:none;color:var(--text)"></textarea>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+              <button onclick="toggleAnalisisFechas(window._psPacId)" style="background:none;border:none;cursor:pointer;font-size:0.68rem;color:#0369a1;text-decoration:underline;padding:0">📜 Ver historial de ediciones</button>
+            </div>
+            <div id="ps-analisis-historial" style="display:none;margin-top:8px;border-top:1px solid #bae6fd;padding-top:8px;max-height:180px;overflow-y:auto"></div>
           </div>
-        </div>
-        <div style="display:flex;gap:6px;margin-bottom:10px">
-          <input type="text" id="ps-pendiente-input" placeholder="Nuevo pendiente… ej: Llamar a familiar, Solicitar psiquiatría" style="flex:1;padding:6px 10px;border:1px solid #fde68a;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.8rem;background:#fff;outline:none" onkeydown="if(event.key==='Enter')agregarPendientePaciente(window._psPacId)">
-          <button class="btn btn-sm btn-primary" style="font-size:0.72rem;padding:4px 10px;background:#d97706;border:none;flex-shrink:0" onclick="agregarPendientePaciente(window._psPacId)">+ Agregar</button>
-        </div>
-        <div id="ps-pendientes-lista" style="max-height:180px;overflow-y:auto"></div>
-        <div id="ps-pendientes-completados" style="display:none;margin-top:10px;border-top:1px dashed #fde68a;padding-top:10px"></div>
-      </div>
 
-      <!-- DIAGNÓSTICOS DIFERENCIALES -->
-      <div style="margin-top:12px;background:#fdf4ff;border:1px solid #e9d5ff;border-radius:10px;padding:12px 14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <span style="font-size:0.72rem;font-weight:700;color:#6b21a8;text-transform:uppercase;letter-spacing:0.06em">🔬 Diagnósticos diferenciales</span>
-          <button class="btn btn-sm" style="font-size:0.68rem;padding:2px 10px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer" onclick="abrirModalDiferenciales(window._psPacId)">✏️ Editar</button>
-        </div>
-        <div id="ps-diferenciales-lista" style="max-height:280px;overflow-y:auto">
-          <p style="font-size:0.72rem;color:#9333ea;font-style:italic">Sin diferenciales registrados aún.</p>
-        </div>
-      </div>
+          <!-- NOTAS RÁPIDAS -->
+          <div style="margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em">📝 Notas rápidas</span>
+              <button class="btn btn-sm btn-primary" style="font-size:0.68rem;padding:2px 10px" onclick="guardarNotaRapida(window._psPacId)">💾 Guardar</button>
+            </div>
+            <textarea id="ps-nota-rapida" rows="3" placeholder="Información adicional post-sesión, eventos relevantes, comunicaciones del equipo…" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.8rem;resize:vertical;background:var(--surface)"></textarea>
+            <div id="ps-notas-historial" style="margin-top:8px;max-height:140px;overflow-y:auto"></div>
+          </div>
 
+          <!-- PENDIENTES -->
+          <div style="margin-top:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <span style="font-size:0.72rem;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:0.06em">📋 Pendientes</span>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-sm" style="font-size:0.68rem;padding:2px 8px;background:#fef3c7;border:1px solid #fde68a;color:#92400e" onclick="togglePendientesCompletadosPac(window._psPacId)">Ver completados</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;margin-bottom:10px">
+              <input type="text" id="ps-pendiente-input" placeholder="Nuevo pendiente… ej: Llamar a familiar, Solicitar psiquiatría" style="flex:1;padding:6px 10px;border:1px solid #fde68a;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.8rem;background:#fff;outline:none" onkeydown="if(event.key==='Enter')agregarPendientePaciente(window._psPacId)">
+              <button class="btn btn-sm btn-primary" style="font-size:0.72rem;padding:4px 10px;background:#d97706;border:none;flex-shrink:0" onclick="agregarPendientePaciente(window._psPacId)">+ Agregar</button>
+            </div>
+            <div id="ps-pendientes-lista" style="max-height:180px;overflow-y:auto"></div>
+            <div id="ps-pendientes-completados" style="display:none;margin-top:10px;border-top:1px dashed #fde68a;padding-top:10px"></div>
+          </div>
 
-    </div>
+          <!-- DIAGNÓSTICOS DIFERENCIALES -->
+          <div style="margin-top:12px;background:#fdf4ff;border:1px solid #e9d5ff;border-radius:10px;padding:12px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <span style="font-size:0.72rem;font-weight:700;color:#6b21a8;text-transform:uppercase;letter-spacing:0.06em">🔬 Diagnósticos diferenciales</span>
+              <button class="btn btn-sm" style="font-size:0.68rem;padding:2px 10px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer" onclick="abrirModalDiferenciales(window._psPacId)">✏️ Editar</button>
+            </div>
+            <div id="ps-diferenciales-lista" style="max-height:280px;overflow-y:auto">
+              <p style="font-size:0.72rem;color:#9333ea;font-style:italic">Sin diferenciales registrados aún.</p>
+            </div>
+          </div>
+        </div><!-- /ps-col-right -->
+
+      </div><!-- /ps-layout -->
+    </div><!-- /pac-sheet-body -->
     <div class="pac-sheet-actions" id="ps-actions"></div>
   </div>
 </div>
@@ -4755,7 +5292,7 @@ window.filtrarPsico = function(filtro, btn){
 window.goTo = function(page){
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
-    'psicoeducacion','metricas'];
+    'psicoeducacion','metricas','ronda-diaria'];
   const titles = {
     dashboard:'Inicio', pacientes:'Registro de Pacientes',
     'consulta-externa':'Consulta Externa EPS',
@@ -4765,7 +5302,8 @@ window.goTo = function(page){
     historial:'Historial de Tests',
     'historial-pac':'Historial de Pacientes',
     psicoeducacion:'Psicoeducación Clínica',
-    metricas:'Mis Métricas de Actividad Clínica'
+    metricas:'Mis Métricas de Actividad Clínica',
+    'ronda-diaria':'Ficha de Ronda Diaria — Psicología Hospitalaria'
   };
   // Hide all pages, show target
   pages.forEach(function(p){
@@ -4793,7 +5331,8 @@ window.goTo = function(page){
     'dashboard': function(){if(window.renderDashboard)window.renderDashboard();else setTimeout(function(){window.renderDashboard&&window.renderDashboard();},300);},
     'interconsultas': function(){if(window.renderIC)window.renderIC();else setTimeout(function(){window.renderIC&&window.renderIC();},300);},
 'historial-pac': function(){setTimeout(function(){window.hpacRenderLista&&window.hpacRenderLista();},100);},
-    'psicoeducacion': function(){setTimeout(function(){window.renderPsicoCards&&window.renderPsicoCards('all');},100);}
+    'psicoeducacion': function(){setTimeout(function(){window.renderPsicoCards&&window.renderPsicoCards('all');},100);},
+    'ronda-diaria': function(){setTimeout(function(){window.rdInit&&window.rdInit();},100);}
   };
   if(fn[page]) fn[page]();
 };
@@ -7606,6 +8145,8 @@ window.abrirPacSheet=async(id)=>{
   if(typeof cargarDiferenciales==='function') cargarDiferenciales(id).then(function(){ if(typeof renderDiferencialesEnFicha==='function') renderDiferencialesEnFicha(); });
   if(typeof cargarAnalisisClinico==='function') cargarAnalisisClinico(id);
   window._mostrarCompletados=false;
+  // Cargar ficha de ronda de hoy si existe
+  psCargarRondaHoy(id);
   document.getElementById('pac-sheet-overlay').classList.add('open');
   document.body.style.overflow='hidden';
 };
@@ -7614,6 +8155,84 @@ window.closePacSheet=(e)=>{
   if(e&&e.target!==document.getElementById('pac-sheet-overlay'))return;
   document.getElementById('pac-sheet-overlay').classList.remove('open');
   document.body.style.overflow='';
+};
+
+// ── Cargar ficha de ronda de hoy en el panel del paciente ─────────
+window.psCargarRondaHoy = async function(pacId){
+  var bloque = document.getElementById('ps-ronda-hoy');
+  var cont   = document.getElementById('ps-ronda-hoy-contenido');
+  if(!bloque||!cont) return;
+  bloque.style.display = 'none';
+  cont.innerHTML = '';
+
+  // Buscar en caché primero (ya cargado por rdInit)
+  var hoy = new Date().toISOString().split('T')[0];
+  var ficha = window._rdFichasHoy && window._rdFichasHoy[pacId];
+
+  // Si no está en caché, consultar Firebase
+  if(!ficha){
+    try{
+      var snap = await window._getDocs(
+        window._fdb.query(
+          window._fdb.collection(window.db,'fichas_ronda'),
+          window._fdb.orderBy('ts','desc')
+        )
+      );
+      snap.forEach(function(d){
+        var data = d.data();
+        if(!ficha && data.pacienteId===pacId && data.fecha===hoy) ficha = data;
+      });
+    }catch(e){ return; }
+  }
+
+  if(!ficha) return; // no hay ficha hoy → no mostrar el bloque
+
+  // Construir vista resumida — solo lo que tiene valor
+  var cambioLabel = {ninguno:'Ninguno',cirugia:'⚠️ Cirugía cancelada/reprogramada',alta:'⚠️ Alta inminente',pronostico:'⚠️ Mal pronóstico'}[ficha.cambioPlan]||ficha.cambioPlan||'';
+  var conductaLabel = {colaborador:'Colaborador','agresivo-verbal':'Agresivo verbal','agresivo-fisico':'⚠️ Agresivo físico',inhibido:'Inhibido / aislado',llanto:'Llanto frecuente',fluctuante:'⚠️ Fluctuante (delirium)'}[ficha.conducta]||ficha.conducta||'';
+  var adherLabel = {colabora:'Colabora',rechaza:'⚠️ Rechaza medicación','alta-voluntaria':'⚠️ Exige alta voluntaria'}[ficha.adherencia]||ficha.adherencia||'';
+
+  function fila(icon, label, valor, alerta){
+    if(!valor||valor==='ninguno'||valor==='normal'||valor==='colabora'||valor==='alerta'||valor==='colaborador') return '';
+    var color = alerta ? 'color:#b91c1c;font-weight:700' : 'color:#166534';
+    return '<div style="display:flex;gap:6px;margin-bottom:3px;font-size:0.78rem">'
+      +'<span style="color:var(--text3);flex-shrink:0">'+icon+' <span style="color:var(--text3);font-weight:600">'+label+'</span></span>'
+      +'<span style="'+color+'">'+valor+'</span>'
+    +'</div>';
+  }
+
+  var html = '';
+
+  // Dx + días
+  if(ficha.dx) html += '<div style="font-size:0.82rem;font-weight:700;color:#166534;margin-bottom:6px">'+ficha.dx+(ficha.dias?' · '+ficha.dias+' días':'')+'</div>';
+
+  // Info clave de contexto médico
+  if(ficha.notaMedico)     html += '<div style="font-size:0.78rem;background:#fff;border-left:3px solid #86efac;padding:4px 8px;margin-bottom:4px;border-radius:0 6px 6px 0"><span style="font-size:0.68rem;font-weight:700;color:#15803d">📋 MÉDICO</span><br>'+ficha.notaMedico+'</div>';
+  if(ficha.notaEnfermeria) html += '<div style="font-size:0.78rem;background:#fff;border-left:3px solid #6ee7b7;padding:4px 8px;margin-bottom:4px;border-radius:0 6px 6px 0"><span style="font-size:0.68rem;font-weight:700;color:#15803d">🩺 ENFERMERÍA</span><br>'+ficha.notaEnfermeria+'</div>';
+
+  // Alertas clínicas — solo las que se desvían de lo normal
+  var alertas = '';
+  if(ficha.cambioPlan && ficha.cambioPlan!=='ninguno') alertas += fila('📅','Plan médico:',cambioLabel, true);
+  var dolor = parseInt(ficha.dolor||0);
+  if(dolor >= 4) alertas += fila('😣','Dolor EVA:',ficha.dolor+'/10', dolor>=7);
+  if(ficha.laboratorio && ficha.laboratorio!=='normal') alertas += fila('🧪','Labs:',ficha.laboratorio, true);
+  if(ficha.aislamiento==='si') alertas += fila('🚧','Aislamiento:',ficha.aislamientoTipo||'Sí', false);
+  if(ficha.conducta && ficha.conducta!=='colaborador') alertas += fila('👤','Conducta:',conductaLabel, ficha.conducta.includes('agresivo'));
+  if(ficha.adherencia && ficha.adherencia!=='colabora') alertas += fila('💊','Adherencia:',adherLabel, true);
+  if(ficha.farmacos && ficha.farmacos.length) alertas += fila('💊','Fármacos:',ficha.farmacos.join(', '), false);
+  if(alertas) html += '<div style="margin-bottom:4px">'+alertas+'</div>';
+
+  // Intervención y pacto
+  if(ficha.intervencion) html += '<div style="font-size:0.78rem;margin-bottom:3px"><span style="font-size:0.68rem;font-weight:700;color:#15803d">INTERVENCIÓN</span> '+ficha.intervencion+'</div>';
+  if(ficha.pacto)        html += '<div style="font-size:0.78rem;margin-bottom:3px"><span style="font-size:0.68rem;font-weight:700;color:#15803d">PACTO</span> '+ficha.pacto+'</div>';
+
+  // Pendientes
+  if(ficha.pendientesMedicos) html += '<div style="font-size:0.78rem;margin-bottom:3px;color:#0369a1"><span style="font-weight:700">⏳ Pendientes médicos:</span> '+ficha.pendientesMedicos+'</div>';
+  if(ficha.pendientesPsi)     html += '<div style="font-size:0.78rem;margin-bottom:3px;color:#0369a1"><span style="font-weight:700">⏳ Pendientes psicológicos:</span> '+ficha.pendientesPsi+'</div>';
+
+  if(!html) return; // ficha vacía → no mostrar
+  cont.innerHTML = html;
+  bloque.style.display = '';
 };
 
 // ── IC ENRIQUECIDA ────────────────────────────────────────────
@@ -12278,7 +12897,456 @@ window.calcMADRS = function(){
     if(typeof renderHistorialTests==='function') renderHistorialTests();
   }catch(e){}
 };
-</script>
+
+// ══════════════════════════════════════════════════════════════════════
+// MÓDULO: RONDA DIARIA — PSICOLOGÍA HOSPITALARIA
+// Colección Firebase: fichas_ronda
+// ══════════════════════════════════════════════════════════════════════
+
+window._rdPacId = null;
+window._rdFichasHoy = {}; // pacienteId → ficha guardada hoy
+
+// ── Orden de ronda: AZU → P1 → P6 → P5 → P4 → P3 → P2 → URG ───────
+// Dentro de cada bloque, habitaciones de menor a mayor número.
+function rdOrdenRonda(pacs){
+  // Prioridad de bloque según prefijo de habitación
+  function bloque(hab){
+    var h = (hab||'').toUpperCase().trim();
+    if(h.startsWith('AZU'))  return 0;
+    if(h.startsWith('P1-') || h.startsWith('1-') || /^1\d{2}/.test(h)) return 1;
+    if(h.startsWith('P6-') || h.startsWith('6-') || /^6\d{2}/.test(h)) return 2;
+    if(h.startsWith('P5-') || h.startsWith('5-') || /^5\d{2}/.test(h)) return 3;
+    if(h.startsWith('P4-') || h.startsWith('4-') || /^4\d{2}/.test(h)) return 4;
+    if(h.startsWith('P3-') || h.startsWith('3-') || /^3\d{2}/.test(h)) return 5;
+    if(h.startsWith('P2-') || h.startsWith('2-') || /^2\d{2}/.test(h)) return 6;
+    if(h.startsWith('URG')) return 7;
+    return 8; // sin hab o no reconocida → al final
+  }
+  // Extraer número de habitación para ordenar dentro del bloque
+  function numHab(hab){
+    var m = (hab||'').match(/(\d+)/g);
+    return m ? parseInt(m[m.length-1],10) : 9999;
+  }
+  return pacs.slice().sort(function(a,b){
+    var ba = bloque(a.hab), bb = bloque(b.hab);
+    if(ba !== bb) return ba - bb;
+    return numHab(a.hab) - numHab(b.hab);
+  });
+}
+
+// ── Inicializar: cargar tablero del día ─────────────────────────────
+window.rdInit = async function(){
+  var cont = document.getElementById('rd-tablero');
+  var resumen = document.getElementById('rd-tablero-resumen');
+  if(!cont) return;
+
+  var hoy = new Date().toISOString().split('T')[0];
+  var pacs = rdOrdenRonda(
+    (window.pacientes||[]).filter(function(p){
+      return p.proxSesion === hoy
+        && p.estado !== 'alta'
+        && p.estado !== 'fallecido'
+        && p.estado !== 'alta-voluntaria';
+    })
+  );
+
+  if(!pacs.length){
+    cont.innerHTML = '<div style="font-size:0.82rem;color:var(--text3);text-align:center;padding:20px 0">No hay pacientes con próxima sesión programada para hoy.<br><span style="font-size:0.76rem">Asigna la fecha de próxima sesión desde el registro del paciente.</span></div>';
+    if(resumen) resumen.textContent = '';
+    return;
+  }
+
+  // Cargar fichas guardadas hoy desde Firebase
+  var hoy = new Date().toISOString().split('T')[0];
+  window._rdFichasHoy = {};
+  try{
+    var snap = await window._getDocs(
+      window._fdb.query(
+        window._fdb.collection(window.db,'fichas_ronda'),
+        window._fdb.orderBy('ts','desc')
+      )
+    );
+    snap.forEach(function(d){
+      var data = d.data();
+      if(data.fecha === hoy && data.pacienteId && !window._rdFichasHoy[data.pacienteId]){
+        window._rdFichasHoy[data.pacienteId] = data;
+      }
+    });
+  }catch(e){ /* sin Firebase offline igual se muestra el tablero */ }
+
+  var hechos = Object.keys(window._rdFichasHoy).length;
+  var total  = pacs.length;
+  if(resumen) resumen.textContent = hechos+' de '+total+' rondas registradas hoy';
+
+  var bloqueLabels = ['🔵 Bloque Azul','🏥 Piso 1','🏥 Piso 6','🏥 Piso 5','🏥 Piso 4','🏥 Piso 3','🏥 Piso 2','🚨 Urgencias','📋 Sin habitación'];
+  function bloqueId(hab){
+    var h=(hab||'').toUpperCase().trim();
+    if(h.startsWith('AZU'))  return 0;
+    if(h.startsWith('P1-')||h.startsWith('1-')||/^1\d{2}/.test(h)) return 1;
+    if(h.startsWith('P6-')||h.startsWith('6-')||/^6\d{2}/.test(h)) return 2;
+    if(h.startsWith('P5-')||h.startsWith('5-')||/^5\d{2}/.test(h)) return 3;
+    if(h.startsWith('P4-')||h.startsWith('4-')||/^4\d{2}/.test(h)) return 4;
+    if(h.startsWith('P3-')||h.startsWith('3-')||/^3\d{2}/.test(h)) return 5;
+    if(h.startsWith('P2-')||h.startsWith('2-')||/^2\d{2}/.test(h)) return 6;
+    if(h.startsWith('URG')) return 7;
+    return 8;
+  }
+  var ultimoBloque = -1;
+  cont.innerHTML = pacs.map(function(p){
+    var hecha = !!(window._rdFichasHoy&&window._rdFichasHoy[p.id]);
+    var bId = bloqueId(p.hab);
+    var separador = '';
+    if(bId !== ultimoBloque){
+      ultimoBloque = bId;
+      separador = '<div style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin:8px 0 4px;padding-left:4px">'+(bloqueLabels[bId]||'')+'</div>';
+    }
+    var hab = p.hab?'<span style="font-size:0.7rem;font-weight:700;color:var(--accent);background:var(--accent-light);padding:2px 7px;border-radius:4px;margin-right:6px">'+p.hab+'</span>':'';
+    var estadoBadge = hecha
+      ?'<span style="font-size:0.7rem;font-weight:700;color:#16a34a;background:#dcfce7;padding:2px 8px;border-radius:10px">✅ Hecha</span>'
+      :'<span style="font-size:0.7rem;font-weight:700;color:#b45309;background:#fef3c7;padding:2px 8px;border-radius:10px">⏳ Pendiente</span>';
+    var fichaInfo = hecha&&window._rdFichasHoy[p.id]&&window._rdFichasHoy[p.id].intervencion
+      ?'<div style="font-size:0.72rem;color:var(--text3);margin-top:3px">📝 '+window._rdFichasHoy[p.id].intervencion.slice(0,60)+'…</div>':'';
+    var btnLabel = hecha?'✏️ Editar ficha':'▶ Iniciar ficha';
+    var btnColor = hecha?'background:var(--surface2);color:var(--text2);border:1.5px solid var(--border)':'background:var(--accent);color:#fff;border:none';
+    return separador+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:var(--surface2);border:1.5px solid '+(hecha?'#bbf7d0':'var(--border)')+';border-radius:9px;flex-wrap:wrap">'
+      +'<div style="flex:1;min-width:0;cursor:pointer" onclick="if(typeof abrirPacSheet===\'function\')abrirPacSheet(\''+p.id+'\')" title="Ver ficha del paciente">'
+        +'<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">'+hab
+          +'<span style="font-size:0.88rem;font-weight:700;color:var(--accent);text-decoration:underline;text-underline-offset:2px">'+(p.nombre||'Sin nombre')+'</span>'+estadoBadge
+        +'</div>'
+        +(p.motivo?'<div style="font-size:0.75rem;color:var(--text3);margin-top:2px">'+p.motivo.slice(0,60)+'</div>':'')
+        +fichaInfo
+      +'</div>'
+      +'<button onclick="rdCargarPaciente(\''+p.id+'\')" style="'+btnColor+';padding:6px 14px;border-radius:7px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif">'+btnLabel+'</button>'
+    +'</div>';
+  }).join('');
+};
+
+// ── Cargar paciente en la ficha ─────────────────────────────────────
+window.rdCargarPaciente = function(pacId){
+  window._rdPacId = pacId || null;
+  var ficha  = document.getElementById('rd-ficha');
+  var empty  = document.getElementById('rd-empty');
+  var header = document.getElementById('rd-pac-header-nombre');
+
+  if(!pacId){
+    if(ficha)  ficha.style.display  = 'none';
+    if(empty)  empty.style.display  = '';
+    return;
+  }
+
+  if(ficha)  ficha.style.display  = '';
+  if(empty)  empty.style.display  = 'none';
+
+  var pac = (window.pacientes||[]).find(function(p){ return p.id === pacId; });
+  if(!pac) return;
+
+  if(header) header.textContent = (pac.nombre||'—') + (pac.hab?' · '+pac.hab:'');
+
+  // Si ya hay ficha guardada hoy, pre-rellenar con esos datos
+  var fichaHoy = window._rdFichasHoy && window._rdFichasHoy[pacId];
+  if(fichaHoy){
+    rdRellenar(fichaHoy);
+  } else {
+    rdRellenarDesde(pac);
+  }
+
+  ficha && ficha.scrollIntoView({ behavior:'smooth', block:'start' });
+};
+
+// Rellenar con datos de una ficha guardada
+function rdRellenar(d){
+  rdSet('rd-fecha',    d.fecha||'');
+  rdSet('rd-hab',      d.hab||'');
+  rdSet('rd-edad',     d.edad||'');
+  rdSet('rd-sexo',     d.sexo||'');
+  rdSet('rd-dias',     d.dias||'');
+  rdSet('rd-aislamiento-tipo', d.aislamientoTipo||'');
+  rdSet('rd-farm-descenso',    d.farmDescenso||'');
+  rdSet('rd-razon-der',   d.razonDer||'');
+  rdSet('rd-intervencion',d.intervencion||'');
+  rdSet('rd-pacto',       d.pacto||'');
+  rdSet('rd-indicacion',  d.indicacion||'');
+  rdSet('rd-nota-medico',     d.notaMedico||'');
+  rdSet('rd-nota-enfermeria', d.notaEnfermeria||'');
+  rdSet('rd-pendientes-medicos', d.pendientesMedicos||'');
+  rdSet('rd-pendientes-psi',     d.pendientesPsi||'');
+  rdRadio('rd-aislamiento',  d.aislamiento||'no');
+  rdRadio('rd-tipo-pac',     d.tipoPaciente||'nuevo');
+  rdRadio('rd-acomp',        d.acompanante||'solo');
+  rdRadio('rd-cambio-plan',  d.cambioPlan||'ninguno');
+  rdRadio('rd-lab',          d.laboratorio||'normal');
+  rdRadio('rd-conciencia',   d.conciencia||'alerta');
+  rdRadio('rd-conducta',     d.conducta||'colaborador');
+  rdRadio('rd-adherencia',   d.adherencia||'colabora');
+  rdRadio('rd-pertenece',    d.pertenece||'si');
+  rdRadio('rd-objetivo',     d.objetivo||'otro');
+  rdRadio('rd-alta',         d.altaCumplida||'no');
+  var dolor = document.getElementById('rd-dolor');
+  var dolorVal = document.getElementById('rd-dolor-val');
+  if(dolor){ dolor.value = d.dolor||0; }
+  if(dolorVal){ dolorVal.textContent = d.dolor||0; }
+  var checks = {
+    'rd-farm-cort': d.farmacos&&d.farmacos.indexOf('Corticoides')>=0,
+    'rd-farm-opio': d.farmacos&&d.farmacos.indexOf('Opioides')>=0,
+    'rd-farm-benzo':d.farmacos&&d.farmacos.indexOf('Benzodiacepinas')>=0,
+    'rd-farm-antip':d.farmacos&&d.farmacos.indexOf('Antipsicóticos')>=0,
+    'rd-der-psiq':  d.derivacion&&d.derivacion.indexOf('Psiquiatría')>=0,
+    'rd-der-ts':    d.derivacion&&d.derivacion.indexOf('Trabajo Social')>=0,
+    'rd-der-pal':   d.derivacion&&d.derivacion.indexOf('C. Paliativos')>=0,
+    'rd-der-neuro': d.derivacion&&d.derivacion.indexOf('Neuropsicología')>=0
+  };
+  Object.keys(checks).forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.checked = !!checks[id];
+  });
+}
+
+// Rellenar desde datos del paciente (ficha nueva)
+function rdRellenarDesde(pac){
+  rdSet('rd-fecha', new Date().toISOString().split('T')[0]);
+  rdSet('rd-hab',   pac.hab||'');
+  rdSet('rd-edad',  pac.edad||'');
+  rdSet('rd-sexo',  pac.sexo ? pac.sexo.charAt(0).toUpperCase() : '');
+  rdSet('rd-dx',    pac.motivo||'');
+  // Calcular días de estancia desde fecha de ingreso
+  var diasCalc = (typeof calcularDiasInternacion==='function' && pac.fecha)
+    ? calcularDiasInternacion(pac.fecha) : null;
+  rdSet('rd-dias', diasCalc !== null ? String(diasCalc) : '');
+  rdSet('rd-aislamiento-tipo','');
+  rdSet('rd-farm-descenso','');
+  rdSet('rd-razon-der','');
+  rdSet('rd-intervencion','');
+  rdSet('rd-pacto','');
+  rdSet('rd-indicacion','');
+  rdSet('rd-nota-medico','');
+  rdSet('rd-nota-enfermeria','');
+  rdSet('rd-pendientes-medicos','');
+  rdSet('rd-pendientes-psi','');
+  rdRadio('rd-aislamiento', 'no');
+  rdRadio('rd-tipo-pac', (pac.sesiones&&pac.sesiones>0)?'seguimiento':'nuevo');
+  rdRadio('rd-acomp','solo');
+  rdRadio('rd-cambio-plan','ninguno');
+  rdRadio('rd-lab','normal');
+  rdRadio('rd-conciencia','alerta');
+  rdRadio('rd-conducta','colaborador');
+  rdRadio('rd-adherencia','colabora');
+  rdRadio('rd-pertenece','si');
+  rdRadio('rd-objetivo','otro');
+  rdRadio('rd-alta','no');
+  ['rd-farm-cort','rd-farm-opio','rd-farm-benzo','rd-farm-antip',
+   'rd-der-psiq','rd-der-ts','rd-der-pal','rd-der-neuro'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.checked = false;
+  });
+  var dolor = document.getElementById('rd-dolor');
+  var dolorVal = document.getElementById('rd-dolor-val');
+  if(dolor) dolor.value = 0;
+  if(dolorVal) dolorVal.textContent = '0';
+}
+
+// Cerrar ficha y volver al tablero
+window.rdCerrarFicha = function(){
+  window._rdPacId = null;
+  var ficha = document.getElementById('rd-ficha');
+  var empty = document.getElementById('rd-empty');
+  if(ficha) ficha.style.display = 'none';
+  if(empty) empty.style.display = '';
+  var tablero = document.getElementById('rd-tablero');
+  if(tablero) tablero.scrollIntoView({ behavior:'smooth', block:'start' });
+};
+
+// ── Helpers ─────────────────────────────────────────────────────────
+function rdSet(id, val){ var el=document.getElementById(id); if(el) el.value=val; }
+function rdGet(id){ var el=document.getElementById(id); return el?(el.value||'').trim():''; }
+function rdRadio(name,val){ document.querySelectorAll('input[name="'+name+'"]').forEach(function(r){r.checked=(r.value===val);}); }
+function rdGetRadio(name){ var el=document.querySelector('input[name="'+name+'"]:checked'); return el?el.value:''; }
+
+// Recolectar todos los datos del formulario
+function rdRecolectar(){
+  var pac = (window.pacientes||[]).find(function(p){return p.id===window._rdPacId;});
+  var farmacos=[];
+  if(document.getElementById('rd-farm-cort')  ?.checked) farmacos.push('Corticoides');
+  if(document.getElementById('rd-farm-opio')  ?.checked) farmacos.push('Opioides');
+  if(document.getElementById('rd-farm-benzo') ?.checked) farmacos.push('Benzodiacepinas');
+  if(document.getElementById('rd-farm-antip') ?.checked) farmacos.push('Antipsicóticos');
+  var desc=rdGet('rd-farm-descenso'); if(desc) farmacos.push('Descenso de: '+desc);
+  var derivacion=[];
+  if(document.getElementById('rd-der-psiq')  ?.checked) derivacion.push('Psiquiatría');
+  if(document.getElementById('rd-der-ts')    ?.checked) derivacion.push('Trabajo Social');
+  if(document.getElementById('rd-der-pal')   ?.checked) derivacion.push('C. Paliativos');
+  if(document.getElementById('rd-der-neuro') ?.checked) derivacion.push('Neuropsicología');
+  var dolorEl=document.getElementById('rd-dolor');
+  return {
+    pacienteId:      window._rdPacId,
+    pacienteNombre:  (pac&&pac.nombre)||'',
+    fecha:           rdGet('rd-fecha'),
+    hab:             rdGet('rd-hab'),
+    edad:            rdGet('rd-edad'),
+    sexo:            rdGet('rd-sexo'),
+    dias:            rdGet('rd-dias'),
+    aislamiento:     rdGetRadio('rd-aislamiento'),
+    aislamientoTipo: rdGet('rd-aislamiento-tipo'),
+    tipoPaciente:    rdGetRadio('rd-tipo-pac'),
+    acompanante:     rdGetRadio('rd-acomp'),
+    dx:              rdGet('rd-dx'),
+    cambioPlan:      rdGetRadio('rd-cambio-plan'),
+    dolor:           dolorEl?dolorEl.value:'0',
+    laboratorio:     rdGetRadio('rd-lab'),
+    farmacos:        farmacos,
+    farmDescenso:    rdGet('rd-farm-descenso'),
+    notaMedico:      rdGet('rd-nota-medico'),
+    notaEnfermeria:  rdGet('rd-nota-enfermeria'),
+    conciencia:      rdGetRadio('rd-conciencia'),
+    conducta:        rdGetRadio('rd-conducta'),
+    adherencia:      rdGetRadio('rd-adherencia'),
+    pertenece:       rdGetRadio('rd-pertenece'),
+    derivacion:      derivacion,
+    razonDer:        rdGet('rd-razon-der'),
+    objetivo:        rdGetRadio('rd-objetivo'),
+    intervencion:    rdGet('rd-intervencion'),
+    pacto:           rdGet('rd-pacto'),
+    altaCumplida:    rdGetRadio('rd-alta'),
+    indicacion:      rdGet('rd-indicacion'),
+    pendientesMedicos: rdGet('rd-pendientes-medicos'),
+    pendientesPsi:     rdGet('rd-pendientes-psi'),
+    ts:              Date.now()
+  };
+}
+
+// ── Guardar en Firebase ─────────────────────────────────────────────
+window.rdGuardar = async function(){
+  if(!window._rdPacId) return toast('⚠️ Selecciona un paciente primero');
+  var datos = rdRecolectar();
+  try{
+    setSyncStatus('syncing');
+    await window._addDoc(window._fdb.collection(window.db,'fichas_ronda'), datos);
+    // Marcar como hecha en el tablero
+    if(!window._rdFichasHoy) window._rdFichasHoy = {};
+    window._rdFichasHoy[window._rdPacId] = datos;
+    rdRefrescarTablero();
+    toast('✅ Ficha guardada');
+    setSyncStatus('ok');
+  }catch(e){
+    setSyncStatus('offline');
+    toast('❌ Error al guardar: '+e.message);
+  }
+};
+
+// Refrescar solo el tablero (sin recargar desde Firebase)
+function rdRefrescarTablero(){
+  var hoy2 = new Date().toISOString().split('T')[0];
+  var pacs = rdOrdenRonda(
+    (window.pacientes||[]).filter(function(p){
+      return p.proxSesion === hoy2
+        && p.estado!=='alta'
+        && p.estado!=='fallecido'
+        && p.estado!=='alta-voluntaria';
+    })
+  );
+  var cont = document.getElementById('rd-tablero');
+  var resumen = document.getElementById('rd-tablero-resumen');
+  if(!cont) return;
+  var hechos = Object.keys(window._rdFichasHoy||{}).length;
+  if(resumen) resumen.textContent = hechos+' de '+pacs.length+' rondas registradas hoy';
+  cont.innerHTML = pacs.map(function(p){
+    var hecha = !!(window._rdFichasHoy&&window._rdFichasHoy[p.id]);
+    var hab = p.hab?'<span style="font-size:0.7rem;font-weight:700;color:var(--accent);background:var(--accent-light);padding:2px 7px;border-radius:4px;margin-right:6px">'+p.hab+'</span>':'';
+    var estadoBadge = hecha
+      ?'<span style="font-size:0.7rem;font-weight:700;color:#16a34a;background:#dcfce7;padding:2px 8px;border-radius:10px">✅ Hecha</span>'
+      :'<span style="font-size:0.7rem;font-weight:700;color:#b45309;background:#fef3c7;padding:2px 8px;border-radius:10px">⏳ Pendiente</span>';
+    var fichaInfo = hecha&&window._rdFichasHoy[p.id]&&window._rdFichasHoy[p.id].intervencion
+      ?'<div style="font-size:0.72rem;color:var(--text3);margin-top:3px">📝 '+window._rdFichasHoy[p.id].intervencion.slice(0,60)+'…</div>':'';
+    var btnLabel = hecha?'✏️ Editar ficha':'▶ Iniciar ficha';
+    var btnColor = hecha?'background:var(--surface2);color:var(--text2);border:1.5px solid var(--border)':'background:var(--accent);color:#fff;border:none';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:var(--surface2);border:1.5px solid '+(hecha?'#bbf7d0':'var(--border)')+';border-radius:9px;flex-wrap:wrap">'
+      +'<div style="flex:1;min-width:0;cursor:pointer" onclick="if(typeof abrirPacSheet===\'function\')abrirPacSheet(\''+p.id+'\')" title="Ver ficha del paciente">'
+        +'<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">'+hab
+          +'<span style="font-size:0.88rem;font-weight:700;color:var(--accent);text-decoration:underline;text-underline-offset:2px">'+(p.nombre||'Sin nombre')+'</span>'+estadoBadge
+        +'</div>'
+        +(p.motivo?'<div style="font-size:0.75rem;color:var(--text3);margin-top:2px">'+p.motivo.slice(0,60)+'</div>':'')
+        +fichaInfo
+      +'</div>'
+      +'<button onclick="rdCargarPaciente(\''+p.id+'\')" style="'+btnColor+';padding:6px 14px;border-radius:7px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif">'+btnLabel+'</button>'
+    +'</div>';
+  }).join('');
+}
+
+// ── Imprimir ficha ──────────────────────────────────────────────────
+window.rdImprimir = function(){
+  if(!window._rdPacId){toast('⚠️ Selecciona un paciente primero');return;}
+  var datos = rdRecolectar();
+  var pac = (window.pacientes||[]).find(function(p){return p.id===window._rdPacId;});
+  var nombre = (pac&&pac.nombre)||'—';
+  var tipoPacLabel = datos.tipoPaciente==='seguimiento'?'🔄 Seguimiento':'🆕 Nuevo (IC)';
+  var perteneceLabel = datos.pertenece==='si'?'SÍ':datos.pertenece==='no'?'NO':'MIXTO';
+  var altaLabel = datos.altaCumplida==='si'?'✅ Sí — Caso cerrado para PsH':'🔄 No — Continúa en seguimiento';
+  var farmacosStr = datos.farmacos.length?datos.farmacos.join(', '):'Ninguno';
+  var derivStr = datos.derivacion.length?datos.derivacion.join(', '):'No aplica';
+  var cambioLabel = {ninguno:'Ninguno',cirugia:'Cirugía cancelada/reprogramada',alta:'Alta inminente',pronostico:'Mal pronóstico'}[datos.cambioPlan]||datos.cambioPlan;
+  var conducLabel = {colaborador:'Colaborador','agresivo-verbal':'Agresivo verbal','agresivo-fisico':'Agresivo físico',inhibido:'Inhibido / aislado',llanto:'Llanto frecuente'}[datos.conducta]||datos.conducta;
+  var adherLabel = {colabora:'Colabora con procedimientos',rechaza:'Rechaza medicación / insumos','alta-voluntaria':'Exige alta voluntaria'}[datos.adherencia]||datos.adherencia;
+  var objLabel = {desescalada:'Desescalada verbal',prequirurgica:'Preparación prequirúrgica',aislamiento:'Validación distrés por aislamiento',dolor:'Afrontamiento dolor',otro:'Otro'}[datos.objetivo]||datos.objetivo;
+  var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Ronda — '+nombre+'</title>'
+    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#111;padding:16px 20px;max-width:720px;margin:0 auto}'
+    +'h1{font-size:12px;font-weight:800;text-align:center;border-bottom:2px solid #1e4d8c;padding-bottom:5px;margin-bottom:10px;color:#1e4d8c;text-transform:uppercase;letter-spacing:0.05em}'
+    +'.s{border:1px solid #ccc;border-radius:3px;margin-bottom:7px;break-inside:avoid}'
+    +'.sh{background:#1e4d8c;color:#fff;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:3px 9px}'
+    +'.sb{padding:7px 9px;display:grid;grid-template-columns:1fr 1fr;gap:3px 14px}'
+    +'.sb.f{grid-template-columns:1fr}.c{margin-bottom:2px}.lb{font-size:8.5px;font-weight:700;color:#555;text-transform:uppercase}'
+    +'.vl{font-size:10.5px;border-bottom:1px solid #e0e0e0;padding-bottom:1px;min-height:15px}'
+    +'.hl{background:#fffbeb;border-left:3px solid #f59e0b;padding:3px 7px;border-radius:2px}'
+    +'@media print{.np{display:none}}</style></head><body>'
+    +'<div class="np" style="text-align:center;margin-bottom:10px"><button onclick="window.print()" style="padding:7px 18px;background:#1e4d8c;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px">🖨️ Imprimir</button></div>'
+    +'<h1>Ficha de Ronda Diaria — Psicología Hospitalaria</h1>'
+    +'<div class="s"><div class="sh">1. Identificación y Contexto</div><div class="sb">'
+    +'<div class="c"><div class="lb">Paciente</div><div class="vl">'+nombre+'</div></div>'
+    +'<div class="c"><div class="lb">Fecha</div><div class="vl">'+(datos.fecha||'—')+'</div></div>'
+    +'<div class="c"><div class="lb">Habitación</div><div class="vl">'+(datos.hab||'—')+'</div></div>'
+    +'<div class="c"><div class="lb">Edad / Sexo</div><div class="vl">'+(datos.edad||'—')+' / '+(datos.sexo||'—')+'</div></div>'
+    +'<div class="c"><div class="lb">Días de estancia</div><div class="vl">'+(datos.dias||'—')+'</div></div>'
+    +'<div class="c"><div class="lb">Tipo</div><div class="vl">'+tipoPacLabel+'</div></div>'
+    +'<div class="c"><div class="lb">Aislamiento</div><div class="vl">'+(datos.aislamiento==='si'?'Sí: '+(datos.aislamientoTipo||'—'):'No')+'</div></div>'
+    +'<div class="c"><div class="lb">Acompañante</div><div class="vl">'+datos.acompanante+'</div></div>'
+    +'</div></div>'
+    +'<div class="s"><div class="sh">2. Filtro Clínico-Médico (HCE)</div><div class="sb">'
+    +'<div class="c" style="grid-column:1/-1"><div class="lb">Dx médico principal</div><div class="vl">'+(datos.dx||'—')+'</div></div>'
+    +'<div class="c"><div class="lb">Cambio de plan</div><div class="vl">'+cambioLabel+'</div></div>'
+    +'<div class="c"><div class="lb">Dolor EVA</div><div class="vl">'+(datos.dolor||'0')+' / 10</div></div>'
+    +'<div class="c"><div class="lb">Alerta metabólica</div><div class="vl">'+datos.laboratorio+'</div></div>'
+    +'<div class="c"><div class="lb">Fármacos conductuales</div><div class="vl">'+farmacosStr+'</div></div>'
+    +(datos.notaMedico?'<div class="c" style="grid-column:1/-1"><div class="lb">Nota médico tratante</div><div class="vl hl">'+datos.notaMedico+'</div></div>':'')
+    +(datos.notaEnfermeria?'<div class="c" style="grid-column:1/-1"><div class="lb">Reporte enfermería 24h</div><div class="vl hl">'+datos.notaEnfermeria+'</div></div>':'')
+    +'</div></div>'
+    +'<div class="s"><div class="sh">3. Monitoreo Conductual</div><div class="sb">'
+    +'<div class="c"><div class="lb">Conciencia</div><div class="vl">'+datos.conciencia+'</div></div>'
+    +'<div class="c"><div class="lb">Conducta</div><div class="vl">'+conducLabel+'</div></div>'
+    +'<div class="c" style="grid-column:1/-1"><div class="lb">Adherencia</div><div class="vl">'+adherLabel+'</div></div>'
+    +'</div></div>'
+    +'<div class="s"><div class="sh">4. Matriz de Decisión</div><div class="sb">'
+    +'<div class="c"><div class="lb">¿Pertenece a PsH?</div><div class="vl">'+perteneceLabel+'</div></div>'
+    +'<div class="c"><div class="lb">Derivación</div><div class="vl">'+derivStr+'</div></div>'
+    +(datos.razonDer?'<div class="c" style="grid-column:1/-1"><div class="lb">Razón de derivación</div><div class="vl">'+datos.razonDer+'</div></div>':'')
+    +'</div></div>'
+    +'<div class="s"><div class="sh">5. Plan de Acción en Habitación</div><div class="sb">'
+    +'<div class="c"><div class="lb">Objetivo</div><div class="vl">'+objLabel+'</div></div>'
+    +'<div class="c" style="grid-column:1/-1"><div class="lb">Intervención realizada</div><div class="vl">'+(datos.intervencion||'—')+'</div></div>'
+    +'<div class="c" style="grid-column:1/-1"><div class="lb">Pacto / cierre</div><div class="vl">'+(datos.pacto||'—')+'</div></div>'
+    +'</div></div>'
+    +'<div class="s"><div class="sh">6. Alta / Seguimiento</div><div class="sb f">'
+    +'<div class="c hl"><div class="lb">Criterio de alta PsH</div><div class="vl">'+altaLabel+'</div></div>'
+    +(datos.indicacion?'<div class="c" style="margin-top:4px"><div class="lb">Indicación al equipo</div><div class="vl">'+datos.indicacion+'</div></div>':'')
+    +'</div></div>'
+    +((datos.pendientesMedicos||datos.pendientesPsi)?
+      '<div class="s"><div class="sh">7. Pendientes</div><div class="sb">'
+      +(datos.pendientesMedicos?'<div class="c"><div class="lb">🩺 Pendientes médicos</div><div class="vl" style="white-space:pre-line">'+datos.pendientesMedicos+'</div></div>':'')
+      +(datos.pendientesPsi?'<div class="c"><div class="lb">🧠 Pendientes psicológicos</div><div class="vl" style="white-space:pre-line">'+datos.pendientesPsi+'</div></div>':'')
+      +'</div></div>':'')
+    +'</body></html>';
+  var win=window.open('','_blank','width=780,height=900');
+  if(win){win.document.write(html);win.document.close();}
+  else toast('⚠️ El navegador bloqueó la ventana. Permite popups para esta página.');
+};
+
+// ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
 
 </body>
 </html>
