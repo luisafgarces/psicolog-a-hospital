@@ -13231,7 +13231,7 @@ window.rdGuardar = async function(){
   var datos = rdRecolectar();
   try{
     setSyncStatus('syncing');
-    await window._addDoc(window._fdb.collection(window.db,'fichas_ronda'), datos);
+    await window._addDoc(window._collection(window.db,'fichas_ronda'), datos);
     // Marcar como hecha en el tablero
     if(!window._rdFichasHoy) window._rdFichasHoy = {};
     window._rdFichasHoy[window._rdPacId] = datos;
