@@ -3953,33 +3953,52 @@ window.guardarICFirebase=async()=>{
     sub:{
       emoc:icChipsBySubLabel('Estado emocional referido').join(', '),
       preoc:icChipsBySubLabel('Principales preocupaciones').join(', '),
-      pens:icChipsBySubLabel('Pensamientos automáticos').join(', '),
+      pens:icChipsBySubLabel('Pensamientos automáticos sobre enfermedad/internación/procedimiento').join(', ')||icChipsBySubLabel('Pensamientos automáticos').join(', '),
       distorsiones:icChipsBySubLabel('Distorsiones cognitivas').join(', '),
       irracionales:icChipsBySubLabel('Ideas irracionales').join(', '),
-      cita:icv('ic-sub-cita'),intens:icv('ic-sub-intensidad')
+      cita:icv('ic-sub-cita'),intens:icv('ic-sub-intensidad'),
+      evitacion:icChipsBySubLabel('Conductas de evitación / seguridad').join(', '),
+      activacion:icChipsBySubLabel('Activación conductual — nivel de actividad en hospital').join(', '),
+      adherencia:icChipsBySubLabel('Adherencia al tratamiento médico').join(', ')
     },
     obj:{
+      porte:icChipsBySubLabel('Porte y apariencia').join(', '),
+      actitud:icChipsBySubLabel('Actitud durante la entrevista').join(', '),
       orient:icChipsBySubLabel('Orientación').join(', '),
       conc:icChipsBySubLabel('Conciencia / Colaboración').join(', '),
+      atencion:icChipsBySubLabel('Atención').join(', '),
+      juicio:icChipsBySubLabel('Juicio y raciocinio').join(', '),
       afecto:icChipsBySubLabel('Afecto').join(', '),
-      pens:icChipsBySubLabel('Pensamiento').join(', '),
-      insight:icChipsBySubLabel('Lenguaje / Insight').join(', '),
+      pens:icChipsBySubLabel('Pensamiento — curso').join(', '),
+      pensCont:icChipsBySubLabel('Pensamiento — contenido').join(', '),
+      lenguaje:icChipsBySubLabel('Lenguaje').join(', '),
+      conductaMotora:icChipsBySubLabel('Conducta motora').join(', '),
+      sensop:icChipsBySubLabel('Sensopercepción').join(', '),
+      insight:icChipsBySubLabel('Insight').join(', '),
       regulacion:icChipsBySubLabel('Regulación emocional').join(', '),
-      ideacion:icChipsBySubLabel('Ideación actual').join(', '),
+      comprension:icChipsBySubLabel('Comprensión del Dx').join(', '),
+      ideacion:icChipsBySubLabel('Ideación autolítica actual').join(', ')||icChipsBySubLabel('Ideación actual').join(', '),
       riesgoN:riesgo,
       protectores:icChipsBySubLabel('Factores protectores').join(', '),
-      notasRiesgo:icv('ic-riesgo-notas')
+      notasRiesgo:icv('ic-riesgo-notas'),
+      analisisCC:icv('ic-resp-analisis')
     },
     resp:{
       tipoResp:icChipsBySubLabel('Tipo de respuesta emocional').join(', '),
-      impresion:icChipsBySubLabel('Impresión clínica').join(', '),
+      impresion:icChipsBySubLabel('Impresión diagnóstica (chips CIE-11)').join(', ')||icChipsBySubLabel('Impresión clínica').join(', '),
       sintomasDx:(()=>{const ch=[];document.querySelectorAll('#ic-dx-section .ic-chip.on,#ic-dx-section .ic-chip.on-r,#ic-dx-section .ic-chip.on-a').forEach(c=>ch.push(c.textContent.trim()));return ch.join(', ');})()||'',
-      impresionIA:(document.getElementById('ic-impresion-hidden')?.value||'')
+      impresionIA:(document.getElementById('ic-impresion-hidden')?.value||''),
+      obs:icv('ic-resp-obs'),
+      cie:icv('ic-cie'),
+      notaGenerada: window.icCurrentMode==='seg' ? (document.getElementById('ic-out-seg-texto')?.textContent||'').trim() : ''
     },
     trat:{
-      interv:icChipsBySubLabel('Intervención realizada hoy').join(', '),
+      interv:icChipsBySubLabel('Intervención realizada / sugerida').join(', ')||icChipsBySubLabel('Intervención realizada hoy').join(', '),
+      respMedico:icv('ic-resp-medico'),
       plan:icChipsBySubLabel('Plan').join(', '),
-      freq:icChipsBySubLabel('Frecuencia de seguimiento').join(', ')
+      freq:icChipsBySubLabel('Seguimiento').join(', '),
+      plazo:icv('ic-seguimiento-plazo'),
+      notas:icv('ic-trat-notas')
     }
   };
   const _aiFormSnap=formulario; // mantener compatibilidad
@@ -7314,29 +7333,47 @@ window.descargarFormIC = function(docId){
 
   // ── SEGUIMIENTO ──
   else if(modo==='Seguimiento'){
-    filas += sec('Estado emocional referido',
-      row('Estado emocional', fd.sub?.emoc||fd.estadoEmoc) +
-      row('Preocupaciones', fd.sub?.preoc||fd.preocupaciones) +
-      row('Pensamientos automáticos', fd.sub?.pens||fd.pensamientoAut) +
-      row('Cita textual', fd.sub?.cita||fd.citaTextual) +
-      row('Intensidad', fd.sub?.intensidad||fd.intensidad)
-    );
-    filas += sec('Examen mental',
-      row('Orientación', fd.obj?.orient||fd.orientacion) +
-      row('Afecto', fd.obj?.afecto||fd.afecto) +
-      row('Pensamiento', fd.obj?.pens||fd.pensamiento) +
-      row('Insight', fd.obj?.insight) +
-      row('Regulación emocional', fd.obj?.regulacion||fd.regulacion) +
-      row('Ideación suicida', fd.obj?.ideacion) +
-      row('Factores protectores', fd.obj?.protectores)
-    );
-    filas += sec('Respuesta / Plan',
-      row('Impresión clínica', fd.resp?.impresion||fd.impresion) +
-      row('Intervención', fd.trat?.interv||fd.intervencion) +
-      row('Plan', fd.trat?.plan||fd.plan) +
-      row('Seguimiento', fd.trat?.freq||fd.frecuencia) +
-      row('Riesgo suicida', fd.riesgo||riesgo)
-    );
+    // Nota generada como texto (nuevo formato local)
+    const notaSeg = fd.resp?.notaGenerada || e.resp || e.nota || '';
+    if(notaSeg && notaSeg.length > 30){
+      filas += sec('Nota de seguimiento',
+        '<tr><td colspan="2" style="padding:8px 12px;font-size:10.5pt;line-height:1.7;white-space:pre-wrap;border:1px solid #e5e7eb">'+notaSeg+'</td></tr>'
+      );
+    } else {
+      filas += sec('Estado emocional referido',
+        row('Estado emocional', fd.sub?.emoc||fd.estadoEmoc) +
+        row('Preocupaciones', fd.sub?.preoc||fd.preocupaciones) +
+        row('Pensamientos automáticos', fd.sub?.pens||fd.pensamientoAut) +
+        row('Cita textual', fd.sub?.cita||fd.citaTextual) +
+        row('Intensidad', fd.sub?.intens||fd.intensidad)
+      );
+      filas += sec('Examen mental',
+        row('Porte y apariencia', fd.obj?.porte) +
+        row('Actitud', fd.obj?.actitud) +
+        row('Orientación', fd.obj?.orient||fd.orientacion) +
+        row('Conciencia', fd.obj?.conc) +
+        row('Atención', fd.obj?.atencion) +
+        row('Juicio', fd.obj?.juicio) +
+        row('Afecto', fd.obj?.afecto||fd.afecto) +
+        row('Pensamiento (curso)', fd.obj?.pens||fd.pensamiento) +
+        row('Pensamiento (contenido)', fd.obj?.pensCont) +
+        row('Lenguaje', fd.obj?.lenguaje) +
+        row('Conducta motora', fd.obj?.conductaMotora) +
+        row('Sensopercepción', fd.obj?.sensop) +
+        row('Insight', fd.obj?.insight) +
+        row('Regulación emocional', fd.obj?.regulacion||fd.regulacion) +
+        row('Comprensión del Dx', fd.obj?.comprension) +
+        row('Ideación suicida', fd.obj?.ideacion) +
+        row('Factores protectores', fd.obj?.protectores)
+      );
+      filas += sec('Respuesta / Plan',
+        row('Impresión clínica', fd.resp?.impresion||fd.impresion) +
+        row('Intervención', fd.trat?.interv||fd.intervencion) +
+        row('Respuesta al médico', fd.trat?.respMedico) +
+        row('Seguimiento', fd.trat?.freq||fd.frecuencia) +
+        row('Riesgo suicida', fd.riesgo||riesgo)
+      );
+    }
   }
 
   // ── ANAMNESIS ──
