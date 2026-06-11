@@ -13239,6 +13239,9 @@ window.rdGuardar = async function(){
     if(!window._rdFichasHoy) window._rdFichasHoy = {};
     window._rdFichasHoy[window._rdPacId] = datos;
     rdRefrescarTablero();
+    // Limpiar formulario tras guardar
+    var pac = (window.pacientes||[]).find(function(p){ return p.id === window._rdPacId; });
+    if(pac) rdRellenarDesde(pac);
     window.toast('✅ Ficha guardada');
     if(typeof setSyncStatus==='function') setSyncStatus('ok');
   }catch(e){
