@@ -13227,20 +13227,24 @@ function rdRecolectar(){
 
 // ── Guardar en Firebase ─────────────────────────────────────────────
 window.rdGuardar = async function(){
-  if(!window._rdPacId) return toast('⚠️ Selecciona un paciente primero');
+  if(!window._rdPacId) return window.toast('⚠️ Selecciona un paciente primero');
+  if(!window.db || !window._addDoc || !window._collection){
+    return window.toast('⚠️ Firebase no está listo. Espera un momento y vuelve a intentarlo.');
+  }
   var datos = rdRecolectar();
   try{
-    setSyncStatus('syncing');
+    if(typeof setSyncStatus==='function') setSyncStatus('syncing');
     await window._addDoc(window._collection(window.db,'fichas_ronda'), datos);
     // Marcar como hecha en el tablero
     if(!window._rdFichasHoy) window._rdFichasHoy = {};
     window._rdFichasHoy[window._rdPacId] = datos;
     rdRefrescarTablero();
-    toast('✅ Ficha guardada');
-    setSyncStatus('ok');
+    window.toast('✅ Ficha guardada');
+    if(typeof setSyncStatus==='function') setSyncStatus('ok');
   }catch(e){
-    setSyncStatus('offline');
-    toast('❌ Error al guardar: '+e.message);
+    if(typeof setSyncStatus==='function') setSyncStatus('offline');
+    window.toast('❌ Error al guardar: '+e.message);
+    console.error('rdGuardar error:', e);
   }
 };
 
