@@ -80,21 +80,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 /* PATIENT INFO SHEET */
 .pac-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:flex-end;justify-content:center}
 .pac-sheet-overlay.open{display:flex}
-.pac-sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 32px 0;animation:slideUp 0.25s ease}
+.pac-sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;-webkit-overflow-scrolling:touch;padding:0;animation:slideUp 0.25s ease}
+.pac-sheet-body{overflow-y:auto;flex:1;padding:0 0 8px 0}
 @media(min-width:768px){
   .pac-sheet-overlay{align-items:center;justify-content:center}
-  .pac-sheet{border-radius:16px;max-width:min(960px,88vw);width:88vw;max-height:90vh;height:auto;animation:zoomIn 0.2s ease}
+  .pac-sheet{border-radius:16px;max-width:min(960px,88vw);width:88vw;max-height:90vh;animation:zoomIn 0.2s ease}
+  .pac-sheet-body{padding:4px 20px 8px}
+  #ps-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  #ps-col-right>div{margin-top:0}
+  #ps-col-right>div+div{margin-top:12px}
 }
 @media(min-width:1200px){
   .pac-sheet{max-width:min(1100px,82vw);width:82vw}
 }
 @keyframes zoomIn{from{transform:scale(0.95);opacity:0}to{transform:scale(1);opacity:1}}
-@media(min-width:768px){
-  .pac-sheet-body{padding:16px 20px 32px}
-  #ps-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
-  #ps-col-right>div{margin-top:0}
-  #ps-col-right>div+div{margin-top:12px}
-}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .pac-sheet-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:12px auto 0}
 .pac-sheet-head{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
@@ -107,7 +106,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pac-info-label{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:3px}
 .pac-info-value{font-size:0.88rem;font-weight:600;color:var(--text)}
 .pac-info-full{grid-column:1/-1}
-.pac-sheet-actions{display:flex;gap:8px;flex-wrap:wrap;padding:0 20px;margin-top:4px}
+.pac-sheet-actions{display:flex;gap:8px;flex-wrap:wrap;padding:10px 20px;background:var(--surface);border-top:1.5px solid var(--border);position:sticky;bottom:0;z-index:10;margin-top:0}
 .pac-sesiones-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-light);color:var(--accent);border-radius:20px;padding:5px 14px;font-size:0.8rem;font-weight:700;margin-bottom:12px;border:1.5px solid var(--accent2)}
 .nav-section{font-size:0.65rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.1em;padding:12px 8px 4px;font-weight:600}
 .nav-item{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:7px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:0.82rem;font-weight:500;transition:all 0.15s;margin-bottom:1px}
@@ -585,7 +584,8 @@ input.toggle-cb{display:none}
           <div class="ic-pat-field"><label>Hab.</label><input type="text" id="ic-hab" placeholder="304B"></div>
           <div class="ic-pat-field"><label>Nombre del paciente</label><input type="text" id="ic-pnombre" placeholder="Nombre completo"></div>
           <div class="ic-pat-field"><label>Edad / Sexo</label><input type="text" id="ic-edad" placeholder="42 años, F"></div>
-          <div class="ic-pat-field" style="flex:2;min-width:160px"><label>Diagnóstico / Motivo IC</label><div id="ic-pdx-display" style="font-size:0.82rem;color:#e5e7eb;padding:2px 0;border-bottom:1px solid #3a3835;min-height:20px;font-style:italic;opacity:0.8">— se carga del paciente —</div><input type="hidden" id="ic-pdx" value=""></div>
+          <div class="ic-pat-field" style="flex:2;min-width:160px"><label>Diagnóstico médico</label><div id="ic-pdx-display" style="font-size:0.82rem;color:#e5e7eb;padding:2px 0;border-bottom:1px solid #3a3835;min-height:20px;font-style:italic;opacity:0.8">— se carga del paciente —</div><input type="hidden" id="ic-pdx" value=""></div>
+          <div class="ic-pat-field" style="flex:2;min-width:160px"><label>Motivo de interconsulta</label><div id="ic-motivoic-display" style="font-size:0.82rem;color:#e5e7eb;padding:2px 0;border-bottom:1px solid #3a3835;min-height:20px;font-style:italic;opacity:0.8">— se carga del paciente —</div><input type="hidden" id="ic-motivoic" value=""></div>
           <div class="ic-pat-field"><label>Fecha</label><input type="date" id="ic-pfecha"></div>
           <div class="ic-pat-field"><label>Médico solicitante</label><input type="text" id="ic-medico-sol" placeholder="Dr. García — Medicina Interna"></div>
 
@@ -2941,7 +2941,8 @@ input.toggle-cb{display:none}
         <button type="button" onclick="document.getElementById('p-medico-esp').value='UCI'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">UCI</button>
         <button type="button" onclick="document.getElementById('p-medico-esp').value='Pediatría'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">Pediatría</button>
       </div></div>
-      <div class="form-group full"><label id="p-motivo-label">Diagnóstico médico / Motivo de interconsulta</label><textarea id="p-motivo" rows="2" placeholder="Ej: Ca. de mama, impacto emocional dx reciente"></textarea></div>
+      <div class="form-group full"><label id="p-motivo-label">Diagnóstico médico principal</label><textarea id="p-motivo" rows="2" placeholder="Ej: Diabetes insulinodependiente, IRC, Ca. de mama"></textarea></div>
+      <div class="form-group full"><label>Motivo de interconsulta a psicología</label><textarea id="p-motivo-ic" rows="2" placeholder="Ej: Valorar estado emocional ante amputación programada, Paciente con ideación suicida referida por enfermería"></textarea></div>
       <div class="form-group full"><label>Tratamiento médico actual</label><textarea id="p-trat-medico" rows="2" placeholder="Ej: Quimioterapia ciclo 3, Morfina 10mg c/8h, O2 suplementario…"></textarea></div>
       <div class="form-group full"><label>Prioridad de la interconsulta</label>
         <div id="p-prioridad-btns" style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
@@ -3196,6 +3197,7 @@ window.guardarPaciente=async()=>{
       medicoSol:gv('p-medico-sol'),
       medicoEsp:gv('p-medico-esp'),
       motivo:gv('p-motivo'),
+      motivoIC:gv('p-motivo-ic'),
       tipo:gv('p-tipo')||'hospitalizado',
       estado:gv('p-estado')||'seguimiento',
       proxSesion:gv('p-proxsesion'),
@@ -3207,7 +3209,7 @@ window.guardarPaciente=async()=>{
     });
     closeModal('modal-paciente');
     toast('✅ Paciente registrado');
-    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad','p-medico-sol','p-medico-esp'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-motivo-ic','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad','p-medico-sol','p-medico-esp'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.querySelectorAll('#p-prioridad-btns .risk-btn').forEach(b=>b.classList.remove('sel'));
   }
   catch(e){setSyncStatus('offline');toast('❌ Error: '+e.message);}
@@ -3432,6 +3434,13 @@ window.selectICPaciente=(id)=>{
   if(nombre)nombre.value=p.nombre;
   if(edad&&(p.edad||p.sexo))edad.value=(p.edad?p.edad+' años':'')+(p.sexo?' '+p.sexo.charAt(0):'');
   if(dx&&p.motivo){dx.value=p.motivo;const disp=document.getElementById('ic-pdx-display');if(disp){disp.textContent=p.motivo;disp.style.opacity='1';disp.style.fontStyle='normal';}}
+  // Cargar motivo IC separado
+  const motivoIC=document.getElementById('ic-motivoic');
+  const motivoICDisp=document.getElementById('ic-motivoic-display');
+  if(motivoIC&&p.motivoIC){motivoIC.value=p.motivoIC;if(motivoICDisp){motivoICDisp.textContent=p.motivoIC;motivoICDisp.style.opacity='1';motivoICDisp.style.fontStyle='normal';}}
+  // Pre-llenar campo de pedido textual del médico con motivoIC si existe y el campo está vacío
+  const campoMotMed=document.getElementById('ic-motivo-medico');
+  if(campoMotMed&&!campoMotMed.value&&p.motivoIC) campoMotMed.value=p.motivoIC;
   const icEsc=document.getElementById('ic-escolaridad');if(icEsc&&p.escolaridad)icEsc.value=p.escolaridad;
   const tratEl=document.getElementById('ic-trat-medico');if(tratEl&&p.tratMedico)tratEl.value=p.tratMedico;
   const diasVal=calcularDiasInternacion(p.fecha);
@@ -3518,7 +3527,7 @@ window.openModal=(id)=>{
   m.classList.add('open');
   // Reset patient modal fields if opening patient modal
   if(id==='modal-paciente'){
-    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad','p-medico-sol','p-medico-esp'].forEach(fid=>{
+    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-motivo-ic','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad','p-medico-sol','p-medico-esp'].forEach(fid=>{
       const el=document.getElementById(fid);if(el)el.value='';
     });
     const riesgo=document.getElementById('p-riesgo');if(riesgo)riesgo.value='';
@@ -3549,6 +3558,7 @@ window.editarPaciente=(id)=>{
   _sv('p-fecha',p.fecha);
   _sv('p-hab',p.hab);
   _sv('p-motivo',p.motivo);
+  _sv('p-motivo-ic',p.motivoIC||'');
   _sv('p-estado',p.estado||'seguimiento');
   _sv('p-proxsesion',p.proxSesion);
   _sv('p-notas',p.notas);
@@ -3575,6 +3585,7 @@ window.actualizarPaciente=async(id)=>{
       fecha:document.getElementById('p-fecha').value,
       hab:document.getElementById('p-hab').value,
       motivo:document.getElementById('p-motivo').value,
+      motivoIC:document.getElementById('p-motivo-ic')?.value||'',
       tipo:document.getElementById('p-tipo').value||'hospitalizado',
       estado:document.getElementById('p-estado').value,
       proxSesion:document.getElementById('p-proxsesion').value,
@@ -8059,7 +8070,8 @@ window.abrirPacSheetSilent = function(p) {
     {l:'Estado',v:estadoLabel[p.estado]||p.estado||'—'},
     capText?{l:'Capacidad decisional',v:capText,color:capColorMap[capVal]}:null,
     {l:'Próxima sesión',v:p.proxSesion?formatDate(p.proxSesion):'No programada'},
-    {l:'Dx médico / Motivo IC',v:p.motivo,full:true},
+    {l:'Dx médico',v:p.motivo,full:true},
+    p.motivoIC?{l:'Motivo de interconsulta',v:p.motivoIC,full:true}:null,
     {l:'Impresión psicológica',v:p.dxpsi,full:true},
     {l:'Observaciones de riesgo',v:p.riesgoObs,full:true},
     {l:'Notas generales',v:p.notas,full:true},
@@ -8121,7 +8133,8 @@ window.abrirPacSheet=async(id)=>{
     {l:'Estado',v:estadoLabel[p.estado]||p.estado||'—'},
     capText?{l:'Capacidad decisional',v:capText,color:capColorMap[capVal]}:null,
     {l:'Próxima sesión',v:p.proxSesion?formatDate(p.proxSesion):'No programada'},
-    {l:'Dx médico / Motivo IC',v:p.motivo,full:true},
+    {l:'Dx médico',v:p.motivo,full:true},
+    p.motivoIC?{l:'Motivo de interconsulta',v:p.motivoIC,full:true}:null,
     {l:'Impresión psicológica',v:p.dxpsi,full:true},
     {l:'Observaciones de riesgo',v:p.riesgoObs,full:true},
     {l:'Notas generales',v:p.notas,full:true},
