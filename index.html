@@ -565,7 +565,6 @@ input.toggle-cb{display:none}
     <div id="page-interconsultas" class="page">
       <div class="section-header">
         <h2>Interconsultas Hospitalarias</h2>
-        <button class="btn btn-secondary btn-sm" onclick="goTo('ronda-diaria')" title="Volver a Ronda Diaria" style="display:flex;align-items:center;gap:5px">🏥 Ronda</button>
       </div>
       <div id="ic-form-view">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px">
@@ -1537,6 +1536,12 @@ input.toggle-cb{display:none}
             <div id="ic-out-seg" style="display:none"><div class="out-seg-wrap"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-seg-texto',this)">Copiar</button><div class="out-field-label-ic">Nota de seguimiento</div><div class="out-text-ic ph" id="ic-out-seg-texto">Genera la nota para ver el contenido…</div></div></div>
           </div>
         </div>
+        </div>
+        <!-- BARRA DE NAVEGACIÓN RÁPIDA AL FINAL -->
+        <div id="ic-nav-bottom" style="display:flex;gap:8px;margin-top:14px;padding:10px 0;border-top:1.5px solid var(--border);flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="goTo('ronda-diaria')" style="display:flex;align-items:center;gap:5px">🏥 Volver a Ronda</button>
+          <button class="btn btn-secondary" id="ic-nav-ficha-btn" onclick="(function(){var id=document.getElementById('ic-paciente-sel')?.value;if(id&&typeof abrirPacSheet==='function')abrirPacSheet(id);else toast('⚠️ Selecciona un paciente primero');})()" style="display:flex;align-items:center;gap:5px">👤 Ver ficha del paciente</button>
+        </div>
       </div><!-- end ic-form-view -->
     </div>
 
@@ -1547,7 +1552,6 @@ input.toggle-cb{display:none}
       <div class="section-header">
         <h2 id="anam-page-title">Anamnesis Psicológica</h2>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button class="btn btn-secondary btn-sm" onclick="goTo('ronda-diaria')" title="Volver a Ronda Diaria" style="display:flex;align-items:center;gap:5px">🏥 Ronda</button>
           <select id="anamnesis-paciente-sel" onchange="selectAnamPaciente(this.value)" style="padding:7px 11px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;min-width:190px">
             <option value="">— Seleccionar paciente —</option>
           </select>
@@ -2169,6 +2173,11 @@ input.toggle-cb{display:none}
               <button type="button" class="btn btn-secondary" onclick="copiarNota()">Copiar</button>
               <button type="button" class="btn btn-secondary" onclick="guardarFormularioLocal('an')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Borrador de emergencia — no aparece en historial">📋 Borrador local</button>
               <button type="button" class="btn btn-secondary" onclick="mostrarFormulariosGuardados('an')" style="color:#92400e">📂 Ver borradores</button>
+            </div>
+            <!-- BARRA DE NAVEGACIÓN RÁPIDA AL FINAL -->
+            <div style="display:flex;gap:8px;margin-top:14px;padding:10px 0;border-top:1.5px solid var(--border);flex-wrap:wrap">
+              <button type="button" class="btn btn-secondary" onclick="goTo('ronda-diaria')" style="display:flex;align-items:center;gap:5px">🏥 Volver a Ronda</button>
+              <button type="button" class="btn btn-secondary" onclick="(function(){var id=document.getElementById('anamnesis-paciente-sel')?.value;if(id&&typeof abrirPacSheet==='function')abrirPacSheet(id);else toast('⚠️ Selecciona un paciente primero');})()" style="display:flex;align-items:center;gap:5px">👤 Ver ficha del paciente</button>
             </div>
           </div>
         </div>
