@@ -9004,7 +9004,7 @@ function generarNotaIcNuevaLocal(){
   var sub='Paciente de '+edad+(edad?' años':'')+', '+sexo+'. Dx médico: '+(dx||'no registrado')+'. Días internado: '+(_diasInternacion||'no registrado')+'.'+(_urgencia?' Urgencia IC: '+_urgencia+'.':'')+(_medSol?' Solicitante: '+_medSol+'.':'')+(_motivoMedico?' Motivo del médico: '+_motivoMedico+'.':'')
     +' Estado emocional: '+(chips('Estado emocional referido')||'no especificado')+'. Pensamientos automáticos: '+(chips('Pensamientos automáticos sobre enfermedad/internación/procedimiento')||chips('Pensamientos automáticos (CC)')||'no identificados')+(_tccPens?' — '+_tccPens:'')+'. Conductas de evitación: '+(chips('Conductas de evitación / seguridad')||'no exploradas')+(_tccEvit?' — '+_tccEvit:'')+'. Activación conductual: '+(chips('Activación conductual — nivel de actividad en hospital')||chips('Activación conductual')||'no evaluada')+(_tccAct?' — '+_tccAct:'')+'. Adherencia al tto: '+(chips('Adherencia al tratamiento médico')||'no evaluada')+(_tccAdh?' — '+_tccAdh:'')+'. Intensidad malestar: '+(intensidad||'no cuantificada')+'.'+(cita?' Cita textual: "'+cita+'"':'')+'. Ideación autolítica: '+_ideacion+'. Red de apoyo: '+(chips('Red de apoyo funcional')||'no explorada')+(_redDetalle?' — '+_redDetalle:'')+'.';
 
-  var obj='Orientación: '+(chips('Orientación')||'conservada')+'. Conciencia: '+(chips('Conciencia / Colaboración')||'consciente')+'. Atención: '+(chips('Atención')||'euprosexia')+'. Juicio: '+(chips('Juicio y raciocinio')||'conservado')+'. Conducta motora: '+(chips('Conducta motora')||'sin alteraciones')+'. Afecto: '+(chips('Afecto')||'no especificado')+'. Pensamiento: '+(chips('Pensamiento — curso')||chips('Pensamiento')||'organizado')+'. Lenguaje: '+(chips('Lenguaje')||'normal')+'. Sensopercepción: '+(chips('Sensopercepción')||'sin alteraciones')+'. Insight: '+(chips('Insight')||chips('Lenguaje / Insight')||'conservado')+'. Regulación emocional: '+(chips('Regulación emocional')||'no explorada')+'. Comprensión del Dx: '+(chips('Comprensión del Dx')||chips('Comprensión del Dx / pronóstico')||'no evaluada')+'. Riesgo suicida: '+sev+'. Factores protectores: '+(chips('Factores protectores')||'no explorados')+'.'+(_notasRiesgo?' Notas riesgo: '+_notasRiesgo+'.':(analisisLibre?' Análisis CC: '+analisisLibre+'.':(_obsDx?' '+_obsDx+'.':'')));
+  var obj='Porte y apariencia: '+(chips('Porte y apariencia')||'adecuado')+'. Actitud: '+(chips('Actitud durante la entrevista')||'colaborador/a')+'. Conciencia: '+(chips('Conciencia / Colaboración')||'alerta')+'. Orientación: '+(chips('Orientación')||'conservada')+'. Atención: '+(chips('Atención')||'euprosexia')+'. Juicio: '+(chips('Juicio y raciocinio')||'conservado')+'. Pensamiento (curso): '+(chips('Pensamiento — curso')||'lógico')+'. Pensamiento (contenido): '+(chips('Pensamiento — contenido')||'sin alteraciones')+'. Lenguaje: '+(chips('Lenguaje')||'normal')+'. Afecto: '+(chips('Afecto')||'no especificado')+'. Conducta motora: '+(chips('Conducta motora')||'sin alteraciones')+'. Sensopercepción: '+(chips('Sensopercepción')||'sin alteraciones')+'. Insight: '+(chips('Insight')||'conservado')+'. Regulación emocional: '+(chips('Regulación emocional')||'no explorada')+'. Comprensión del Dx: '+(chips('Comprensión del Dx')||'no evaluada')+'. Riesgo suicida: '+sev+'. Factores protectores: '+(chips('Factores protectores')||'no explorados')+'.'+(_notasRiesgo?' Notas riesgo: '+_notasRiesgo+'.':(analisisLibre?' Análisis CC: '+analisisLibre+'.':(_obsDx?' '+_obsDx+'.':'')));
 
   var resp='Tipo de respuesta emocional: '+(chips('Tipo de respuesta emocional')||'esperable')+'. Impresión clínica: '+(chips('Impresión clínica')||chips('Impresión diagnóstica (chips CIE-11)')||'respuesta adaptativa')+(_cie?' Código CIE-11: '+_cie+'.':'')+(_obsDx?' Observaciones: '+_obsDx+'.':'')+'.';
 
@@ -9029,57 +9029,68 @@ function generarNotaIcNuevaLocal(){
 function generarNotaIcSegLocal(){
   var icvl=function(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';};
   function chips(label){return icChipsBySubLabel(label).join(', ');}
-  var estadoEmoc=icChipsBySubLabel('Estado emocional referido').join(', ')||'no especificado';
-  var preocupaciones=icChipsBySubLabel('Principales preocupaciones').join(', ')||'ninguna referida';
-  var pensamientosAut=icChipsBySubLabel('Pensamientos automáticos').filter(function(c){return c!=='Ninguno';}).join(', ')||'no identificados';
+  var estadoEmoc=chips('Estado emocional referido')||'no especificado';
+  var preocupaciones=chips('Principales preocupaciones')||'ninguna referida';
+  var pensamientosAut=icChipsBySubLabel('Pensamientos automáticos sobre enfermedad/internación/procedimiento').filter(function(c){return c!=='Ninguno';}).join(', ')||'no identificados';
   var citaTextual=icvl('ic-sub-cita');
   var intensidad=icvl('ic-sub-intensidad');
-  var funcionalidad=icChipsBySubLabel('Funcionalidad física actual').join(', ')||'no especificada';
-  var orientacion=icChipsBySubLabel('Orientación').join(', ')||'conservada';
-  var conciencia=icChipsBySubLabel('Conciencia / Colaboración').join(', ')||'consciente';
-  var conducta=icChipsBySubLabel('Conducta').join(', ')||'adecuada';
-  var afecto=icChipsBySubLabel('Afecto').join(', ')||'no especificado';
-  var pensamiento=icChipsBySubLabel('Pensamiento').join(', ')||'organizado';
-  var lenguaje=icChipsBySubLabel('Lenguaje / Insight').join(', ')||'conservado';
-  var regulacion=icChipsBySubLabel('Regulación emocional').join(', ')||'no evaluada';
-  var afrontamiento=icChipsBySubLabel('Estrategias de afrontamiento').join(', ')||'no especificadas';
-  var comprension=icChipsBySubLabel('Comprensión del Dx').join(', ')||'no evaluada';
-  var distorsiones=icChipsBySubLabel('Distorsiones cognitivas').filter(function(c){return c!=='Ninguna';}).join(', ')||'ninguna identificada';
-  var ideasIrrac=icChipsBySubLabel('Ideas irracionales').filter(function(c){return c!=='Ninguna';}).join(', ')||'ninguna';
+  // Examen mental — labels exactos del formulario reordenado
+  var porte=chips('Porte y apariencia')||'adecuado';
+  var actitud=chips('Actitud durante la entrevista')||'colaborador/a';
+  var conciencia=chips('Conciencia / Colaboración')||'alerta';
+  var orientacion=chips('Orientación')||'conservada';
+  var atencion=chips('Atención')||'euprosexia';
+  var juicio=chips('Juicio y raciocinio')||'conservado';
+  var pensCurso=chips('Pensamiento — curso')||'lógico';
+  var pensCont=chips('Pensamiento — contenido')||'sin alteraciones';
+  var lenguaje=chips('Lenguaje')||'normal';
+  var afecto=chips('Afecto')||'no especificado';
+  var conductaMotora=chips('Conducta motora')||'sin alteraciones';
+  var sensop=chips('Sensopercepción')||'sin alteraciones';
+  var insight=chips('Insight')||'conservado';
+  var regulacion=chips('Regulación emocional')||'no evaluada';
+  var comprension=chips('Comprensión del Dx')||'no evaluada';
+  var adherencia=chips('Adherencia al tratamiento médico')||'no evaluada';
+  var evitacion=chips('Conductas de evitación / seguridad')||'ninguna';
+  var activacion=chips('Activación conductual — nivel de actividad en hospital')||'no evaluada';
   var analisisCC=icvl('ic-resp-analisis');
-  var esquema=icChipsBySubLabel('Esquema cognitivo predominante').filter(function(c){return c!=='Sin esquema disfuncional predominante';}).join(', ')||'sin esquema disfuncional predominante';
-  var ideacion=icChipsBySubLabel('Ideación actual').join(', ')||'niega ideación autolítica';
+  var ideacion=chips('Ideación autolítica actual')||chips('Ideación actual')||'niega ideación autolítica';
   var sev=icvl('ic-riesgo-nivel')||'No clasificado';
-  var protectores=icChipsBySubLabel('Factores protectores').join(', ')||'no identificados';
+  var protectores=chips('Factores protectores')||'no identificados';
+  var red=chips('Red de apoyo funcional')||'no evaluada';
   var riesgoNotas=icvl('ic-riesgo-notas');
-  var tipoResp=icChipsBySubLabel('Tipo de respuesta emocional').join(', ')||'no especificada';
-  var impresion=icChipsBySubLabel('Impresión clínica').join(', ')||'no especificada';
-  var red=icChipsBySubLabel('Red de apoyo funcional').join(', ')||'no evaluada';
-  var intervencion=icChipsBySubLabel('Intervención realizada hoy').join(', ')||'valoración clínica';
-  var plan=icChipsBySubLabel('Plan').join(', ')||'no especificado';
-  var frecuencia=icChipsBySubLabel('Frecuencia de seguimiento').join(', ')||'según evolución';
+  var tipoResp=chips('Tipo de respuesta emocional')||'no especificada';
+  var impresion=chips('Impresión diagnóstica (chips CIE-11)')||'no especificada';
+  var intervencion=chips('Intervención realizada / sugerida')||chips('Intervención realizada hoy')||'valoración clínica';
+  var seguimiento=chips('Seguimiento')||'según evolución';
+  var plazo=icvl('ic-seguimiento-plazo');
   var tratNotas=icvl('ic-trat-notas');
   var dx=icvl('ic-pdx');
+  var _cie=icvl('ic-cie');
   var _cap=getCapInlineTexto('ic');
+
   var texto='Paciente en seguimiento psicológico hospitalario'+(dx?', Dx médico: '+dx:'')+'. '
-    +'Estado emocional referido: '+estadoEmoc+'; preocupaciones: '+preocupaciones+'. '
+    +'Estado emocional referido: '+estadoEmoc+'. Preocupaciones: '+preocupaciones+'. '
     +(pensamientosAut!=='no identificados'?'Pensamientos automáticos: '+pensamientosAut+'. ':'')
     +(citaTextual?'Cita textual: "'+citaTextual+'". ':'')
-    +(intensidad?'Intensidad del malestar: '+intensidad+'. ':'')
-    +'Funcionalidad física: '+funcionalidad+'. '
-    +'Examen mental: orientación '+orientacion+', conciencia/colaboración '+conciencia+', conducta '+conducta+', afecto '+afecto+', pensamiento '+pensamiento+', lenguaje/insight '+lenguaje+'. '
-    +'Regulación emocional: '+regulacion+'. Afrontamiento: '+afrontamiento+'. Comprensión del Dx: '+comprension+'. '
-    +(distorsiones!=='ninguna identificada'?'Distorsiones cognitivas: '+distorsiones+'. ':'')
-    +(ideasIrrac!=='ninguna'?'Ideas irracionales: '+ideasIrrac+'. ':'')
-    +'Esquema cognitivo: '+esquema+'. '
-    +(analisisCC?'Análisis CC: '+analisisCC+'. ':'')
+    +(intensidad?'Intensidad del malestar: '+intensidad+'/10. ':'')
+    +'Conductas de evitación: '+evitacion+'. Activación conductual: '+activacion+'. Adherencia al tratamiento: '+adherencia+'. '
+    +'Examen mental: porte '+porte+', actitud '+actitud+', conciencia '+conciencia
+    +', orientación '+orientacion+', atención '+atencion+', juicio '+juicio
+    +', pensamiento (curso) '+pensCurso+', pensamiento (contenido) '+pensCont
+    +', lenguaje '+lenguaje+', afecto '+afecto+', conducta motora '+conductaMotora
+    +', sensopercepción '+sensop+', insight '+insight
+    +', regulación emocional '+regulacion+', comprensión del Dx '+comprension+'. '
+    +(analisisCC?'Análisis clínico: '+analisisCC+'. ':'')
     +'Ideación suicida/autolesiva: '+ideacion+'. Nivel de riesgo: '+sev+'. '
-    +'Factores protectores: '+protectores+'. '
+    +'Factores protectores: '+protectores+'. Red de apoyo: '+red+'. '
     +(riesgoNotas?'Notas riesgo: '+riesgoNotas+'. ':'')
-    +'Respuesta emocional: '+tipoResp+'. Impresión diagnóstica: '+impresion+'. Red de apoyo: '+red+'. '
-    +'Intervención realizada: '+intervencion+'. Plan: '+plan+'. Frecuencia de seguimiento: '+frecuencia+'.'
-    +(tratNotas?' Notas al equipo: '+tratNotas+'.':'')
+    +'Respuesta emocional: '+tipoResp+'. Impresión diagnóstica: '+impresion
+    +(_cie?' ('+_cie+')':'')+'. '
+    +'Intervención realizada: '+intervencion+'. Seguimiento: '+seguimiento+(plazo?' — plazo: '+plazo:'')+'. '
+    +(tratNotas?'Notas al equipo: '+tratNotas+'.':'')
     +(_cap?'\n\nVALORACIÓN DE CAPACIDAD DECISIONAL\n'+_cap:'');
+
   setIcOut('ic-out-seg-texto',texto);
   var seg=document.getElementById('ic-out-seg');
   var f4=document.getElementById('ic-out-4campos');
