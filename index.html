@@ -2575,12 +2575,7 @@ input.toggle-cb{display:none}
           </div>
           <div style="margin-bottom:10px">
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Cambio de plan médico hoy</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="radio" name="rd-cambio-plan" value="ninguno" checked> Ninguno</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="radio" name="rd-cambio-plan" value="cirugia"> Cirugía cancelada/reprogramada</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="radio" name="rd-cambio-plan" value="alta"> Alta inminente</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="radio" name="rd-cambio-plan" value="pronostico"> Mal pronóstico</label>
-            </div>
+            <textarea id="rd-cambio-plan-texto" rows="2" placeholder="Ej: Cirugía reprogramada para mañana, alta inminente, nuevo Dx, cambio de manejo…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
             <div>
@@ -2592,23 +2587,25 @@ input.toggle-cb{display:none}
             </div>
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Alerta metabólica / laboratorios</div>
-              <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
                 <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-lab" value="normal" checked> Normal</label>
                 <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-lab" value="sodio"> Na alterado</label>
                 <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-lab" value="hb"> Hb baja</label>
                 <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-lab" value="deshidratacion"> Deshidratación</label>
               </div>
+              <textarea id="rd-lab-detalle" rows="2" placeholder="Detalle de alteración metabólica, valores relevantes, observaciones…" style="width:100%;padding:6px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:0.8rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
             </div>
           </div>
           <div style="margin-top:10px">
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Fármacos con impacto conductual</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:7px">
               <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-cort"> Corticoides</label>
               <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-opio"> Opioides</label>
               <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-benzo"> Benzodiacepinas</label>
               <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-antip"> Antipsicóticos</label>
               <span style="display:flex;align-items:center;gap:4px;font-size:0.8rem">Descenso de: <input type="text" id="rd-farm-descenso" placeholder="fármaco…" style="width:110px;padding:3px 7px;border:1.5px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none"></span>
             </div>
+            <textarea id="rd-farm-notas" rows="2" placeholder="Nombre del fármaco, dosis, efecto conductual observado o esperado…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
           </div>
           <!-- Notas de HCE y enfermería -->
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
@@ -8303,14 +8300,16 @@ window.psCargarRondaHoy = async function(pacId){
 
   // Alertas clínicas — solo las que se desvían de lo normal
   var alertas = '';
-  if(ficha.cambioPlan && ficha.cambioPlan!=='ninguno') alertas += fila('📅','Plan médico:',cambioLabel, true);
+  if(ficha.cambioPlan && ficha.cambioPlan.trim()) alertas += fila('📅','Plan médico:',ficha.cambioPlan, true);
   var dolor = parseInt(ficha.dolor||0);
   if(dolor >= 4) alertas += fila('😣','Dolor EVA:',ficha.dolor+'/10', dolor>=7);
-  if(ficha.laboratorio && ficha.laboratorio!=='normal') alertas += fila('🧪','Labs:',ficha.laboratorio, true);
+  if(ficha.laboratorio && ficha.laboratorio!=='normal') alertas += fila('🧪','Labs:',ficha.laboratorio+(ficha.labDetalle?' — '+ficha.labDetalle:''), true);
+  else if(ficha.labDetalle) alertas += fila('🧪','Labs:',ficha.labDetalle, false);
   if(ficha.aislamiento==='si') alertas += fila('🚧','Aislamiento:',ficha.aislamientoTipo||'Sí', false);
   if(ficha.conducta && ficha.conducta!=='colaborador') alertas += fila('👤','Conducta:',conductaLabel, ficha.conducta.includes('agresivo'));
   if(ficha.adherencia && ficha.adherencia!=='colabora') alertas += fila('💊','Adherencia:',adherLabel, true);
-  if(ficha.farmacos && ficha.farmacos.length) alertas += fila('💊','Fármacos:',ficha.farmacos.join(', '), false);
+  if(ficha.farmacos && ficha.farmacos.length) alertas += fila('💊','Fármacos:',ficha.farmacos.join(', ')+(ficha.farmNotas?' — '+ficha.farmNotas:''), false);
+  else if(ficha.farmNotas) alertas += fila('💊','Fármacos:',ficha.farmNotas, false);
   if(alertas) html += '<div style="margin-bottom:4px">'+alertas+'</div>';
 
   // Intervención y pacto
@@ -13190,8 +13189,10 @@ function rdRellenar(d){
   rdRadio('rd-aislamiento',  d.aislamiento||'no');
   rdRadio('rd-tipo-pac',     d.tipoPaciente||'nuevo');
   rdRadio('rd-acomp',        d.acompanante||'solo');
-  rdRadio('rd-cambio-plan',  d.cambioPlan||'ninguno');
+  rdSet('rd-cambio-plan-texto', d.cambioPlan||'');
   rdRadio('rd-lab',          d.laboratorio||'normal');
+  rdSet('rd-lab-detalle',    d.labDetalle||'');
+  rdSet('rd-farm-notas',     d.farmNotas||'');
   rdRadio('rd-conciencia',   d.conciencia||'alerta');
   rdRadio('rd-conducta',     d.conducta||'colaborador');
   rdRadio('rd-adherencia',   d.adherencia||'colabora');
@@ -13242,8 +13243,10 @@ function rdRellenarDesde(pac){
   rdRadio('rd-aislamiento', 'no');
   rdRadio('rd-tipo-pac', (pac.sesiones&&pac.sesiones>0)?'seguimiento':'nuevo');
   rdRadio('rd-acomp','solo');
-  rdRadio('rd-cambio-plan','ninguno');
+  rdSet('rd-cambio-plan-texto','');
   rdRadio('rd-lab','normal');
+  rdSet('rd-lab-detalle','');
+  rdSet('rd-farm-notas','');
   rdRadio('rd-conciencia','alerta');
   rdRadio('rd-conducta','colaborador');
   rdRadio('rd-adherencia','colabora');
@@ -13305,11 +13308,13 @@ function rdRecolectar(){
     tipoPaciente:    rdGetRadio('rd-tipo-pac'),
     acompanante:     rdGetRadio('rd-acomp'),
     dx:              rdGet('rd-dx'),
-    cambioPlan:      rdGetRadio('rd-cambio-plan'),
+    cambioPlan:      rdGet('rd-cambio-plan-texto'),
     dolor:           dolorEl?dolorEl.value:'0',
     laboratorio:     rdGetRadio('rd-lab'),
+    labDetalle:      rdGet('rd-lab-detalle'),
     farmacos:        farmacos,
     farmDescenso:    rdGet('rd-farm-descenso'),
+    farmNotas:       rdGet('rd-farm-notas'),
     notaMedico:      rdGet('rd-nota-medico'),
     notaEnfermeria:  rdGet('rd-nota-enfermeria'),
     conciencia:      rdGetRadio('rd-conciencia'),
@@ -13433,10 +13438,10 @@ window.rdImprimir = function(){
     +'</div></div>'
     +'<div class="s"><div class="sh">2. Filtro Clínico-Médico (HCE)</div><div class="sb">'
     +'<div class="c" style="grid-column:1/-1"><div class="lb">Dx médico principal</div><div class="vl">'+(datos.dx||'—')+'</div></div>'
-    +'<div class="c"><div class="lb">Cambio de plan</div><div class="vl">'+cambioLabel+'</div></div>'
+    +(datos.cambioPlan?'<div class="c" style="grid-column:1/-1"><div class="lb">Cambio de plan médico</div><div class="vl hl">'+datos.cambioPlan+'</div></div>':'')
     +'<div class="c"><div class="lb">Dolor EVA</div><div class="vl">'+(datos.dolor||'0')+' / 10</div></div>'
-    +'<div class="c"><div class="lb">Alerta metabólica</div><div class="vl">'+datos.laboratorio+'</div></div>'
-    +'<div class="c"><div class="lb">Fármacos conductuales</div><div class="vl">'+farmacosStr+'</div></div>'
+    +'<div class="c"><div class="lb">Alerta metabólica</div><div class="vl">'+datos.laboratorio+(datos.labDetalle?' — '+datos.labDetalle:'')+'</div></div>'
+    +'<div class="c"><div class="lb">Fármacos conductuales</div><div class="vl">'+farmacosStr+(datos.farmNotas?' — '+datos.farmNotas:'')+'</div></div>'
     +(datos.notaMedico?'<div class="c" style="grid-column:1/-1"><div class="lb">Nota médico tratante</div><div class="vl hl">'+datos.notaMedico+'</div></div>':'')
     +(datos.notaEnfermeria?'<div class="c" style="grid-column:1/-1"><div class="lb">Reporte enfermería 24h</div><div class="vl hl">'+datos.notaEnfermeria+'</div></div>':'')
     +'</div></div>'
@@ -13557,6 +13562,32 @@ window.rdImprimir = function(){
 .fj-jornada-row .fj-jr-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.85rem;padding:2px 6px;}
 </style>
 
+<!-- Banner jornada abierta -->
+<style>
+#fj-banner{
+  display:none;position:fixed;top:0;left:0;right:0;z-index:8888;
+  background:#f97316;color:#fff;
+  padding:8px 16px;font-size:0.8rem;font-weight:600;
+  display:none;align-items:center;gap:10px;
+  box-shadow:0 2px 8px rgba(249,115,22,.35);
+}
+#fj-banner .fj-ban-txt{flex:1;}
+#fj-banner .fj-ban-btn{
+  background:rgba(255,255,255,0.25);border:none;color:#fff;
+  padding:5px 12px;border-radius:6px;font-size:0.75rem;font-weight:700;
+  cursor:pointer;white-space:nowrap;
+}
+#fj-banner .fj-ban-btn:active{background:rgba(255,255,255,0.4);}
+/* Empujar el contenido cuando el banner está visible */
+body.fj-banner-on .topbar,
+body.fj-banner-on nav{top:36px !important;}
+body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !important;}
+</style>
+<div id="fj-banner">
+  <span class="fj-ban-txt" id="fj-ban-txt">⏱ Jornada en curso — recuerda marcar tu salida</span>
+  <button class="fj-ban-btn" onclick="fichajeAbrirModal()">Marcar salida</button>
+</div>
+
 <div id="fichaje-modal-overlay">
   <div id="fichaje-modal">
     <span class="fj-ico" id="fj-ico">🌅</span>
@@ -13565,6 +13596,10 @@ window.rdImprimir = function(){
     <div class="fj-hora-actual" id="fj-hora-reloj">--:--</div>
     <div class="fj-fecha-actual" id="fj-fecha-reloj"></div>
     <div class="fj-info-entrada" id="fj-info-entrada" style="display:none"></div>
+    <div id="fj-entrada-manual-wrap" style="display:none;margin-bottom:14px;text-align:left">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--text2);margin-bottom:6px">¿A qué hora entraste? <span style="font-weight:400;color:var(--text3)">(escríbela tú)</span></div>
+      <input type="time" id="fj-entrada-manual" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:1rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;width:100%">
+    </div>
     <button class="fj-btn fj-btn-entrada" id="fj-btn-entrada" onclick="fichajeEntrada()">⏱ Registrar entrada</button>
     <button class="fj-btn fj-btn-salida" id="fj-btn-salida" onclick="fichajeSalida()" style="display:none">🔴 Registrar salida</button>
     <br>
@@ -13647,15 +13682,32 @@ window.rdImprimir = function(){
     var infoEl=document.getElementById('fj-info-entrada');
     var btnE=document.getElementById('fj-btn-entrada');
     var btnS=document.getElementById('fj-btn-salida');
+    var manualWrap=document.getElementById('fj-entrada-manual-wrap');
     if(modo==='salida'){
       var est=getEstadoHoy();
-      document.getElementById('fj-sub').textContent='Tu jornada está activa. ¿Listo/a para terminar?';
-      if(infoEl&&est&&est.entrada){infoEl.style.display='';infoEl.innerHTML='⏱ Entrada registrada a las <strong>'+est.entrada+'</strong>';}
+      if(est&&est.entrada){
+        // Ya tiene entrada — flujo normal
+        document.getElementById('fj-sub').textContent='Tu jornada está activa. ¿Listo/a para terminar?';
+        if(infoEl){infoEl.style.display='';infoEl.innerHTML='⏱ Entrada registrada a las <strong>'+est.entrada+'</strong>';}
+        if(manualWrap) manualWrap.style.display='none';
+      } else {
+        // Sin entrada — pedir que la escriba
+        document.getElementById('fj-sub').textContent='No registraste la entrada. ¿A qué hora llegaste?';
+        if(infoEl) infoEl.style.display='none';
+        if(manualWrap) manualWrap.style.display='';
+        // Pre-llenar con hora razonable (1h antes)
+        var inp=document.getElementById('fj-entrada-manual');
+        if(inp&&!inp.value){
+          var ahora=new Date(),hace1h=new Date(ahora-3600000);
+          inp.value=hace1h.toTimeString().slice(0,5);
+        }
+      }
       btnE.style.display='none';
       btnS.style.display='';
     } else {
       document.getElementById('fj-sub').textContent='Registra tu hora de entrada para comenzar la jornada';
       if(infoEl) infoEl.style.display='none';
+      if(manualWrap) manualWrap.style.display='none';
       btnE.style.display='';
       btnS.style.display='none';
     }
@@ -13664,7 +13716,12 @@ window.rdImprimir = function(){
 
   window.fichajeAbrirModal=function(){
     var est=getEstadoHoy();
-    mostrarModal(est&&est.entrada&&!est.salida?'salida':'entrada');
+    // Si ya tiene salida del día, mostrar entrada (nuevo día o corrección)
+    // Si tiene entrada sin salida, o si no tiene nada y viene del FAB (salida), mostrar salida
+    var modo=(est&&est.salida)?'entrada':
+             (est&&est.entrada&&!est.salida)?'salida':
+             (document.getElementById('fichaje-fab')?.style.display!=='none')?'salida':'entrada';
+    mostrarModal(modo);
   };
 
   window.fichajeEntrada=function(){
@@ -13673,12 +13730,22 @@ window.rdImprimir = function(){
     setEstadoHoy({fecha:hoy,entrada:hora,salida:null});
     cerrarModal();
     mostrarFAB();
+    mostrarBanner(hora);
     if(typeof toast==='function') toast('✅ Entrada registrada: '+hora);
   };
 
   window.fichajeSalida=function(){
     var est=getEstadoHoy();
-    if(!est||!est.entrada){cerrarModal();return;}
+    if(!est||!est.entrada){
+      // Leer hora manual que escribió
+      var inp=document.getElementById('fj-entrada-manual');
+      var horaManual=inp?inp.value.trim():'';
+      if(!horaManual){if(typeof toast==='function')toast('⚠️ Escribe la hora de entrada primero');return;}
+      // Guardar entrada manual y continuar
+      var hoy=hoyStr();
+      est={fecha:hoy,entrada:horaManual,salida:null};
+      setEstadoHoy(est);
+    }
     var horaSalida=horaStr();
     // Calcular minutos
     var parts1=est.entrada.split(':'),parts2=horaSalida.split(':');
@@ -13711,10 +13778,28 @@ window.rdImprimir = function(){
   function mostrarFAB(){
     var fab=document.getElementById('fichaje-fab');
     if(fab){fab.style.display='flex';}
+    var est=getEstadoHoy();
+    if(est&&est.entrada) mostrarBanner(est.entrada);
   }
   function ocultarFAB(){
     var fab=document.getElementById('fichaje-fab');
     if(fab) fab.style.display='none';
+    ocultarBanner();
+  }
+
+  // ── BANNER ─────────────────────────────────
+  function mostrarBanner(entradaHora){
+    var b=document.getElementById('fj-banner');
+    var t=document.getElementById('fj-ban-txt');
+    if(!b) return;
+    if(t) t.textContent='⏱ Jornada en curso desde las '+entradaHora+' — recuerda marcar tu salida';
+    b.style.display='flex';
+    document.body.classList.add('fj-banner-on');
+  }
+  function ocultarBanner(){
+    var b=document.getElementById('fj-banner');
+    if(b) b.style.display='none';
+    document.body.classList.remove('fj-banner-on');
   }
 
   // ── INICIO: verificar estado al cargar ─────
@@ -13725,8 +13810,10 @@ window.rdImprimir = function(){
       // No hay registro hoy → pedir entrada
       setTimeout(function(){mostrarModal('entrada');},800);
     } else if(est.entrada&&!est.salida){
-      // Hay entrada pero no salida → mostrar FAB
+      // Hay entrada sin salida → mostrar banner + FAB + modal recordatorio
       mostrarFAB();
+      mostrarBanner(est.entrada);
+      setTimeout(function(){mostrarModal('salida');},800);
     }
     // Si ya hay entrada y salida → no hacer nada
   }
@@ -13798,10 +13885,14 @@ window.rdImprimir = function(){
           j.slice().reverse().slice(0,30).map(function(jor,i){
             var real=j.length-1-i;
             var dur=jor.minutos?minToHHMM(jor.minutos):(jor.auto?'sin salida':'—');
+            var sinSalida=!jor.salida||jor.salida==='(sin marcar)';
+            var salidaDisplay=sinSalida
+              ?'<button style="background:#fef3c7;border:1.5px dashed #f59e0b;color:#92400e;border-radius:6px;padding:2px 8px;font-size:0.72rem;font-weight:700;cursor:pointer" onclick="fichajeEditarSalida('+real+')">+ Agregar salida</button>'
+              :'<span style="color:var(--text3);font-size:0.74rem">'+jor.entrada+' → '+jor.salida+'</span>';
             return '<div class="fj-jornada-row">'+
               '<span class="fj-jr-fecha">'+jor.fecha+'</span>'+
-              '<span style="color:var(--text3);font-size:0.74rem">'+jor.entrada+' → '+jor.salida+'</span>'+
-              '<span class="fj-jr-horas">'+dur+'</span>'+
+              salidaDisplay+
+              '<span class="fj-jr-horas" style="'+(sinSalida?'color:#f59e0b':'')+'">'+dur+'</span>'+
               '<button class="fj-jr-del" onclick="fichajeEliminarJornada('+real+')" title="Eliminar">✕</button>'+
             '</div>';
           }).join(''))+'</div>'+
@@ -13818,6 +13909,38 @@ window.rdImprimir = function(){
     j.splice(idx,1);
     saveJornadas(j);
     fichajeRenderEnMetricas();
+  };
+
+  window.fichajeEditarSalida=function(idx){
+    var j=getJornadas();
+    var jor=j[idx];
+    if(!jor) return;
+    var horaSalida=prompt('¿A qué hora saliste el '+jor.fecha+'?\n\nEscribe la hora (ej: 17:30):',jor.salida&&jor.salida!=='(sin marcar)'?jor.salida:'');
+    if(!horaSalida||!horaSalida.trim()) return;
+    horaSalida=horaSalida.trim();
+    // Validar formato HH:MM
+    if(!/^\d{1,2}:\d{2}$/.test(horaSalida)){
+      if(typeof toast==='function') toast('⚠️ Formato inválido. Usa HH:MM (ej: 17:30)');
+      return;
+    }
+    // Calcular minutos
+    var p1=jor.entrada?jor.entrada.split(':'):[0,0];
+    var p2=horaSalida.split(':');
+    var min1=parseInt(p1[0])*60+parseInt(p1[1]);
+    var min2=parseInt(p2[0])*60+parseInt(p2[1]);
+    var minutos=min2-min1;
+    j[idx].salida=horaSalida;
+    j[idx].minutos=minutos>0?minutos:null;
+    j[idx].auto=false;
+    saveJornadas(j);
+    // Si es hoy, actualizar estado
+    var est=getEstadoHoy();
+    if(est&&est.fecha===jor.fecha){
+      setEstadoHoy(Object.assign({},est,{salida:horaSalida,minutos:minutos>0?minutos:null}));
+      ocultarFAB();
+    }
+    fichajeRenderEnMetricas();
+    if(typeof toast==='function') toast('✅ Salida corregida: '+horaSalida);
   };
 
   // Inyectar sección en métricas cuando se cargue esa página
