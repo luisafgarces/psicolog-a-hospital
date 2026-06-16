@@ -9050,10 +9050,13 @@ function generarNotaIcNuevaLocal(){
   // Capacidad decisional si aplica
   var _cap=getCapInlineTexto('ic');
 
+  // Notas libres de sesión
+  var _notasLibres=(document.getElementById('ic-notas-libres')||{value:''}).value.trim();
+
   setIcOut('ic-out-sub',sub);
   setIcOut('ic-out-obj',obj);
   setIcOut('ic-out-resp',resp);
-  setIcOut('ic-out-trat',trat+(_cap?'\n\nVALORACIÓN DE CAPACIDAD DECISIONAL\n'+_cap:''));
+  setIcOut('ic-out-trat',trat+(_cap?'\n\nVALORACIÓN DE CAPACIDAD DECISIONAL\n'+_cap:'')+(_notasLibres?'\n\nNOTAS LIBRES DE SESIÓN\n'+_notasLibres:''));
   var f4=document.getElementById('ic-out-4campos');
   var seg=document.getElementById('ic-out-seg');
   if(f4)f4.style.display='';
@@ -9128,6 +9131,10 @@ function generarNotaIcSegLocal(){
     +(tratNotas?'Notas al equipo: '+tratNotas+'.':'')
     +(_cap?'\n\nVALORACIÓN DE CAPACIDAD DECISIONAL\n'+_cap:'');
 
+  // Notas libres de sesión
+  var _notasLibresSeg=(document.getElementById('ic-notas-libres')||{value:''}).value.trim();
+  if(_notasLibresSeg) texto+='\n\nNOTAS LIBRES DE SESIÓN\n'+_notasLibresSeg;
+
   setIcOut('ic-out-seg-texto',texto);
   var seg=document.getElementById('ic-out-seg');
   var f4=document.getElementById('ic-out-4campos');
@@ -9167,6 +9174,11 @@ function generarNotaFamiliarLocal(){
     +'Tipo de intervención: '+intervencion+'. '
     +(notasInterv?'Notas de intervención: '+notasInterv+'. ':'')
     +'Seguimiento: '+seguimiento+(plazo?' — plazo: '+plazo:'')+'.';
+
+  // Notas libres de sesión
+  var _notasLibresFam=(document.getElementById('ic-notas-libres')||{value:''}).value.trim();
+  if(_notasLibresFam) texto+='\n\nNOTAS LIBRES DE SESIÓN\n'+_notasLibresFam;
+
   setIcOut('ic-out-seg-texto',texto);
   var seg=document.getElementById('ic-out-seg');
   var f4=document.getElementById('ic-out-4campos');
@@ -13459,6 +13471,399 @@ window.rdImprimir = function(){
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
+
+<!-- ══════════════════════════════════════════════════════════
+     MÓDULO FICHAJE DE JORNADA
+     Registro de entrada/salida — horas mensuales/semanales
+     ══════════════════════════════════════════════════════════ -->
+<style>
+#fichaje-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+#fichaje-modal-overlay.visible{display:flex;}
+#fichaje-modal{
+  background:var(--surface,#fff);border-radius:18px;
+  padding:32px 28px 26px;max-width:380px;width:92%;
+  box-shadow:0 24px 60px rgba(0,0,0,0.22);
+  text-align:center;position:relative;
+  animation:fichajeIn .22s cubic-bezier(.4,0,.2,1);
+}
+@keyframes fichajeIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+#fichaje-modal .fj-ico{font-size:2.8rem;margin-bottom:8px;display:block;}
+#fichaje-modal .fj-titulo{font-size:1.18rem;font-weight:800;color:var(--text,#1e293b);margin-bottom:4px;}
+#fichaje-modal .fj-sub{font-size:0.82rem;color:var(--text3,#94a3b8);margin-bottom:20px;}
+#fichaje-modal .fj-hora-actual{
+  font-size:2.4rem;font-family:'DM Serif Display',serif;
+  color:var(--accent,#2563eb);letter-spacing:0.02em;
+  margin-bottom:6px;line-height:1;
+}
+#fichaje-modal .fj-fecha-actual{font-size:0.78rem;color:var(--text3,#94a3b8);margin-bottom:20px;}
+#fichaje-modal .fj-info-entrada{
+  background:var(--surface2,#f1f5f9);border-radius:10px;
+  padding:10px 16px;font-size:0.82rem;color:var(--text2,#64748b);
+  margin-bottom:18px;
+}
+#fichaje-modal .fj-btn{
+  width:100%;padding:13px;border:none;border-radius:10px;
+  font-size:1rem;font-weight:700;cursor:pointer;
+  transition:transform .12s,box-shadow .12s;letter-spacing:0.01em;
+}
+#fichaje-modal .fj-btn:active{transform:scale(.97);}
+#fichaje-modal .fj-btn-entrada{background:#22c55e;color:#fff;box-shadow:0 4px 18px rgba(34,197,94,.3);}
+#fichaje-modal .fj-btn-salida{background:#ef4444;color:#fff;box-shadow:0 4px 18px rgba(239,68,68,.3);}
+#fichaje-modal .fj-btn-skip{
+  background:none;border:none;color:var(--text3,#94a3b8);
+  font-size:0.75rem;cursor:pointer;margin-top:12px;
+  text-decoration:underline;padding:4px;
+}
+#fichaje-fab{
+  display:none;position:fixed;bottom:22px;right:22px;z-index:888;
+  background:var(--accent,#2563eb);color:#fff;border:none;border-radius:50px;
+  padding:10px 18px;font-size:0.8rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 18px rgba(37,99,235,.35);gap:7px;align-items:center;
+  transition:transform .12s;
+}
+#fichaje-fab:active{transform:scale(.95);}
+/* KPI de horas en métricas */
+.fj-horas-section{
+  background:var(--surface);border:1.5px solid #6366f1;
+  border-radius:var(--radius,10px);padding:18px;margin-bottom:24px;
+}
+.fj-horas-section .fj-h-titulo{
+  font-size:0.82rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:0.06em;color:#6366f1;margin-bottom:14px;
+}
+.fj-horas-kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;}
+.fj-horas-kpi{
+  background:var(--surface2,#f8fafc);border-radius:9px;padding:12px 14px;
+  border:1px solid var(--border,#e2e8f0);text-align:center;
+}
+.fj-horas-kpi .fj-kv{
+  font-family:'DM Serif Display',serif;font-size:1.7rem;
+  color:#6366f1;line-height:1.1;margin:3px 0;
+}
+.fj-horas-kpi .fj-kl{font-size:0.68rem;font-weight:700;text-transform:uppercase;color:var(--text2);}
+.fj-horas-kpi .fj-ks{font-size:0.7rem;color:var(--text3);}
+.fj-jornadas-lista{margin-top:14px;max-height:220px;overflow-y:auto;}
+.fj-jornada-row{
+  display:flex;align-items:center;gap:10px;padding:7px 10px;
+  border-radius:8px;font-size:0.78rem;margin-bottom:4px;
+  background:var(--surface2,#f1f5f9);
+}
+.fj-jornada-row .fj-jr-fecha{font-weight:700;color:var(--text2);min-width:90px;}
+.fj-jornada-row .fj-jr-horas{color:#6366f1;font-weight:700;margin-left:auto;}
+.fj-jornada-row .fj-jr-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.85rem;padding:2px 6px;}
+</style>
+
+<div id="fichaje-modal-overlay">
+  <div id="fichaje-modal">
+    <span class="fj-ico" id="fj-ico">🌅</span>
+    <div class="fj-titulo" id="fj-titulo">Buenos días, Luisa</div>
+    <div class="fj-sub" id="fj-sub">Registra tu hora de entrada para comenzar la jornada</div>
+    <div class="fj-hora-actual" id="fj-hora-reloj">--:--</div>
+    <div class="fj-fecha-actual" id="fj-fecha-reloj"></div>
+    <div class="fj-info-entrada" id="fj-info-entrada" style="display:none"></div>
+    <button class="fj-btn fj-btn-entrada" id="fj-btn-entrada" onclick="fichajeEntrada()">⏱ Registrar entrada</button>
+    <button class="fj-btn fj-btn-salida" id="fj-btn-salida" onclick="fichajeSalida()" style="display:none">🔴 Registrar salida</button>
+    <br>
+    <button class="fj-btn-skip" onclick="fichajeSkip()">Ahora no</button>
+  </div>
+</div>
+
+<button id="fichaje-fab" onclick="fichajeAbrirModal()">
+  <span id="fj-fab-ico">⏱</span>
+  <span id="fj-fab-txt">Registrar salida</span>
+</button>
+
+<script>
+(function(){
+  // ── UTILIDADES ─────────────────────────────
+  function hoyStr(){return new Date().toISOString().split('T')[0];}
+  function horaStr(d){d=d||new Date();return d.toTimeString().slice(0,5);}
+  function fechaLegible(d){
+    d=d||new Date();
+    var dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    var meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    return dias[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()]+' de '+d.getFullYear();
+  }
+  function saludoHora(){
+    var h=new Date().getHours();
+    if(h<12) return {txt:'Buenos días, Luisa ☀️',ico:'🌅'};
+    if(h<17) return {txt:'Buenas tardes, Luisa 🌤',ico:'🌤'};
+    return {txt:'Buenas noches, Luisa 🌙',ico:'🌙'};
+  }
+  function minToHHMM(min){
+    if(!min||min<=0) return '0h 0m';
+    var h=Math.floor(min/60),m=Math.round(min%60);
+    return h+'h '+m+'m';
+  }
+  function getJornadas(){
+    try{return JSON.parse(localStorage.getItem('fj_jornadas')||'[]');}catch(e){return[];}
+  }
+  function saveJornadas(arr){localStorage.setItem('fj_jornadas',JSON.stringify(arr));}
+
+  // ── RELOJ TICK ─────────────────────────────
+  function tickReloj(){
+    var ahora=new Date();
+    var r=document.getElementById('fj-hora-reloj');
+    var f=document.getElementById('fj-fecha-reloj');
+    if(r) r.textContent=horaStr(ahora);
+    if(f) f.textContent=fechaLegible(ahora);
+  }
+  setInterval(tickReloj,1000);
+  tickReloj();
+
+  // ── ESTADO DEL DÍA ─────────────────────────
+  function getEstadoHoy(){
+    // { entrada:'08:30', salida:'17:00', fecha:'2025-...' } o null
+    try{return JSON.parse(localStorage.getItem('fj_hoy')||'null');}catch(e){return null;}
+  }
+  function setEstadoHoy(obj){
+    localStorage.setItem('fj_hoy',JSON.stringify(obj));
+  }
+  function limpiarEstadoSiCambioFecha(){
+    var est=getEstadoHoy();
+    if(est&&est.fecha!==hoyStr()){
+      // Si hay entrada sin salida del día anterior, cerrar automáticamente
+      if(est.entrada&&!est.salida){
+        var j=getJornadas();
+        j.push({fecha:est.fecha,entrada:est.entrada,salida:'(sin marcar)',minutos:null,auto:true});
+        saveJornadas(j);
+      }
+      localStorage.removeItem('fj_hoy');
+    }
+  }
+
+  // ── MODAL ──────────────────────────────────
+  function mostrarModal(modo){
+    // modo: 'entrada' | 'salida'
+    var ov=document.getElementById('fichaje-modal-overlay');
+    if(!ov) return;
+    var sal=saludoHora();
+    document.getElementById('fj-ico').textContent=sal.ico;
+    document.getElementById('fj-titulo').textContent=sal.txt;
+    var infoEl=document.getElementById('fj-info-entrada');
+    var btnE=document.getElementById('fj-btn-entrada');
+    var btnS=document.getElementById('fj-btn-salida');
+    if(modo==='salida'){
+      var est=getEstadoHoy();
+      document.getElementById('fj-sub').textContent='Tu jornada está activa. ¿Listo/a para terminar?';
+      if(infoEl&&est&&est.entrada){infoEl.style.display='';infoEl.innerHTML='⏱ Entrada registrada a las <strong>'+est.entrada+'</strong>';}
+      btnE.style.display='none';
+      btnS.style.display='';
+    } else {
+      document.getElementById('fj-sub').textContent='Registra tu hora de entrada para comenzar la jornada';
+      if(infoEl) infoEl.style.display='none';
+      btnE.style.display='';
+      btnS.style.display='none';
+    }
+    ov.classList.add('visible');
+  }
+
+  window.fichajeAbrirModal=function(){
+    var est=getEstadoHoy();
+    mostrarModal(est&&est.entrada&&!est.salida?'salida':'entrada');
+  };
+
+  window.fichajeEntrada=function(){
+    var hora=horaStr();
+    var hoy=hoyStr();
+    setEstadoHoy({fecha:hoy,entrada:hora,salida:null});
+    cerrarModal();
+    mostrarFAB();
+    if(typeof toast==='function') toast('✅ Entrada registrada: '+hora);
+  };
+
+  window.fichajeSalida=function(){
+    var est=getEstadoHoy();
+    if(!est||!est.entrada){cerrarModal();return;}
+    var horaSalida=horaStr();
+    // Calcular minutos
+    var parts1=est.entrada.split(':'),parts2=horaSalida.split(':');
+    var min1=parseInt(parts1[0])*60+parseInt(parts1[1]);
+    var min2=parseInt(parts2[0])*60+parseInt(parts2[1]);
+    var minutos=min2-min1;
+    // Guardar en historial
+    var j=getJornadas();
+    // Si ya hay registro de hoy, actualizar; sino, agregar
+    var idx=j.findIndex(function(x){return x.fecha===est.fecha;});
+    var reg={fecha:est.fecha,entrada:est.entrada,salida:horaSalida,minutos:minutos>0?minutos:null};
+    if(idx>=0) j[idx]=reg; else j.push(reg);
+    saveJornadas(j);
+    setEstadoHoy({fecha:est.fecha,entrada:est.entrada,salida:horaSalida,minutos:minutos});
+    cerrarModal();
+    ocultarFAB();
+    if(typeof toast==='function') toast('🔴 Salida registrada: '+horaSalida+' · '+minToHHMM(minutos)+'  trabajadas');
+  };
+
+  window.fichajeSkip=function(){
+    cerrarModal();
+  };
+
+  function cerrarModal(){
+    var ov=document.getElementById('fichaje-modal-overlay');
+    if(ov) ov.classList.remove('visible');
+  }
+
+  // ── FAB (botón flotante de salida) ─────────
+  function mostrarFAB(){
+    var fab=document.getElementById('fichaje-fab');
+    if(fab){fab.style.display='flex';}
+  }
+  function ocultarFAB(){
+    var fab=document.getElementById('fichaje-fab');
+    if(fab) fab.style.display='none';
+  }
+
+  // ── INICIO: verificar estado al cargar ─────
+  function iniciarFichaje(){
+    limpiarEstadoSiCambioFecha();
+    var est=getEstadoHoy();
+    if(!est){
+      // No hay registro hoy → pedir entrada
+      setTimeout(function(){mostrarModal('entrada');},800);
+    } else if(est.entrada&&!est.salida){
+      // Hay entrada pero no salida → mostrar FAB
+      mostrarFAB();
+    }
+    // Si ya hay entrada y salida → no hacer nada
+  }
+
+  // Ejecutar cuando el DOM esté listo
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',iniciarFichaje);
+  } else {
+    setTimeout(iniciarFichaje,900);
+  }
+
+  // ── SECCIÓN HORAS EN MÉTRICAS ──────────────
+  function semanaActual(){
+    var hoy=new Date();
+    var lun=new Date(hoy);
+    lun.setDate(hoy.getDate()-((hoy.getDay()+6)%7));
+    var dom=new Date(lun);dom.setDate(lun.getDate()+6);
+    return{desde:lun.toISOString().split('T')[0],hasta:dom.toISOString().split('T')[0]};
+  }
+  function mesActual(){
+    var hoy=new Date();
+    return{
+      desde:hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0')+'-01',
+      hasta:hoy.toISOString().split('T')[0]
+    };
+  }
+  function aniActual(){
+    var hoy=new Date();
+    return{desde:hoy.getFullYear()+'-01-01',hasta:hoy.toISOString().split('T')[0]};
+  }
+  function sumarMinutos(arr,desde,hasta){
+    return arr.filter(function(j){return j.fecha>=desde&&j.fecha<=hasta&&j.minutos>0;})
+      .reduce(function(acc,j){return acc+j.minutos;},0);
+  }
+  function contarDias(arr,desde,hasta){
+    return arr.filter(function(j){return j.fecha>=desde&&j.fecha<=hasta&&j.minutos>0;}).length;
+  }
+
+  window.fichajeRenderEnMetricas=function(){
+    var cont=document.getElementById('fj-horas-metricas');
+    if(!cont) return;
+    var j=getJornadas();
+    var sem=semanaActual(),mes=mesActual(),anio=aniActual();
+    var minSem=sumarMinutos(j,sem.desde,sem.hasta);
+    var minMes=sumarMinutos(j,mes.desde,mes.hasta);
+    var minAnio=sumarMinutos(j,anio.desde,anio.hasta);
+    var diasSem=contarDias(j,sem.desde,sem.hasta);
+    var diasMes=contarDias(j,mes.desde,mes.hasta);
+    // Promedio diario del mes
+    var promMes=diasMes>0?(minMes/diasMes):0;
+    // Jornada de hoy
+    var est=getEstadoHoy();
+    var minHoy=est&&est.minutos?est.minutos:0;
+    var horasHoy=minHoy>0?minToHHMM(minHoy):(est&&est.entrada&&!est.salida?'En curso ⏳':'—');
+
+    cont.innerHTML=
+      '<div class="fj-h-titulo">⏰ Horas de jornada registradas</div>'+
+      '<div class="fj-horas-kpi-grid">'+
+        '<div class="fj-horas-kpi"><div class="fj-kl">Hoy</div><div class="fj-kv">'+horasHoy+'</div><div class="fj-ks">'+(est&&est.entrada?'Entrada '+est.entrada:'-')+'</div></div>'+
+        '<div class="fj-horas-kpi"><div class="fj-kl">Esta semana</div><div class="fj-kv">'+minToHHMM(minSem)+'</div><div class="fj-ks">'+diasSem+' días registrados</div></div>'+
+        '<div class="fj-horas-kpi"><div class="fj-kl">Este mes</div><div class="fj-kv">'+minToHHMM(minMes)+'</div><div class="fj-ks">'+diasMes+' días registrados</div></div>'+
+        '<div class="fj-horas-kpi"><div class="fj-kl">Promedio/día</div><div class="fj-kv">'+minToHHMM(Math.round(promMes))+'</div><div class="fj-ks">En el mes</div></div>'+
+        '<div class="fj-horas-kpi"><div class="fj-kl">Este año</div><div class="fj-kv">'+minToHHMM(minAnio)+'</div><div class="fj-ks">Horas acumuladas</div></div>'+
+      '</div>'+
+      '<div style="margin-top:16px">'+
+        '<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--text2);letter-spacing:.06em;margin-bottom:8px">Historial de jornadas</div>'+
+        '<div class="fj-jornadas-lista">'+
+          (j.length===0?'<div style="color:var(--text3);font-size:0.8rem;padding:8px">Sin registros aún.</div>':
+          j.slice().reverse().slice(0,30).map(function(jor,i){
+            var real=j.length-1-i;
+            var dur=jor.minutos?minToHHMM(jor.minutos):(jor.auto?'sin salida':'—');
+            return '<div class="fj-jornada-row">'+
+              '<span class="fj-jr-fecha">'+jor.fecha+'</span>'+
+              '<span style="color:var(--text3);font-size:0.74rem">'+jor.entrada+' → '+jor.salida+'</span>'+
+              '<span class="fj-jr-horas">'+dur+'</span>'+
+              '<button class="fj-jr-del" onclick="fichajeEliminarJornada('+real+')" title="Eliminar">✕</button>'+
+            '</div>';
+          }).join(''))+'</div>'+
+      '</div>'+
+      '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">'+
+        '<button class="btn btn-primary btn-sm" onclick="fichajeAbrirModal()" style="font-size:0.75rem">⏱ Marcar entrada/salida ahora</button>'+
+        '<button class="btn btn-secondary btn-sm" onclick="fichajeRenderEnMetricas()" style="font-size:0.75rem">↺ Actualizar</button>'+
+      '</div>';
+  };
+
+  window.fichajeEliminarJornada=function(idx){
+    if(!confirm('¿Eliminar este registro de jornada?')) return;
+    var j=getJornadas();
+    j.splice(idx,1);
+    saveJornadas(j);
+    fichajeRenderEnMetricas();
+  };
+
+  // Inyectar sección en métricas cuando se cargue esa página
+  var _fichajeInyectado=false;
+  var _fichajeObs=new MutationObserver(function(){
+    var pagMet=document.getElementById('page-metricas');
+    if(pagMet&&!_fichajeInyectado){
+      _fichajeInyectado=true;
+      _fichajeObs.disconnect();
+      // Insertar sección al inicio, justo después del info banner
+      var kpiGrid=document.getElementById('met-kpi-grid');
+      if(kpiGrid){
+        var sec=document.createElement('div');
+        sec.id='fj-horas-metricas';
+        sec.className='fj-horas-section';
+        kpiGrid.parentNode.insertBefore(sec,kpiGrid);
+        fichajeRenderEnMetricas();
+      }
+    }
+  });
+  _fichajeObs.observe(document.body,{childList:true,subtree:true});
+
+  // Re-renderizar cuando se navegue a métricas
+  var _goToOrig=window.goTo;
+  window.goTo=function(page){
+    if(_goToOrig) _goToOrig(page);
+    if(page==='metricas'){
+      setTimeout(function(){
+        var sec=document.getElementById('fj-horas-metricas');
+        if(sec) fichajeRenderEnMetricas();
+        else {
+          var kpiGrid=document.getElementById('met-kpi-grid');
+          if(kpiGrid){
+            var sec2=document.createElement('div');
+            sec2.id='fj-horas-metricas';
+            sec2.className='fj-horas-section';
+            kpiGrid.parentNode.insertBefore(sec2,kpiGrid);
+            fichajeRenderEnMetricas();
+          }
+        }
+      },200);
+    }
+  };
+
+})();
+</script>
 
 </body>
 </html>
