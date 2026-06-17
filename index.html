@@ -3014,7 +3014,7 @@ input.toggle-cb{display:none}
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, limit, updateDoc, serverTimestamp, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, limit, updateDoc, serverTimestamp, getDocs, where, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSyCsqumG_BRCWwnFEOcoNfLXtfaUlzvPqYE",
@@ -3046,6 +3046,8 @@ window._where=where;
 window._orderBy=orderBy;
 window._deleteDoc=deleteDoc;
 window._limit=limit;
+window._setDoc=setDoc;
+window._getDoc=getDoc;
 window._fdb={collection,addDoc,deleteDoc,doc,updateDoc,serverTimestamp,query,orderBy};
 let pacientes=[],interconsultas=[],anamnesisList=[],testHistory=[];
 window.pacientes=pacientes;window.interconsultas=interconsultas;window.anamnesisList=anamnesisList;window.testHistory=testHistory;
@@ -13962,12 +13964,20 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     localStorage.setItem('fj_jornadas',JSON.stringify(arr));
     try{
       if(window.db&&window._setDoc&&window._doc){
-        window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa'),{jornadas:arr,updated:new Date().toISOString()});
+        window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa'),
+          {jornadas:arr,updated:new Date().toISOString()}
+        ).catch(function(e){console.warn('fichaje sync:',e);});
       }
-    }catch(e){console.warn('fichaje sync:',e);}
+    }catch(e){console.warn('fichaje sync error:',e);}
   }
   // Cargar desde Firebase si localStorage vacío (iPad nuevo o limpio)
   async function sincFichajeDesdeFirebase(){
+    // Esperar hasta que Firebase esté listo (máx 5 segundos)
+    var intentos=0;
+    while((!window.db||!window._getDoc||!window._setDoc)&&intentos<10){
+      await new Promise(function(r){setTimeout(r,500);});
+      intentos++;
+    }
     try{
       if(!window.db||!window._getDoc||!window._doc) return;
       var snap=await window._getDoc(window._doc(window.db,'fichaje_jornadas','luisa'));
