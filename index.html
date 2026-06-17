@@ -14115,23 +14115,29 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     var min1=parseInt(parts1[0])*60+parseInt(parts1[1]);
     var min2=parseInt(parts2[0])*60+parseInt(parts2[1]);
     var minutos=min2-min1;
-    // Guardar en historial
+    // ── Verificar meta ANTES de guardar ──
+    var salidaMeta=getSalidaHoy();
+    var metaMin=salidaMeta?parseInt(salidaMeta.split(':')[0])*60+parseInt(salidaMeta.split(':')[1]):0;
+    var diff=min2-metaMin;
+    if(salidaMeta&&diff<-5){
+      var falta=Math.abs(diff);
+      var confirmar=confirm(
+        '⚠️ Aún no has completado tu jornada.\n\n'
+        +'Te faltan '+minToHHMM(falta)+' para cumplir la meta de hoy ('+getSalidaHoyTexto()+').\n\n'
+        +'¿Estás segura de que quieres salir ahora?'
+      );
+      if(!confirmar) return; // Cancelar — no guardar
+    }
+    // ── Guardar en historial ──
     var j=getJornadas();
-    // Si ya hay registro de hoy, actualizar; sino, agregar
     var idx=j.findIndex(function(x){return x.fecha===est.fecha;});
     var reg={fecha:est.fecha,entrada:est.entrada,salida:horaSalida,minutos:minutos>0?minutos:null};
     if(idx>=0) j[idx]=reg; else j.push(reg);
     saveJornadas(j);
     setEstadoHoy({fecha:est.fecha,entrada:est.entrada,salida:horaSalida,minutos:minutos});
-    // Verificar si cumplió la meta de hoy
-    var salidaMeta=getSalidaHoy();
-    var metaMin=salidaMeta?parseInt(salidaMeta.split(':')[0])*60+parseInt(salidaMeta.split(':')[1]):0;
-    var salidaMin2=min2;
-    var diff=salidaMin2-metaMin;
     var msg='🔴 Salida: '+horaSalida+' · '+minToHHMM(minutos)+' trabajadas';
     if(salidaMeta&&diff<-5){
-      var falta=Math.abs(diff);
-      msg+=' · ⚠️ Faltan '+minToHHMM(falta)+'h para la meta';
+      msg+=' · ⚠️ Saliste antes (-'+minToHHMM(Math.abs(diff))+')';
     } else if(salidaMeta&&diff>=0){
       msg+=' · ✅ Meta cumplida'+(diff>0?' (+'+minToHHMM(diff)+')':'');
     }
