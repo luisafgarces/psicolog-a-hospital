@@ -2526,7 +2526,13 @@ input.toggle-cb{display:none}
             </div>
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Habitación</div>
-              <input type="text" id="rd-hab" placeholder="Ej. AZU-304B" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+              <div style="display:flex;gap:4px;margin-bottom:5px;flex-wrap:wrap">
+                <button type="button" onclick="rdPrefijHab('AZU-')" style="font-size:0.68rem;font-weight:700;padding:2px 8px;border:1.5px solid #3b82f6;color:#1d4ed8;background:#eff6ff;border-radius:5px;cursor:pointer">🔵 AZU</button>
+                <button type="button" onclick="rdPrefijHab('UCI-')" style="font-size:0.68rem;font-weight:700;padding:2px 8px;border:1.5px solid #ef4444;color:#dc2626;background:#fef2f2;border-radius:5px;cursor:pointer">🔴 UCI</button>
+                <button type="button" onclick="rdPrefijHab('URG-')" style="font-size:0.68rem;font-weight:700;padding:2px 8px;border:1.5px solid #f59e0b;color:#d97706;background:#fffbeb;border-radius:5px;cursor:pointer">🟡 URG</button>
+                <button type="button" onclick="rdPrefijHab('')" style="font-size:0.68rem;font-weight:700;padding:2px 8px;border:1.5px solid var(--border);color:var(--text3);background:var(--surface);border-radius:5px;cursor:pointer">✕ Limpiar</button>
+              </div>
+              <input type="text" id="rd-hab" placeholder="Ej. AZU-304B, UCI-14, 322B…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
             </div>
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Edad / Sexo</div>
@@ -13463,13 +13469,28 @@ window.rdGuardar = async function(){
   try{
     if(typeof setSyncStatus==='function') setSyncStatus('syncing');
     await window._addDoc(window._collection(window.db,'fichas_ronda'), datos);
+    // Si la habitación cambió, actualizarla en el paciente en todas partes
+    var pac = (window.pacientes||[]).find(function(p){ return p.id === window._rdPacId; });
+    var nuevaHab = rdGet('rd-hab');
+    if(pac && nuevaHab && nuevaHab !== pac.hab){
+      try{
+        await updateDoc(doc(db,'pacientes',pac.id),{hab:nuevaHab});
+        pac.hab = nuevaHab; // actualizar objeto local
+        if(typeof renderPacientes==='function') renderPacientes();
+        if(typeof actualizarSelectores==='function') actualizarSelectores();
+        window.toast('✅ Ficha guardada · Habitación actualizada a '+nuevaHab);
+      } catch(eHab){
+        console.warn('No se pudo actualizar habitación:', eHab);
+        window.toast('✅ Ficha guardada (habitación no se pudo sincronizar)');
+      }
+    } else {
+      window.toast('✅ Ficha guardada');
+    }
     // Refrescar tablero sin marcar como visto (el visto es manual o desde formularios IC)
     rdRefrescarTablero();
     if(typeof window.renderDashboard==='function') window.renderDashboard();
     // Limpiar formulario tras guardar
-    var pac = (window.pacientes||[]).find(function(p){ return p.id === window._rdPacId; });
     if(pac) rdRellenarDesde(pac);
-    window.toast('✅ Ficha guardada');
     if(typeof setSyncStatus==='function') setSyncStatus('ok');
   }catch(e){
     if(typeof setSyncStatus==='function') setSyncStatus('offline');
@@ -13636,6 +13657,25 @@ window.rdImprimir = function(){
 };
 
 
+
+// ── PREFIJO HABITACIÓN ───────────────────────────────────────────────
+window.rdPrefijHab = function(prefijo){
+  var inp = document.getElementById('rd-hab');
+  if(!inp) return;
+  if(!prefijo){ inp.value=''; inp.focus(); return; }
+  // Si ya tiene el prefijo, no duplicar
+  if(inp.value.toUpperCase().startsWith(prefijo.toUpperCase())){
+    inp.focus(); return;
+  }
+  // Extraer solo el número/sufijo si ya había algo
+  var actual = inp.value.trim();
+  var soloNum = actual.replace(/^(AZU-|UCI-|URG-)/i,'');
+  inp.value = prefijo + soloNum;
+  inp.focus();
+  // Mover cursor al final
+  var len = inp.value.length;
+  inp.setSelectionRange(len,len);
+};
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
 
