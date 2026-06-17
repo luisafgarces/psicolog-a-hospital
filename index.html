@@ -3774,9 +3774,7 @@ window.guardarICFirebase=async()=>{
       || pacientes.find(p=>(p.nombre||'').toLowerCase().trim()===(nombre||'').toLowerCase().trim())
       || null;
   // Si encontramos el paciente pero el selector estaba vacío, usar su ID
-  // Fallback adicional: selector directo en el momento de guardar
-  const _selValAhora=document.getElementById('ic-paciente-sel')?.value||null;
-  const pacIdFinal=pacId||pacObj?.id||_selValAhora||null;
+  const pacIdFinal=pacId||pacObj?.id||null;
   // Capturar nota generada si existe
   let notaTexto='';
   try{
@@ -4359,7 +4357,7 @@ window.renderDashboard=()=>{
             <button class="btn btn-sm btn-secondary" onclick="abrirPacSheet('${p.id}')">👤 Ver Paciente</button>
             <button class="btn btn-sm btn-secondary" onclick="editarPaciente('${p.id}')">✏️ Editar</button>
             <button class="btn btn-sm btn-secondary" onclick="hpacAbrirPaciente('${p.id}')">📂 Historial</button>
-            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.78rem;font-weight:600;color:${(window._rdFichasHoy&&window._rdFichasHoy[p.id])?'#16a34a':'var(--text3)'};background:${(window._rdFichasHoy&&window._rdFichasHoy[p.id])?'#dcfce7':'var(--surface)'};border:1.5px solid ${(window._rdFichasHoy&&window._rdFichasHoy[p.id])?'#16a34a':'var(--border)'};border-radius:6px;padding:3px 9px;transition:all .15s" onclick="event.stopPropagation()"><input type="checkbox" class="rd-check-visto" data-pac-id="${p.id}" ${(window._rdFichasHoy&&window._rdFichasHoy[p.id])?'checked':''} onchange="rdMarcarVista('${p.id}',this)" style="accent-color:#16a34a;width:14px;height:14px;cursor:pointer">${(window._rdFichasHoy&&window._rdFichasHoy[p.id])?'✅ Visto':'Marcar visto'}</label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.78rem;font-weight:600;color:${(window._rdVistosHoy&&window._rdVistosHoy[p.id])?'#16a34a':'var(--text3)'};background:${(window._rdVistosHoy&&window._rdVistosHoy[p.id])?'#dcfce7':'var(--surface)'};border:1.5px solid ${(window._rdVistosHoy&&window._rdVistosHoy[p.id])?'#16a34a':'var(--border)'};border-radius:6px;padding:3px 9px;transition:all .15s" onclick="event.stopPropagation()"><input type="checkbox" class="rd-check-visto" data-pac-id="${p.id}" ${(window._rdVistosHoy&&window._rdVistosHoy[p.id])?'checked':''} onchange="rdMarcarVista('${p.id}',this)" style="accent-color:#16a34a;width:14px;height:14px;cursor:pointer">${(window._rdVistosHoy&&window._rdVistosHoy[p.id])?'✅ Visto':'Marcar visto'}</label>
           </div>
         </div>`).join('');
       const headerLabel=esPorFecha?labelFecha(grupo):`🏢 ${grupo}`;
