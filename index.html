@@ -13164,6 +13164,7 @@ window.rdInit = async function(){
   // Cargar fichas guardadas hoy desde Firebase
   var hoy = new Date().toISOString().split('T')[0];
   window._rdFichasHoy = {};
+  if(!window._rdVistosHoy) window._rdVistosHoy = {};
   try{
     var snap = await window._getDocs(
       window._fdb.query(
@@ -13202,6 +13203,7 @@ window.rdInit = async function(){
   var ultimoBloque = -1;
   cont.innerHTML = pacs.map(function(p){
     var hecha = !!(window._rdFichasHoy&&window._rdFichasHoy[p.id]);
+    var visto = !!(window._rdVistosHoy&&window._rdVistosHoy[p.id]);
     var bId = bloqueId(p.hab);
     var separador = '';
     if(bId !== ultimoBloque){
@@ -13227,14 +13229,14 @@ window.rdInit = async function(){
     else if(p.estado==='revaloracion') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#fef3c7;color:#b45309;border-radius:4px;padding:1px 6px;margin-right:2px">REVAL</span>';
     // Checkbox siempre visible
     var checkVisto2='<label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;font-weight:600;'
-      +(hecha?'color:#16a34a;background:#dcfce7;border:1.5px solid #16a34a;':'color:#64748b;background:#f8fafc;border:1.5px solid #cbd5e1;')
+      +(visto?'color:#16a34a;background:#dcfce7;border:1.5px solid #16a34a;':'color:#64748b;background:#f8fafc;border:1.5px solid #cbd5e1;')
       +'border-radius:6px;padding:4px 10px;white-space:nowrap">'
-      +'<input type="checkbox" '+(hecha?'checked ':'')
+      +'<input type="checkbox" '+(visto?'checked ':'')
       +'onchange="rdMarcarVista(\''+p.id+'\',this)" style="accent-color:#16a34a;width:15px;height:15px;cursor:pointer">'
-      +(hecha?'✅ Visto':'☐ Visto')
+      +(visto?'✅ Visto':'☐ Visto')
       +'</label>';
-    var bgColor2=hecha?'#f0fdf4':prioUp2==='URGENTE'?'#fff5f5':'var(--surface2)';
-    var borderColor2=hecha?'#86efac':prioUp2==='URGENTE'?'#fca5a5':'var(--border)';
+    var bgColor2=visto?'#f0fdf4':prioUp2==='URGENTE'?'#fff5f5':'var(--surface2)';
+    var borderColor2=visto?'#86efac':prioUp2==='URGENTE'?'#fca5a5':'var(--border)';
     return separador+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:'+bgColor2+';border:1.5px solid '+borderColor2+';border-radius:9px;flex-wrap:wrap">'
       +'<div style="flex:1;min-width:0;cursor:pointer" onclick="if(typeof abrirPacSheet===\'function\')abrirPacSheet(\''+p.id+'\')" title="Ver ficha del paciente">'
         +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+prioBadge2+hab+tipoBadge2
@@ -13480,29 +13482,23 @@ window.rdGuardar = async function(){
 // Marcar chulo automáticamente cuando se guarda una nota desde el formulario
 window.rdMarcarVistaPorNota=function(pacId){
   if(!pacId) return;
-  if(!window._rdFichasHoy) window._rdFichasHoy={};
-  window._rdFichasHoy[pacId]=Object.assign(window._rdFichasHoy[pacId]||{},{_notaGuardada:true});
+  if(!window._rdVistosHoy) window._rdVistosHoy={};
+  window._rdVistosHoy[pacId]=true;
   rdRefrescarTablero();
   if(typeof window.renderDashboard==='function') window.renderDashboard();
 };
 
 window.rdMarcarVista=function(pacId, cbEl){
-  if(!window._rdFichasHoy) window._rdFichasHoy={};
-  var yaVista=!!(window._rdFichasHoy[pacId]);
-  // Si tiene nota guardada, no se puede desmarcar con el checkbox
-  if(yaVista&&window._rdFichasHoy[pacId]._notaGuardada){
-    if(cbEl&&cbEl.type==='checkbox') cbEl.checked=true; // revertir
-    if(typeof toast==='function') toast('ℹ️ Paciente con nota guardada — no se puede desmarcar');
-    return;
-  }
-  if(yaVista){
-    delete window._rdFichasHoy[pacId];
+  if(!window._rdVistosHoy) window._rdVistosHoy={};
+  var yaVisto=!!(window._rdVistosHoy[pacId]);
+  if(yaVisto){
+    delete window._rdVistosHoy[pacId];
   } else {
-    window._rdFichasHoy[pacId]={_manual:true};
+    window._rdVistosHoy[pacId]=true;
   }
   rdRefrescarTablero();
   if(typeof window.renderDashboard==='function') window.renderDashboard();
-  if(typeof toast==='function') toast(yaVista?'☐ Desmarcado':'✅ Marcado como visto');
+  if(typeof toast==='function') toast(yaVisto?'☐ Desmarcado':'✅ Marcado como visto');
 };
 
 function rdRefrescarTablero(){
