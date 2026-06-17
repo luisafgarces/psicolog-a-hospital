@@ -13903,7 +13903,9 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     var est=getEstadoHoy();
     if(!est||!est.entrada) return 0;
     var ahora=horaStr();
-    var p1=est.entrada.split(':'),p2=(est.salida||ahora).split(':');
+    // Usar salida registrada si existe, sino la hora actual
+    var horaFin=est.salida||ahora;
+    var p1=est.entrada.split(':'),p2=horaFin.split(':');
     return parseInt(p2[0])*60+parseInt(p2[1])-(parseInt(p1[0])*60+parseInt(p1[1]));
   }
 
@@ -13917,16 +13919,20 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     if(!h) return 0;
     var minDiario=Math.round(93*60/h.dias); // minutos meta por día
     var saldo=0;
+    var hoyFecha=hoyStr();
+    var est=getEstadoHoy();
+    var jornadaActivaHoy=est&&est.fecha===hoyFecha&&est.entrada&&!est.salida;
     j.forEach(function(jor){
       if(!jor.fecha||!jor.minutos) return;
+      // Si la jornada de hoy está activa, no contar del historial (evita doble conteo)
+      if(jornadaActivaHoy&&jor.fecha===hoyFecha) return;
       var d=new Date(jor.fecha);
       if(d.getMonth()+1===mes&&d.getFullYear()===anio){
         saldo+=(jor.minutos-minDiario);
       }
     });
-    // Sumar hoy si está en curso
-    var est=getEstadoHoy();
-    if(est&&est.fecha===hoyStr()&&est.entrada&&!est.salida){
+    // Sumar hoy en tiempo real si está en curso
+    if(jornadaActivaHoy){
       saldo+=(minTrabajaHoy()-minDiario);
     }
     return saldo; // positivo=a favor, negativo=en contra
@@ -14012,6 +14018,11 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
   }
   setInterval(tickReloj,1000);
   tickReloj();
+  // Refrescar banner y saldo cada 60 segundos si jornada activa
+  setInterval(function(){
+    var est=getEstadoHoy();
+    if(est&&est.entrada&&!est.salida) mostrarBanner(est.entrada);
+  },60000);
 
   // ── ESTADO DEL DÍA ─────────────────────────
   function getEstadoHoy(){
