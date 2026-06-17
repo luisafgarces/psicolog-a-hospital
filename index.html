@@ -13577,6 +13577,7 @@ function rdRefrescarTablero(){
   if(resumen) resumen.textContent = hechos+' de '+pacs.length+' rondas registradas hoy';
   cont.innerHTML = pacs.map(function(p){
     var hecha = !!(window._rdFichasHoy&&window._rdFichasHoy[p.id]);
+    var visto = !!(window._rdVistosHoy&&window._rdVistosHoy[p.id]);
     var hab = p.hab?'<span style="font-size:0.7rem;font-weight:700;color:var(--accent);background:var(--accent-light);padding:2px 7px;border-radius:4px;margin-right:6px">'+p.hab+'</span>':'';
     var estadoBadge = hecha
       ?'<span style="font-size:0.7rem;font-weight:700;color:#16a34a;background:#dcfce7;padding:2px 8px;border-radius:10px">✅ Hecha</span>'
@@ -13590,18 +13591,18 @@ function rdRefrescarTablero(){
     if(p.estado==='nueva-interconsulta-pendiente') tipoBadge='<span style="font-size:0.68rem;font-weight:700;background:#dbeafe;color:#1e40af;border-radius:4px;padding:1px 6px">IC</span>';
     else if(p.estado==='seguimiento') tipoBadge='<span style="font-size:0.68rem;font-weight:700;background:#ede9fe;color:#6d28d9;border-radius:4px;padding:1px 6px">SEG</span>';
     else if(p.estado==='revaloracion') tipoBadge='<span style="font-size:0.68rem;font-weight:700;background:#fef3c7;color:#b45309;border-radius:4px;padding:1px 6px">REVAL</span>';
-    // Checkbox siempre visible
+    // Checkbox — usa SOLO _rdVistosHoy, nunca _rdFichasHoy
     var checkVisto = '<label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:5px;cursor:pointer;'
         +'font-size:0.75rem;font-weight:600;'
-        +(hecha?'color:#16a34a;background:#dcfce7;border:1.5px solid #16a34a;':'color:#64748b;background:#f8fafc;border:1.5px solid #cbd5e1;')
+        +(visto?'color:#16a34a;background:#dcfce7;border:1.5px solid #16a34a;':'color:#64748b;background:#f8fafc;border:1.5px solid #cbd5e1;')
         +'border-radius:6px;padding:4px 10px;white-space:nowrap">'
         +'<input type="checkbox" '
-        +(hecha?'checked ':'')
+        +(visto?'checked ':'')
         +'onchange="rdMarcarVista(\''+p.id+'\',this)" '
         +'style="accent-color:#16a34a;width:15px;height:15px;cursor:pointer">'
-        +(hecha?'✅ Visto':'☐ Visto')
+        +(visto?'✅ Visto':'☐ Visto')
         +'</label>';
-    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:'+(hecha?'#f0fdf4':'var(--surface2)')+';border:1.5px solid '+(hecha?'#86efac':'var(--border)')+';border-radius:9px;flex-wrap:wrap">'
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:'+(visto?'#f0fdf4':'var(--surface2)')+';border:1.5px solid '+(visto?'#86efac':'var(--border)')+';border-radius:9px;flex-wrap:wrap">'
       +'<div style="flex:1;min-width:0;cursor:pointer" onclick="if(typeof abrirPacSheet===\'function\')abrirPacSheet(\''+p.id+'\')" title="Ver ficha del paciente">'
         +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+hab+tipoBadge
           +'<span style="font-size:0.88rem;font-weight:700;color:var(--accent);text-decoration:underline;text-underline-offset:2px">'+(p.nombre||'Sin nombre')+'</span>'+estadoBadge
