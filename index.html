@@ -3696,6 +3696,7 @@ window.editarPaciente=(id)=>{
 window.actualizarPaciente=async(id)=>{
   setSyncStatus('syncing');
   try{
+    var nuevoTratMedico=document.getElementById('p-trat-medico').value;
     await updateDoc(doc(db,'pacientes',id),{
       nombre:document.getElementById('p-nombre').value.trim(),
       cedula:document.getElementById('p-cedula').value.trim(),
@@ -3705,16 +3706,51 @@ window.actualizarPaciente=async(id)=>{
       hab:document.getElementById('p-hab').value,
       motivo:document.getElementById('p-motivo').value,
       motivoIC:document.getElementById('p-motivo-ic')?.value||'',
+      quePide:document.getElementById('p-que-pide')?.value||'',
       tipo:document.getElementById('p-tipo').value||'hospitalizado',
       estado:document.getElementById('p-estado').value,
       proxSesion:document.getElementById('p-proxsesion').value,
       notas:document.getElementById('p-notas').value,
-      tratMedico:document.getElementById('p-trat-medico').value,
+      tratMedico:nuevoTratMedico,
       fechaIC:document.getElementById('p-fecha-ic').value,
       prioridad:document.getElementById('p-prioridad').value,
       medicoSol:document.getElementById('p-medico-sol').value,
       medicoEsp:document.getElementById('p-medico-esp').value
     });
+    // Actualizar objeto local
+    var pacLocal=(window.pacientes||[]).find(p=>p.id===id);
+    if(pacLocal){
+      pacLocal.nombre=document.getElementById('p-nombre').value.trim();
+      pacLocal.tratMedico=nuevoTratMedico;
+      pacLocal.motivo=document.getElementById('p-motivo').value;
+      pacLocal.motivoIC=document.getElementById('p-motivo-ic')?.value||'';
+      pacLocal.quePide=document.getElementById('p-que-pide')?.value||'';
+      pacLocal.estado=document.getElementById('p-estado').value;
+      pacLocal.hab=document.getElementById('p-hab').value;
+      pacLocal.proxSesion=document.getElementById('p-proxsesion').value;
+      pacLocal.prioridad=document.getElementById('p-prioridad').value;
+    }
+    // Si la ficha del paciente está abierta, actualizar plan farmacológico en pantalla
+    if(window._psPacId===id){
+      // Actualizar también en plan_farmacologico si no hay registro propio
+      var farmCache=window._farmCache&&window._farmCache[id];
+      if(!farmCache||!farmCache._fbId){
+        // No hay plan propio guardado — actualizar vista directamente
+        var vEl=document.getElementById('ps-farm-view');
+        var tEl=document.getElementById('ps-farm-texto');
+        if(vEl) vEl.textContent=nuevoTratMedico;
+        if(tEl) tEl.value=nuevoTratMedico;
+      } else {
+        // Hay plan propio — actualizarlo también
+        try{
+          await window._updateDoc(window._doc(window.db,'plan_farmacologico',farmCache._fbId),{texto:nuevoTratMedico});
+          var vEl=document.getElementById('ps-farm-view');
+          var tEl=document.getElementById('ps-farm-texto');
+          if(vEl) vEl.textContent=nuevoTratMedico;
+          if(tEl) tEl.value=nuevoTratMedico;
+        }catch(eF){console.warn('sync plan_farmacologico:',eF);}
+      }
+    }
     closeModal('modal-paciente');toast('✅ Paciente actualizado');
     const btn=document.querySelector('#modal-paciente .btn-primary');
     btn.textContent='Registrar';btn.onclick=guardarPaciente;
