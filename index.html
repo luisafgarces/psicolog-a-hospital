@@ -13520,9 +13520,8 @@ window.rdGuardar = async function(){
     } else {
       window.toast('✅ Ficha guardada');
     }
-    // Refrescar tablero sin marcar como visto (el visto es manual o desde formularios IC)
+    // Refrescar solo el tablero de ronda (no el dashboard — evita efectos secundarios)
     rdRefrescarTablero();
-    if(typeof window.renderDashboard==='function') window.renderDashboard();
     // Limpiar formulario tras guardar
     if(pac) rdRellenarDesde(pac);
     if(typeof setSyncStatus==='function') setSyncStatus('ok');
@@ -13536,7 +13535,11 @@ window.rdGuardar = async function(){
 // Refrescar solo el tablero (sin recargar desde Firebase)
 // Marcar chulo automáticamente cuando se guarda una nota desde el formulario
 window.rdMarcarVistaPorNota=function(pacId){
-  if(!pacId) return;
+  // Validar que sea un ID real de paciente (string no vacío, no 'null', no 'undefined')
+  if(!pacId||typeof pacId!=='string'||pacId==='null'||pacId==='undefined'||pacId.length<5) return;
+  // Validar que el paciente exista realmente
+  var existe=(window.pacientes||[]).some(function(p){return p.id===pacId;});
+  if(!existe) return;
   if(!window._rdVistosHoy) window._rdVistosHoy={};
   window._rdVistosHoy[pacId]=true;
   rdRefrescarTablero();
@@ -13544,6 +13547,7 @@ window.rdMarcarVistaPorNota=function(pacId){
 };
 
 window.rdMarcarVista=function(pacId, cbEl){
+  if(!pacId||typeof pacId!=='string'||pacId==='null'||pacId.length<5) return;
   if(!window._rdVistosHoy) window._rdVistosHoy={};
   var yaVisto=!!(window._rdVistosHoy[pacId]);
   if(yaVisto){
