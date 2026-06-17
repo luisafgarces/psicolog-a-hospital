@@ -13207,15 +13207,31 @@ window.rdInit = async function(){
       ?'<div style="font-size:0.72rem;color:var(--text3);margin-top:3px">📝 '+window._rdFichasHoy[p.id].intervencion.slice(0,60)+'…</div>':'';
     var btnLabel = hecha?'✏️ Editar ficha':'▶ Iniciar ficha';
     var btnColor = hecha?'background:var(--surface2);color:var(--text2);border:1.5px solid var(--border)':'background:var(--accent);color:#fff;border:none';
-    return separador+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:var(--surface2);border:1.5px solid '+(hecha?'#bbf7d0':'var(--border)')+';border-radius:9px;flex-wrap:wrap">'
+    // Badge tipo
+    var tipoBadge2='';
+    if(p.estado==='nueva-interconsulta-pendiente') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#dbeafe;color:#1e40af;border-radius:4px;padding:1px 6px;margin-right:2px">IC</span>';
+    else if(p.estado==='seguimiento') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#ede9fe;color:#6d28d9;border-radius:4px;padding:1px 6px;margin-right:2px">SEG</span>';
+    else if(p.estado==='revaloracion') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#fef3c7;color:#b45309;border-radius:4px;padding:1px 6px;margin-right:2px">REVAL</span>';
+    // Checkbox siempre visible
+    var checkVisto2='<label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;font-weight:600;'
+      +(hecha?'color:#16a34a;background:#dcfce7;border:1.5px solid #16a34a;':'color:#64748b;background:#f8fafc;border:1.5px solid #cbd5e1;')
+      +'border-radius:6px;padding:4px 10px;white-space:nowrap">'
+      +'<input type="checkbox" '+(hecha?'checked ':'')
+      +'onchange="rdMarcarVista(\''+p.id+'\',this)" style="accent-color:#16a34a;width:15px;height:15px;cursor:pointer">'
+      +(hecha?'✅ Visto':'☐ Visto')
+      +'</label>';
+    return separador+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:'+(hecha?'#f0fdf4':'var(--surface2)')+';border:1.5px solid '+(hecha?'#86efac':'var(--border)')+';border-radius:9px;flex-wrap:wrap">'
       +'<div style="flex:1;min-width:0;cursor:pointer" onclick="if(typeof abrirPacSheet===\'function\')abrirPacSheet(\''+p.id+'\')" title="Ver ficha del paciente">'
-        +'<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">'+hab
+        +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+hab+tipoBadge2
           +'<span style="font-size:0.88rem;font-weight:700;color:var(--accent);text-decoration:underline;text-underline-offset:2px">'+(p.nombre||'Sin nombre')+'</span>'+estadoBadge
         +'</div>'
         +(p.motivo?'<div style="font-size:0.75rem;color:var(--text3);margin-top:2px">'+p.motivo.slice(0,60)+'</div>':'')
         +fichaInfo
       +'</div>'
-      +'<button onclick="rdCargarPaciente(\''+p.id+'\')" style="'+btnColor+';padding:6px 14px;border-radius:7px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif">'+btnLabel+'</button>'
+      +'<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">'
+        +checkVisto2
+        +'<button onclick="rdCargarPaciente(\''+p.id+'\')" style="'+btnColor+';padding:6px 14px;border-radius:7px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif">'+btnLabel+'</button>'
+      +'</div>'
     +'</div>';
   }).join('');
 };
