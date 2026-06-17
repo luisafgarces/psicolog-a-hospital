@@ -13858,6 +13858,83 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
 
 <script>
 (function(){
+  // ── TABLA HORARIOS 2026 ────────────────────
+  // Entrada contrato: 11:00 am. Meta mensual: 93h. Salida = 11:00 + horas/día
+  var HORARIO_2026 = {
+    1:  {dias:20, salidaMin:15*60+39, nombre:'Enero'},      // 3:39 pm
+    2:  {dias:20, salidaMin:15*60+39, nombre:'Febrero'},    // 3:39 pm
+    3:  {dias:21, salidaMin:15*60+26, nombre:'Marzo'},      // 3:26 pm
+    4:  {dias:20, salidaMin:15*60+39, nombre:'Abril'},      // 3:39 pm
+    5:  {dias:19, salidaMin:15*60+54, nombre:'Mayo'},       // 3:54 pm
+    6:  {dias:19, salidaMin:15*60+54, nombre:'Junio'},      // 3:54 pm
+    7:  {dias:22, salidaMin:15*60+14, nombre:'Julio'},      // 3:14 pm
+    8:  {dias:19, salidaMin:15*60+54, nombre:'Agosto'},     // 3:54 pm
+    9:  {dias:22, salidaMin:15*60+14, nombre:'Septiembre'}, // 3:14 pm
+    10: {dias:21, salidaMin:15*60+26, nombre:'Octubre'},    // 3:26 pm
+    11: {dias:19, salidaMin:15*60+54, nombre:'Noviembre'},  // 3:54 pm
+    12: {dias:21, salidaMin:15*60+26, nombre:'Diciembre'},  // 3:26 pm
+  };
+
+  function getSalidaHoy(){
+    var mes=new Date().getMonth()+1;
+    var h=HORARIO_2026[mes];
+    if(!h) return null;
+    var hh=Math.floor(h.salidaMin/60);
+    var mm=h.salidaMin%60;
+    return String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+  }
+
+  function getSalidaHoyTexto(){
+    var s=getSalidaHoy();
+    if(!s) return '';
+    var parts=s.split(':');
+    var h=parseInt(parts[0]),m=parseInt(parts[1]);
+    var ampm=h>=12?'pm':'am';
+    var h12=h>12?h-12:h;
+    return h12+':'+(m<10?'0':'')+m+' '+ampm;
+  }
+
+  // Minutos trabajados hoy según entrada y hora actual
+  function minTrabajaHoy(){
+    var est=getEstadoHoy();
+    if(!est||!est.entrada) return 0;
+    var ahora=horaStr();
+    var p1=est.entrada.split(':'),p2=(est.salida||ahora).split(':');
+    return parseInt(p2[0])*60+parseInt(p2[1])-(parseInt(p1[0])*60+parseInt(p1[1]));
+  }
+
+  // Saldo de horas del mes: suma diferencia entre minutos trabajados y meta diaria
+  function calcularSaldoMes(){
+    var j=getJornadas();
+    var hoy=new Date();
+    var mes=hoy.getMonth()+1;
+    var anio=hoy.getFullYear();
+    var h=HORARIO_2026[mes];
+    if(!h) return 0;
+    var minDiario=Math.round(93*60/h.dias); // minutos meta por día
+    var saldo=0;
+    j.forEach(function(jor){
+      if(!jor.fecha||!jor.minutos) return;
+      var d=new Date(jor.fecha);
+      if(d.getMonth()+1===mes&&d.getFullYear()===anio){
+        saldo+=(jor.minutos-minDiario);
+      }
+    });
+    // Sumar hoy si está en curso
+    var est=getEstadoHoy();
+    if(est&&est.fecha===hoyStr()&&est.entrada&&!est.salida){
+      saldo+=(minTrabajaHoy()-minDiario);
+    }
+    return saldo; // positivo=a favor, negativo=en contra
+  }
+
+  function saldoTexto(min){
+    var abs=Math.abs(Math.round(min));
+    var h=Math.floor(abs/60),m=abs%60;
+    var txt=h+'h '+m+'m';
+    return min>=0?'✅ +'+txt+' a favor':'⚠️ -'+txt+' en contra';
+  }
+
   // ── UTILIDADES ─────────────────────────────
   function hoyStr(){return new Date().toISOString().split('T')[0];}
   function horaStr(d){d=d||new Date();return d.toTimeString().slice(0,5);}
@@ -13966,8 +14043,14 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
       var est=getEstadoHoy();
       if(est&&est.entrada){
         // Ya tiene entrada — flujo normal
+        var salidaMeta2=getSalidaHoyTexto();
+        var saldoAhora=calcularSaldoMes();
         document.getElementById('fj-sub').textContent='Tu jornada está activa. ¿Listo/a para terminar?';
-        if(infoEl){infoEl.style.display='';infoEl.innerHTML='⏱ Entrada registrada a las <strong>'+est.entrada+'</strong>';}
+        if(infoEl){infoEl.style.display='';infoEl.innerHTML=
+          '⏱ Entrada: <strong>'+est.entrada+'</strong>'
+          +(salidaMeta2?' &nbsp;·&nbsp; 🎯 Sale hoy: <strong>'+salidaMeta2+'</strong>':'')
+          +'<br><small style="color:var(--text3)">'+saldoTexto(saldoAhora)+'</small>'
+        ;}
         if(manualWrap) manualWrap.style.display='none';
       } else {
         // Sin entrada — pedir que la escriba
@@ -13984,7 +14067,8 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
       btnE.style.display='none';
       btnS.style.display='';
     } else {
-      document.getElementById('fj-sub').textContent='Registra tu hora de entrada para comenzar la jornada';
+      var salidaHoyT=getSalidaHoyTexto();
+      document.getElementById('fj-sub').textContent='Registra tu hora de entrada para comenzar la jornada'+(salidaHoyT?' · Sale hoy: '+salidaHoyT:'');
       if(infoEl) infoEl.style.display='none';
       if(manualWrap) manualWrap.style.display='none';
       btnE.style.display='';
@@ -14039,9 +14123,21 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     if(idx>=0) j[idx]=reg; else j.push(reg);
     saveJornadas(j);
     setEstadoHoy({fecha:est.fecha,entrada:est.entrada,salida:horaSalida,minutos:minutos});
+    // Verificar si cumplió la meta de hoy
+    var salidaMeta=getSalidaHoy();
+    var metaMin=salidaMeta?parseInt(salidaMeta.split(':')[0])*60+parseInt(salidaMeta.split(':')[1]):0;
+    var salidaMin2=min2;
+    var diff=salidaMin2-metaMin;
+    var msg='🔴 Salida: '+horaSalida+' · '+minToHHMM(minutos)+' trabajadas';
+    if(salidaMeta&&diff<-5){
+      var falta=Math.abs(diff);
+      msg+=' · ⚠️ Faltan '+minToHHMM(falta)+'h para la meta';
+    } else if(salidaMeta&&diff>=0){
+      msg+=' · ✅ Meta cumplida'+(diff>0?' (+'+minToHHMM(diff)+')':'');
+    }
     cerrarModal();
     ocultarFAB();
-    if(typeof toast==='function') toast('🔴 Salida registrada: '+horaSalida+' · '+minToHHMM(minutos)+'  trabajadas');
+    if(typeof toast==='function') toast(msg);
   };
 
   window.fichajeSkip=function(){
@@ -14071,7 +14167,10 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     var b=document.getElementById('fj-banner');
     var t=document.getElementById('fj-ban-txt');
     if(!b) return;
-    if(t) t.textContent='⏱ Jornada en curso desde las '+entradaHora+' — recuerda marcar tu salida';
+    var salida=getSalidaHoyTexto();
+    var saldo=calcularSaldoMes();
+    var saldoTxt=saldo>=0?'▲ '+Math.floor(Math.abs(saldo)/60)+'h '+Math.abs(saldo)%60+'m a favor':'▼ '+Math.floor(Math.abs(saldo)/60)+'h '+Math.abs(saldo)%60+'m en contra';
+    if(t) t.innerHTML='⏱ Entrada: <strong>'+entradaHora+'</strong>'+(salida?' &nbsp;·&nbsp; 🕐 Sale hoy: <strong>'+salida+'</strong>':'')+' &nbsp;·&nbsp; '+saldoTxt;
     b.style.display='flex';
     document.body.classList.add('fj-banner-on');
   }
@@ -14143,8 +14242,9 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     var minAnio=sumarMinutos(j,anio.desde,anio.hasta);
     var diasSem=contarDias(j,sem.desde,sem.hasta);
     var diasMes=contarDias(j,mes.desde,mes.hasta);
-    // Promedio diario del mes
     var promMes=diasMes>0?(minMes/diasMes):0;
+    var mesN=new Date().getMonth()+1;
+    var saldoMes=calcularSaldoMes();
     // Jornada de hoy
     var est=getEstadoHoy();
     var minHoy=est&&est.minutos?est.minutos:0;
@@ -14158,7 +14258,13 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
         '<div class="fj-horas-kpi"><div class="fj-kl">Este mes</div><div class="fj-kv">'+minToHHMM(minMes)+'</div><div class="fj-ks">'+diasMes+' días registrados</div></div>'+
         '<div class="fj-horas-kpi"><div class="fj-kl">Promedio/día</div><div class="fj-kv">'+minToHHMM(Math.round(promMes))+'</div><div class="fj-ks">En el mes</div></div>'+
         '<div class="fj-horas-kpi"><div class="fj-kl">Este año</div><div class="fj-kv">'+minToHHMM(minAnio)+'</div><div class="fj-ks">Horas acumuladas</div></div>'+
-      '</div>'+
+      '</div>'
+      // Saldo y meta del mes
+      +'<div style="margin-top:12px;padding:10px 12px;border-radius:9px;background:'+(saldoMes>=0?'#f0fdf4':'#fef3f2')+';border:1.5px solid '+(saldoMes>=0?'#86efac':'#fca5a5')+'">'
+        +'<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:'+(saldoMes>=0?'#16a34a':'#dc2626')+';margin-bottom:4px">⚖️ Banco de horas — '+HORARIO_2026[mesN].nombre+'</div>'
+        +'<div style="font-size:1.1rem;font-weight:800;color:'+(saldoMes>=0?'#16a34a':'#dc2626')+'">'+(saldoMes>=0?'+':'')+minToHHMM(Math.abs(saldoMes))+(saldoMes>=0?' a tu favor':' en contra')+'</div>'
+        +'<div style="font-size:0.72rem;color:var(--text3);margin-top:3px">🎯 Este mes sales a las '+getSalidaHoyTexto()+' · '+HORARIO_2026[mesN].dias+' días hábiles</div>'
+      +'</div>'+
       '<div style="margin-top:16px">'+
         '<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--text2);letter-spacing:.06em;margin-bottom:8px">Historial de jornadas</div>'+
         '<div class="fj-jornadas-lista">'+
