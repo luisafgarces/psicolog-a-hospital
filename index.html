@@ -2562,6 +2562,7 @@ input.toggle-cb{display:none}
               <div style="display:flex;gap:10px;flex-wrap:wrap">
                 <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="nuevo" checked> 🆕 Nuevo (IC)</label>
                 <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="seguimiento"> 🔄 Seguimiento</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="revaloracion"> 🔁 Revaloración</label>
               </div>
             </div>
             <div>
@@ -2584,6 +2585,10 @@ input.toggle-cb{display:none}
           <div style="margin-bottom:10px">
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Dx Médico Principal</div>
             <input type="text" id="rd-dx" placeholder="Diagnóstico médico principal…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:#7c3aed;margin-bottom:3px">Dx Psicológico / Diferenciales <span style="font-weight:400;font-size:0.68rem;color:var(--text3)">(corto)</span></div>
+            <input type="text" id="rd-dx-psi" placeholder="Ej: T. adaptativo vs T. depresivo mayor, descartar delirium…" style="width:100%;padding:8px 12px;border:1.5px solid #d8b4fe;border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:#fdf4ff;color:var(--text);outline:none">
           </div>
           <div style="margin-bottom:10px">
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Cambio de plan médico hoy</div>
@@ -2652,6 +2657,7 @@ input.toggle-cb{display:none}
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Patrón conductual</div>
               <div style="display:flex;flex-direction:column;gap:4px">
                 <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="colaborador" id="rd-conducta-colaborador"> Colaborador</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="ansioso" id="rd-conducta-ansioso"> Ansioso</label>
                 <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="agresivo-verbal" id="rd-conducta-agresivo-verbal"> Agresivo verbal</label>
                 <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="agresivo-fisico" id="rd-conducta-agresivo-fisico"> Agresivo físico</label>
                 <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="inhibido" id="rd-conducta-inhibido"> Inhibido / aislado</label>
@@ -2692,6 +2698,10 @@ input.toggle-cb{display:none}
                 <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-pal"> C. Paliativos</label>
                 <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-neuro"> Neuropsicología</label>
               </div>
+              <div style="margin-top:7px">
+                <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Otras especialidades involucradas</div>
+                <input type="text" id="rd-otras-esp" placeholder="Ej: Oncología, Cirugía, Medicina Interna, UCI…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+              </div>
             </div>
           </div>
           <div style="margin-top:10px">
@@ -2716,6 +2726,10 @@ input.toggle-cb{display:none}
               <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-objetivo" value="otro" id="rd-objetivo-otro"> Otro</label>
             </div>
             <textarea id="rd-objetivo-texto" rows="2" placeholder="Escribe el objetivo específico de la visita de hoy…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Estrategia en cama</div>
+            <textarea id="rd-estrategia-cama" rows="2" placeholder="Describe la estrategia psicológica aplicada en la habitación…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
           </div>
           <div style="margin-bottom:10px">
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Intervención realizada</div>
@@ -2835,61 +2849,6 @@ input.toggle-cb{display:none}
             <div id="ps-farm-historial" style="display:none;margin-top:8px;border-top:1px solid #fed7aa;padding-top:8px;max-height:180px;overflow-y:auto"></div>
           </div>
 
-          <!-- ANÁLISIS CLÍNICO DEL PROCESO -->
-          <div style="margin-top:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 14px">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-              <span style="font-size:0.72rem;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:0.06em">🧠 Análisis clínico del proceso</span>
-              <div style="display:flex;gap:5px;align-items:center">
-                <span id="ps-analisis-fecha" style="font-size:0.65rem;color:#0ea5e9"></span>
-                <button id="ps-analisis-edit-btn" class="btn btn-sm" style="font-size:0.68rem;padding:2px 8px;background:#0ea5e9;color:#fff;border:none;border-radius:5px" onclick="analisisToggleEdit()">✏️ Editar</button>
-                <button id="ps-analisis-save-btn" class="btn btn-sm" style="display:none;font-size:0.68rem;padding:2px 8px;background:#16a34a;color:#fff;border:none;border-radius:5px" onclick="guardarAnalisisClinico(window._psPacId)">💾 Guardar</button>
-                <button id="ps-analisis-cancel-btn" class="btn btn-sm btn-secondary" style="display:none;font-size:0.68rem;padding:2px 8px" onclick="analisisCancelEdit()">Cancelar</button>
-              </div>
-            </div>
-            <div id="ps-analisis-view" style="font-size:0.82rem;color:#0c4a6e;line-height:1.7;white-space:pre-wrap;min-height:32px;padding:2px 0"></div>
-            <textarea id="ps-analisis-texto" rows="5" placeholder="Formulación del caso, hipótesis de trabajo, evolución del proceso terapéutico, conexiones entre sesiones, reflexiones clínicas…" style="display:none;width:100%;padding:8px 10px;border:1.5px solid #0ea5e9;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;resize:vertical;background:#fff;line-height:1.6;outline:none;color:var(--text)"></textarea>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
-              <button onclick="toggleAnalisisFechas(window._psPacId)" style="background:none;border:none;cursor:pointer;font-size:0.68rem;color:#0369a1;text-decoration:underline;padding:0">📜 Ver historial de ediciones</button>
-            </div>
-            <div id="ps-analisis-historial" style="display:none;margin-top:8px;border-top:1px solid #bae6fd;padding-top:8px;max-height:180px;overflow-y:auto"></div>
-          </div>
-
-          <!-- NOTAS RÁPIDAS -->
-          <div style="margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-              <span style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em">📝 Notas rápidas</span>
-              <button class="btn btn-sm btn-primary" style="font-size:0.68rem;padding:2px 10px" onclick="guardarNotaRapida(window._psPacId)">💾 Guardar</button>
-            </div>
-            <textarea id="ps-nota-rapida" rows="3" placeholder="Información adicional post-sesión, eventos relevantes, comunicaciones del equipo…" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.8rem;resize:vertical;background:var(--surface)"></textarea>
-            <div id="ps-notas-historial" style="margin-top:8px;max-height:140px;overflow-y:auto"></div>
-          </div>
-
-          <!-- PENDIENTES -->
-          <div style="margin-top:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-              <span style="font-size:0.72rem;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:0.06em">📋 Pendientes</span>
-              <div style="display:flex;gap:6px">
-                <button class="btn btn-sm" style="font-size:0.68rem;padding:2px 8px;background:#fef3c7;border:1px solid #fde68a;color:#92400e" onclick="togglePendientesCompletadosPac(window._psPacId)">Ver completados</button>
-              </div>
-            </div>
-            <div style="display:flex;gap:6px;margin-bottom:10px">
-              <input type="text" id="ps-pendiente-input" placeholder="Nuevo pendiente… ej: Llamar a familiar, Solicitar psiquiatría" style="flex:1;padding:6px 10px;border:1px solid #fde68a;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.8rem;background:#fff;outline:none" onkeydown="if(event.key==='Enter')agregarPendientePaciente(window._psPacId)">
-              <button class="btn btn-sm btn-primary" style="font-size:0.72rem;padding:4px 10px;background:#d97706;border:none;flex-shrink:0" onclick="agregarPendientePaciente(window._psPacId)">+ Agregar</button>
-            </div>
-            <div id="ps-pendientes-lista" style="max-height:180px;overflow-y:auto"></div>
-            <div id="ps-pendientes-completados" style="display:none;margin-top:10px;border-top:1px dashed #fde68a;padding-top:10px"></div>
-          </div>
-
-          <!-- DIAGNÓSTICOS DIFERENCIALES -->
-          <div style="margin-top:12px;background:#fdf4ff;border:1px solid #e9d5ff;border-radius:10px;padding:12px 14px">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-              <span style="font-size:0.72rem;font-weight:700;color:#6b21a8;text-transform:uppercase;letter-spacing:0.06em">🔬 Diagnósticos diferenciales</span>
-              <button class="btn btn-sm" style="font-size:0.68rem;padding:2px 10px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer" onclick="abrirModalDiferenciales(window._psPacId)">✏️ Editar</button>
-            </div>
-            <div id="ps-diferenciales-lista" style="max-height:280px;overflow-y:auto">
-              <p style="font-size:0.72rem;color:#9333ea;font-style:italic">Sin diferenciales registrados aún.</p>
-            </div>
-          </div>
         </div><!-- /ps-col-right -->
 
       </div><!-- /ps-layout -->
@@ -8316,8 +8275,16 @@ window.psEditarCampo=async function(campo, label){
     pac[campo]=nuevo;
     // Refrescar ficha
     if(typeof window.abrirPacSheetSilent==='function') window.abrirPacSheetSilent(pac);
-    // Si es habitación, refrescar tablero de ronda también
+    // Si es habitación o diagnóstico, refrescar tablero y formulario de ronda
     if(campo==='hab'){
+      if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+      if(typeof window.renderDashboard==='function') window.renderDashboard();
+      var rdHab=document.getElementById('rd-hab');
+      if(rdHab&&window._rdPacId===pacId) rdHab.value=nuevo;
+    }
+    if(campo==='motivo'){
+      var rdDx=document.getElementById('rd-dx');
+      if(rdDx&&window._rdPacId===pacId) rdDx.value=nuevo;
       if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
       if(typeof window.renderDashboard==='function') window.renderDashboard();
     }
@@ -13369,12 +13336,16 @@ window.rdCargarPaciente = function(pacId){
 function rdRellenar(d){
   rdSet('rd-fecha',    d.fecha||'');
   rdSet('rd-hab',      d.hab||'');
+  rdSet('rd-dx',       d.dx||'');
+  rdSet('rd-dx-psi',   d.dxPsi||'');
   rdSet('rd-edad',     d.edad||'');
   rdSet('rd-sexo',     d.sexo||'');
   rdSet('rd-dias',     d.dias||'');
   rdSet('rd-aislamiento-tipo', d.aislamientoTipo||'');
   rdSet('rd-farm-descenso',    d.farmDescenso||'');
   rdSet('rd-razon-der',   d.razonDer||'');
+  rdSet('rd-otras-esp',   d.otrasEsp||'');
+  rdSet('rd-estrategia-cama', d.estrategiaCama||'');
   rdSet('rd-intervencion',d.intervencion||'');
   rdSet('rd-pacto',       d.pacto||'');
   rdSet('rd-indicacion',  d.indicacion||'');
@@ -13424,13 +13395,17 @@ function rdRellenarDesde(pac){
   rdSet('rd-edad',  pac.edad||'');
   rdSet('rd-sexo',  pac.sexo ? pac.sexo.charAt(0).toUpperCase() : '');
   rdSet('rd-dx',    pac.motivo||'');
+  rdSet('rd-dx-psi', pac.dxPsi||'');
   // Calcular días de estancia desde fecha de ingreso
   var diasCalc = (typeof calcularDiasInternacion==='function' && pac.fecha)
     ? calcularDiasInternacion(pac.fecha) : null;
   rdSet('rd-dias', diasCalc !== null ? String(diasCalc) : '');
   rdSet('rd-aislamiento-tipo','');
+  rdSet('rd-dx-psi','');
   rdSet('rd-farm-descenso','');
   rdSet('rd-razon-der','');
+  rdSet('rd-otras-esp','');
+  rdSet('rd-estrategia-cama','');
   rdSet('rd-intervencion','');
   rdSet('rd-pacto','');
   rdSet('rd-indicacion','');
@@ -13515,6 +13490,7 @@ function rdRecolectar(){
     tipoPaciente:    rdGetRadio('rd-tipo-pac'),
     acompanante:     rdGetChecks('rd-acomp').join(', '),
     dx:              rdGet('rd-dx'),
+    dxPsi:           rdGet('rd-dx-psi'),
     cambioPlan:      rdGet('rd-cambio-plan-texto'),
     dolor:           dolorEl?dolorEl.value:'0',
     laboratorio:     rdGetChecks('rd-lab').join(', '),
@@ -13529,9 +13505,11 @@ function rdRecolectar(){
     adherencia:      rdGetChecks('rd-adherencia').join(', '),
     pertenece:       rdGetChecks('rd-pertenece').join(', '),
     derivacion:      derivacion,
+    otrasEsp:        rdGet('rd-otras-esp'),
     razonDer:        rdGet('rd-razon-der'),
     objetivo:        rdGetChecks('rd-objetivo').join(', '),
     objetivoTexto:   rdGet('rd-objetivo-texto'),
+    estrategiaCama:  rdGet('rd-estrategia-cama'),
     intervencion:    rdGet('rd-intervencion'),
     pacto:           rdGet('rd-pacto'),
     altaCumplida:    rdGetRadio('rd-alta'),
@@ -13710,6 +13688,7 @@ window.rdImprimir = function(){
     +'</div></div>'
     +'<div class="s"><div class="sh">2. Filtro Clínico-Médico (HCE)</div><div class="sb">'
     +'<div class="c" style="grid-column:1/-1"><div class="lb">Dx médico principal</div><div class="vl">'+(datos.dx||'—')+'</div></div>'
+    +(datos.dxPsi?'<div class="c" style="grid-column:1/-1"><div class="lb" style="color:#7c3aed">Dx psicológico / Diferenciales</div><div class="vl">'+datos.dxPsi+'</div></div>':'')
     +(datos.cambioPlan?'<div class="c" style="grid-column:1/-1"><div class="lb">Cambio de plan médico</div><div class="vl hl">'+datos.cambioPlan+'</div></div>':'')
     +'<div class="c"><div class="lb">Dolor EVA</div><div class="vl">'+(datos.dolor||'0')+' / 10</div></div>'
     +'<div class="c"><div class="lb">Alerta metabólica</div><div class="vl">'+datos.laboratorio+(datos.labDetalle?' — '+datos.labDetalle:'')+'</div></div>'
@@ -13725,6 +13704,7 @@ window.rdImprimir = function(){
     +'<div class="s"><div class="sh">4. Matriz de Decisión</div><div class="sb">'
     +'<div class="c"><div class="lb">¿Pertenece a PsH?</div><div class="vl">'+perteneceLabel+'</div></div>'
     +'<div class="c"><div class="lb">Derivación</div><div class="vl">'+derivStr+'</div></div>'
+    +(datos.otrasEsp?'<div class="c" style="grid-column:1/-1"><div class="lb">Otras especialidades</div><div class="vl">'+datos.otrasEsp+'</div></div>':'')
     +(datos.razonDer?'<div class="c" style="grid-column:1/-1"><div class="lb">Razón de derivación</div><div class="vl">'+datos.razonDer+'</div></div>':'')
     +'</div></div>'
     +'<div class="s"><div class="sh">5. Plan de Acción en Habitación</div><div class="sb">'
