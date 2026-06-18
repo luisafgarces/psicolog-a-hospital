@@ -13971,27 +13971,25 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
       }
     });
     // Iterar solo los días hábiles del mes hasta hoy (sin contar hoy si está activo)
+    var metaMin=h.salidaMin; // minutos desde medianoche de la hora de salida meta
     var saldo=0;
-    var inicio=new Date(anio,mes-1,1);
-    var fin=new Date(hoy);
-    if(jornadaActivaHoy) fin.setDate(fin.getDate()-1); // excluir hoy del loop
-    for(var d2=new Date(inicio);d2<=fin;d2.setDate(d2.getDate()+1)){
-      var fStr=d2.toISOString().split('T')[0];
-      if(!esDiaHabil(fStr)) continue;
-      if(fStr===hoyFecha&&jornadaActivaHoy) continue;
+    // Fórmula correcta: hora_salida_real - hora_salida_meta
+    // Solo cuenta lo que pasó DESPUÉS (o antes) de la hora de salida
+    Object.keys(mapaJornadas).forEach(function(fStr){
+      if(jornadaActivaHoy&&fStr===hoyFecha) return;
       var jor=mapaJornadas[fStr];
-      if(jor&&jor.minutos) saldo+=(jor.minutos-minDiario);
-      // Si no hay jornada registrada ese día hábil pasado, no penalizar
-      // (puede ser festivo no registrado o ausencia justificada)
-    }
-    // Sumar hoy en tiempo real si está en curso
+      if(!jor||!jor.salida||!esDiaHabil(fStr)) return;
+      if(jor.salida==='(sin marcar)') return;
+      var ps=jor.salida.split(':');
+      var salidaRealMin=parseInt(ps[0])*60+parseInt(ps[1]);
+      saldo+=(salidaRealMin-metaMin);
+    });
+    // Hoy activo: comparar hora actual vs meta
     if(jornadaActivaHoy){
-      saldo+=(minTrabajaHoy()-minDiario);
-    } else if(mapaJornadas[hoyFecha]&&mapaJornadas[hoyFecha].minutos&&esDiaHabil(hoyFecha)){
-      // Hoy ya cerrado (tiene salida registrada) — incluir si no está en el loop
-      if(new Date(hoyFecha+'T12:00:00')>fin){
-        saldo+=(mapaJornadas[hoyFecha].minutos-minDiario);
-      }
+      var ahora=horaStr();
+      var pa=ahora.split(':');
+      var ahoraMin=parseInt(pa[0])*60+parseInt(pa[1]);
+      saldo+=(ahoraMin-metaMin);
     }
     return saldo;
   }
