@@ -643,6 +643,63 @@ input.toggle-cb{display:none}
             </div>
           </div>
 
+          <!-- RONDA PARTE 2: completar desde el formulario -->
+          <div class="ic-form-section" id="ic-ronda-parte2" style="border-color:#f59e0b;background:#fffbeb">
+            <div class="ic-form-head" style="background:#fef3c7;border-left-color:#f59e0b;cursor:pointer" onclick="icToggleRondaParte2()">
+              <span class="ft" style="color:#92400e">🏥 Completar ronda de hoy</span>
+              <span id="ic-ronda-p2-toggle" style="font-size:0.72rem;color:#b45309;font-weight:400;text-transform:none;letter-spacing:0">▼ Expandir — Dolor · Conducta · Pacto · Alta · Indicación</span>
+            </div>
+            <div class="ic-form-body" id="ic-ronda-parte2-body" style="display:none">
+              <!-- Dolor EVA -->
+              <div style="margin-bottom:14px">
+                <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Dolor reportado (EVA 0–10)</div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <input type="range" id="ic-rd-dolor" min="0" max="10" value="0" oninput="document.getElementById('ic-rd-dolor-val').textContent=this.value" style="flex:1">
+                  <strong id="ic-rd-dolor-val" style="min-width:20px;text-align:center;font-size:1rem;color:var(--accent)">0</strong>
+                </div>
+              </div>
+              <!-- Conducta -->
+              <div style="margin-bottom:14px">
+                <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Patrón conductual</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="ic-rd-conducta" value="colaborador"> Colaborador</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="ic-rd-conducta" value="ansioso"> Ansioso</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="ic-rd-conducta" value="inhibido"> Inhibido / aislado</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="ic-rd-conducta" value="llanto"> Llanto frecuente</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="ic-rd-conducta" value="agresivo-verbal"> Agresivo verbal</label>
+                </div>
+              </div>
+              <!-- Adherencia -->
+              <div style="margin-bottom:14px">
+                <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Adherencia al tratamiento</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="ic-rd-adherencia" value="colabora"> Colabora</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="ic-rd-adherencia" value="rechaza"> Rechaza medicación</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="ic-rd-adherencia" value="alta-voluntaria"> Exige alta voluntaria</label>
+                </div>
+              </div>
+              <!-- Pacto / Cierre -->
+              <div style="margin-bottom:14px">
+                <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Pacto / Cierre con el paciente</div>
+                <input type="text" id="ic-rd-pacto" placeholder="Acuerdo o cierre con el paciente…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+              </div>
+              <!-- Alerta alta -->
+              <div style="margin-bottom:14px">
+                <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Criterio de alta psicológica hospitalaria cumplido</div>
+                <div style="display:flex;gap:14px;margin-bottom:6px">
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="ic-rd-alta" value="si"> <span style="color:#16a34a;font-weight:600">✅ Sí — Caso cerrado</span></label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="ic-rd-alta" value="no" checked> <span style="color:#b45309;font-weight:600">🔄 No — Continúa</span></label>
+                </div>
+                <textarea id="ic-rd-alta-criterio" rows="2" placeholder="Criterio de alta cumplido (si aplica)…" style="width:100%;padding:7px 10px;border:1.5px solid #86efac;border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:#f0fdf4;color:var(--text);outline:none;resize:vertical"></textarea>
+              </div>
+              <!-- Indicación al equipo -->
+              <div>
+                <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Indicación al equipo médico / enfermería</div>
+                <textarea id="ic-rd-indicacion" rows="2" placeholder="Indicación o alerta para el equipo tratante…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+              </div>
+            </div>
+          </div>
+
           <!-- N0: NOTAS LIBRES DE SESIÓN -->
           <div class="ic-form-section">
             <div class="ic-form-head slate"><span class="ft">📝 Notas libres de sesión</span><span style="font-size:0.68rem;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;margin-left:8px">Lo que el paciente dice y no cabe en ningún campo</span></div>
@@ -4121,6 +4178,7 @@ window.guardarICFirebase=async()=>{
       toast('✅ IC guardada en Firebase');
       setSyncStatus('online');
       if(pacIdFinal&&typeof rdMarcarVistaPorNota==='function') rdMarcarVistaPorNota(pacIdFinal);
+      if(pacIdFinal&&typeof icGuardarRondaParte2==='function') icGuardarRondaParte2(pacIdFinal);
       // Autoguardar borrador en Firebase sin necesidad de presionar el botón
       try{if(typeof guardarBorradorFirebase==='function')guardarBorradorFirebase('ic');}catch(e){console.warn('autoborrador:',e);}
       // Limpiar backups de localStorage ya sincronizados
@@ -4201,6 +4259,7 @@ window.guardarAnamnesis=async()=>{
       toast('✅ Anamnesis guardada');
       var _anPacId=document.getElementById('an-pac-sel')?.value||window._anPacId||null;
       if(_anPacId&&typeof rdMarcarVistaPorNota==='function') rdMarcarVistaPorNota(_anPacId);
+      if(_anPacId&&typeof icGuardarRondaParte2==='function') icGuardarRondaParte2(_anPacId);
       setTimeout(()=>clearAnamnesis(),300);
     }
   }
@@ -13757,6 +13816,69 @@ window.rdPrefijHab = function(prefijo){
   // Mover cursor al final
   var len = inp.value.length;
   inp.setSelectionRange(len,len);
+};
+
+// ── RONDA PARTE 2 DESDE FORMULARIO ─────────────────────────────────
+window.icToggleRondaParte2 = function(){
+  var body = document.getElementById('ic-ronda-parte2-body');
+  var toggle = document.getElementById('ic-ronda-p2-toggle');
+  if(!body) return;
+  var abierto = body.style.display !== 'none';
+  body.style.display = abierto ? 'none' : '';
+  if(toggle) toggle.textContent = abierto
+    ? '▼ Expandir — Dolor · Conducta · Pacto · Alta · Indicación'
+    : '▲ Cerrar';
+};
+
+// Guardar datos de ronda parte 2 en la ficha de ronda del paciente
+window.icGuardarRondaParte2 = async function(pacId){
+  if(!pacId) return;
+  // Leer valores
+  var dolor = document.getElementById('ic-rd-dolor')?.value||'0';
+  var conductaVals = []; document.querySelectorAll('input[name="ic-rd-conducta"]:checked').forEach(function(c){conductaVals.push(c.value);});
+  var adherenciaVals = []; document.querySelectorAll('input[name="ic-rd-adherencia"]:checked').forEach(function(c){adherenciaVals.push(c.value);});
+  var pacto = (document.getElementById('ic-rd-pacto')?.value||''). trim();
+  var alta = document.querySelector('input[name="ic-rd-alta"]:checked')?.value||'no';
+  var altaCriterio = (document.getElementById('ic-rd-alta-criterio')?.value||''). trim();
+  var indicacion = (document.getElementById('ic-rd-indicacion')?.value||''). trim();
+  // Si no hay nada que guardar, salir
+  if(!pacto&&!indicacion&&!altaCriterio&&conductaVals.length===0&&adherenciaVals.length===0&&dolor==='0') return;
+  // Buscar ficha de ronda de hoy para este paciente
+  try{
+    if(!window.db||!window._getDocs||!window._query||!window._collection||!window._where||!window._orderBy||!window._limit) return;
+    var hoy = new Date().toISOString().split('T')[0];
+    var snap = await window._getDocs(window._query(
+      window._collection(window.db,'fichas_ronda'),
+      window._where('pacienteId','==',pacId),
+      window._where('fecha','==',hoy),
+      window._orderBy('creado','desc'),
+      window._limit(1)
+    ));
+    var update = {
+      dolor: dolor,
+      conducta: conductaVals.join(', '),
+      adherencia: adherenciaVals.join(', '),
+      pacto: pacto,
+      altaCumplida: alta,
+      altaCriterio: altaCriterio,
+      indicacion: indicacion,
+    };
+    if(!snap.empty){
+      // Actualizar ficha existente
+      await window._updateDoc(window._doc(window.db,'fichas_ronda',snap.docs[0].id), update);
+    } else {
+      // Crear ficha nueva con los datos mínimos
+      var pac = (window.pacientes||[]).find(function(p){return p.id===pacId;});
+      await window._addDoc(window._collection(window.db,'fichas_ronda'), Object.assign({
+        pacienteId: pacId,
+        fecha: hoy,
+        nombre: pac?.nombre||'',
+        hab: pac?.hab||'',
+        creado: new Date()
+      }, update));
+    }
+    console.log('[RondaParte2] guardado para '+pacId);
+  } catch(e){ console.warn('[RondaParte2] error:',e); }
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
