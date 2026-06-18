@@ -8257,9 +8257,9 @@ window.abrirPacSheetSilent = function(p) {
   const capIconMap={"CONSERVADA":"✅","DISMINUIDA":"⚠️","SIN CAPACIDAD":"🚫"};
   const capVal=capRecord&&capRecord.conclusion;
   const capText=capVal?((capIconMap[capVal]||"")+" "+capVal+(capRecord.fecha?" · "+capRecord.fecha:"")):null;
-  const ri=item=>`<div class="pac-info-item${item.full?' pac-info-full':''}"><div class="pac-info-label">${item.l}</div><div class="pac-info-value" style="${item.color?'color:'+item.color:''}">${item.v||'—'}</div></div>`;
+  const ri=item=>`<div class="pac-info-item${item.full?' pac-info-full':''}"><div class="pac-info-label">${item.l}${item.editable?'<button onclick="psEditarCampo(\''+item.editable+'\',\''+item.editLabel+'\')" style="margin-left:6px;background:none;border:none;cursor:pointer;font-size:0.8rem;color:var(--accent);padding:0;vertical-align:middle" title="Editar">✏️</button>':''}</div><div class="pac-info-value" style="${item.color?'color:'+item.color:''}">${item.v||'—'}</div></div>`;
   const grid=[
-    {l:'Habitación',v:p.hab||(p.tipo==='consulta-externa'?'Consulta Externa':'—')},
+    {l:'Habitación',v:p.hab||(p.tipo==='consulta-externa'?'Consulta Externa':'—'),editable:'hab',editLabel:'Habitación'},
     p.prioridad?{l:'Prioridad IC',v:p.prioridad==='URGENTE'?'🔴 URGENTE':p.prioridad==='PRIORITARIA'?'🟡 PRIORITARIA':'🟢 REGULAR',color:p.prioridad==='URGENTE'?'var(--danger)':p.prioridad==='PRIORITARIA'?'var(--warning)':'var(--success)'}:null,
     {l:'Fecha ingreso',v:p.fecha?formatDate(p.fecha):'—'},
     p.fechaIC?{l:'Fecha solicitud IC',v:formatDate(p.fechaIC)}:null,
@@ -8270,7 +8270,7 @@ window.abrirPacSheetSilent = function(p) {
     {l:'Estado',v:estadoLabel[p.estado]||p.estado||'—'},
     capText?{l:'Capacidad decisional',v:capText,color:capColorMap[capVal]}:null,
     {l:'Próxima sesión',v:p.proxSesion?formatDate(p.proxSesion):'No programada'},
-    {l:'Dx médico',v:p.motivo,full:true},
+    {l:'Dx médico',v:p.motivo,full:true,editable:'motivo',editLabel:'Diagnóstico médico'},
     p.motivoIC?{l:'Motivo de interconsulta',v:p.motivoIC,full:true}:null,
     p.quePide?{l:'🎯 ¿Qué pide realmente?',v:p.quePide,full:true,color:'#7c3aed'}:null,
     {l:'Impresión psicológica',v:p.dxpsi,full:true},
@@ -8288,6 +8288,40 @@ window.abrirPacSheetSilent = function(p) {
   // Si la ficha abierta es de este mismo paciente, recargar plan farmacológico
   if(window._psPacId === p.id && typeof cargarPlanFarmacologico === 'function') {
     cargarPlanFarmacologico(p.id);
+  }
+};
+
+window.psEditarCampo=async function(campo, label){
+  var pacId=window._psPacId;
+  if(!pacId) return;
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  if(!pac) return;
+  var valorActual=pac[campo]||'';
+  var nuevo;
+  if(campo==='hab'){
+    nuevo=prompt('Editar '+label+':\n\nValor actual: '+valorActual,valorActual);
+  } else {
+    nuevo=prompt('Editar '+label+':\n\nValor actual: '+valorActual,valorActual);
+  }
+  if(nuevo===null) return; // canceló
+  nuevo=nuevo.trim();
+  if(nuevo===valorActual) return; // no cambió
+  if(!nuevo){ if(typeof toast==='function') toast('⚠️ El campo no puede quedar vacío'); return; }
+  try{
+    var update={};
+    update[campo]=nuevo;
+    await updateDoc(doc(db,'pacientes',pacId),update);
+    pac[campo]=nuevo;
+    // Refrescar ficha
+    if(typeof window.abrirPacSheetSilent==='function') window.abrirPacSheetSilent(pac);
+    // Si es habitación, refrescar tablero de ronda también
+    if(campo==='hab'){
+      if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+      if(typeof window.renderDashboard==='function') window.renderDashboard();
+    }
+    if(typeof toast==='function') toast('✅ '+label+' actualizado');
+  }catch(e){
+    if(typeof toast==='function') toast('❌ Error al guardar: '+e.message);
   }
 };
 
@@ -8314,9 +8348,9 @@ window.abrirPacSheet=async(id)=>{
   const capIconMap={"CONSERVADA":"✅","DISMINUIDA":"⚠️","SIN CAPACIDAD":"🚫"};
   const capVal=capRecord&&capRecord.conclusion;
   const capText=capVal?((capIconMap[capVal]||"")+" "+capVal+(capRecord.fecha?" · "+capRecord.fecha:"")):null;
-  const ri=item=>`<div class="pac-info-item${item.full?' pac-info-full':''}"><div class="pac-info-label">${item.l}</div><div class="pac-info-value" style="${item.color?'color:'+item.color:''}">${item.v||'—'}</div></div>`;
+  const ri=item=>`<div class="pac-info-item${item.full?' pac-info-full':''}"><div class="pac-info-label">${item.l}${item.editable?'<button onclick="psEditarCampo(\''+item.editable+'\',\''+item.editLabel+'\')" style="margin-left:6px;background:none;border:none;cursor:pointer;font-size:0.8rem;color:var(--accent);padding:0;vertical-align:middle" title="Editar">✏️</button>':''}</div><div class="pac-info-value" style="${item.color?'color:'+item.color:''}">${item.v||'—'}</div></div>`;
   const grid=[
-    {l:'Habitación',v:p.hab||(p.tipo==='consulta-externa'?'Consulta Externa':'—')},
+    {l:'Habitación',v:p.hab||(p.tipo==='consulta-externa'?'Consulta Externa':'—'),editable:'hab',editLabel:'Habitación'},
     p.prioridad?{l:'Prioridad IC',v:p.prioridad==='URGENTE'?'🔴 URGENTE':p.prioridad==='PRIORITARIA'?'🟡 PRIORITARIA':'🟢 REGULAR',color:p.prioridad==='URGENTE'?'var(--danger)':p.prioridad==='PRIORITARIA'?'var(--warning)':'var(--success)'}:null,
     {l:'Fecha ingreso',v:p.fecha?formatDate(p.fecha):'—'},
     p.fechaIC?{l:'Fecha solicitud IC',v:formatDate(p.fechaIC)}:null,
@@ -8334,7 +8368,7 @@ window.abrirPacSheet=async(id)=>{
     {l:'Estado',v:estadoLabel[p.estado]||p.estado||'—'},
     capText?{l:'Capacidad decisional',v:capText,color:capColorMap[capVal]}:null,
     {l:'Próxima sesión',v:p.proxSesion?formatDate(p.proxSesion):'No programada'},
-    {l:'Dx médico',v:p.motivo,full:true},
+    {l:'Dx médico',v:p.motivo,full:true,editable:'motivo',editLabel:'Diagnóstico médico'},
     p.motivoIC?{l:'Motivo de interconsulta',v:p.motivoIC,full:true}:null,
     p.quePide?{l:'🎯 ¿Qué pide realmente?',v:p.quePide,full:true,color:'#7c3aed'}:null,
     {l:'Impresión psicológica',v:p.dxpsi,full:true},
@@ -13910,6 +13944,12 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
   }
 
   // Saldo de horas del mes: suma diferencia entre minutos trabajados y meta diaria
+  function esDiaHabil(fecha){
+    var d=new Date(fecha+'T12:00:00'); // mediodía para evitar problemas de timezone
+    var dow=d.getDay();
+    return dow!==0&&dow!==6; // no fines de semana
+  }
+
   function calcularSaldoMes(){
     var j=getJornadas();
     var hoy=new Date();
@@ -13917,25 +13957,43 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     var anio=hoy.getFullYear();
     var h=HORARIO_2026[mes];
     if(!h) return 0;
-    var minDiario=Math.round(93*60/h.dias); // minutos meta por día
-    var saldo=0;
+    var minDiario=Math.round(93*60/h.dias);
     var hoyFecha=hoyStr();
     var est=getEstadoHoy();
     var jornadaActivaHoy=est&&est.fecha===hoyFecha&&est.entrada&&!est.salida;
+    // Construir mapa de jornadas del mes para acceso rápido
+    var mapaJornadas={};
     j.forEach(function(jor){
-      if(!jor.fecha||!jor.minutos) return;
-      // Si la jornada de hoy está activa, no contar del historial (evita doble conteo)
-      if(jornadaActivaHoy&&jor.fecha===hoyFecha) return;
-      var d=new Date(jor.fecha);
+      if(!jor.fecha) return;
+      var d=new Date(jor.fecha+'T12:00:00');
       if(d.getMonth()+1===mes&&d.getFullYear()===anio){
-        saldo+=(jor.minutos-minDiario);
+        mapaJornadas[jor.fecha]=jor;
       }
     });
+    // Iterar solo los días hábiles del mes hasta hoy (sin contar hoy si está activo)
+    var saldo=0;
+    var inicio=new Date(anio,mes-1,1);
+    var fin=new Date(hoy);
+    if(jornadaActivaHoy) fin.setDate(fin.getDate()-1); // excluir hoy del loop
+    for(var d2=new Date(inicio);d2<=fin;d2.setDate(d2.getDate()+1)){
+      var fStr=d2.toISOString().split('T')[0];
+      if(!esDiaHabil(fStr)) continue;
+      if(fStr===hoyFecha&&jornadaActivaHoy) continue;
+      var jor=mapaJornadas[fStr];
+      if(jor&&jor.minutos) saldo+=(jor.minutos-minDiario);
+      // Si no hay jornada registrada ese día hábil pasado, no penalizar
+      // (puede ser festivo no registrado o ausencia justificada)
+    }
     // Sumar hoy en tiempo real si está en curso
     if(jornadaActivaHoy){
       saldo+=(minTrabajaHoy()-minDiario);
+    } else if(mapaJornadas[hoyFecha]&&mapaJornadas[hoyFecha].minutos&&esDiaHabil(hoyFecha)){
+      // Hoy ya cerrado (tiene salida registrada) — incluir si no está en el loop
+      if(new Date(hoyFecha+'T12:00:00')>fin){
+        saldo+=(mapaJornadas[hoyFecha].minutos-minDiario);
+      }
     }
-    return saldo; // positivo=a favor, negativo=en contra
+    return saldo;
   }
 
   function saldoTexto(min){
@@ -13978,9 +14036,8 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
       }
     }catch(e){console.warn('fichaje sync error:',e);}
   }
-  // Cargar desde Firebase si localStorage vacío (iPad nuevo o limpio)
+  // Sincronizar con Firebase — merge inteligente, siempre descarga lo más reciente
   async function sincFichajeDesdeFirebase(){
-    // Esperar hasta que Firebase esté listo (máx 5 segundos)
     var intentos=0;
     while((!window.db||!window._getDoc||!window._setDoc)&&intentos<10){
       await new Promise(function(r){setTimeout(r,500);});
@@ -13988,21 +14045,43 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     }
     try{
       if(!window.db||!window._getDoc||!window._doc) return;
+      // ── Merge inteligente de historial ──
       var snap=await window._getDoc(window._doc(window.db,'fichaje_jornadas','luisa'));
+      var local=getJornadas();
       if(snap.exists()){
-        var d=snap.data();
-        if(d.jornadas&&d.jornadas.length){
-          var local=getJornadas();
-          if(d.jornadas.length>local.length)
-            localStorage.setItem('fj_jornadas',JSON.stringify(d.jornadas));
+        var fbJornadas=(snap.data().jornadas)||[];
+        // Merge por fecha: unir local y Firebase, Firebase gana en conflicto
+        var mapa={};
+        local.forEach(function(j){if(j.fecha) mapa[j.fecha]=j;});
+        fbJornadas.forEach(function(j){if(j.fecha) mapa[j.fecha]=j;});
+        var merged=Object.values(mapa).sort(function(a,b){return a.fecha>b.fecha?1:-1;});
+        localStorage.setItem('fj_jornadas',JSON.stringify(merged));
+        // Si local tiene jornadas que Firebase no tiene, subir el merge
+        if(local.length>fbJornadas.length){
+          window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa'),
+            {jornadas:merged,updated:new Date().toISOString()}).catch(function(){});
         }
+      } else if(local.length>0){
+        // Firebase vacío — subir datos locales
+        window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa'),
+          {jornadas:local,updated:new Date().toISOString()}).catch(function(){});
       }
+      // ── Estado de hoy — Firebase siempre gana si es más completo ──
       var snapH=await window._getDoc(window._doc(window.db,'fichaje_jornadas','luisa_hoy'));
       if(snapH.exists()){
         var dH=snapH.data();
-        var hoy=new Date().toISOString().split('T')[0];
-        if(dH.fecha===hoy&&!localStorage.getItem('fj_hoy')){
-          localStorage.setItem('fj_hoy',JSON.stringify(dH));
+        var hoyS=new Date().toISOString().split('T')[0];
+        if(dH.fecha===hoyS){
+          var localHoy=localStorage.getItem('fj_hoy');
+          if(!localHoy){
+            localStorage.setItem('fj_hoy',JSON.stringify(dH));
+          } else {
+            var lh=JSON.parse(localHoy);
+            // Firebase gana si tiene salida y local no, o si local no tiene entrada
+            if((dH.salida&&!lh.salida)||(!lh.entrada&&dH.entrada)){
+              localStorage.setItem('fj_hoy',JSON.stringify(dH));
+            }
+          }
         }
       }
     }catch(e){console.warn('fichaje Firebase load:',e);}
@@ -14043,10 +14122,18 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
       // Si hay entrada sin salida del día anterior, cerrar automáticamente
       if(est.entrada&&!est.salida){
         var j=getJornadas();
-        j.push({fecha:est.fecha,entrada:est.entrada,salida:'(sin marcar)',minutos:null,auto:true});
-        saveJornadas(j);
+        // Solo agregar si no existe ya ese día
+        var idx=j.findIndex(function(x){return x.fecha===est.fecha;});
+        var reg={fecha:est.fecha,entrada:est.entrada,salida:'(sin marcar)',minutos:null,auto:true};
+        if(idx>=0) j[idx]=reg; else j.push(reg);
+        saveJornadas(j); // esto ya sincroniza a Firebase
       }
       localStorage.removeItem('fj_hoy');
+      // Limpiar luisa_hoy en Firebase también
+      try{
+        if(window.db&&window._setDoc&&window._doc)
+          window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa_hoy'),{fecha:null,ts:new Date().toISOString()});
+      }catch(e){}
     }
   }
 
@@ -14315,8 +14402,59 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
       '</div>'+
       '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">'+
         '<button class="btn btn-primary btn-sm" onclick="fichajeAbrirModal()" style="font-size:0.75rem">⏱ Marcar entrada/salida ahora</button>'+
+        '<button class="btn btn-secondary btn-sm" onclick="fichajeAgregarManual()" style="font-size:0.75rem">📝 Agregar día manual</button>'+
         '<button class="btn btn-secondary btn-sm" onclick="fichajeRenderEnMetricas()" style="font-size:0.75rem">↺ Actualizar</button>'+
       '</div>';
+  };
+
+  window.fichajeAgregarManual=function(){
+    // Pedir fecha
+    var fecha=prompt('¿Qué fecha quieres registrar?\n\nFormato: AAAA-MM-DD (ej: 2026-06-10)');
+    if(!fecha||!fecha.trim()) return;
+    fecha=fecha.trim();
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha)){
+      if(typeof toast==='function') toast('⚠️ Formato incorrecto. Usa AAAA-MM-DD');
+      return;
+    }
+    // Verificar que no sea fin de semana
+    var d=new Date(fecha+'T12:00:00');
+    if(d.getDay()===0||d.getDay()===6){
+      if(typeof toast==='function') toast('⚠️ Esa fecha es fin de semana');
+      return;
+    }
+    // Pedir hora de entrada
+    var entrada=prompt('¿A qué hora entraste el '+fecha+'?\n\nFormato HH:MM (ej: 07:10)');
+    if(!entrada||!entrada.trim()) return;
+    entrada=entrada.trim();
+    if(!/^\d{1,2}:\d{2}$/.test(entrada)){
+      if(typeof toast==='function') toast('⚠️ Formato inválido. Usa HH:MM');
+      return;
+    }
+    // Pedir hora de salida
+    var salida=prompt('¿A qué hora saliste el '+fecha+'?\n\nFormato HH:MM (ej: 15:54)');
+    if(!salida||!salida.trim()) return;
+    salida=salida.trim();
+    if(!/^\d{1,2}:\d{2}$/.test(salida)){
+      if(typeof toast==='function') toast('⚠️ Formato inválido. Usa HH:MM');
+      return;
+    }
+    // Calcular minutos
+    var p1=entrada.split(':'),p2=salida.split(':');
+    var minutos=parseInt(p2[0])*60+parseInt(p2[1])-(parseInt(p1[0])*60+parseInt(p1[1]));
+    if(minutos<=0){
+      if(typeof toast==='function') toast('⚠️ La salida debe ser después de la entrada');
+      return;
+    }
+    // Guardar
+    var j=getJornadas();
+    var idx=j.findIndex(function(x){return x.fecha===fecha;});
+    var reg={fecha:fecha,entrada:entrada,salida:salida,minutos:minutos,manual:true};
+    if(idx>=0) j[idx]=reg; else j.push(reg);
+    j.sort(function(a,b){return a.fecha>b.fecha?1:-1;});
+    saveJornadas(j);
+    fichajeRenderEnMetricas();
+    var hh=Math.floor(minutos/60),mm=minutos%60;
+    if(typeof toast==='function') toast('✅ Jornada del '+fecha+' registrada: '+hh+'h '+mm+'m');
   };
 
   window.fichajeEliminarJornada=function(idx){
