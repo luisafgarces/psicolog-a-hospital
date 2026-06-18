@@ -4572,6 +4572,7 @@ window.mneGuardar=async()=>{
         // Alta
         if(estado==='alta'||estado==='alta-voluntaria'){
           pacUpdate.estado=estado;
+          pacUpdate.fechaAlta=new Date().toISOString().split('T')[0];
           msgs.push('Paciente dado de alta ✅');
         }
         // Próxima sesión
