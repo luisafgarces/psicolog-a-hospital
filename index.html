@@ -14119,7 +14119,7 @@ window.revGuardar = async function(){
         +'<div style="font-size:0.75rem;font-weight:'+( esHoy?'800':'600')+';color:'
         +(esHoy?'#2563eb':esFin?'#dc2626':'var(--text2)')+';margin-bottom:3px">'+d+'</div>'
         +pacHtml
-        +(pacs.length>3?'<div style="font-size:0.63rem;color:var(--text3)">+'+(pacs.length-3)+' más</div>':'')
+        +(pacs.length>3?'<div onclick="calVerMas(event,\''+fs+'\')" style="font-size:0.63rem;color:var(--accent);cursor:pointer;font-weight:600;padding:2px 4px;border-radius:4px;background:var(--accent-light)">+' +(pacs.length-3)+' más…</div>':'')
         +'</div>'
       );
     }
@@ -14140,13 +14140,46 @@ window.revGuardar = async function(){
     calMes=hoy.getMonth();
     calRender();
   };
-  // Renderizar cuando se navega al calendario
-  var _goToOrigCal=window.goTo;
-  window.goTo=function(page){
-    if(_goToOrigCal) _goToOrigCal(page);
-    if(page==='calendario') setTimeout(calRender,150);
-  };
+  // Renderizar cuando la página calendario se hace visible
+  var _calObs=new MutationObserver(function(){
+    var pg=document.getElementById('page-calendario');
+    if(pg&&pg.classList.contains('active')) calRender();
+  });
+  _calObs.observe(document.body,{attributes:true,subtree:true,attributeFilter:['class']});
 })();
+
+// calVerMas — tooltip/popup con lista completa del día
+window.calVerMas=function(evt,fecha){
+  evt.stopPropagation();
+  var pacs=(window.pacientes||[]).filter(function(p){
+    return p.proxSesion&&p.proxSesion.split('T')[0]===fecha
+      &&p.estado!=='alta'&&p.estado!=='alta-voluntaria'&&p.estado!=='fallecido';
+  });
+  // Quitar popup anterior
+  var prev=document.getElementById('cal-popup');
+  if(prev) prev.remove();
+  // Crear popup
+  var pop=document.createElement('div');
+  pop.id='cal-popup';
+  pop.style.cssText='position:fixed;z-index:9999;background:var(--surface);border:1.5px solid var(--border);'
+    +'border-radius:10px;padding:12px 14px;box-shadow:0 8px 30px rgba(0,0,0,0.15);min-width:220px;max-width:280px';
+  var rect=evt.target.getBoundingClientRect();
+  pop.style.top=(rect.bottom+6)+'px';
+  pop.style.left=Math.min(rect.left,window.innerWidth-300)+'px';
+  var html='<div style="font-size:0.72rem;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">📅 '+fecha+'</div>';
+  pacs.forEach(function(p){
+    var rColor=p.riesgo==='ALTO'?'#dc2626':p.riesgo==='MEDIO'?'#d97706':'#16a34a';
+    html+='<div style="padding:5px 8px;border-radius:6px;margin-bottom:4px;border-left:3px solid '+rColor+';background:'+rColor+'11;font-size:0.78rem">'
+      +'<strong>'+p.nombre+'</strong>'+(p.hab?' <span style="color:var(--text3);font-size:0.7rem">· '+p.hab+'</span>':'')
+      +'</div>';
+  });
+  pop.innerHTML=html;
+  // Cerrar al click fuera
+  document.addEventListener('click',function cerrar(e){
+    if(!pop.contains(e.target)){pop.remove();document.removeEventListener('click',cerrar);}
+  });
+  document.body.appendChild(pop);
+};
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
 
