@@ -5574,7 +5574,7 @@ window.filtrarPsico = function(filtro, btn){
 window.goTo = function(page){
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
-    'psicoeducacion','metricas','ronda-diaria'];
+    'psicoeducacion','metricas','ronda-diaria','calendario'];
   const titles = {
     dashboard:'Inicio', pacientes:'Registro de Pacientes',
     'consulta-externa':'Consulta Externa EPS',
@@ -5585,7 +5585,8 @@ window.goTo = function(page){
     'historial-pac':'Historial de Pacientes',
     psicoeducacion:'Psicoeducación Clínica',
     metricas:'Mis Métricas de Actividad Clínica',
-    'ronda-diaria':'Ficha de Ronda Diaria — Psicología Hospitalaria'
+    'ronda-diaria':'Ficha de Ronda Diaria — Psicología Hospitalaria',
+    'calendario':'Calendario de Pacientes'
   };
   // Hide all pages, show target
   pages.forEach(function(p){
@@ -5614,7 +5615,8 @@ window.goTo = function(page){
     'interconsultas': function(){if(window.renderIC)window.renderIC();else setTimeout(function(){window.renderIC&&window.renderIC();},300);},
 'historial-pac': function(){setTimeout(function(){window.hpacRenderLista&&window.hpacRenderLista();},100);},
     'psicoeducacion': function(){setTimeout(function(){window.renderPsicoCards&&window.renderPsicoCards('all');},100);},
-    'ronda-diaria': function(){setTimeout(function(){window.rdInit&&window.rdInit();},100);}
+    'ronda-diaria': function(){setTimeout(function(){window.rdInit&&window.rdInit();},100);},
+    'calendario': function(){setTimeout(function(){window.calRender&&window.calRender();},100);}
   };
   if(fn[page]) fn[page]();
 };
@@ -14140,12 +14142,6 @@ window.revGuardar = async function(){
     calMes=hoy.getMonth();
     calRender();
   };
-  // Renderizar cuando la página calendario se hace visible
-  var _calObs=new MutationObserver(function(){
-    var pg=document.getElementById('page-calendario');
-    if(pg&&pg.classList.contains('active')) calRender();
-  });
-  _calObs.observe(document.body,{attributes:true,subtree:true,attributeFilter:['class']});
 })();
 
 // calVerMas — tooltip/popup con lista completa del día
@@ -14155,6 +14151,10 @@ window.calVerMas=function(evt,fecha){
     return p.proxSesion&&p.proxSesion.split('T')[0]===fecha
       &&p.estado!=='alta'&&p.estado!=='alta-voluntaria'&&p.estado!=='fallecido';
   });
+  // Solo mostrar los que no están visibles (a partir del 4to)
+  var ocultos=pacs.slice(3);
+  if(ocultos.length===0){evt.stopPropagation();return;}
+  pacs=ocultos;
   // Quitar popup anterior
   var prev=document.getElementById('cal-popup');
   if(prev) prev.remove();
@@ -14162,11 +14162,23 @@ window.calVerMas=function(evt,fecha){
   var pop=document.createElement('div');
   pop.id='cal-popup';
   pop.style.cssText='position:fixed;z-index:9999;background:var(--surface);border:1.5px solid var(--border);'
-    +'border-radius:10px;padding:12px 14px;box-shadow:0 8px 30px rgba(0,0,0,0.15);min-width:220px;max-width:280px';
+    +'border-radius:10px;padding:12px 14px;box-shadow:0 8px 30px rgba(0,0,0,0.15);min-width:220px;max-width:280px;max-height:60vh;overflow-y:auto';
   var rect=evt.target.getBoundingClientRect();
-  pop.style.top=(rect.bottom+6)+'px';
-  pop.style.left=Math.min(rect.left,window.innerWidth-300)+'px';
-  var html='<div style="font-size:0.72rem;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">📅 '+fecha+'</div>';
+  // Posición horizontal: no salir de la pantalla
+  var left=Math.min(rect.left, window.innerWidth-290);
+  left=Math.max(left,8);
+  // Posición vertical: arriba o abajo según espacio
+  var spaceAbajo=window.innerHeight-rect.bottom-10;
+  var spaceArriba=rect.top-10;
+  if(spaceAbajo>=150||spaceAbajo>=spaceArriba){
+    pop.style.top=(rect.bottom+6)+'px';
+    pop.style.maxHeight=Math.max(spaceAbajo-10,120)+'px';
+  } else {
+    pop.style.bottom=(window.innerHeight-rect.top+6)+'px';
+    pop.style.maxHeight=Math.max(spaceArriba-10,120)+'px';
+  }
+  pop.style.left=left+'px';
+  var html='<div style="font-size:0.72rem;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">📅 '+fecha+' — '+ocultos.length+' más</div>';
   pacs.forEach(function(p){
     var rColor=p.riesgo==='ALTO'?'#dc2626':p.riesgo==='MEDIO'?'#d97706':'#16a34a';
     html+='<div style="padding:5px 8px;border-radius:6px;margin-bottom:4px;border-left:3px solid '+rColor+';background:'+rColor+'11;font-size:0.78rem">'
