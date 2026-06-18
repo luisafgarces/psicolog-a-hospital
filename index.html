@@ -2567,9 +2567,9 @@ input.toggle-cb{display:none}
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Acompañante</div>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-acomp" value="solo" checked> Solo</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-acomp" value="familiar"> Familiar</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-acomp" value="cuidador"> Cuidador</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-acomp" value="solo" id="rd-acomp-solo"> Solo</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-acomp" value="familiar" id="rd-acomp-familiar"> Familiar</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-acomp" value="cuidador" id="rd-acomp-cuidador"> Cuidador</label>
               </div>
             </div>
           </div>
@@ -2600,10 +2600,10 @@ input.toggle-cb{display:none}
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Alerta metabólica / laboratorios</div>
               <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-lab" value="normal" checked> Normal</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-lab" value="sodio"> Na alterado</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-lab" value="hb"> Hb baja</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-lab" value="deshidratacion"> Deshidratación</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-lab" value="normal" id="rd-lab-normal"> Normal</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-lab" value="sodio" id="rd-lab-sodio"> Na alterado</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-lab" value="hb" id="rd-lab-hb"> Hb baja</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-lab" value="deshidratacion" id="rd-lab-deshidratacion"> Deshidratación</label>
               </div>
               <textarea id="rd-lab-detalle" rows="2" placeholder="Detalle de alteración metabólica, valores relevantes, observaciones…" style="width:100%;padding:6px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:0.8rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
             </div>
@@ -2642,28 +2642,28 @@ input.toggle-cb{display:none}
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Estado de conciencia</div>
               <div style="display:flex;flex-direction:column;gap:4px">
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conciencia" value="alerta" checked> Alerta</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conciencia" value="fluctuante"> Fluctuante (sospecha delirium)</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conciencia" value="somnoliento"> Somnoliento</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conciencia" value="estuporoso"> Estuporoso</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conciencia" value="alerta" id="rd-conciencia-alerta"> Alerta</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conciencia" value="fluctuante" id="rd-conciencia-fluctuante"> Fluctuante (sospecha delirium)</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conciencia" value="somnoliento" id="rd-conciencia-somnoliento"> Somnoliento</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conciencia" value="estuporoso" id="rd-conciencia-estuporoso"> Estuporoso</label>
               </div>
             </div>
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Patrón conductual</div>
               <div style="display:flex;flex-direction:column;gap:4px">
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conducta" value="colaborador" checked> Colaborador</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conducta" value="agresivo-verbal"> Agresivo verbal</label>
-                <label style="display:flex;align-items:center;gap=5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conducta" value="agresivo-fisico"> Agresivo físico</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conducta" value="inhibido"> Inhibido / aislado</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-conducta" value="llanto"> Llanto frecuente</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="colaborador" id="rd-conducta-colaborador"> Colaborador</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="agresivo-verbal" id="rd-conducta-agresivo-verbal"> Agresivo verbal</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="agresivo-fisico" id="rd-conducta-agresivo-fisico"> Agresivo físico</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="inhibido" id="rd-conducta-inhibido"> Inhibido / aislado</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="llanto" id="rd-conducta-llanto"> Llanto frecuente</label>
               </div>
             </div>
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Adherencia</div>
               <div style="display:flex;flex-direction:column;gap:4px">
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-adherencia" value="colabora" checked> Colabora con procedimientos</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-adherencia" value="rechaza"> Rechaza medicación / insumos</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-adherencia" value="alta-voluntaria"> Exige alta voluntaria</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-adherencia" value="colabora" id="rd-adherencia-colabora"> Colabora con procedimientos</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-adherencia" value="rechaza" id="rd-adherencia-rechaza"> Rechaza medicación / insumos</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-adherencia" value="alta-voluntaria" id="rd-adherencia-alta-voluntaria"> Exige alta voluntaria</label>
               </div>
             </div>
           </div>
@@ -2679,9 +2679,9 @@ input.toggle-cb{display:none}
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">¿Pertenece a Psicología Hospitalaria?</div>
               <div style="display:flex;gap:10px">
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-pertenece" value="si" checked> Sí</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-pertenece" value="no"> No</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-pertenece" value="mixto"> Mixto</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-pertenece" value="si" id="rd-pertenece-si"> Sí</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-pertenece" value="no" id="rd-pertenece-no"> No</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-pertenece" value="mixto" id="rd-pertenece-mixto"> Mixto</label>
               </div>
             </div>
             <div>
@@ -2709,11 +2709,11 @@ input.toggle-cb{display:none}
           <div style="margin-bottom:10px">
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Objetivo de hoy</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:7px">
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-objetivo" value="desescalada"> Desescalada verbal</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-objetivo" value="prequirurgica"> Preparación prequirúrgica</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-objetivo" value="aislamiento"> Validación distrés por aislamiento</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-objetivo" value="dolor"> Afrontamiento dolor</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="radio" name="rd-objetivo" value="otro" checked> Otro</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-objetivo" value="desescalada" id="rd-objetivo-desescalada"> Desescalada verbal</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-objetivo" value="prequirurgica" id="rd-objetivo-prequirurgica"> Preparación prequirúrgica</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-objetivo" value="aislamiento" id="rd-objetivo-aislamiento"> Validación distrés por aislamiento</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-objetivo" value="dolor" id="rd-objetivo-dolor"> Afrontamiento dolor</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-objetivo" value="otro" id="rd-objetivo-otro"> Otro</label>
             </div>
             <textarea id="rd-objetivo-texto" rows="2" placeholder="Escribe el objetivo específico de la visita de hoy…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
           </div>
@@ -2735,7 +2735,7 @@ input.toggle-cb{display:none}
           </div>
           <div style="margin-bottom:10px">
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Criterio de alta psicológica hospitalaria cumplido</div>
-            <div style="display:flex;gap:14px">
+            <div style="display:flex;gap:14px;margin-bottom:8px">
               <label style="display:flex;align-items:center;gap:5px;font-size:0.84rem;cursor:pointer">
                 <input type="radio" name="rd-alta" value="si">
                 <span style="color:#16a34a;font-weight:600">✅ Sí — Caso cerrado para PsH</span>
@@ -2745,6 +2745,7 @@ input.toggle-cb{display:none}
                 <span style="color:#b45309;font-weight:600">🔄 No — Continúa en seguimiento</span>
               </label>
             </div>
+            <textarea id="rd-alta-criterio" rows="2" placeholder="Describe el criterio de alta psicológica hospitalaria cumplido…" style="width:100%;padding:7px 10px;border:1.5px solid #059669;border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:#f0fdf4;color:var(--text);outline:none;resize:vertical"></textarea>
           </div>
           <div>
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Indicación al equipo médico / enfermería</div>
@@ -13382,18 +13383,19 @@ function rdRellenar(d){
   rdSet('rd-pendientes-psi',     d.pendientesPsi||'');
   rdRadio('rd-aislamiento',  d.aislamiento||'no');
   rdRadio('rd-tipo-pac',     d.tipoPaciente||'nuevo');
-  rdRadio('rd-acomp',        d.acompanante||'solo');
+  rdSetChecks('rd-acomp', d.acompanante?d.acompanante.split(', '):[]);
   rdSet('rd-cambio-plan-texto', d.cambioPlan||'');
-  rdRadio('rd-lab',          d.laboratorio||'normal');
+  rdSetChecks('rd-lab', d.laboratorio?d.laboratorio.split(', '):[]);
   rdSet('rd-lab-detalle',    d.labDetalle||'');
   rdSet('rd-farm-notas',     d.farmNotas||'');
-  rdRadio('rd-conciencia',   d.conciencia||'alerta');
-  rdRadio('rd-conducta',     d.conducta||'colaborador');
-  rdRadio('rd-adherencia',   d.adherencia||'colabora');
-  rdRadio('rd-pertenece',    d.pertenece||'si');
-  rdRadio('rd-objetivo',     d.objetivo||'otro');
+  rdSetChecks('rd-conciencia', d.conciencia?d.conciencia.split(', '):[]);
+  rdSetChecks('rd-conducta', d.conducta?d.conducta.split(', '):[]);
+  rdSetChecks('rd-adherencia', d.adherencia?d.adherencia.split(', '):[]);
+  rdSetChecks('rd-pertenece', d.pertenece?d.pertenece.split(', '):[]);
+  rdSetChecks('rd-objetivo', d.objetivo?d.objetivo.split(', '):[]);
   rdSet('rd-objetivo-texto', d.objetivoTexto||'');
   rdRadio('rd-alta',         d.altaCumplida||'no');
+  rdSet('rd-alta-criterio',  d.altaCriterio||'');
   var dolor = document.getElementById('rd-dolor');
   var dolorVal = document.getElementById('rd-dolor-val');
   if(dolor){ dolor.value = d.dolor||0; }
@@ -13437,18 +13439,19 @@ function rdRellenarDesde(pac){
   rdSet('rd-pendientes-psi','');
   rdRadio('rd-aislamiento', 'no');
   rdRadio('rd-tipo-pac', (pac.sesiones&&pac.sesiones>0)?'seguimiento':'nuevo');
-  rdRadio('rd-acomp','solo');
+  rdSetChecks('rd-acomp',[]);
   rdSet('rd-cambio-plan-texto','');
-  rdRadio('rd-lab','normal');
+  rdSetChecks('rd-lab',[]);
   rdSet('rd-lab-detalle','');
   rdSet('rd-farm-notas','');
-  rdRadio('rd-conciencia','alerta');
-  rdRadio('rd-conducta','colaborador');
-  rdRadio('rd-adherencia','colabora');
-  rdRadio('rd-pertenece','si');
-  rdRadio('rd-objetivo','otro');
+  rdSetChecks('rd-conciencia',[]);
+  rdSetChecks('rd-conducta',[]);
+  rdSetChecks('rd-adherencia',[]);
+  rdSetChecks('rd-pertenece',[]);
+  rdSetChecks('rd-objetivo',[]);
   rdSet('rd-objetivo-texto','');
   rdRadio('rd-alta','no');
+  rdSet('rd-alta-criterio','');
   ['rd-farm-cort','rd-farm-opio','rd-farm-benzo','rd-farm-antip',
    'rd-der-psiq','rd-der-ts','rd-der-pal','rd-der-neuro'].forEach(function(id){
     var el = document.getElementById(id); if(el) el.checked = false;
@@ -13475,6 +13478,13 @@ function rdSet(id, val){ var el=document.getElementById(id); if(el) el.value=val
 function rdGet(id){ var el=document.getElementById(id); return el?(el.value||'').trim():''; }
 function rdRadio(name,val){ document.querySelectorAll('input[name="'+name+'"]').forEach(function(r){r.checked=(r.value===val);}); }
 function rdGetRadio(name){ var el=document.querySelector('input[name="'+name+'"]:checked'); return el?el.value:''; }
+// Multi-checkbox: get array of checked values
+function rdGetChecks(name){ var vals=[]; document.querySelectorAll('input[name="'+name+'"]:checked').forEach(function(c){vals.push(c.value);}); return vals; }
+// Multi-checkbox: set checked from array or string
+function rdSetChecks(name,val){
+  var arr=Array.isArray(val)?val:(val?[val]:[]);
+  document.querySelectorAll('input[name="'+name+'"]').forEach(function(c){c.checked=arr.indexOf(c.value)>=0;});
+}
 
 // Recolectar todos los datos del formulario
 function rdRecolectar(){
@@ -13502,28 +13512,29 @@ function rdRecolectar(){
     aislamiento:     rdGetRadio('rd-aislamiento'),
     aislamientoTipo: rdGet('rd-aislamiento-tipo'),
     tipoPaciente:    rdGetRadio('rd-tipo-pac'),
-    acompanante:     rdGetRadio('rd-acomp'),
+    acompanante:     rdGetChecks('rd-acomp').join(', '),
     dx:              rdGet('rd-dx'),
     cambioPlan:      rdGet('rd-cambio-plan-texto'),
     dolor:           dolorEl?dolorEl.value:'0',
-    laboratorio:     rdGetRadio('rd-lab'),
+    laboratorio:     rdGetChecks('rd-lab').join(', '),
     labDetalle:      rdGet('rd-lab-detalle'),
     farmacos:        farmacos,
     farmDescenso:    rdGet('rd-farm-descenso'),
     farmNotas:       rdGet('rd-farm-notas'),
     notaMedico:      rdGet('rd-nota-medico'),
     notaEnfermeria:  rdGet('rd-nota-enfermeria'),
-    conciencia:      rdGetRadio('rd-conciencia'),
-    conducta:        rdGetRadio('rd-conducta'),
-    adherencia:      rdGetRadio('rd-adherencia'),
-    pertenece:       rdGetRadio('rd-pertenece'),
+    conciencia:      rdGetChecks('rd-conciencia').join(', '),
+    conducta:        rdGetChecks('rd-conducta').join(', '),
+    adherencia:      rdGetChecks('rd-adherencia').join(', '),
+    pertenece:       rdGetChecks('rd-pertenece').join(', '),
     derivacion:      derivacion,
     razonDer:        rdGet('rd-razon-der'),
-    objetivo:        rdGetRadio('rd-objetivo'),
+    objetivo:        rdGetChecks('rd-objetivo').join(', '),
     objetivoTexto:   rdGet('rd-objetivo-texto'),
     intervencion:    rdGet('rd-intervencion'),
     pacto:           rdGet('rd-pacto'),
     altaCumplida:    rdGetRadio('rd-alta'),
+    altaCriterio:    rdGet('rd-alta-criterio'),
     indicacion:      rdGet('rd-indicacion'),
     pendientesMedicos: rdGet('rd-pendientes-medicos'),
     pendientesPsi:     rdGet('rd-pendientes-psi'),
@@ -13723,6 +13734,7 @@ window.rdImprimir = function(){
     +'</div></div>'
     +'<div class="s"><div class="sh">6. Alta / Seguimiento</div><div class="sb f">'
     +'<div class="c hl"><div class="lb">Criterio de alta PsH</div><div class="vl">'+altaLabel+'</div></div>'
+    +(datos.altaCriterio?'<div class="c" style="grid-column:1/-1;margin-top:4px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:6px 10px"><div class="lb" style="color:#059669">Criterio de alta psicológica cumplido</div><div class="vl">'+datos.altaCriterio+'</div></div>':'')
     +(datos.indicacion?'<div class="c" style="margin-top:4px"><div class="lb">Indicación al equipo</div><div class="vl">'+datos.indicacion+'</div></div>':'')
     +'</div></div>'
     +((datos.pendientesMedicos||datos.pendientesPsi)?
