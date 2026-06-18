@@ -8469,9 +8469,12 @@ window.psCargarRondaHoy = async function(pacId){
   if(!ficha) return; // no hay ficha hoy → no mostrar el bloque
 
   // Construir vista resumida — solo lo que tiene valor
-  var cambioLabel = {ninguno:'Ninguno',cirugia:'⚠️ Cirugía cancelada/reprogramada',alta:'⚠️ Alta inminente',pronostico:'⚠️ Mal pronóstico'}[ficha.cambioPlan]||ficha.cambioPlan||'';
-  var conductaLabel = {colaborador:'Colaborador','agresivo-verbal':'Agresivo verbal','agresivo-fisico':'⚠️ Agresivo físico',inhibido:'Inhibido / aislado',llanto:'Llanto frecuente',fluctuante:'⚠️ Fluctuante (delirium)'}[ficha.conducta]||ficha.conducta||'';
-  var adherLabel = {colabora:'Colabora',rechaza:'⚠️ Rechaza medicación','alta-voluntaria':'⚠️ Exige alta voluntaria'}[ficha.adherencia]||ficha.adherencia||'';
+  var cambioLabel = ficha.cambioPlan||'';
+  // Conducta y adherencia pueden ser múltiples valores separados por ', '
+  var conductaMap = {colaborador:'Colaborador',ansioso:'Ansioso','agresivo-verbal':'⚠️ Agresivo verbal','agresivo-fisico':'⚠️ Agresivo físico',inhibido:'Inhibido / aislado',llanto:'Llanto frecuente',fluctuante:'⚠️ Fluctuante (delirium)'};
+  var conductaLabel = (ficha.conducta||'').split(', ').map(function(v){return conductaMap[v.trim()]||v;}).filter(Boolean).join(', ');
+  var adherMap = {colabora:'Colabora',rechaza:'⚠️ Rechaza medicación','alta-voluntaria':'⚠️ Exige alta voluntaria'};
+  var adherLabel = (ficha.adherencia||'').split(', ').map(function(v){return adherMap[v.trim()]||v;}).filter(Boolean).join(', ');
 
   function fila(icon, label, valor, alerta){
     if(!valor||valor==='ninguno'||valor==='normal'||valor==='colabora'||valor==='alerta'||valor==='colaborador') return '';
@@ -8506,8 +8509,10 @@ window.psCargarRondaHoy = async function(pacId){
   if(alertas) html += '<div style="margin-bottom:4px">'+alertas+'</div>';
 
   // Intervención y pacto
-  if(ficha.intervencion) html += '<div style="font-size:0.78rem;margin-bottom:3px"><span style="font-size:0.68rem;font-weight:700;color:#15803d">INTERVENCIÓN</span> '+ficha.intervencion+'</div>';
-  if(ficha.pacto)        html += '<div style="font-size:0.78rem;margin-bottom:3px"><span style="font-size:0.68rem;font-weight:700;color:#15803d">PACTO</span> '+ficha.pacto+'</div>';
+  if(ficha.intervencion)  html += '<div style="font-size:0.78rem;margin-bottom:3px"><span style="font-size:0.68rem;font-weight:700;color:#15803d">INTERVENCIÓN</span> '+ficha.intervencion+'</div>';
+  if(ficha.pacto)         html += '<div style="font-size:0.78rem;margin-bottom:3px"><span style="font-size:0.68rem;font-weight:700;color:#15803d">PACTO</span> '+ficha.pacto+'</div>';
+  if(ficha.indicacion)    html += '<div style="font-size:0.78rem;margin-bottom:3px;color:#0369a1"><span style="font-weight:700">📋 Indicación equipo:</span> '+ficha.indicacion+'</div>';
+  if(ficha.altaCriterio)  html += '<div style="font-size:0.78rem;margin-bottom:3px;color:#15803d;background:#f0fdf4;padding:4px 8px;border-radius:6px"><span style="font-weight:700">✅ Alta psicológica:</span> '+ficha.altaCriterio+'</div>';
 
   // Pendientes
   if(ficha.pendientesMedicos) html += '<div style="font-size:0.78rem;margin-bottom:3px;color:#0369a1"><span style="font-weight:700">⏳ Pendientes médicos:</span> '+ficha.pendientesMedicos+'</div>';
