@@ -2587,8 +2587,12 @@ input.toggle-cb{display:none}
             <input type="text" id="rd-dx" placeholder="Diagnóstico médico principal…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
           </div>
           <div style="margin-bottom:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:#7c3aed;margin-bottom:3px">Dx Psicológico / Diferenciales <span style="font-weight:400;font-size:0.68rem;color:var(--text3)">(corto)</span></div>
-            <input type="text" id="rd-dx-psi" placeholder="Ej: T. adaptativo vs T. depresivo mayor, descartar delirium…" style="width:100%;padding:8px 12px;border:1.5px solid #d8b4fe;border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:#fdf4ff;color:var(--text);outline:none">
+            <div style="font-size:0.7rem;font-weight:600;color:#7c3aed;margin-bottom:3px">Dx Psicológico Principal</div>
+            <input type="text" id="rd-dx-psi" placeholder="Ej: Trastorno adaptativo con ánimo depresivo…" style="width:100%;padding:8px 12px;border:1.5px solid #d8b4fe;border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:#fdf4ff;color:var(--text);outline:none">
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:#9333ea;margin-bottom:3px">Diferenciales Psicológicos <span style="font-weight:400;font-size:0.68rem;color:var(--text3)">(corto)</span></div>
+            <input type="text" id="rd-dx-diferenciales" placeholder="Ej: Descartar T. depresivo mayor, T. de ajuste vs duelo normal…" style="width:100%;padding:8px 12px;border:1.5px solid #e9d5ff;border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:#faf5ff;color:var(--text);outline:none">
           </div>
           <div style="margin-bottom:10px">
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Cambio de plan médico hoy</div>
@@ -13337,7 +13341,8 @@ function rdRellenar(d){
   rdSet('rd-fecha',    d.fecha||'');
   rdSet('rd-hab',      d.hab||'');
   rdSet('rd-dx',       d.dx||'');
-  rdSet('rd-dx-psi',   d.dxPsi||'');
+  rdSet('rd-dx-psi',         d.dxPsi||'');
+  rdSet('rd-dx-diferenciales', d.dxDiferenciales||'');
   rdSet('rd-edad',     d.edad||'');
   rdSet('rd-sexo',     d.sexo||'');
   rdSet('rd-dias',     d.dias||'');
@@ -13395,13 +13400,15 @@ function rdRellenarDesde(pac){
   rdSet('rd-edad',  pac.edad||'');
   rdSet('rd-sexo',  pac.sexo ? pac.sexo.charAt(0).toUpperCase() : '');
   rdSet('rd-dx',    pac.motivo||'');
-  rdSet('rd-dx-psi', pac.dxPsi||'');
+  rdSet('rd-dx-psi',         pac.dxPsi||'');
+  rdSet('rd-dx-diferenciales', pac.dxDiferenciales||'');
   // Calcular días de estancia desde fecha de ingreso
   var diasCalc = (typeof calcularDiasInternacion==='function' && pac.fecha)
     ? calcularDiasInternacion(pac.fecha) : null;
   rdSet('rd-dias', diasCalc !== null ? String(diasCalc) : '');
   rdSet('rd-aislamiento-tipo','');
   rdSet('rd-dx-psi','');
+  rdSet('rd-dx-diferenciales','');
   rdSet('rd-farm-descenso','');
   rdSet('rd-razon-der','');
   rdSet('rd-otras-esp','');
@@ -13491,6 +13498,7 @@ function rdRecolectar(){
     acompanante:     rdGetChecks('rd-acomp').join(', '),
     dx:              rdGet('rd-dx'),
     dxPsi:           rdGet('rd-dx-psi'),
+    dxDiferenciales: rdGet('rd-dx-diferenciales'),
     cambioPlan:      rdGet('rd-cambio-plan-texto'),
     dolor:           dolorEl?dolorEl.value:'0',
     laboratorio:     rdGetChecks('rd-lab').join(', '),
@@ -13688,7 +13696,8 @@ window.rdImprimir = function(){
     +'</div></div>'
     +'<div class="s"><div class="sh">2. Filtro Clínico-Médico (HCE)</div><div class="sb">'
     +'<div class="c" style="grid-column:1/-1"><div class="lb">Dx médico principal</div><div class="vl">'+(datos.dx||'—')+'</div></div>'
-    +(datos.dxPsi?'<div class="c" style="grid-column:1/-1"><div class="lb" style="color:#7c3aed">Dx psicológico / Diferenciales</div><div class="vl">'+datos.dxPsi+'</div></div>':'')
+    +(datos.dxPsi?'<div class="c" style="grid-column:1/-1"><div class="lb" style="color:#7c3aed">Dx psicológico principal</div><div class="vl">'+datos.dxPsi+'</div></div>':'')
+    +(datos.dxDiferenciales?'<div class="c" style="grid-column:1/-1"><div class="lb" style="color:#9333ea">Diferenciales psicológicos</div><div class="vl">'+datos.dxDiferenciales+'</div></div>':'')
     +(datos.cambioPlan?'<div class="c" style="grid-column:1/-1"><div class="lb">Cambio de plan médico</div><div class="vl hl">'+datos.cambioPlan+'</div></div>':'')
     +'<div class="c"><div class="lb">Dolor EVA</div><div class="vl">'+(datos.dolor||'0')+' / 10</div></div>'
     +'<div class="c"><div class="lb">Alerta metabólica</div><div class="vl">'+datos.laboratorio+(datos.labDetalle?' — '+datos.labDetalle:'')+'</div></div>'
