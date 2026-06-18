@@ -13984,13 +13984,8 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
       var salidaRealMin=parseInt(ps[0])*60+parseInt(ps[1]);
       saldo+=(salidaRealMin-metaMin);
     });
-    // Hoy activo: comparar hora actual vs meta
-    if(jornadaActivaHoy){
-      var ahora=horaStr();
-      var pa=ahora.split(':');
-      var ahoraMin=parseInt(pa[0])*60+parseInt(pa[1]);
-      saldo+=(ahoraMin-metaMin);
-    }
+    // Hoy activo: NO contar hasta que marque salida
+    // El banco solo refleja días cerrados
     return saldo;
   }
 
@@ -14282,8 +14277,10 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     var t=document.getElementById('fj-ban-txt');
     if(!b) return;
     var salida=getSalidaHoyTexto();
-    var saldo=calcularSaldoMes();
-    var saldoTxt=saldo>=0?'▲ '+Math.floor(Math.abs(saldo)/60)+'h '+Math.abs(saldo)%60+'m a favor':'▼ '+Math.floor(Math.abs(saldo)/60)+'h '+Math.abs(saldo)%60+'m en contra';
+    var saldo=calcularSaldoMes(); // solo días cerrados
+    var saldoTxt=saldo>0?'▲ '+Math.floor(saldo/60)+'h '+saldo%60+'m acumulado'
+      :saldo<0?'▼ '+Math.floor(Math.abs(saldo)/60)+'h '+Math.abs(saldo)%60+'m en contra'
+      :'⚖️ Al día';
     if(t) t.innerHTML='⏱ Entrada: <strong>'+entradaHora+'</strong>'+(salida?' &nbsp;·&nbsp; 🕐 Sale hoy: <strong>'+salida+'</strong>':'')+' &nbsp;·&nbsp; '+saldoTxt;
     b.style.display='flex';
     document.body.classList.add('fj-banner-on');
