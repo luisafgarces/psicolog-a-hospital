@@ -448,6 +448,7 @@ input.toggle-cb{display:none}
     <div class="nav-section">Historial</div>
     <div class="nav-item" onclick="goTo('historial-pac')"><span class="icon">📂</span>Historial Pacientes</div>
     <div class="nav-section">Registro</div>
+    <div class="nav-item" onclick="goTo('calendario')"><span class="icon">📅</span>Calendario</div>
     <div class="nav-item" onclick="goTo('metricas')"><span class="icon">📊</span>Mis Métricas</div>
   </div>
   <div class="sidebar-footer" style="flex-direction:column;align-items:flex-start;gap:6px">
@@ -2491,6 +2492,34 @@ input.toggle-cb{display:none}
     </div>
 
     <!-- HISTORIAL PACIENTES -->
+    <!-- PÁGINA CALENDARIO -->
+    <div id="page-calendario" class="page">
+      <div style="max-width:900px;margin:0 auto;padding:4px 0 24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+          <div style="font-family:'DM Serif Display',serif;font-size:1.3rem;font-weight:700;color:var(--accent)">📅 Calendario de pacientes</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button onclick="calNavMes(-1)" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:0.9rem">◀</button>
+            <span id="cal-titulo" style="font-size:0.95rem;font-weight:700;color:var(--text);min-width:160px;text-align:center"></span>
+            <button onclick="calNavMes(1)" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:0.9rem">▶</button>
+            <button onclick="calIrHoy()" style="background:var(--accent);color:#fff;border:none;border-radius:7px;padding:6px 14px;cursor:pointer;font-size:0.78rem;font-weight:700">↺ Hoy</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:var(--text3);padding:6px">LUN</div>
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:var(--text3);padding:6px">MAR</div>
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:var(--text3);padding:6px">MIÉ</div>
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:var(--text3);padding:6px">JUE</div>
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:var(--text3);padding:6px">VIE</div>
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:#dc2626;padding:6px">SAB</div>
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:#dc2626;padding:6px">DOM</div>
+        </div>
+        <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px"></div>
+        <div style="margin-top:14px;display:flex;gap:16px;flex-wrap:wrap;font-size:0.72rem;color:var(--text3)">
+          <span>🔴 Riesgo ALTO</span><span>🟡 Riesgo MEDIO</span><span>🟢 Riesgo BAJO / Sin clasificar</span>
+        </div>
+      </div>
+    </div><!-- /page-calendario -->
+
     <div id="page-historial-pac" class="page">
       <div id="hpac-lista-view">
         <div class="section-header"><h2>📂 Historial de Pacientes</h2></div>
@@ -4182,6 +4211,7 @@ window.guardarICFirebase=async()=>{
       setSyncStatus('online');
       if(pacIdFinal&&typeof rdMarcarVistaPorNota==='function') rdMarcarVistaPorNota(pacIdFinal);
       if(pacIdFinal&&typeof icGuardarRondaParte2==='function') icGuardarRondaParte2(pacIdFinal);
+      if(pacIdFinal&&riesgo&&typeof propagarRiesgoPaciente==='function') propagarRiesgoPaciente(pacIdFinal,riesgo);
       // Autoguardar borrador en Firebase sin necesidad de presionar el botón
       try{if(typeof guardarBorradorFirebase==='function')guardarBorradorFirebase('ic');}catch(e){console.warn('autoborrador:',e);}
       // Limpiar backups de localStorage ya sincronizados
@@ -4263,6 +4293,8 @@ window.guardarAnamnesis=async()=>{
       var _anPacId=document.getElementById('an-pac-sel')?.value||window._anPacId||null;
       if(_anPacId&&typeof rdMarcarVistaPorNota==='function') rdMarcarVistaPorNota(_anPacId);
       if(_anPacId&&typeof icGuardarRondaParte2==='function') icGuardarRondaParte2(_anPacId);
+      var _anRiesgo=document.getElementById('seg-riesgo')?.value||'';
+      if(_anPacId&&_anRiesgo&&typeof propagarRiesgoPaciente==='function') propagarRiesgoPaciente(_anPacId,_anRiesgo);
       setTimeout(()=>clearAnamnesis(),300);
     }
   }
@@ -4587,8 +4619,12 @@ window.mneGuardar=async()=>{
           if(typeof window.renderDashboard==='function') window.renderDashboard();
           if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
         }
+        // Propagar riesgo si viene de editar nota
+        if(riesgo&&riesgo!=='No clasificado'&&typeof propagarRiesgoPaciente==='function') propagarRiesgoPaciente(pacId,riesgo);
         toast('✅ Nota actualizada'+(msgs.length?' · '+msgs.join(' · '):''));
       } else {
+        // También propagar riesgo aunque no sea alta
+        if(riesgo&&riesgo!=='No clasificado'&&window._hPacId&&typeof propagarRiesgoPaciente==='function') propagarRiesgoPaciente(window._hPacId,riesgo);
         toast('✅ Nota actualizada');
       }
     } else {
@@ -13923,6 +13959,24 @@ window.icGuardarRondaParte2 = async function(pacId){
   } catch(e){ console.warn('[RondaParte2] error:',e); }
 };
 
+// ── PROPAGADOR DE RIESGO ────────────────────────────────────────────
+// Actualiza riesgo en el paciente si cambió — se llama desde IC, seg y mneGuardar
+window.propagarRiesgoPaciente = async function(pacId, nuevoRiesgo){
+  if(!pacId||!nuevoRiesgo||nuevoRiesgo==='No clasificado'||nuevoRiesgo==='—'||nuevoRiesgo==='') return;
+  var valid=['BAJO','MEDIO','ALTO'];
+  if(valid.indexOf(nuevoRiesgo)<0) return;
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  if(!pac||pac.riesgo===nuevoRiesgo) return; // ya tiene ese riesgo
+  try{
+    await window._updateDoc(window._doc(window.db,'pacientes',pacId),{riesgo:nuevoRiesgo});
+    pac.riesgo=nuevoRiesgo;
+    if(typeof window.abrirPacSheetSilent==='function') window.abrirPacSheetSilent(pac);
+    if(typeof window.renderDashboard==='function') window.renderDashboard();
+    if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+    console.log('[Riesgo] actualizado a '+nuevoRiesgo+' para '+pac.nombre);
+  }catch(e){console.warn('[Riesgo] no se pudo propagar:',e);}
+};
+
 // ── REVALORACIÓN ────────────────────────────────────────────────────
 window.revSelectPac = function(id){
   var p=(window.pacientes||[]).find(function(x){return x.id===id;});
@@ -13988,12 +14042,111 @@ window.revGuardar = async function(){
     await window._addDoc(window._collection(window.db,'notas_pacientes'),datos);
     if(typeof rdMarcarVistaPorNota==='function') rdMarcarVistaPorNota(pacId);
     if(typeof icGuardarRondaParte2==='function') icGuardarRondaParte2(pacId);
+    var _revRiesgo=gv('rev-riesgo');
+    if(_revRiesgo&&typeof propagarRiesgoPaciente==='function') propagarRiesgoPaciente(pacId,_revRiesgo);
     if(typeof toast==='function') toast('✅ Revaloración guardada');
     revLimpiar();
   }catch(e){
     if(typeof toast==='function') toast('❌ Error: '+e.message);
   }
 };
+
+// ── CALENDARIO DE PACIENTES ─────────────────────────────────────────
+(function(){
+  var calAnio, calMes;
+  function initCal(){
+    var hoy=new Date();
+    calAnio=calAnio||hoy.getFullYear();
+    calMes=calMes!==undefined?calMes:hoy.getMonth();
+  }
+  function fStr(y,m,d){
+    return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  }
+  function riesgoColor(r){
+    if(r==='ALTO') return '#dc2626';
+    if(r==='MEDIO') return '#d97706';
+    return '#16a34a';
+  }
+  function riesgoIco(r){
+    if(r==='ALTO') return '🔴';
+    if(r==='MEDIO') return '🟡';
+    return '🟢';
+  }
+  window.calRender=function(){
+    initCal();
+    var meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+               'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    var tit=document.getElementById('cal-titulo');
+    if(tit) tit.textContent=meses[calMes]+' '+calAnio;
+    var grid=document.getElementById('cal-grid');
+    if(!grid) return;
+    // Construir mapa: fecha -> pacientes
+    var mapa={};
+    (window.pacientes||[]).forEach(function(p){
+      if(!p.proxSesion) return;
+      if(p.estado==='alta'||p.estado==='alta-voluntaria'||p.estado==='fallecido') return;
+      var fecha=p.proxSesion.split('T')[0]; // normalizar
+      if(!mapa[fecha]) mapa[fecha]=[];
+      mapa[fecha].push(p);
+    });
+    // Primer día del mes
+    var primero=new Date(calAnio,calMes,1);
+    var diasMes=new Date(calAnio,calMes+1,0).getDate();
+    // Lunes=0 ... Domingo=6
+    var inicioSem=(primero.getDay()+6)%7;
+    var hoyStr=new Date().toISOString().split('T')[0];
+    var celdas=[];
+    // Celdas vacías iniciales
+    for(var i=0;i<inicioSem;i++) celdas.push('');
+    // Días del mes
+    for(var d=1;d<=diasMes;d++){
+      var fs=fStr(calAnio,calMes,d);
+      var esHoy=fs===hoyStr;
+      var esFin=(new Date(calAnio,calMes,d).getDay()===0||new Date(calAnio,calMes,d).getDay()===6);
+      var pacs=mapa[fs]||[];
+      var pacHtml=pacs.map(function(p){
+        var hab=p.hab?'<span style="color:#64748b;font-size:0.65rem"> '+p.hab+'</span>':''; 
+        return '<div style="font-size:0.68rem;padding:2px 4px;border-radius:4px;background:'+riesgoColor(p.riesgo)+'18;'
+          +'border-left:2px solid '+riesgoColor(p.riesgo)+';margin-bottom:2px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"'
+          +' title="'+p.nombre+(p.hab?' · '+p.hab:'')+'">'
+          +riesgoIco(p.riesgo)+' <strong style="font-size:0.67rem">'+p.nombre.split(' ')[0]+'</strong>'+hab
+          +'</div>';
+      }).join('');
+      celdas.push(
+        '<div style="min-height:80px;background:'+( esHoy?'#eff6ff':'var(--surface)')+';border:1.5px solid '
+        +(esHoy?'#3b82f6':pacs.length?'#86efac':'var(--border)')+';border-radius:8px;padding:5px;cursor:default'
+        +(esFin?';opacity:0.5':'')+'">'
+        +'<div style="font-size:0.75rem;font-weight:'+( esHoy?'800':'600')+';color:'
+        +(esHoy?'#2563eb':esFin?'#dc2626':'var(--text2)')+';margin-bottom:3px">'+d+'</div>'
+        +pacHtml
+        +(pacs.length>3?'<div style="font-size:0.63rem;color:var(--text3)">+'+(pacs.length-3)+' más</div>':'')
+        +'</div>'
+      );
+    }
+    // Rellenar al final
+    while(celdas.length%7!==0) celdas.push('<div></div>');
+    grid.innerHTML=celdas.map(function(c){return c||'<div style="min-height:80px"></div>';}).join('');
+  };
+  window.calNavMes=function(dir){
+    initCal();
+    calMes+=dir;
+    if(calMes>11){calMes=0;calAnio++;}
+    if(calMes<0){calMes=11;calAnio--;}
+    calRender();
+  };
+  window.calIrHoy=function(){
+    var hoy=new Date();
+    calAnio=hoy.getFullYear();
+    calMes=hoy.getMonth();
+    calRender();
+  };
+  // Renderizar cuando se navega al calendario
+  var _goToOrigCal=window.goTo;
+  window.goTo=function(page){
+    if(_goToOrigCal) _goToOrigCal(page);
+    if(page==='calendario') setTimeout(calRender,150);
+  };
+})();
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
 
