@@ -8311,7 +8311,8 @@ window.psEditarCampo=async function(campo, label){
   try{
     var update={};
     update[campo]=nuevo;
-    await updateDoc(doc(db,'pacientes',pacId),update);
+    // Usar window._updateDoc/_doc que están expuestos desde el módulo ES6
+    await window._updateDoc(window._doc(window.db,'pacientes',pacId),update);
     pac[campo]=nuevo;
     // Refrescar ficha
     if(typeof window.abrirPacSheetSilent==='function') window.abrirPacSheetSilent(pac);
