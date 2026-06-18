@@ -583,6 +583,7 @@ input.toggle-cb{display:none}
         <div class="ic-mode-bar">
           <button class="ic-mode-btn active" id="ic-btn-nueva" onclick="setICMode('nueva')">💬 IC Nueva</button>
           <button class="ic-mode-btn" id="ic-btn-seg" onclick="setICMode('seg')">📝 Seguimiento</button>
+          <button class="ic-mode-btn" id="ic-btn-rev" onclick="setICMode('rev')">🔁 Revaloración</button>
           <button class="ic-mode-btn" id="ic-btn-fam" onclick="setICMode('fam')">👨‍👩‍👧 Intervención Familiar</button>
           <button class="ic-mode-btn" id="ic-btn-esp" onclick="setICMode('esp')">⚠️ Nota Especial</button>
         </div>
@@ -1605,6 +1606,124 @@ input.toggle-cb{display:none}
           <button class="btn btn-secondary" id="ic-nav-ficha-btn" onclick="(function(){var id=document.getElementById('ic-paciente-sel')?.value;if(id&&typeof abrirPacSheet==='function')abrirPacSheet(id);else toast('⚠️ Selecciona un paciente primero');})()" style="display:flex;align-items:center;gap:5px">👤 Ver ficha del paciente</button>
         </div>
       </div><!-- end ic-form-view -->
+
+      <!-- FORMULARIO REVALORACIÓN -->
+      <div id="ic-mode-rev" style="display:none;max-width:820px;margin:0 auto">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px">
+          <div style="text-align:center;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #7c3aed">
+            <div style="font-family:'DM Serif Display',serif;font-size:1.15rem;font-weight:700;color:#7c3aed">🔁 REVALORACIÓN PSICOLÓGICA HOSPITALARIA</div>
+          </div>
+          <!-- Cabecera -->
+          <div style="display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:end;margin-bottom:18px">
+            <div class="form-group"><label>Paciente</label>
+              <select id="rev-pac-sel" onchange="revSelectPac(this.value)" style="padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;width:100%">
+                <option value="">— Seleccionar paciente —</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Fecha</label><input type="date" id="rev-fecha" style="width:140px"></div>
+            <div class="form-group"><label>Sesión #</label><input type="number" id="rev-num" min="1" placeholder="—" style="width:80px;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem"></div>
+          </div>
+
+          <!-- I. MOTIVO -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#7c3aed;margin-bottom:12px">I. Motivo de revaloración</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="rev-motivo-cambio"> Cambio clínico significativo</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="rev-motivo-equipo"> Solicitud del equipo tratante</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="rev-motivo-dx"> Replantear diagnóstico</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="rev-motivo-alta"> Evaluación para alta</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="rev-motivo-riesgo"> Cambio en nivel de riesgo</label>
+            </div>
+            <div class="form-group"><label>Descripción del motivo</label><textarea id="rev-motivo-desc" rows="2" placeholder="¿Por qué se hace esta revaloración ahora?..."></textarea></div>
+          </div>
+
+          <!-- II. EVOLUCIÓN -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#7c3aed;margin-bottom:12px">II. Evolución desde la valoración inicial</div>
+            <div class="form-group"><label>Evolución clínica y psicológica</label><textarea id="rev-evolucion" rows="3" placeholder="¿Cómo ha evolucionado desde la IC inicial? ¿Qué cambió?..."></textarea></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label>Respuesta al manejo psicológico</label>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;padding:4px 0">
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-respuesta" value="favorable"> Favorable</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-respuesta" value="parcial"> Parcial</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-respuesta" value="sin-respuesta"> Sin respuesta</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-respuesta" value="deterioro"> Deterioro</label>
+                </div>
+              </div>
+              <div class="form-group"><label>Factores que cambiaron</label><textarea id="rev-factores" rows="2" placeholder="Contexto médico, familiar, conductual..."></textarea></div>
+            </div>
+          </div>
+
+          <!-- III. ESTADO MENTAL ACTUAL -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#7c3aed;margin-bottom:12px">III. Estado mental actual</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="rev-em-estable"> Estable</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="rev-em-ansioso"> Ansioso</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="rev-em-depresivo"> Depresivo</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="rev-em-irritable"> Irritable</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="rev-em-labil"> Lábil</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="rev-em-dsorg"> Desorganizado</label>
+            </div>
+            <div class="form-group"><label>Descripción del estado mental</label><textarea id="rev-estado-mental" rows="2" placeholder="Descripción clínica del estado mental actual..."></textarea></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label>Riesgo suicida actual</label>
+                <div class="sev-row" style="margin-top:5px">
+                  <div class="sev-btn" onclick="setRevRiesgo(this,'SIN RIESGO')" style="color:var(--success)">SIN RIESGO</div>
+                  <div class="sev-btn bajo" onclick="setRevRiesgo(this,'BAJO')">BAJO</div>
+                  <div class="sev-btn medio" onclick="setRevRiesgo(this,'MEDIO')">MEDIO</div>
+                  <div class="sev-btn alto" onclick="setRevRiesgo(this,'ALTO')">ALTO</div>
+                </div>
+                <input type="hidden" id="rev-riesgo" value="">
+              </div>
+              <div class="form-group"><label>Capacidad decisional</label>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;padding:4px 0">
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-cap" value="conservada"> Conservada</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-cap" value="reducida"> Reducida</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-cap" value="ausente"> Ausente</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- IV. REVISIÓN DIAGNÓSTICA -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#7c3aed;margin-bottom:12px">IV. Revisión diagnóstica</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label>Diagnóstico previo</label><input type="text" id="rev-dx-previo" placeholder="Dx de la IC inicial..." style="padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+              <div class="form-group"><label>Diagnóstico actual revisado</label><input type="text" id="rev-dx-actual" placeholder="Dx actualizado..." style="padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;width:100%;outline:none;border-color:#7c3aed"></div>
+            </div>
+            <div class="form-group"><label>Diferenciales actuales</label><input type="text" id="rev-diferenciales" placeholder="Diferenciales a considerar en este momento..." style="padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div class="form-group"><label>Justificación del cambio diagnóstico (si aplica)</label><textarea id="rev-dx-justif" rows="2" placeholder="¿Por qué cambia o se confirma el diagnóstico?..."></textarea></div>
+          </div>
+
+          <!-- V. PLAN AJUSTADO -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#7c3aed;margin-bottom:12px">V. Plan ajustado</div>
+            <div class="form-group"><label>Ajuste al plan de manejo psicológico</label><textarea id="rev-plan" rows="3" placeholder="¿Qué cambia en el manejo? ¿Nuevas estrategias? ¿Derivación?..."></textarea></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label>Recomendaciones al equipo tratante</label><textarea id="rev-recom" rows="2" placeholder="Indicaciones para médico, enfermería, trabajo social..."></textarea></div>
+              <div class="form-group"><label>Criterio de alta psicológica</label>
+                <div style="display:flex;gap:14px;margin-bottom:6px">
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-alta" value="si"> <span style="color:#16a34a;font-weight:600">✅ Cumplido</span></label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-alta" value="no" checked> <span style="color:#b45309;font-weight:600">🔄 No cumplido</span></label>
+                </div>
+                <textarea id="rev-alta-criterio" rows="2" placeholder="Criterio específico cumplido..." style="width:100%;padding:7px 10px;border:1.5px solid #86efac;border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:#f0fdf4;color:var(--text);outline:none;resize:vertical"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)">
+            <div class="form-group" style="margin:0"><label>Próxima cita</label><input type="date" id="rev-proxcita" style="padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem"></div>
+            <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+              <button class="btn btn-secondary" onclick="revLimpiar()">🗑 Limpiar</button>
+              <button class="btn btn-primary" style="background:#7c3aed;border-color:#7c3aed" onclick="revGuardar()">💾 Guardar revaloración</button>
+            </div>
+          </div>
+        </div>
+      </div><!-- end ic-mode-rev -->
+
     </div>
 
     <!-- HISTORIAL IC -->
@@ -1674,128 +1793,53 @@ input.toggle-cb{display:none}
             <div id="seg-orientacion-out" style="display:none;padding:12px 14px;font-size:0.78rem;color:var(--text2);line-height:1.7;white-space:pre-wrap"></div>
           </div>
 
-          <!-- I. DATOS CLAVES -->
+          <!-- I. ESTADO ACTUAL -->
           <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
-            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">I. Datos claves de la sesión</div>
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">I. Estado actual del paciente</div>
 
             <div style="margin-bottom:12px">
-              <div style="font-size:0.8rem;font-weight:600;margin-bottom:6px">1. Estado actual del paciente</div>
-              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px">Humor predominante:</div>
-              <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px">
+              <div style="font-size:0.8rem;font-weight:600;margin-bottom:6px">Estado emocional / conductual</div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">
                 <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-humor-estable"> Estable</label>
                 <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-humor-ansioso"> Ansioso</label>
                 <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-humor-depresivo"> Depresivo</label>
                 <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-humor-irritable"> Irritable</label>
-                <span style="font-size:0.82rem;color:var(--text2);display:flex;align-items:center;gap:5px">Escala 1-5: <input type="number" id="seg-humor-escala" min="1" max="5" style="width:50px;padding:3px 7px;border:1px solid var(--border);border-radius:6px;font-size:0.82rem"></span>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-humor-labil"> Lábil</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-humor-euforico"> Eufórico</label>
               </div>
-              <div class="form-group"><label>Eventos relevantes desde última sesión</label><textarea id="seg-eventos" rows="2" placeholder="¿Qué pasó desde la última vez que se vieron?..."></textarea></div>
             </div>
 
-            <div>
-              <div style="font-size:0.8rem;font-weight:600;margin-bottom:6px">2. Revisión de tareas asignadas</div>
-              <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px">
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-tarea-completa"> Completa</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-tarea-parcial"> Parcial</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-tarea-no"> No realizada</label>
-              </div>
-              <div class="form-group"><label>Dificultades encontradas</label><textarea id="seg-dificultades" rows="2" placeholder="¿Qué obstáculos encontró para realizar la tarea?..."></textarea></div>
-            </div>
-          </div>
-
-          <!-- II. PROCESO TERAPÉUTICO -->
-          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
-            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">II. Proceso terapéutico — Foco TCC</div>
+            <div class="form-group"><label>Evolución desde la última valoración</label><textarea id="seg-eventos" rows="3" placeholder="¿Qué ha cambiado clínicamente? ¿Cómo ha respondido al manejo?..."></textarea></div>
 
             <div style="margin-bottom:12px">
-              <div style="font-size:0.8rem;font-weight:600;margin-bottom:6px">1. Técnicas aplicadas en sesión</div>
-              <div style="display:flex;flex-direction:column;gap:8px">
-                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
-                  <input type="checkbox" id="seg-tec-reest" style="margin-top:2px">
-                  <span>Reestructuración cognitiva — Efectividad 1-5: <input type="number" id="seg-tec-reest-ef" min="1" max="5" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem"></span>
-                </label>
-                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
-                  <input type="checkbox" id="seg-tec-expos" style="margin-top:2px">
-                  <span>Exposición gradual — Nivel de ansiedad máximo: <input type="number" id="seg-tec-expos-nivel" min="0" max="10" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem">/10</span>
-                </label>
-                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
-                  <input type="checkbox" id="seg-tec-dbt" style="margin-top:2px">
-                  <span>Entrenamiento habilidades DBT (TLP): 
-                    <label style="margin-left:8px"><input type="checkbox" id="seg-tec-dbt-tol"> Tolerancia al malestar</label>
-                    <label style="margin-left:8px"><input type="checkbox" id="seg-tec-dbt-reg"> Regulación emocional</label>
-                  </span>
-                </label>
-                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
-                  <input type="checkbox" id="seg-tec-psico" style="margin-top:2px">
-                  <span>Psicoeducación sobre: <input type="text" id="seg-tec-psico-tema" placeholder="tema..." style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:200px;padding:1px 4px"></span>
-                </label>
-                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
-                  <input type="checkbox" id="seg-tec-otras" style="margin-top:2px">
-                  <span>Otra técnica: <input type="text" id="seg-tec-otras-cual" placeholder="especificar..." style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:200px;padding:1px 4px"></span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <div style="font-size:0.8rem;font-weight:600;margin-bottom:8px">2. Cogniciones identificadas</div>
-              <div class="form-group" style="margin-bottom:8px"><label>Pensamiento automático clave</label><textarea id="seg-pensamiento" rows="2" placeholder='"Soy un fracasado", "Nunca voy a mejorar"...'></textarea></div>
-              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px">Distorsión cognitiva:</div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-dist-catas"> Catastrofismo</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-dist-person"> Personalización</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-dist-polar"> Pensamiento polarizado</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-dist-sobre"> Sobregeneralización</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-dist-filtr"> Filtro mental</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-dist-otra"> Otra: <input type="text" id="seg-dist-otra-cual" style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:130px;padding:1px 4px"></label>
-              </div>
-            </div>
-          </div>
-
-          <!-- III. PLAN DE ACCIÓN -->
-          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
-            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">III. Plan de acción</div>
-
-            <div style="margin-bottom:12px">
-              <div style="font-size:0.8rem;font-weight:600;margin-bottom:8px">1. Tareas para próxima sesión</div>
-              <div style="display:flex;flex-direction:column;gap:7px">
-                <label style="display:flex;align-items:center;gap:7px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-tarea-reg"> Registro de pensamientos (Situación → Emoción → Pensamiento)</label>
-                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
-                  <input type="checkbox" id="seg-tarea-dbt2" style="margin-top:2px">
-                  <span>Práctica habilidad DBT: <input type="text" id="seg-tarea-dbt2-cual" placeholder="especificar..." style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:200px;padding:1px 4px"></span>
-                </label>
-                <label style="display:flex;align-items:flex-start;gap:7px;font-size:0.82rem;cursor:pointer;line-height:1.4">
-                  <input type="checkbox" id="seg-tarea-otra2" style="margin-top:2px">
-                  <span>Otra: <input type="text" id="seg-tarea-otra2-cual" placeholder="especificar..." style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:260px;padding:1px 4px"></span>
-                </label>
+              <div style="font-size:0.8rem;font-weight:600;margin-bottom:6px">Síntomas presentes</div>
+              <div class="ic-chips" id="seg-sintomas-chips">
+                <span class="ic-chip" onclick="icTog(this)">Ánimo deprimido</span>
+                <span class="ic-chip" onclick="icTog(this)">Anhedonia</span>
+                <span class="ic-chip" onclick="icTog(this)">Ansiedad / preocupación</span>
+                <span class="ic-chip" onclick="icTog(this)">Ideación suicida pasiva</span>
+                <span class="ic-chip" onclick="icTog(this)">Ideación suicida activa</span>
+                <span class="ic-chip" onclick="icTog(this)">Desesperanza</span>
+                <span class="ic-chip" onclick="icTog(this)">Labilidad emocional</span>
+                <span class="ic-chip" onclick="icTog(this)">Irritabilidad</span>
+                <span class="ic-chip" onclick="icTog(this)">Insomnio</span>
+                <span class="ic-chip" onclick="icTog(this)">Desorientación / delirium</span>
+                <span class="ic-chip" onclick="icTog(this)">Alucinaciones</span>
+                <span class="ic-chip" onclick="icTog(this)">Ideas delirantes</span>
+                <span class="ic-chip" onclick="icTog(this)">Agitación psicomotora</span>
+                <span class="ic-chip" onclick="icTog(this)">Consumo activo de SPA</span>
+                <span class="ic-chip" onclick="icTog(this)">Síntomas somáticos</span>
               </div>
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-              <div class="form-group"><label>Objetivo corto plazo — próxima sesión</label><textarea id="seg-obj-corto" rows="2" placeholder="Ej: Practicar respiración ante situaciones de ansiedad..."></textarea></div>
-              <div class="form-group"><label>Objetivo largo plazo</label><textarea id="seg-obj-largo" rows="2" placeholder="Ej: Reducir evitación social y mejorar autoestima..."></textarea></div>
-            </div>
-          </div>
-
-          <!-- IV. NOTAS CLÍNICAS -->
-          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
-            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">IV. Notas clínicas</div>
-
-            <div style="margin-bottom:12px">
-              <div style="font-size:0.8rem;font-weight:600;margin-bottom:8px">1. Observaciones relevantes</div>
-              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px">Riesgos detectados:</div>
-              <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px">
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-riesgo-ideacion"> Ideación suicida</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-riesgo-autolesion"> Autolesiones</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-riesgo-otro"> Otro: <input type="text" id="seg-riesgo-otro-cual" style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:140px;padding:1px 4px;margin-left:4px"></label>
+              <div class="form-group"><label>Riesgos detectados</label>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;padding:4px 0">
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-riesgo-ideacion"> Ideación suicida</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-riesgo-autolesion"> Autolesiones</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-riesgo-otro"> Otro: <input type="text" id="seg-riesgo-otro-cual" style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:100px;padding:1px 4px;margin-left:4px"></label>
+                </div>
               </div>
-              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px">Recursos del paciente:</div>
-              <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px">
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-rec-insight"> Insight</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-rec-motiv"> Motivación</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-rec-apoyo"> Apoyo social</label>
-              </div>
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
               <div class="form-group"><label>Nivel de riesgo suicida</label>
                 <div class="sev-row" style="margin-top:5px">
                   <div class="sev-btn" onclick="setSegRiesgo(this,'SIN RIESGO')" style="color:var(--success)">SIN RIESGO</div>
@@ -1805,80 +1849,39 @@ input.toggle-cb{display:none}
                 </div>
                 <input type="hidden" id="seg-riesgo" value="">
               </div>
-              <div class="form-group"><label>Ajustes terapéuticos</label><textarea id="seg-ajustes" rows="2" placeholder='Ej: "Reducir velocidad por crisis actual"...'></textarea></div>
             </div>
           </div>
 
+          <!-- II. INTERVENCIÓN -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">II. Intervención de hoy</div>
 
-          <!-- SÍNTOMAS SEGUIMIENTO -->
-          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:18px">
-            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:8px">🩺 Síntomas actuales — CIE-11 / DSM-5</div>
-            <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px">Selecciona los síntomas presentes en esta sesión para actualizar la impresión diagnóstica.</div>
-            <div class="ic-chips" id="seg-sintomas-chips">
-              <span class="ic-chip" onclick="icTog(this)">Ánimo deprimido persistente</span>
-              <span class="ic-chip" onclick="icTog(this)">Anhedonia</span>
-              <span class="ic-chip" onclick="icTog(this)">Pérdida de apetito / peso</span>
-              <span class="ic-chip" onclick="icTog(this)">Insomnio</span>
-              <span class="ic-chip" onclick="icTog(this)">Hipersomnia</span>
-              <span class="ic-chip" onclick="icTog(this)">Fatiga / pérdida de energía</span>
-              <span class="ic-chip" onclick="icTog(this)">Agitación psicomotora</span>
-              <span class="ic-chip" onclick="icTog(this)">Enlentecimiento psicomotor</span>
-              <span class="ic-chip" onclick="icTog(this)">Culpa excesiva / inutilidad</span>
-              <span class="ic-chip" onclick="icTog(this)">Dificultad para concentrarse</span>
-              <span class="ic-chip" onclick="icTog(this)">Pensamientos recurrentes de muerte</span>
-              <span class="ic-chip" onclick="icTog(this)">Ideación suicida pasiva</span>
-              <span class="ic-chip" onclick="icTog(this)">Ideación suicida activa sin plan</span>
-              <span class="ic-chip" onclick="icTog(this)">Ideación suicida con plan</span>
-              <span class="ic-chip" onclick="icTog(this)">Desesperanza marcada</span>
-              <span class="ic-chip" onclick="icTog(this)">Autolesiones sin intención suicida</span>
-              <span class="ic-chip" onclick="icTog(this)">Labilidad emocional</span>
-              <span class="ic-chip" onclick="icTog(this)">Irritabilidad</span>
-              <span class="ic-chip" onclick="icTog(this)">Ánimo elevado / eufórico</span>
-              <span class="ic-chip" onclick="icTog(this)">Grandiosidad / impulsividad</span>
-              <span class="ic-chip" onclick="icTog(this)">Logorrea / pensamiento acelerado</span>
-              <span class="ic-chip" onclick="icTog(this)">Ansiedad / preocupación excesiva</span>
-              <span class="ic-chip" onclick="icTog(this)">Ataques de pánico</span>
-              <span class="ic-chip" onclick="icTog(this)">Evitación fóbica</span>
-              <span class="ic-chip" onclick="icTog(this)">Obsesiones / compulsiones</span>
-              <span class="ic-chip" onclick="icTog(this)">Reexperimentación / flashbacks</span>
-              <span class="ic-chip" onclick="icTog(this)">Hiperactivación / sobresalto</span>
-              <span class="ic-chip" onclick="icTog(this)">Disociación / entumecimiento</span>
-              <span class="ic-chip" onclick="icTog(this)">Ideas delirantes</span>
-              <span class="ic-chip" onclick="icTog(this)">Alucinaciones</span>
-              <span class="ic-chip" onclick="icTog(this)">Pensamiento desorganizado</span>
-              <span class="ic-chip" onclick="icTog(this)">Desorientación / delirium</span>
-              <span class="ic-chip" onclick="icTog(this)">Deterioro cognitivo</span>
-              <span class="ic-chip" onclick="icTog(this)">Inestabilidad emocional intensa</span>
-              <span class="ic-chip" onclick="icTog(this)">Conductas impulsivas / autolesivas</span>
-              <span class="ic-chip" onclick="icTog(this)">Consumo problemático activo</span>
-              <span class="ic-chip" onclick="icTog(this)">Síntomas somáticos desproporcionados</span>
-              <span class="ic-chip" onclick="icTog(this)">Insomnio de inicio / mantenimiento</span>
-              <span class="ic-chip" onclick="icTog(this)">Sueño no reparador</span>
-            </div>
-            <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-              <button onclick="generarImpresionDxSeg()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.78rem;font-weight:700;cursor:pointer" id="seg-dx-btn">✨ Actualizar impresión diagnóstica</button>
-              <span style="font-size:0.7rem;color:var(--text3)">CIE-11 + diferenciales según síntomas actuales</span>
-            </div>
-            <div id="seg-dx-out" style="display:none;margin-top:8px;background:var(--accent-light);border:1.5px solid var(--accent2);border-radius:10px;padding:12px 14px;font-size:0.78rem;line-height:1.7;color:var(--text)"></div>
-            <input type="hidden" id="seg-impresion-hidden" value="">
-          </div>
-          <!-- V. ESCALAS -->
-          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:18px">
-            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">V. Escalas de medición <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3)">(Opcional)</span></div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-              <div style="font-size:0.82rem">PHQ-9 (Depresión)<br>
-                <span style="color:var(--text3);font-size:0.75rem">Inicial:</span> <input type="number" id="seg-phq-ini" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem">
-                <span style="color:var(--text3);font-size:0.75rem;margin-left:6px">Actual:</span> <input type="number" id="seg-phq-act" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem">
+            <div class="form-group"><label>Intervención psicológica realizada</label><textarea id="seg-dificultades" rows="3" placeholder="Describe la intervención: técnica usada, foco de la sesión, respuesta del paciente..."></textarea></div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label>Recursos del paciente</label>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;padding:4px 0">
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-rec-insight"> Insight</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-rec-motiv"> Motivación</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-rec-apoyo"> Apoyo social</label>
+                </div>
               </div>
-              <div style="font-size:0.82rem">GAD-7 (Ansiedad)<br>
-                <span style="color:var(--text3);font-size:0.75rem">Inicial:</span> <input type="number" id="seg-gad-ini" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem">
-                <span style="color:var(--text3);font-size:0.75rem;margin-left:6px">Actual:</span> <input type="number" id="seg-gad-act" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem">
-              </div>
-              <div style="font-size:0.82rem">Impulsividad (TLP)<br>
-                <input type="number" id="seg-impuls" min="0" max="10" style="width:45px;padding:2px 6px;border:1px solid var(--border);border-radius:5px;font-size:0.8rem"> / 10
-              </div>
+              <div class="form-group"><label>Ajustes al manejo</label><textarea id="seg-ajustes" rows="2" placeholder="¿Qué cambia en el plan de manejo?..."></textarea></div>
             </div>
           </div>
+
+          <!-- III. PLAN -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">III. Plan</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label>Objetivo próxima sesión</label><textarea id="seg-obj-corto" rows="2" placeholder="¿En qué se enfocará la próxima sesión?..."></textarea></div>
+              <div class="form-group"><label>Indicación al equipo tratante</label><textarea id="seg-obj-largo" rows="2" placeholder="Alertas o recomendaciones al equipo médico..."></textarea></div>
+            </div>
+            <div class="form-group"><label>Pacto / acuerdo con el paciente</label><input type="text" id="seg-pensamiento" placeholder="Acuerdo o compromiso establecido con el paciente..." style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface);outline:none"></div>
+          </div>
+
+          <input type="hidden" id="seg-humor-escala" value="">
+          <input type="hidden" id="seg-impresion-hidden" value="">
 
           <!-- Próxima cita + botones -->
           <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)">
@@ -4516,7 +4519,7 @@ window.renderConsultaExterna=(q)=>{
 
 window.populateAnamPacientes=()=>{
   const opts='<option value="">— Seleccionar paciente —</option>'+pacientes.map(p=>`<option value="${p.id}">${p.nombre} (${p.cedula})</option>`).join('');
-  ['anamnesis-paciente-sel','seg-pac-sel','seg-historial-pac-sel'].forEach(id=>{const sel=document.getElementById(id);if(!sel)return;const cur=sel.value;sel.innerHTML=opts;if(cur)sel.value=cur;});
+  ['anamnesis-paciente-sel','seg-pac-sel','seg-historial-pac-sel','rev-pac-sel'].forEach(id=>{const sel=document.getElementById(id);if(!sel)return;const cur=sel.value;sel.innerHTML=opts;if(cur)sel.value=cur;});
 };
 
 setSyncStatus('syncing');
@@ -4560,7 +4563,33 @@ window.mneGuardar=async()=>{
       const arr=window._mneCol==='anamnesis'?(window.anamnesisList||[]):(window.interconsultas||[]);
       const idx=arr.findIndex(function(x){return x.id===window._mneId;});
       if(idx>=0){arr[idx]=Object.assign({},arr[idx],{fecha,modo,riesgo,estado,sub,obj,resp,trat,nota,proxSesion:proxSesion||null,fechaEditado:new Date().toISOString().split('T')[0]});}
-      toast('✅ Nota actualizada');
+      // Actualizar paciente si cambió el estado o la próxima sesión
+      if(window._hPacId){
+        const pacId=window._hPacId;
+        const pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+        var pacUpdate={};
+        var msgs=[];
+        // Alta
+        if(estado==='alta'||estado==='alta-voluntaria'){
+          pacUpdate.estado=estado;
+          msgs.push('Paciente dado de alta ✅');
+        }
+        // Próxima sesión
+        if(proxSesion&&pac&&proxSesion!==pac.proxSesion){
+          pacUpdate.proxSesion=proxSesion;
+          msgs.push('Próxima sesión actualizada 📅');
+        }
+        if(Object.keys(pacUpdate).length>0){
+          await updateDoc(doc(db,'pacientes',pacId),pacUpdate);
+          if(pac) Object.assign(pac,pacUpdate);
+          if(typeof window.abrirPacSheetSilent==='function'&&pac) window.abrirPacSheetSilent(pac);
+          if(typeof window.renderDashboard==='function') window.renderDashboard();
+          if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+        }
+        toast('✅ Nota actualizada'+(msgs.length?' · '+msgs.join(' · '):''));
+      } else {
+        toast('✅ Nota actualizada');
+      }
     } else {
       const pac=pacientes.find(p=>p.id===window._hPacId);
       await addDoc(collection(db,'interconsultas'),{
@@ -8534,16 +8563,18 @@ var icCurrentEsp=null;
 window.setICMode=function(m){
   icCurrentMode=m;
   window.icCurrentMode=m; // mantener window sincronizado
-  ['nueva','seg','esp','fam'].forEach(function(x){
+  ['nueva','seg','esp','fam','rev'].forEach(function(x){
     var el=document.getElementById('ic-btn-'+x);
     if(el)el.classList.toggle('active',x===m);
   });
   var mnueva=document.getElementById('ic-mode-nueva');
   var mesp=document.getElementById('ic-mode-esp');
   var mfam=document.getElementById('ic-mode-fam');
+  var mrev=document.getElementById('ic-mode-rev');
   if(mnueva)mnueva.style.display=(m==='nueva'||m==='seg')?'':'none';
   if(mesp)mesp.style.display=m==='esp'?'':'none';
   if(mfam)mfam.style.display=m==='fam'?'':'none';
+  if(mrev)mrev.style.display=m==='rev'?'':'none';
   document.querySelectorAll('.ic-only-nueva').forEach(function(el){el.style.display=m==='seg'?'none':'';});
   var f4=document.getElementById('ic-out-4campos');
   var seg=document.getElementById('ic-out-seg');
@@ -11350,7 +11381,12 @@ document.addEventListener('DOMContentLoaded',()=>{
           <select id="mne-riesgo"><option value="">Sin clasificar</option><option value="BAJO">BAJO</option><option value="MEDIO">MEDIO</option><option value="ALTO">ALTO</option></select>
         </div>
         <div class="form-group"><label>Estado</label>
-          <select id="mne-estado"><option value="respondida">Completada</option><option value="pendiente">Pendiente</option></select>
+          <select id="mne-estado">
+            <option value="respondida">Completada</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="alta" style="color:#16a34a;font-weight:700">✅ Alta psicológica</option>
+            <option value="alta-voluntaria" style="color:#d97706;font-weight:700">⚠️ Alta voluntaria</option>
+          </select>
         </div>
       </div>
       <!-- Próxima sesión -->
@@ -13884,6 +13920,78 @@ window.icGuardarRondaParte2 = async function(pacId){
     }
     console.log('[RondaParte2] guardado para '+pacId);
   } catch(e){ console.warn('[RondaParte2] error:',e); }
+};
+
+// ── REVALORACIÓN ────────────────────────────────────────────────────
+window.revSelectPac = function(id){
+  var p=(window.pacientes||[]).find(function(x){return x.id===id;});
+  if(!p) return;
+  var prevDx=document.getElementById('rev-dx-previo');
+  if(prevDx&&!prevDx.value) prevDx.value=p.motivo||'';
+  var fecha=document.getElementById('rev-fecha');
+  if(fecha&&!fecha.value) fecha.value=new Date().toISOString().split('T')[0];
+};
+
+window.setRevRiesgo = function(el,nivel){
+  el.closest('.sev-row').querySelectorAll('.sev-btn').forEach(function(s){s.classList.remove('on');});
+  el.classList.add('on');
+  var h=document.getElementById('rev-riesgo'); if(h) h.value=nivel;
+};
+
+window.revLimpiar = function(){
+  ['rev-motivo-desc','rev-evolucion','rev-factores','rev-estado-mental',
+   'rev-dx-previo','rev-dx-actual','rev-diferenciales','rev-dx-justif',
+   'rev-plan','rev-recom','rev-alta-criterio'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  document.querySelectorAll('#ic-mode-rev input[type=checkbox],#ic-mode-rev input[type=radio]').forEach(function(c){c.checked=false;});
+  document.getElementById('rev-pac-sel').value='';
+  document.getElementById('rev-riesgo').value='';
+  document.querySelectorAll('#ic-mode-rev .sev-btn').forEach(function(s){s.classList.remove('on');});
+};
+
+window.revGuardar = async function(){
+  var pacId=document.getElementById('rev-pac-sel').value;
+  if(!pacId){if(typeof toast==='function')toast('⚠️ Selecciona un paciente');return;}
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  var getChecks=function(name){var v=[];document.querySelectorAll('input[name="'+name+'"]:checked').forEach(function(c){v.push(c.value);});return v.join(', ');};
+  var getRadio=function(name){var el=document.querySelector('input[name="'+name+'"]:checked');return el?el.value:'';};
+  var gv=function(id){var el=document.getElementById(id);return el?(el.value||''). trim():'';};
+  var datos={
+    pacienteId:pacId,
+    paciente:pac?.nombre||'',
+    fecha:gv('rev-fecha')||new Date().toISOString().split('T')[0],
+    sesionNum:gv('rev-num'),
+    tipo:'revaloracion',
+    motivosRev:getChecks('rev-motivo')||'',
+    motivoDesc:gv('rev-motivo-desc'),
+    evolucion:gv('rev-evolucion'),
+    respuesta:getRadio('rev-respuesta'),
+    factores:gv('rev-factores'),
+    estadoMental:gv('rev-estado-mental'),
+    emChecks:getChecks('rev-em')||'',
+    riesgo:gv('rev-riesgo'),
+    capacidad:getRadio('rev-cap'),
+    dxPrevio:gv('rev-dx-previo'),
+    dxActual:gv('rev-dx-actual'),
+    diferenciales:gv('rev-diferenciales'),
+    dxJustif:gv('rev-dx-justif'),
+    plan:gv('rev-plan'),
+    recom:gv('rev-recom'),
+    altaCumplida:getRadio('rev-alta'),
+    altaCriterio:gv('rev-alta-criterio'),
+    proxCita:gv('rev-proxcita'),
+    timestamp:new Date().toISOString()
+  };
+  try{
+    await window._addDoc(window._collection(window.db,'notas_pacientes'),datos);
+    if(typeof rdMarcarVistaPorNota==='function') rdMarcarVistaPorNota(pacId);
+    if(typeof icGuardarRondaParte2==='function') icGuardarRondaParte2(pacId);
+    if(typeof toast==='function') toast('✅ Revaloración guardada');
+    revLimpiar();
+  }catch(e){
+    if(typeof toast==='function') toast('❌ Error: '+e.message);
+  }
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
