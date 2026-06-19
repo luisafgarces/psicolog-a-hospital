@@ -14834,8 +14834,23 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
       '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">'+
         '<button class="btn btn-primary btn-sm" onclick="fichajeAbrirModal()" style="font-size:0.75rem">⏱ Marcar entrada/salida ahora</button>'+
         '<button class="btn btn-secondary btn-sm" onclick="fichajeAgregarManual()" style="font-size:0.75rem">📝 Agregar día manual</button>'+
+        '<button class="btn btn-secondary btn-sm" id="fj-btn-forzar-sync" onclick="fichajeForzarSync()" style="font-size:0.75rem">🔄 Forzar sincronización</button>'+
         '<button class="btn btn-secondary btn-sm" onclick="fichajeRenderEnMetricas()" style="font-size:0.75rem">↺ Actualizar</button>'+
       '</div>';
+  };
+
+  window.fichajeForzarSync=async function(){
+    var btn=document.getElementById('fj-btn-forzar-sync');
+    if(btn){btn.disabled=true;btn.textContent='⏳ Sincronizando…';}
+    try{
+      await sincFichajeDesdeFirebase();
+      fichajeRenderEnMetricas();
+      if(typeof toast==='function') toast('✅ Sincronizado con Firebase');
+    }catch(e){
+      if(typeof toast==='function') toast('❌ Error al sincronizar: '+e.message);
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent='🔄 Forzar sincronización';}
+    }
   };
 
   window.fichajeAgregarManual=function(){
