@@ -2972,6 +2972,78 @@ input.toggle-cb{display:none}
   </div>
 </div>
 
+<!-- MODAL EGRESO -->
+<div class="modal-overlay" id="modal-egreso">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3>🚪 Registrar egreso</h3>
+      <button class="modal-close" onclick="closeModal('modal-egreso')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px">
+      <div id="egreso-pac-nombre" style="font-weight:700;font-size:0.95rem;color:var(--text);margin-bottom:14px"></div>
+      <div class="form-group">
+        <label>Tipo de egreso</label>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.85rem">
+            <input type="radio" name="egreso-tipo" value="alta-psicologia"> ✅ Alta por Psicología
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.85rem">
+            <input type="radio" name="egreso-tipo" value="alta-hospitalaria"> 🏥 Alta Hospitalaria
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.85rem">
+            <input type="radio" name="egreso-tipo" value="alta-voluntaria"> ⚠️ Alta Voluntaria
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid #dc2626;border-radius:8px;cursor:pointer;font-size:0.85rem;color:#dc2626">
+            <input type="radio" name="egreso-tipo" value="fuga"> 🚨 Fuga
+          </label>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:12px">
+        <label>Fecha de egreso</label>
+        <input type="date" id="egreso-fecha" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem">
+      </div>
+      <div class="form-group">
+        <label>Observaciones <span style="font-weight:400;color:var(--text3)">(opcional)</span></label>
+        <textarea id="egreso-obs" rows="2" placeholder="Notas sobre el egreso..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-egreso')">Cancelar</button>
+      <button class="btn btn-primary" style="background:#7c3aed;border:none" onclick="guardarEgreso()">💾 Registrar egreso</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REINGRESO -->
+<div class="modal-overlay" id="modal-reingreso">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3>🔄 Registrar reingreso</h3>
+      <button class="modal-close" onclick="closeModal('modal-reingreso')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px">
+      <div id="reingreso-pac-nombre" style="font-weight:700;font-size:0.95rem;color:var(--text);margin-bottom:4px"></div>
+      <div style="font-size:0.78rem;color:var(--text3);margin-bottom:14px;background:#fef3c7;border-radius:6px;padding:8px 10px">⚠️ El historial anterior se conserva. Se actualizarán la fecha de ingreso y la habitación.</div>
+      <div class="form-group">
+        <label>Fecha de reingreso</label>
+        <input type="date" id="reingreso-fecha" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem">
+      </div>
+      <div class="form-group">
+        <label>Nueva habitación</label>
+        <input type="text" id="reingreso-hab" placeholder="Ej: AZU-217, 304B..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
+      </div>
+      <div class="form-group">
+        <label>Motivo de reingreso</label>
+        <textarea id="reingreso-motivo" rows="2" placeholder="¿Por qué reingresa?" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-reingreso')">Cancelar</button>
+      <button class="btn btn-primary" style="background:#0369a1;border:none" onclick="guardarReingreso()">🔄 Confirmar reingreso</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PERSONALIZAR CARTILLA -->
 <div class="modal-overlay" id="modal-personalizar-cartilla">
   <div class="modal" style="max-width:480px">
@@ -8483,6 +8555,8 @@ window.abrirPacSheet=async(id)=>{
     <button class="btn btn-secondary btn-sm" onclick="closePacSheet();goTo('tests');setTimeout(()=>{const sel=document.getElementById('test-pac-sel');if(sel){sel.value='${id}';if(typeof selectTestPaciente==='function')selectTestPaciente('${id}');}},250)">🧪 Test</button>
     <button class="btn btn-secondary btn-sm" onclick="editarPaciente('${id}');closePacSheet()">✏️ Editar</button>
     <button class="btn btn-secondary btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="closePacSheet();eliminarPaciente('${id}')">🗑️ Eliminar</button>
+    <button class="btn btn-sm" style="background:#7c3aed;color:#fff;border:none" onclick="abrirModalEgreso('${id}')">🚪 Registrar egreso</button>
+    <button class="btn btn-sm" style="background:#0369a1;color:#fff;border:none" onclick="abrirModalReingreso('${id}')">🔄 Reingreso</button>
     <button class="btn btn-primary btn-sm" style="background:#2563a8;width:100%;margin-top:8px" onclick="closePacSheet();hpacAbrirPaciente('${id}')">📂 Ver historial completo</button>
   `;
   // Cargar plan existente si hay
@@ -14191,6 +14265,102 @@ window.calVerMas=function(evt,fecha){
     if(!pop.contains(e.target)){pop.remove();document.removeEventListener('click',cerrar);}
   });
   document.body.appendChild(pop);
+};
+
+// ── EGRESO Y REINGRESO ───────────────────────────────────────────────
+window.abrirModalEgreso = function(pacId){
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  if(!pac) return;
+  window._egresoPacId=pacId;
+  document.getElementById('egreso-pac-nombre').textContent=pac.nombre;
+  document.getElementById('egreso-fecha').value=new Date().toISOString().split('T')[0];
+  document.getElementById('egreso-obs').value='';
+  document.querySelectorAll('input[name="egreso-tipo"]').forEach(function(r){r.checked=false;});
+  if(typeof openModal==='function') openModal('modal-egreso');
+  else document.getElementById('modal-egreso').style.display='flex';
+};
+
+window.guardarEgreso = async function(){
+  var pacId=window._egresoPacId;
+  if(!pacId) return;
+  var tipo=document.querySelector('input[name="egreso-tipo"]:checked')?.value;
+  if(!tipo){if(typeof toast==='function')toast('⚠️ Selecciona el tipo de egreso');return;}
+  var fecha=document.getElementById('egreso-fecha').value;
+  var obs=document.getElementById('egreso-obs').value.trim();
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  var labels={'alta-psicologia':'Alta por Psicología','alta-hospitalaria':'Alta Hospitalaria','alta-voluntaria':'Alta Voluntaria','fuga':'Fuga'};
+  try{
+    // Actualizar estado del paciente
+    await window._updateDoc(window._doc(window.db,'pacientes',pacId),{
+      estado:tipo, fechaAlta:fecha, motivoEgreso:labels[tipo]||'', obsEgreso:obs
+    });
+    if(pac){pac.estado=tipo;pac.fechaAlta=fecha;}
+    // Guardar registro de egreso en Firebase
+    await window._addDoc(window._collection(window.db,'egresos'),{
+      pacienteId:pacId, paciente:pac?.nombre||'',
+      tipo:tipo, tipoLabel:labels[tipo]||'',
+      fecha:fecha, observaciones:obs,
+      timestamp:new Date().toISOString()
+    });
+    // Refrescar
+    if(typeof window.renderDashboard==='function') window.renderDashboard();
+    if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+    if(typeof closeModal==='function') closeModal('modal-egreso');
+    else document.getElementById('modal-egreso').style.display='none';
+    closePacSheet();
+    if(typeof toast==='function') toast('✅ Egreso registrado: '+(labels[tipo]||tipo));
+  }catch(e){
+    if(typeof toast==='function') toast('❌ Error: '+e.message);
+  }
+};
+
+window.abrirModalReingreso = function(pacId){
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  if(!pac) return;
+  window._reingresoPacId=pacId;
+  document.getElementById('reingreso-pac-nombre').textContent=pac.nombre;
+  document.getElementById('reingreso-fecha').value=new Date().toISOString().split('T')[0];
+  document.getElementById('reingreso-hab').value=pac.hab||''; 
+  document.getElementById('reingreso-motivo').value='';
+  if(typeof openModal==='function') openModal('modal-reingreso');
+  else document.getElementById('modal-reingreso').style.display='flex';
+};
+
+window.guardarReingreso = async function(){
+  var pacId=window._reingresoPacId;
+  if(!pacId) return;
+  var fecha=document.getElementById('reingreso-fecha').value;
+  var hab=document.getElementById('reingreso-hab').value.trim();
+  var motivo=document.getElementById('reingreso-motivo').value.trim();
+  if(!fecha){if(typeof toast==='function')toast('⚠️ Ingresa la fecha de reingreso');return;}
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  try{
+    // Guardar historial del ingreso anterior
+    await window._addDoc(window._collection(window.db,'reingresos'),{
+      pacienteId:pacId, paciente:pac?.nombre||'',
+      fechaReingreso:fecha, nuevaHab:hab, motivo:motivo,
+      estadoAnterior:pac?.estado||'', fechaAltaAnterior:pac?.fechaAlta||'',
+      timestamp:new Date().toISOString()
+    });
+    // Actualizar paciente: nuevo episodio
+    var update={
+      estado:'seguimiento', fecha:fecha,
+      fechaAlta:null, motivoEgreso:null, obsEgreso:null,
+      reingresos:(pac?.reingresos||0)+1
+    };
+    if(hab) update.hab=hab;
+    await window._updateDoc(window._doc(window.db,'pacientes',pacId),update);
+    if(pac) Object.assign(pac,update);
+    // Refrescar
+    if(typeof window.abrirPacSheetSilent==='function'&&pac) window.abrirPacSheetSilent(pac);
+    if(typeof window.renderDashboard==='function') window.renderDashboard();
+    if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+    if(typeof closeModal==='function') closeModal('modal-reingreso');
+    else document.getElementById('modal-reingreso').style.display='none';
+    if(typeof toast==='function') toast('✅ Reingreso registrado · Historial conservado');
+  }catch(e){
+    if(typeof toast==='function') toast('❌ Error: '+e.message);
+  }
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
