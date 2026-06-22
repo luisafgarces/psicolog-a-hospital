@@ -1169,12 +1169,12 @@ input.toggle-cb{display:none}
             <div class="ic-form-body">
               <div class="ic-g2">
                 <div><div class="ic-sublabel">Ideación autolítica actual</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguna</span><span class="ic-chip" onclick="icTogRiesgo(this)">Pasiva — deseo de que termine</span><span class="ic-chip" onclick="icTogRiesgo(this)">Activa</span><span class="ic-chip" onclick="icTogRiesgo(this)">Con plan estructurado</span></div></div>
-                <div><div class="ic-sublabel">Intentos previos</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguno</span><span class="ic-chip" onclick="icTogR(this)">Sí — relevantes</span></div></div>
+                <div class="ic-only-nueva"><div class="ic-sublabel">Intentos previos</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguno</span><span class="ic-chip" onclick="icTogR(this)">Sí — relevantes</span></div></div>
               </div>
               <div id="ic-plan-riesgo-wrap" style="display:none">
                 <div class="ic-field"><div class="ic-sublabel">⚠️ Describir: ideación, plan, medios disponibles</div><textarea id="ic-riesgo-notas" rows="2" placeholder="Deseo de morir vs. deseo de que termine el sufrimiento. Plan. Medios disponibles. Intención…"></textarea></div>
               </div>
-              <div class="ic-field">
+              <div class="ic-field ic-only-nueva">
                 <div class="ic-sublabel">Red de apoyo funcional</div>
                 <div class="ic-chips">
                   <span class="ic-chip" onclick="icTogG(this)">Presente y activa</span>
@@ -1184,7 +1184,7 @@ input.toggle-cb{display:none}
                 </div>
                 <input type="text" id="ic-red-apoyo-detalle" placeholder="¿Quién está disponible ahora? ¿Calidad del apoyo? (opcional)" style="margin-top:6px;width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
               </div>
-              <div class="ic-field">
+              <div class="ic-field ic-only-nueva">
                 <div class="ic-sublabel">Factores protectores</div>
                 <div class="ic-chips">
                   <span class="ic-chip" onclick="icTog(this)">Motivación para recuperarse</span>
@@ -1659,6 +1659,16 @@ input.toggle-cb{display:none}
                 </div>
               </div>
               <div class="form-group"><label>Factores que cambiaron</label><textarea id="rev-factores" rows="2" placeholder="Contexto médico, familiar, conductual..."></textarea></div>
+              <div class="form-group">
+                <label>¿Cambios en red de apoyo? <span style="font-weight:400;font-size:0.72rem;color:var(--text3)">(respecto a valoración inicial)</span></label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px">
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-red-cambio" value="sin-cambio"> Sin cambio</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-red-cambio" value="mejoro"> Mejoró</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-red-cambio" value="empeoro"> Empeoró</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rev-red-cambio" value="ausente"> Ausente ahora</label>
+                </div>
+                <textarea id="rev-red-detalle" rows="2" placeholder="Describir cambio en red de apoyo..." style="margin-top:6px;width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;resize:vertical"></textarea>
+              </div>
             </div>
           </div>
 
@@ -1819,6 +1829,28 @@ input.toggle-cb{display:none}
 
             <div class="form-group"><label>Evolución desde la última valoración</label><textarea id="seg-eventos" rows="3" placeholder="¿Qué ha cambiado clínicamente? ¿Cómo ha respondido al manejo?..."></textarea></div>
 
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+              <div>
+                <div style="font-size:0.78rem;font-weight:600;margin-bottom:5px">Sueño</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <span class="ic-chip" onclick="icTogG(this)">Conservado</span>
+                  <span class="ic-chip" onclick="icTog(this)">Insomnio conciliación</span>
+                  <span class="ic-chip" onclick="icTog(this)">Insomnio mantenimiento</span>
+                  <span class="ic-chip" onclick="icTog(this)">Hipersomnia</span>
+                  <span class="ic-chip" onclick="icTog(this)">Alterado por hospitalización</span>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:0.78rem;font-weight:600;margin-bottom:5px">Alimentación</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <span class="ic-chip" onclick="icTogG(this)">Adecuada</span>
+                  <span class="ic-chip" onclick="icTog(this)">Apetito reducido</span>
+                  <span class="ic-chip" onclick="icTog(this)">Apetito aumentado</span>
+                  <span class="ic-chip" onclick="icTog(this)">Ayuno / restricción</span>
+                </div>
+              </div>
+            </div>
+
             <div style="margin-bottom:12px">
               <div style="font-size:0.8rem;font-weight:600;margin-bottom:6px">Síntomas presentes</div>
               <div class="ic-chips" id="seg-sintomas-chips">
@@ -1835,7 +1867,6 @@ input.toggle-cb{display:none}
                 <span class="ic-chip" onclick="icTog(this)">Alucinaciones</span>
                 <span class="ic-chip" onclick="icTog(this)">Ideas delirantes</span>
                 <span class="ic-chip" onclick="icTog(this)">Agitación psicomotora</span>
-                <span class="ic-chip" onclick="icTog(this)">Consumo activo de SPA</span>
                 <span class="ic-chip" onclick="icTog(this)">Síntomas somáticos</span>
               </div>
             </div>
@@ -8703,6 +8734,12 @@ window.abrirPacSheet=async(id)=>{
       const color=d>21?'var(--danger)':d>14?'var(--warning)':'var(--text)';
       return {l:'Tiempo hospitalizado',v:label,color};
     })(),
+    (()=>{
+      if(!p.reingresos||p.reingresos===0) return null;
+      var txt=p.reingresos===1?'1er reingreso':p.reingresos===2?'2° reingreso':p.reingresos+'° reingreso';
+      if(p.fechaAlta) txt+=' · Último egreso: '+formatDate(p.fechaAlta);
+      return {l:'🔄 Ingresos hospitalarios',v:p.reingresos+1+' ingresos · '+txt,color:'#0369a1',full:true};
+    })(),
     {l:'Edad',v:p.edad?p.edad+' años':'—'},
     {l:'Sexo',v:p.sexo||'—'},
     {l:'Riesgo suicida',v:p.riesgo||'Sin clasificar',color:riskColor[p.riesgo]||'var(--text2)'},
@@ -14288,6 +14325,7 @@ window.revSelectPac = function(id){
   gset('rev-recom','');
   gset('rev-alta-criterio','');
   gset('rev-proxcita','');
+  gset('rev-red-detalle','');
   gset('rev-riesgo','');
   document.querySelectorAll('#ic-mode-rev input[type=checkbox],#ic-mode-rev input[type=radio]').forEach(function(c){c.checked=false;});
   document.querySelectorAll('#ic-mode-rev .sev-btn').forEach(function(s){s.classList.remove('on');});
@@ -14339,6 +14377,8 @@ window.revGuardar = async function(){
     dxJustif:gv('rev-dx-justif'),
     plan:gv('rev-plan'),
     recom:gv('rev-recom'),
+    redApoyoCambio:getRadio('rev-red-cambio'),
+    redApoyoDetalle:gv('rev-red-detalle'),
     altaCumplida:getRadio('rev-alta'),
     altaCriterio:gv('rev-alta-criterio'),
     proxCita:gv('rev-proxcita'),
