@@ -2671,9 +2671,23 @@ input.toggle-cb{display:none}
             <span style="background:#b45309;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">2</span>
             Filtro Clínico-Médico <span style="font-weight:400;font-size:0.68rem;color:var(--text3);text-transform:none">(Revisión HCE)</span>
           </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Edad</div>
+              <input type="number" id="rd-edad-pac" min="0" max="120" placeholder="Años" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Fecha de ingreso hospitalario</div>
+              <input type="date" id="rd-fecha-ingreso" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+            </div>
+          </div>
           <div style="margin-bottom:10px">
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Dx Médico Principal</div>
             <input type="text" id="rd-dx" placeholder="Diagnóstico médico principal…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Tratamiento médico actual</div>
+            <textarea id="rd-trat-medico" rows="2" placeholder="Ej: Morfina 10mg c/8h, O2 suplementario, Quimioterapia…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
           </div>
           <div style="margin-bottom:10px">
             <div style="font-size:0.7rem;font-weight:600;color:#7c3aed;margin-bottom:3px">Dx Psicológico Principal</div>
@@ -3083,6 +3097,42 @@ input.toggle-cb{display:none}
   </div>
 </div>
 
+<!-- MODAL REINTERCONSULTA -->
+<div class="modal-overlay" id="modal-reinterc" style="z-index:600">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3>🔁 Registrar reinterconsulta</h3>
+      <button class="modal-close" onclick="closeModal('modal-reinterc')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px">
+      <div id="reinterc-pac-nombre" style="font-weight:700;font-size:0.95rem;color:var(--text);margin-bottom:14px"></div>
+      <div class="form-group">
+        <label>Fecha de la reinterconsulta</label>
+        <input type="date" id="reinterc-fecha" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem">
+      </div>
+      <div class="form-group">
+        <label>Nuevo motivo de interconsulta</label>
+        <textarea id="reinterc-motivo" rows="3" placeholder="¿Por qué vuelven a solicitar interconsulta?" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical"></textarea>
+      </div>
+      <div class="form-group">
+        <label>¿Es pertinente la reinterconsulta?</label>
+        <div style="display:flex;gap:12px;margin-top:6px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer"><input type="radio" name="reinterc-pertinente" value="si"> ✅ Sí, es pertinente</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer"><input type="radio" name="reinterc-pertinente" value="no"> ❌ No es pertinente</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Justificación <span style="font-weight:400;color:var(--text3)">(opcional)</span></label>
+        <textarea id="reinterc-justif" rows="2" placeholder="Justificación de la pertinencia o no pertinencia..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-reinterc')">Cancelar</button>
+      <button class="btn btn-primary" style="background:#7c3aed;border:none" onclick="guardarReinterconsulta()">💾 Registrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PERSONALIZAR CARTILLA -->
 <div class="modal-overlay" id="modal-personalizar-cartilla">
   <div class="modal" style="max-width:480px">
@@ -3114,7 +3164,8 @@ input.toggle-cb{display:none}
 <div class="modal-overlay" id="modal-paciente">
   <div class="modal">
     <div class="modal-header"><h3>Nuevo Paciente</h3><button class="modal-close" onclick="closeModal('modal-paciente')"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button></div>
-    <div class="modal-body"><div class="form-grid">
+    <div class="modal-body" style="max-height:75vh;overflow-y:auto"><div class="form-grid">
+      <!-- Tipo de paciente -->
       <div class="form-group full">
         <label>Tipo de paciente</label>
         <div style="display:flex;gap:10px;margin-top:6px">
@@ -3127,21 +3178,21 @@ input.toggle-cb{display:none}
         </div>
         <input type="hidden" id="p-tipo" value="hospitalizado">
       </div>
+      <!-- Datos básicos -->
       <div class="form-group full"><label>Nombre completo *</label><input type="text" id="p-nombre" placeholder="Apellidos, Nombres"></div>
       <div class="form-group"><label>Cédula *</label><input type="text" id="p-cedula"></div>
-      <div class="form-group"><label>Edad</label><input type="number" id="p-edad" min="0" max="120"></div>
       <div class="form-group"><label>Sexo</label><select id="p-sexo"><option value="">Seleccionar...</option><option>Femenino</option><option>Masculino</option><option>No binario</option></select></div>
-      <div class="form-group"><label>Fecha de ingreso hospitalario</label><input type="date" id="p-fecha" oninput="calcDiasModal()"></div>
-      <div class="form-group"><label>Fecha de solicitud de IC a psicología</label><input type="date" id="p-fecha-ic" oninput="calcDiasModal()"></div>
-      <div class="form-group full" id="p-dias-wrap" style="display:none">
-        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:8px 14px;font-size:0.85rem;color:#166534;display:flex;align-items:center;gap:10px">
-          <span style="font-size:1.1rem">🗓️</span>
-          <span id="p-dias-label" style="font-weight:600"></span>
-        </div>
-      </div>
-      <div class="form-group" id="p-hab-group"><label>Habitación / Servicio</label><input type="text" id="p-hab" placeholder="Ej: 304B, URG-12, UCI-3, AZU-5"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px"><button type="button" onclick="document.getElementById('p-hab').value='AZU-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔵 Bloque Azul</button><button type="button" onclick="document.getElementById('p-hab').value='URG-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🟡 Urgencias</button><button type="button" onclick="document.getElementById('p-hab').value='UCI-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔴 UCI</button></div></div>
+      <!-- Campos ocultos para compatibilidad con guardarPaciente -->
+      <input type="hidden" id="p-edad" value="">
+      <input type="hidden" id="p-fecha" value="">
+      <input type="hidden" id="p-trat-medico" value="">
+      <input type="hidden" id="p-notas" value="">
+      <div class="form-group full" id="p-dias-wrap" style="display:none"><div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:8px 14px;font-size:0.85rem;color:#166534;display:flex;align-items:center;gap:10px"><span style="font-size:1.1rem">🗓️</span><span id="p-dias-label" style="font-weight:600"></span></div></div>
+      <!-- IC -->
+      <div class="form-group"><label>Fecha solicitud IC a psicología</label><input type="date" id="p-fecha-ic"></div>
+      <div class="form-group" id="p-hab-group"><label>Habitación / Servicio</label><input type="text" id="p-hab" placeholder="Ej: 304B, URG-12, UCI-3, AZU-5"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px"><button type="button" onclick="document.getElementById('p-hab').value='AZU-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔵 AZU</button><button type="button" onclick="document.getElementById('p-hab').value='URG-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🟡 URG</button><button type="button" onclick="document.getElementById('p-hab').value='UCI-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔴 UCI</button></div></div>
       <div class="form-group"><label>Médico que solicita la IC</label><input type="text" id="p-medico-sol" placeholder="Ej: Dr. Ramírez"></div>
-      <div class="form-group"><label>Especialidad</label><input type="text" id="p-medico-esp" placeholder="Ej: Medicina Interna, Oncología…"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">
+      <div class="form-group"><label>Especialidad</label><input type="text" id="p-medico-esp" placeholder="Ej: Medicina Interna…"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">
         <button type="button" onclick="document.getElementById('p-medico-esp').value='Medicina Interna'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">Medicina Interna</button>
         <button type="button" onclick="document.getElementById('p-medico-esp').value='Cirugía'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">Cirugía</button>
         <button type="button" onclick="document.getElementById('p-medico-esp').value='Oncología'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">Oncología</button>
@@ -3149,10 +3200,9 @@ input.toggle-cb{display:none}
         <button type="button" onclick="document.getElementById('p-medico-esp').value='UCI'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">UCI</button>
         <button type="button" onclick="document.getElementById('p-medico-esp').value='Pediatría'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">Pediatría</button>
       </div></div>
-      <div class="form-group full"><label id="p-motivo-label">Diagnóstico médico principal</label><textarea id="p-motivo" rows="2" placeholder="Ej: Diabetes insulinodependiente, IRC, Ca. de mama"></textarea></div>
-      <div class="form-group full"><label>Motivo de interconsulta a psicología</label><textarea id="p-motivo-ic" rows="2" placeholder="Ej: Valorar estado emocional ante amputación programada, Paciente con ideación suicida referida por enfermería"></textarea></div>
-      <div class="form-group full"><label style="color:var(--accent2);font-weight:700">🎯 ¿Qué pide realmente? <span style="font-size:0.72rem;font-weight:400;color:var(--text3)">(tu interpretación clínica del pedido)</span></label><textarea id="p-que-pide" rows="2" placeholder="Ej: Quieren descartar riesgo suicida antes del procedimiento, buscan apoyo emocional para el familiar…"></textarea></div>
-      <div class="form-group full"><label>Tratamiento médico actual</label><textarea id="p-trat-medico" rows="2" placeholder="Ej: Quimioterapia ciclo 3, Morfina 10mg c/8h, O2 suplementario…"></textarea></div>
+      <div class="form-group full"><label id="p-motivo-label">Motivo de interconsulta a psicología</label><textarea id="p-motivo" rows="2" placeholder="Ej: Valorar estado emocional, paciente con ideación suicida…"></textarea></div>
+      <input type="hidden" id="p-motivo-ic" value="">
+      <div class="form-group full"><label style="color:var(--accent2);font-weight:700">🎯 ¿Qué pide realmente? <span style="font-size:0.72rem;font-weight:400;color:var(--text3)">(tu interpretación clínica)</span></label><textarea id="p-que-pide" rows="2" placeholder="Ej: Quieren descartar riesgo suicida antes del procedimiento…"></textarea></div>
       <div class="form-group full"><label>Prioridad de la interconsulta</label>
         <div id="p-prioridad-btns" style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
           <button type="button" class="risk-btn" data-val="REGULAR" style="color:var(--text2);border-color:#6b7280" onclick="selPrioridad('REGULAR')">🟢 REGULAR</button>
@@ -3161,11 +3211,10 @@ input.toggle-cb{display:none}
         </div>
         <input type="hidden" id="p-prioridad" value="">
       </div>
-      <div class="form-group full"><label>Estado actual</label>
-        <select id="p-estado"><option value="seguimiento">Seguimiento</option><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="consulta-externa">Consulta externa</option><option value="alta">Alta</option><option value="revaloracion">Revaluación</option><option value="alta-voluntaria">Alta voluntaria</option><option value="fallecido">Paciente fallecido</option></select>
+      <div class="form-group"><label>Estado actual</label>
+        <select id="p-estado"><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="seguimiento">Seguimiento</option><option value="consulta-externa">Consulta externa</option><option value="revaloracion">Revaluación</option></select>
       </div>
       <div class="form-group"><label>Próxima sesión</label><input type="date" id="p-proxsesion"></div>
-      <div class="form-group full"><label>Notas generales del caso</label><textarea id="p-notas" rows="3" placeholder="Observaciones, evolución general, consideraciones clínicas..."></textarea></div>
     </div></div>
     <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modal-paciente')">Cancelar</button><button class="btn btn-primary" onclick="guardarPaciente()">Registrar</button></div>
   </div>
@@ -8650,6 +8699,7 @@ window.abrirPacSheet=async(id)=>{
     <button class="btn btn-secondary btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="closePacSheet();eliminarPaciente('${id}')">🗑️ Eliminar</button>
     <button class="btn btn-sm" style="background:#7c3aed;color:#fff;border:none" onclick="abrirModalEgreso('${id}')">🚪 Registrar egreso</button>
     <button class="btn btn-sm" style="background:#0369a1;color:#fff;border:none" onclick="abrirModalReingreso('${id}')">🔄 Reingreso</button>
+    <button class="btn btn-sm" style="background:#059669;color:#fff;border:none" onclick="abrirReinterconsulta('${id}')">🔁 Reinterconsulta</button>
     <button class="btn btn-primary btn-sm" style="background:#2563a8;width:100%;margin-top:8px" onclick="closePacSheet();hpacAbrirPaciente('${id}')">📂 Ver historial completo</button>
   `;
   // Cargar plan existente si hay
@@ -13646,9 +13696,12 @@ window.rdCargarPaciente = function(pacId){
 function rdRellenar(d){
   rdSet('rd-fecha',    d.fecha||'');
   rdSet('rd-hab',      d.hab||'');
-  rdSet('rd-dx',       d.dx||'');
-  rdSet('rd-dx-psi',         d.dxPsi||'');
-  rdSet('rd-dx-diferenciales', d.dxDiferenciales||'');
+  rdSet('rd-dx',              d.dx||'');
+  rdSet('rd-dx-psi',          d.dxPsi||'');
+  rdSet('rd-dx-diferenciales',d.dxDiferenciales||'');
+  rdSet('rd-trat-medico',     d.tratMedico||'');
+  rdSet('rd-edad-pac',        d.edadPac||'');
+  rdSet('rd-fecha-ingreso',   d.fechaIngreso||'');
   rdSet('rd-edad',     d.edad||'');
   rdSet('rd-sexo',     d.sexo||'');
   rdSet('rd-dias',     d.dias||'');
@@ -13705,9 +13758,12 @@ function rdRellenarDesde(pac){
   rdSet('rd-hab',   pac.hab||'');
   rdSet('rd-edad',  pac.edad||'');
   rdSet('rd-sexo',  pac.sexo ? pac.sexo.charAt(0).toUpperCase() : '');
-  rdSet('rd-dx',    pac.motivo||'');
-  rdSet('rd-dx-psi',         pac.dxPsi||'');
-  rdSet('rd-dx-diferenciales', pac.dxDiferenciales||'');
+  rdSet('rd-dx',              pac.motivo||'');
+  rdSet('rd-dx-psi',          pac.dxPsi||'');
+  rdSet('rd-dx-diferenciales',pac.dxDiferenciales||'');
+  rdSet('rd-trat-medico',     pac.tratMedico||'');
+  rdSet('rd-edad-pac',        pac.edad||'');
+  rdSet('rd-fecha-ingreso',   pac.fecha||'');
   // Calcular días de estancia desde fecha de ingreso
   var diasCalc = (typeof calcularDiasInternacion==='function' && pac.fecha)
     ? calcularDiasInternacion(pac.fecha) : null;
@@ -13715,6 +13771,9 @@ function rdRellenarDesde(pac){
   rdSet('rd-aislamiento-tipo','');
   rdSet('rd-dx-psi','');
   rdSet('rd-dx-diferenciales','');
+  rdSet('rd-trat-medico','');
+  rdSet('rd-edad-pac','');
+  rdSet('rd-fecha-ingreso','');
   rdSet('rd-farm-descenso','');
   rdSet('rd-razon-der','');
   rdSet('rd-otras-esp','');
@@ -13805,6 +13864,9 @@ function rdRecolectar(){
     dx:              rdGet('rd-dx'),
     dxPsi:           rdGet('rd-dx-psi'),
     dxDiferenciales: rdGet('rd-dx-diferenciales'),
+    tratMedico:      rdGet('rd-trat-medico'),
+    edadPac:         rdGet('rd-edad-pac'),
+    fechaIngreso:    rdGet('rd-fecha-ingreso'),
     cambioPlan:      rdGet('rd-cambio-plan-texto'),
     dolor:           dolorEl?dolorEl.value:'0',
     laboratorio:     rdGetChecks('rd-lab').join(', '),
@@ -13850,6 +13912,17 @@ window.rdGuardar = async function(){
     window._rdFichasHoy[window._rdPacId] = datos;
     // Si la habitación cambió, actualizarla en el paciente en todas partes
     var pac = (window.pacientes||[]).find(function(p){ return p.id === window._rdPacId; });
+    // Propagar campos al paciente si cambiaron
+    if(pac){
+      var pacUpdate2={};
+      var rdDxVal=rdGet('rd-dx'); if(rdDxVal&&rdDxVal!==pac.motivo) pacUpdate2.motivo=rdDxVal;
+      var rdTratVal=rdGet('rd-trat-medico'); if(rdTratVal&&rdTratVal!==pac.tratMedico) pacUpdate2.tratMedico=rdTratVal;
+      var rdEdadVal=rdGet('rd-edad-pac'); if(rdEdadVal&&rdEdadVal!==pac.edad) pacUpdate2.edad=rdEdadVal;
+      var rdFechaVal=rdGet('rd-fecha-ingreso'); if(rdFechaVal&&rdFechaVal!==pac.fecha) pacUpdate2.fecha=rdFechaVal;
+      if(Object.keys(pacUpdate2).length>0){
+        try{ await updateDoc(doc(db,'pacientes',pac.id),pacUpdate2); Object.assign(pac,pacUpdate2); }catch(e2){}
+      }
+    }
     var nuevaHab = rdGet('rd-hab');
     if(pac && nuevaHab && nuevaHab !== pac.hab){
       try{
@@ -14472,6 +14545,55 @@ window.guardarReingreso = async function(){
     if(typeof closeModal==='function') closeModal('modal-reingreso');
     else document.getElementById('modal-reingreso').style.display='none';
     if(typeof toast==='function') toast('✅ Reingreso registrado · Historial conservado');
+  }catch(e){
+    if(typeof toast==='function') toast('❌ Error: '+e.message);
+  }
+};
+
+// ── REINTERCONSULTA ─────────────────────────────────────────────────
+window.abrirReinterconsulta=function(pacId){
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  if(!pac) return;
+  window._reintercPacId=pacId;
+  document.getElementById('reinterc-pac-nombre').textContent=pac.nombre;
+  document.getElementById('reinterc-fecha').value=new Date().toISOString().split('T')[0];
+  document.getElementById('reinterc-motivo').value='';
+  document.getElementById('reinterc-justif').value='';
+  document.querySelectorAll('input[name="reinterc-pertinente"]').forEach(function(r){r.checked=false;});
+  if(typeof openModal==='function') openModal('modal-reinterc');
+  else document.getElementById('modal-reinterc').style.display='flex';
+};
+
+window.guardarReinterconsulta=async function(){
+  var pacId=window._reintercPacId;
+  if(!pacId) return;
+  var fecha=document.getElementById('reinterc-fecha').value;
+  var motivo=document.getElementById('reinterc-motivo').value.trim();
+  var pertinente=document.querySelector('input[name="reinterc-pertinente"]:checked')?.value||'';
+  var justif=document.getElementById('reinterc-justif').value.trim();
+  if(!motivo){if(typeof toast==='function')toast('⚠️ Escribe el motivo de la reinterconsulta');return;}
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  try{
+    await window._addDoc(window._collection(window.db,'reinterconsultas'),{
+      pacienteId:pacId, paciente:pac?.nombre||'',
+      fecha:fecha, motivo:motivo,
+      pertinente:pertinente, justificacion:justif,
+      timestamp:new Date().toISOString()
+    });
+    // Actualizar motivo IC del paciente si es pertinente
+    if(pertinente==='si'&&pac){
+      await window._updateDoc(window._doc(window.db,'pacientes',pacId),{
+        motivoIC:motivo, fechaIC:fecha,
+        estado:'nueva-interconsulta-pendiente'
+      });
+      pac.motivoIC=motivo; pac.fechaIC=fecha;
+      pac.estado='nueva-interconsulta-pendiente';
+      if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+      if(typeof window.renderDashboard==='function') window.renderDashboard();
+    }
+    if(typeof closeModal==='function') closeModal('modal-reinterc');
+    else document.getElementById('modal-reinterc').style.display='none';
+    if(typeof toast==='function') toast('✅ Reinterconsulta registrada'+(pertinente==='no'?' · No pertinente':pertinente==='si'?' · Paciente reactivo en ronda':''));
   }catch(e){
     if(typeof toast==='function') toast('❌ Error: '+e.message);
   }
