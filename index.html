@@ -3054,6 +3054,10 @@ input.toggle-cb{display:none}
         <label>Médico solicitante</label>
         <input type="text" id="reingreso-medico" placeholder="Nombre del médico que solicita IC..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
       </div>
+      <div class="form-group">
+        <label>Próxima sesión <span style="font-weight:400;font-size:0.72rem;color:var(--text3)">(aparecerá en ronda ese día)</span></label>
+        <input type="date" id="reingreso-prox-sesion" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem">
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="form-group">
           <label>Estado inicial</label>
@@ -14417,6 +14421,7 @@ window.abrirModalReingreso = function(pacId){
   document.getElementById('reingreso-medico').value=pac.medicoSol||'';
   document.getElementById('reingreso-estado').value='nueva-interconsulta-pendiente';
   document.getElementById('reingreso-prioridad').value='REGULAR';
+  document.getElementById('reingreso-prox-sesion').value='';
   if(typeof openModal==='function') openModal('modal-reingreso');
   else document.getElementById('modal-reingreso').style.display='flex';
 };
@@ -14456,6 +14461,8 @@ window.guardarReingreso = async function(){
     if(reinFechaIC) update.fechaIC=reinFechaIC;
     if(reinMotivoIC) update.motivoIC=reinMotivoIC;
     if(reinMedico) update.medicoSol=reinMedico;
+    var reinProxSesion=document.getElementById('reingreso-prox-sesion')?.value||'';
+    if(reinProxSesion) update.proxSesion=reinProxSesion;
     await window._updateDoc(window._doc(window.db,'pacientes',pacId),update);
     if(pac) Object.assign(pac,update);
     // Refrescar
