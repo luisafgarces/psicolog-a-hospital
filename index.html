@@ -1614,15 +1614,22 @@ input.toggle-cb{display:none}
           <div style="text-align:center;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #7c3aed">
             <div style="font-family:'DM Serif Display',serif;font-size:1.15rem;font-weight:700;color:#7c3aed">🔁 REVALORACIÓN PSICOLÓGICA HOSPITALARIA</div>
           </div>
-          <!-- Cabecera -->
-          <div style="display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:end;margin-bottom:18px">
-            <div class="form-group"><label>Paciente</label>
-              <select id="rev-pac-sel" onchange="revSelectPac(this.value)" style="padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;width:100%">
+          <!-- Cabecera — se autocompleta al seleccionar paciente o al abrir desde ronda -->
+          <div style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px">
+              <div style="font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:3px">Paciente</div>
+              <select id="rev-pac-sel" onchange="revSelectPac(this.value)" style="padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.85rem;width:100%;background:var(--surface)">
                 <option value="">— Seleccionar paciente —</option>
               </select>
             </div>
-            <div class="form-group"><label>Fecha</label><input type="date" id="rev-fecha" style="width:140px"></div>
-            <div class="form-group"><label>Sesión #</label><input type="number" id="rev-num" min="1" placeholder="—" style="width:80px;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem"></div>
+            <div>
+              <div style="font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:3px">Fecha</div>
+              <input type="date" id="rev-fecha" style="padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.85rem;background:var(--surface)">
+            </div>
+            <div>
+              <div style="font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:3px">Sesión #</div>
+              <input type="number" id="rev-num" min="1" placeholder="—" style="width:70px;padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.85rem;background:var(--surface)">
+            </div>
           </div>
 
           <!-- I. MOTIVO -->
@@ -5746,6 +5753,13 @@ window.filtrarPsico = function(filtro, btn){
 
 // ── NAVIGATION ─────────────────────────────────────────────────────
 window.goTo = function(page){
+  // Si salimos de interconsultas, resetear modo a 'nueva'
+  if(page!=='interconsultas'&&typeof window.setICMode==='function'){
+    var mrev=document.getElementById('ic-mode-rev');
+    if(mrev&&mrev.style.display!=='none'){
+      window.setICMode('nueva');
+    }
+  }
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
     'psicoeducacion','metricas','ronda-diaria','calendario'];
@@ -8852,11 +8866,23 @@ window.setICMode=function(m){
   if(seg)seg.style.display=m==='seg'?'':'none';
   // Al cambiar a rev: autocompletar con paciente activo
   if(m==='rev'){
-    var activePacId=window._icPacId||document.getElementById('ic-pac-sel')?.value||'';
+    var activePacId=window._icPacId
+      ||document.getElementById('ic-pac-sel')?.value
+      ||document.getElementById('ic-paciente-sel')?.value
+      ||window._rdPacId||'';
     var revSel=document.getElementById('rev-pac-sel');
-    if(revSel&&activePacId&&revSel.value!==activePacId){
+    if(revSel&&activePacId){
       revSel.value=activePacId;
       if(typeof revSelectPac==='function') revSelectPac(activePacId);
+    }
+    // Autocompletar fecha de hoy
+    var revFecha=document.getElementById('rev-fecha');
+    if(revFecha&&!revFecha.value) revFecha.value=new Date().toISOString().split('T')[0];
+    // Autocompletar número de sesión basado en notas del paciente
+    if(activePacId){
+      var notasPac=(window.interconsultas||[]).filter(function(ic){return ic.pacienteId===activePacId;});
+      var revNum=document.getElementById('rev-num');
+      if(revNum&&!revNum.value) revNum.value=notasPac.length+1;
     }
   }
 };
@@ -14250,6 +14276,10 @@ window.revSelectPac = function(id){
   // Cargar datos del paciente en el formulario
   var gset=function(eid,v){var el=document.getElementById(eid);if(el)el.value=v||'';};
   gset('rev-fecha',new Date().toISOString().split('T')[0]);
+  // Número de sesión automático
+  var notasPac=(window.interconsultas||[]).filter(function(ic){return ic.pacienteId===id;});
+  var revNumEl=document.getElementById('rev-num');
+  if(revNumEl) revNumEl.value=notasPac.length+1;
   gset('rev-dx-previo',p.motivo||'');
   gset('rev-motivo-desc','');
   gset('rev-evolucion','');
