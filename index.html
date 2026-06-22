@@ -8043,6 +8043,8 @@ window.hpacFiltrar=(q)=>{
 };
 
 window.hpacAbrirPaciente=(pacId)=>{
+  window._hpacEgresos=[];
+  window._hpacReingresos=[];
   console.log('hpacAbrirPaciente llamado con id:', pacId);
   if(!pacId){toast('⚠️ ID de paciente no disponible');return;}
   _hpacPacId=pacId;window._hpacPacId=pacId;
@@ -8080,6 +8082,20 @@ window.hpacRenderNotas=()=>{
   const anas=anamnesisList.filter(a=>a.pacienteId===_hpacPacId||a.pacienteNombre===nombre);
   const tests=testHistory.filter(t=>t.pacienteId===_hpacPacId||t.paciente===nombre);
   const caps=(window.capacidadList||[]).filter(c=>c.pacienteId===_hpacPacId||c.pacienteNombre===nombre);
+  // Cargar egresos y reingresos del trayecto
+  var _hpacEgresos=window._hpacEgresos||[];
+  var _hpacReingresos=window._hpacReingresos||[];
+  // Disparar carga async si no están cargados
+  (async function(){
+    try{
+      if(!window._getDocs||!window._query||!window._collection||!window._where||!window._orderBy) return;
+      var snapE=await window._getDocs(window._query(window._collection(window.db,'egresos'),window._where('pacienteId','==',_hpacPacId),window._orderBy('fecha','desc')));
+      window._hpacEgresos=snapE.docs.map(function(d){return Object.assign({id:d.id},d.data(),{_esEgreso:true});});
+      var snapR=await window._getDocs(window._query(window._collection(window.db,'reingresos'),window._where('pacienteId','==',_hpacPacId),window._orderBy('fechaReingreso','desc')));
+      window._hpacReingresos=snapR.docs.map(function(d){return Object.assign({id:d.id},d.data(),{_esReingreso:true});});
+      if(window._hpacEgresos.length||window._hpacReingresos.length) hpacRenderNotas();
+    }catch(e){console.warn('egresos/reingresos:',e);}
+  })();
   // Summary bar
   const rb=document.getElementById('hpac-resumen-bar');
   if(rb){
@@ -8105,8 +8121,46 @@ window.hpacRenderNotas=()=>{
   var tc={'IC Nueva':'tipo-ic','Seguimiento':'tipo-seg','Anamnesis':'tipo-anam','Nota especial':'tipo-esp','Capacidad Decisional':'tipo-ic'};
   var tcol={'IC Nueva':'var(--accent2)','Seguimiento':'#1a56db','Anamnesis':'#7b1fa2','Nota especial':'var(--warning)','Capacidad Decisional':'#c0392b'};
 
+  // ── TRAYECTO HOSPITALARIO ──
+  var egs=window._hpacEgresos||[];
+  var reings=window._hpacReingresos||[];
+  var trayecto=[].concat(
+    egs.map(function(e){return{fecha:e.fecha,tipo:'egreso',label:e.tipoLabel||e.tipo,obs:e.observaciones||''};}),
+    reings.map(function(r){return{fecha:r.fechaReingreso,tipo:'reingreso',hab:r.nuevaHab||'',motivo:r.motivo||''};}) 
+  ).sort(function(a,b){return b.fecha>a.fecha?1:-1;});
+  var trayectoParts=[];
+  if(p.fecha){
+    trayectoParts.push('<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0fdf4;border-left:3px solid #16a34a;border-radius:6px;margin-bottom:4px;font-size:0.8rem">'
+      +'<span style="font-weight:700;color:#15803d">🟢 Ingreso</span>'
+      +'<span style="color:var(--text2)">'+p.fecha+'</span>'
+      +(p.hab?'<span style="color:var(--text3);font-size:0.72rem">· '+p.hab+'</span>':'')
+      +'</div>');
+  }
+  trayecto.forEach(function(ev){
+    if(ev.tipo==='egreso'){
+      var ecolor={'alta-psicologia':'#16a34a','alta-hospitalaria':'#2563eb','alta-voluntaria':'#d97706','fuga':'#dc2626'}[ev.label]||'#6b7280';
+      var eico={'Alta por Psicología':'✅','Alta Hospitalaria':'🏥','Alta Voluntaria':'⚠️','Fuga':'🚨'}[ev.label]||'🚪';
+      trayectoParts.push('<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fef2f2;border-left:3px solid #dc2626;border-radius:6px;margin-bottom:4px;font-size:0.8rem">'
+        +'<span style="font-weight:700;color:#dc2626">'+eico+' '+ev.label+'</span>'
+        +'<span style="color:var(--text2)">'+ev.fecha+'</span>'
+        +(ev.obs?'<span style="color:var(--text3);font-size:0.72rem">· '+ev.obs+'</span>':'')
+        +'</div>');
+    } else {
+      trayectoParts.push('<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#eff6ff;border-left:3px solid #2563eb;border-radius:6px;margin-bottom:4px;font-size:0.8rem">'
+        +'<span style="font-weight:700;color:#1d4ed8">🔄 Reingreso</span>'
+        +'<span style="color:var(--text2)">'+ev.fecha+'</span>'
+        +(ev.hab?'<span style="color:var(--text3);font-size:0.72rem">· '+ev.hab+'</span>':'')
+        +(ev.motivo?'<span style="color:var(--text3);font-size:0.72rem">· '+ev.motivo+'</span>':'')
+        +'</div>');
+    }
+  });
   // Build notas HTML with for loop (no nested template literals)
   var notasParts=[];
+  if(trayectoParts.length){
+    notasParts.push('<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#15803d;margin-bottom:8px">🏥 Trayecto hospitalario</div>');
+    notasParts=notasParts.concat(trayectoParts);
+    notasParts.push('<div style="height:14px"></div>');
+  }
   if(notas.length){
     notasParts.push('<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:10px">Notas clinicas ('+notas.length+')</div>');
     for(var ni=0;ni<notas.length;ni++){
@@ -14357,7 +14411,11 @@ window.guardarReingreso = async function(){
     if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
     if(typeof closeModal==='function') closeModal('modal-reingreso');
     else document.getElementById('modal-reingreso').style.display='none';
-    if(typeof toast==='function') toast('✅ Reingreso registrado · Historial conservado');
+    if(typeof toast==='function') toast('✅ Reingreso registrado · Abriendo formulario de actualización…');
+    // Abrir automáticamente el formulario de editar paciente para actualizar datos del nuevo ingreso
+    setTimeout(function(){
+      if(typeof editarPaciente==='function') editarPaciente(pacId);
+    }, 600);
   }catch(e){
     if(typeof toast==='function') toast('❌ Error: '+e.message);
   }
