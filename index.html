@@ -3046,6 +3046,11 @@ input.toggle-cb{display:none}
         <div class="form-group">
           <label>Nueva habitación</label>
           <input type="text" id="reingreso-hab" placeholder="Ej: AZU-217, 304B..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">
+            <button type="button" onclick="document.getElementById('reingreso-hab').value='AZU-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔵 AZU</button>
+            <button type="button" onclick="document.getElementById('reingreso-hab').value='URG-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🟡 URG</button>
+            <button type="button" onclick="document.getElementById('reingreso-hab').value='UCI-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔴 UCI</button>
+          </div>
         </div>
       </div>
       <div class="form-group">
@@ -3109,6 +3114,15 @@ input.toggle-cb{display:none}
       <div class="form-group">
         <label>Fecha de la reinterconsulta</label>
         <input type="date" id="reinterc-fecha" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem">
+      </div>
+      <div class="form-group">
+        <label>Habitación <span style="font-weight:400;font-size:0.72rem;color:var(--text3)">(si cambió)</span></label>
+        <input type="text" id="reinterc-hab" placeholder="Ej: AZU-217, 304B..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">
+          <button type="button" onclick="document.getElementById('reinterc-hab').value='AZU-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔵 AZU</button>
+          <button type="button" onclick="document.getElementById('reinterc-hab').value='URG-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🟡 URG</button>
+          <button type="button" onclick="document.getElementById('reinterc-hab').value='UCI-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔴 UCI</button>
+        </div>
       </div>
       <div class="form-group">
         <label>Nuevo motivo de interconsulta</label>
@@ -8836,6 +8850,15 @@ window.setICMode=function(m){
   var seg=document.getElementById('ic-out-seg');
   if(f4)f4.style.display=m==='seg'?'none':'';
   if(seg)seg.style.display=m==='seg'?'':'none';
+  // Al cambiar a rev: autocompletar con paciente activo
+  if(m==='rev'){
+    var activePacId=window._icPacId||document.getElementById('ic-pac-sel')?.value||'';
+    var revSel=document.getElementById('rev-pac-sel');
+    if(revSel&&activePacId&&revSel.value!==activePacId){
+      revSel.value=activePacId;
+      if(typeof revSelectPac==='function') revSelectPac(activePacId);
+    }
+  }
 };
 
 window.toggleICView=function(){goTo('interconsultas');};
@@ -14221,12 +14244,27 @@ window.propagarRiesgoPaciente = async function(pacId, nuevoRiesgo){
 
 // ── REVALORACIÓN ────────────────────────────────────────────────────
 window.revSelectPac = function(id){
+  if(!id) return;
   var p=(window.pacientes||[]).find(function(x){return x.id===id;});
   if(!p) return;
-  var prevDx=document.getElementById('rev-dx-previo');
-  if(prevDx&&!prevDx.value) prevDx.value=p.motivo||'';
-  var fecha=document.getElementById('rev-fecha');
-  if(fecha&&!fecha.value) fecha.value=new Date().toISOString().split('T')[0];
+  // Cargar datos del paciente en el formulario
+  var gset=function(eid,v){var el=document.getElementById(eid);if(el)el.value=v||'';};
+  gset('rev-fecha',new Date().toISOString().split('T')[0]);
+  gset('rev-dx-previo',p.motivo||'');
+  gset('rev-motivo-desc','');
+  gset('rev-evolucion','');
+  gset('rev-factores','');
+  gset('rev-estado-mental','');
+  gset('rev-dx-actual','');
+  gset('rev-diferenciales',p.dxDiferenciales||'');
+  gset('rev-dx-justif','');
+  gset('rev-plan','');
+  gset('rev-recom','');
+  gset('rev-alta-criterio','');
+  gset('rev-proxcita','');
+  gset('rev-riesgo','');
+  document.querySelectorAll('#ic-mode-rev input[type=checkbox],#ic-mode-rev input[type=radio]').forEach(function(c){c.checked=false;});
+  document.querySelectorAll('#ic-mode-rev .sev-btn').forEach(function(s){s.classList.remove('on');});
 };
 
 window.setRevRiesgo = function(el,nivel){
@@ -14288,6 +14326,9 @@ window.revGuardar = async function(){
     if(_revRiesgo&&typeof propagarRiesgoPaciente==='function') propagarRiesgoPaciente(pacId,_revRiesgo);
     if(typeof toast==='function') toast('✅ Revaloración guardada');
     revLimpiar();
+    // Resetear selector
+    var sel=document.getElementById('rev-pac-sel');
+    if(sel) sel.value='';
   }catch(e){
     if(typeof toast==='function') toast('❌ Error: '+e.message);
   }
@@ -14557,6 +14598,7 @@ window.abrirReinterconsulta=function(pacId){
   window._reintercPacId=pacId;
   document.getElementById('reinterc-pac-nombre').textContent=pac.nombre;
   document.getElementById('reinterc-fecha').value=new Date().toISOString().split('T')[0];
+  document.getElementById('reinterc-hab').value=pac.hab||'';
   document.getElementById('reinterc-motivo').value='';
   document.getElementById('reinterc-justif').value='';
   document.querySelectorAll('input[name="reinterc-pertinente"]').forEach(function(r){r.checked=false;});
@@ -14574,12 +14616,19 @@ window.guardarReinterconsulta=async function(){
   if(!motivo){if(typeof toast==='function')toast('⚠️ Escribe el motivo de la reinterconsulta');return;}
   var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
   try{
+    var reintercHab=document.getElementById('reinterc-hab')?.value.trim()||'';
     await window._addDoc(window._collection(window.db,'reinterconsultas'),{
       pacienteId:pacId, paciente:pac?.nombre||'',
-      fecha:fecha, motivo:motivo,
+      fecha:fecha, motivo:motivo, hab:reintercHab,
       pertinente:pertinente, justificacion:justif,
       timestamp:new Date().toISOString()
     });
+    // Actualizar habitación si cambió
+    if(reintercHab&&pac&&reintercHab!==pac.hab){
+      await window._updateDoc(window._doc(window.db,'pacientes',pacId),{hab:reintercHab});
+      pac.hab=reintercHab;
+      if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+    }
     // Actualizar motivo IC del paciente si es pertinente
     if(pertinente==='si'&&pac){
       await window._updateDoc(window._doc(window.db,'pacientes',pacId),{
