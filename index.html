@@ -765,6 +765,30 @@ input.toggle-cb{display:none}
                   <span class="ic-chip" onclick="icTog(this)">Tratamiento psiquiátrico previo</span>
                 </div>
               </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Consumo de SPA</div>
+                <div class="ic-chips">
+                  <span class="ic-chip" onclick="icTogG(this)">Niega consumo</span>
+                  <span class="ic-chip" onclick="icTog(this)">Alcohol ocasional</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Alcohol problemático</span>
+                  <span class="ic-chip" onclick="icTog(this)">Tabaco</span>
+                  <span class="ic-chip" onclick="icTog(this)">Cannabis</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Cocaína / bazuco</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Benzodiacepinas sin prescripción</span>
+                  <span class="ic-chip" onclick="icTogA(this)">Policonsumo</span>
+                </div>
+              </div>
+              <div class="ic-field">
+                <div class="ic-sublabel">Notas sobre antecedentes</div>
+                <textarea id="ic-sustancias-notas" rows="2" placeholder="Detalles sobre antecedentes psiquiátricos, patrón de consumo, contexto relevante…"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUEÑO Y ALIMENTACIÓN — visible en IC y seguimiento -->
+          <div class="ic-form-section">
+            <div class="ic-form-head slate"><span class="ft">😴 Sueño y alimentación</span></div>
+            <div class="ic-form-body">
               <div class="ic-g2">
                 <div class="ic-field">
                   <div class="ic-sublabel">Hábitos de sueño</div>
@@ -787,23 +811,6 @@ input.toggle-cb{display:none}
                     <span class="ic-chip" onclick="icTog(this)">Ayuno / restricción</span>
                   </div>
                 </div>
-              </div>
-              <div class="ic-field">
-                <div class="ic-sublabel">Consumo de SPA</div>
-                <div class="ic-chips">
-                  <span class="ic-chip" onclick="icTogG(this)">Niega consumo</span>
-                  <span class="ic-chip" onclick="icTog(this)">Alcohol ocasional</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Alcohol problemático</span>
-                  <span class="ic-chip" onclick="icTog(this)">Tabaco</span>
-                  <span class="ic-chip" onclick="icTog(this)">Cannabis</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Cocaína / bazuco</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Benzodiacepinas sin prescripción</span>
-                  <span class="ic-chip" onclick="icTogA(this)">Policonsumo</span>
-                </div>
-              </div>
-              <div class="ic-field">
-                <div class="ic-sublabel">Notas sobre antecedentes</div>
-                <textarea id="ic-sustancias-notas" rows="2" placeholder="Detalles sobre antecedentes psiquiátricos, patrón de consumo, contexto relevante…"></textarea>
               </div>
             </div>
           </div>
@@ -1733,7 +1740,6 @@ input.toggle-cb{display:none}
 
           <!-- Botones -->
           <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)">
-            <div class="form-group" style="margin:0"><label>Próxima cita</label><input type="date" id="rev-proxcita" style="padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem"></div>
             <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
               <button class="btn btn-secondary" onclick="revLimpiar()">🗑 Limpiar</button>
               <button class="btn btn-primary" style="background:#7c3aed;border-color:#7c3aed" onclick="revGuardar()">💾 Guardar revaloración</button>
@@ -14324,7 +14330,6 @@ window.revSelectPac = function(id){
   gset('rev-plan','');
   gset('rev-recom','');
   gset('rev-alta-criterio','');
-  gset('rev-proxcita','');
   gset('rev-red-detalle','');
   gset('rev-riesgo','');
   document.querySelectorAll('#ic-mode-rev input[type=checkbox],#ic-mode-rev input[type=radio]').forEach(function(c){c.checked=false;});
@@ -14381,7 +14386,6 @@ window.revGuardar = async function(){
     redApoyoDetalle:gv('rev-red-detalle'),
     altaCumplida:getRadio('rev-alta'),
     altaCriterio:gv('rev-alta-criterio'),
-    proxCita:gv('rev-proxcita'),
     timestamp:new Date().toISOString()
   };
   try{
