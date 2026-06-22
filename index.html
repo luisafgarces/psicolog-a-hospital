@@ -3021,20 +3021,55 @@ input.toggle-cb{display:none}
       <h3>🔄 Registrar reingreso</h3>
       <button class="modal-close" onclick="closeModal('modal-reingreso')">✕</button>
     </div>
-    <div class="modal-body" style="padding:16px 20px">
+    <div class="modal-body" style="padding:16px 20px;max-height:70vh;overflow-y:auto">
       <div id="reingreso-pac-nombre" style="font-weight:700;font-size:0.95rem;color:var(--text);margin-bottom:4px"></div>
-      <div style="font-size:0.78rem;color:var(--text3);margin-bottom:14px;background:#fef3c7;border-radius:6px;padding:8px 10px">⚠️ El historial anterior se conserva. Se actualizarán la fecha de ingreso y la habitación.</div>
-      <div class="form-group">
-        <label>Fecha de reingreso</label>
-        <input type="date" id="reingreso-fecha" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem">
-      </div>
-      <div class="form-group">
-        <label>Nueva habitación</label>
-        <input type="text" id="reingreso-hab" placeholder="Ej: AZU-217, 304B..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
+      <div style="font-size:0.78rem;color:var(--text3);margin-bottom:14px;background:#fef3c7;border-radius:6px;padding:8px 10px">⚠️ El historial anterior se conserva completamente.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group">
+          <label>Fecha de reingreso</label>
+          <input type="date" id="reingreso-fecha" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem">
+        </div>
+        <div class="form-group">
+          <label>Nueva habitación</label>
+          <input type="text" id="reingreso-hab" placeholder="Ej: AZU-217, 304B..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
+        </div>
       </div>
       <div class="form-group">
         <label>Motivo de reingreso</label>
         <textarea id="reingreso-motivo" rows="2" placeholder="¿Por qué reingresa?" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Nuevo diagnóstico médico</label>
+        <input type="text" id="reingreso-dx" placeholder="Dx médico del nuevo ingreso..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
+      </div>
+      <div class="form-group">
+        <label>Fecha nueva interconsulta</label>
+        <input type="date" id="reingreso-fecha-ic" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem">
+      </div>
+      <div class="form-group">
+        <label>Nuevo motivo de interconsulta</label>
+        <textarea id="reingreso-motivo-ic" rows="2" placeholder="¿Qué solicita el equipo médico esta vez?" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Médico solicitante</label>
+        <input type="text" id="reingreso-medico" placeholder="Nombre del médico que solicita IC..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group">
+          <label>Estado inicial</label>
+          <select id="reingreso-estado" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
+            <option value="nueva-interconsulta-pendiente">IC Nueva</option>
+            <option value="seguimiento">Seguimiento</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Prioridad</label>
+          <select id="reingreso-prioridad" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
+            <option value="REGULAR">🟢 Regular</option>
+            <option value="PRIORITARIA">🟡 Prioritaria</option>
+            <option value="URGENTE">🔴 Urgente</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -14374,8 +14409,14 @@ window.abrirModalReingreso = function(pacId){
   window._reingresoPacId=pacId;
   document.getElementById('reingreso-pac-nombre').textContent=pac.nombre;
   document.getElementById('reingreso-fecha').value=new Date().toISOString().split('T')[0];
-  document.getElementById('reingreso-hab').value=pac.hab||''; 
+  document.getElementById('reingreso-hab').value=pac.hab||'';
   document.getElementById('reingreso-motivo').value='';
+  document.getElementById('reingreso-dx').value='';
+  document.getElementById('reingreso-fecha-ic').value=new Date().toISOString().split('T')[0];
+  document.getElementById('reingreso-motivo-ic').value='';
+  document.getElementById('reingreso-medico').value=pac.medicoSol||'';
+  document.getElementById('reingreso-estado').value='nueva-interconsulta-pendiente';
+  document.getElementById('reingreso-prioridad').value='REGULAR';
   if(typeof openModal==='function') openModal('modal-reingreso');
   else document.getElementById('modal-reingreso').style.display='flex';
 };
@@ -14396,13 +14437,25 @@ window.guardarReingreso = async function(){
       estadoAnterior:pac?.estado||'', fechaAltaAnterior:pac?.fechaAlta||'',
       timestamp:new Date().toISOString()
     });
-    // Actualizar paciente: nuevo episodio
+    // Leer campos nuevos del modal
+    var reinDx=document.getElementById('reingreso-dx')?.value.trim()||'';
+    var reinFechaIC=document.getElementById('reingreso-fecha-ic')?.value||'';
+    var reinMotivoIC=document.getElementById('reingreso-motivo-ic')?.value.trim()||'';
+    var reinMedico=document.getElementById('reingreso-medico')?.value.trim()||'';
+    var reinEstado=document.getElementById('reingreso-estado')?.value||'nueva-interconsulta-pendiente';
+    var reinPrioridad=document.getElementById('reingreso-prioridad')?.value||'REGULAR';
+    // Actualizar paciente: nuevo episodio con todos los datos
     var update={
-      estado:'seguimiento', fecha:fecha,
+      estado:reinEstado, fecha:fecha,
       fechaAlta:null, motivoEgreso:null, obsEgreso:null,
-      reingresos:(pac?.reingresos||0)+1
+      reingresos:(pac?.reingresos||0)+1,
+      prioridad:reinPrioridad
     };
     if(hab) update.hab=hab;
+    if(reinDx) update.motivo=reinDx;
+    if(reinFechaIC) update.fechaIC=reinFechaIC;
+    if(reinMotivoIC) update.motivoIC=reinMotivoIC;
+    if(reinMedico) update.medicoSol=reinMedico;
     await window._updateDoc(window._doc(window.db,'pacientes',pacId),update);
     if(pac) Object.assign(pac,update);
     // Refrescar
@@ -14411,11 +14464,7 @@ window.guardarReingreso = async function(){
     if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
     if(typeof closeModal==='function') closeModal('modal-reingreso');
     else document.getElementById('modal-reingreso').style.display='none';
-    if(typeof toast==='function') toast('✅ Reingreso registrado · Abriendo formulario de actualización…');
-    // Abrir automáticamente el formulario de editar paciente para actualizar datos del nuevo ingreso
-    setTimeout(function(){
-      if(typeof editarPaciente==='function') editarPaciente(pacId);
-    }, 600);
+    if(typeof toast==='function') toast('✅ Reingreso registrado · Historial conservado');
   }catch(e){
     if(typeof toast==='function') toast('❌ Error: '+e.message);
   }
