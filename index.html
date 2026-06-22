@@ -14011,6 +14011,23 @@ window.rdGuardar = async function(){
       if(Object.keys(pacUpdate2).length>0){
         try{ await updateDoc(doc(db,'pacientes',pac.id),pacUpdate2); Object.assign(pac,pacUpdate2); }catch(e2){}
       }
+      // Si hay notas de fármacos en la ronda, agregarlas al plan farmacológico
+      var rdFarmNotas=rdGet('rd-farm-notas');
+      if(rdFarmNotas&&pac){
+        var farmacosRonda=datos.farmacos||[];
+        var farmTexto=(farmacosRonda.length?farmacosRonda.join(', ')+' — ':'')+rdFarmNotas;
+        try{
+          await window._addDoc(window._collection(window.db,'plan_farmacologico'),{
+            pacienteId:pac.id,
+            texto:farmTexto,
+            fuente:'ronda',
+            fecha:new Date().toISOString().split('T')[0],
+            timestamp:new Date()
+          });
+          // Refrescar plan farmacológico si la ficha está abierta
+          if(window._psPacId===pac.id&&typeof cargarPlanFarmacologico==='function') cargarPlanFarmacologico(pac.id);
+        }catch(eFarm){console.warn('plan_farmacologico ronda:',eFarm);}
+      }
     }
     var nuevaHab = rdGet('rd-hab');
     if(pac && nuevaHab && nuevaHab !== pac.hab){
