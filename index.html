@@ -3146,6 +3146,10 @@ input.toggle-cb{display:none}
         <label>Justificación <span style="font-weight:400;color:var(--text3)">(opcional)</span></label>
         <textarea id="reinterc-justif" rows="2" placeholder="Justificación de la pertinencia o no pertinencia..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical"></textarea>
       </div>
+      <div class="form-group">
+        <label>Próxima sesión <span style="font-weight:400;font-size:0.72rem;color:var(--text3)">(aparecerá en ronda ese día)</span></label>
+        <input type="date" id="reinterc-prox-sesion" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem">
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-reinterc')">Cancelar</button>
@@ -14632,6 +14636,7 @@ window.abrirReinterconsulta=function(pacId){
   document.getElementById('reinterc-hab').value=pac.hab||'';
   document.getElementById('reinterc-motivo').value='';
   document.getElementById('reinterc-justif').value='';
+  document.getElementById('reinterc-prox-sesion').value='';
   document.querySelectorAll('input[name="reinterc-pertinente"]').forEach(function(r){r.checked=false;});
   if(typeof openModal==='function') openModal('modal-reinterc');
   else document.getElementById('modal-reinterc').style.display='flex';
@@ -14654,11 +14659,16 @@ window.guardarReinterconsulta=async function(){
       pertinente:pertinente, justificacion:justif,
       timestamp:new Date().toISOString()
     });
-    // Actualizar habitación si cambió
-    if(reintercHab&&pac&&reintercHab!==pac.hab){
-      await window._updateDoc(window._doc(window.db,'pacientes',pacId),{hab:reintercHab});
-      pac.hab=reintercHab;
+    var reintercProxSesion=document.getElementById('reinterc-prox-sesion')?.value||'';
+    // Actualizar paciente: hab y/o proxSesion
+    var reintercUpdate={};
+    if(reintercHab&&pac&&reintercHab!==pac.hab) reintercUpdate.hab=reintercHab;
+    if(reintercProxSesion) reintercUpdate.proxSesion=reintercProxSesion;
+    if(Object.keys(reintercUpdate).length>0){
+      await window._updateDoc(window._doc(window.db,'pacientes',pacId),reintercUpdate);
+      if(pac) Object.assign(pac,reintercUpdate);
       if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+      if(typeof window.calRender==='function') window.calRender();
     }
     // Actualizar motivo IC del paciente si es pertinente
     if(pertinente==='si'&&pac){
