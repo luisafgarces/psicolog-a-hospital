@@ -1830,23 +1830,23 @@ input.toggle-cb{display:none}
             <div class="form-group"><label>Evolución desde la última valoración</label><textarea id="seg-eventos" rows="3" placeholder="¿Qué ha cambiado clínicamente? ¿Cómo ha respondido al manejo?..."></textarea></div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-              <div>
-                <div style="font-size:0.78rem;font-weight:600;margin-bottom:5px">Sueño</div>
-                <div style="display:flex;gap:6px;flex-wrap:wrap">
-                  <span class="ic-chip" onclick="icTogG(this)">Conservado</span>
-                  <span class="ic-chip" onclick="icTog(this)">Insomnio conciliación</span>
-                  <span class="ic-chip" onclick="icTog(this)">Insomnio mantenimiento</span>
-                  <span class="ic-chip" onclick="icTog(this)">Hipersomnia</span>
-                  <span class="ic-chip" onclick="icTog(this)">Alterado por hospitalización</span>
+              <div class="form-group">
+                <label>Sueño</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px">
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-sueno-conservado"> Conservado</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-sueno-conciliacion"> Insomnio conciliación</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-sueno-mantenimiento"> Insomnio mantenimiento</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-sueno-hipersomnia"> Hipersomnia</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-sueno-hosp"> Alterado por hospitalización</label>
                 </div>
               </div>
-              <div>
-                <div style="font-size:0.78rem;font-weight:600;margin-bottom:5px">Alimentación</div>
-                <div style="display:flex;gap:6px;flex-wrap:wrap">
-                  <span class="ic-chip" onclick="icTogG(this)">Adecuada</span>
-                  <span class="ic-chip" onclick="icTog(this)">Apetito reducido</span>
-                  <span class="ic-chip" onclick="icTog(this)">Apetito aumentado</span>
-                  <span class="ic-chip" onclick="icTog(this)">Ayuno / restricción</span>
+              <div class="form-group">
+                <label>Alimentación</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px">
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-alim-adecuada"> Adecuada</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-alim-reducido"> Apetito reducido</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-alim-aumentado"> Apetito aumentado</label>
+                  <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-alim-ayuno"> Ayuno / restricción</label>
                 </div>
               </div>
             </div>
