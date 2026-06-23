@@ -13912,6 +13912,7 @@ window.rdInit = async function(){
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">'
         +checkVisto2
+        +'<button onclick="event.stopPropagation();rdReprogramar(\''+p.id+'\',this)" style="background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;cursor:pointer;white-space:nowrap" title="Reprogramar">📅</button>'
         +'<button onclick="rdCargarPaciente(\''+p.id+'\')" style="'+btnColor+';padding:6px 14px;border-radius:7px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif">'+btnLabel+'</button>'
       +'</div>'
     +'</div>';
@@ -14981,6 +14982,48 @@ window.actualizarContadorPendientes = function(){
     badge.style.display=pendientes>0?'inline-flex':'none';
   }
   return pendientes;
+};
+
+// ── REPROGRAMAR DESDE RONDA ─────────────────────────────────────────
+window.rdReprogramar = function(pacId, btn){
+  var prev=document.getElementById('rd-reprog-picker');
+  if(prev){prev.remove();if(prev._pacId===pacId)return;}
+  var div=document.createElement('div');
+  div.id='rd-reprog-picker';
+  div._pacId=pacId;
+  div.style.cssText='position:fixed;z-index:9999;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;box-shadow:0 8px 30px rgba(0,0,0,0.15);display:flex;flex-direction:column;gap:8px;min-width:220px';
+  var rect=btn.getBoundingClientRect();
+  var top=rect.bottom+6;
+  if(top+160>window.innerHeight) top=rect.top-170;
+  div.style.top=top+'px';
+  div.style.left=Math.min(rect.left,window.innerWidth-240)+'px';
+  var hoy=new Date().toISOString().split('T')[0];
+  div.innerHTML='<div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">📅 Reprogramar sesión</div>'
+    +'<input type="date" id="rd-reprog-date" value="'+hoy+'" min="'+hoy+'" style="padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.85rem;width:100%">'
+    +'<div style="display:flex;gap:6px">'
+    +'<button onclick="rdReprogramarGuardar(\''+pacId+'\')" style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:7px;padding:6px 10px;font-size:0.8rem;font-weight:600;cursor:pointer">✅ Guardar</button>'
+    +'<button onclick="document.getElementById(\'rd-reprog-picker\').remove()" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:0.8rem;cursor:pointer">✕</button>'
+    +'</div>';
+  document.addEventListener('click',function cerrar(e){
+    if(!div.contains(e.target)&&e.target!==btn){div.remove();document.removeEventListener('click',cerrar);}
+  });
+  document.body.appendChild(div);
+};
+
+window.rdReprogramarGuardar = async function(pacId){
+  var fecha=document.getElementById('rd-reprog-date')?.value;
+  if(!fecha) return;
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  try{
+    await window._updateDoc(window._doc(window.db,'pacientes',pacId),{proxSesion:fecha});
+    if(pac) pac.proxSesion=fecha;
+    var picker=document.getElementById('rd-reprog-picker');
+    if(picker) picker.remove();
+    if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+    if(typeof toast==='function') toast('📅 Reprogramado para '+fecha);
+  }catch(e){
+    if(typeof toast==='function') toast('❌ Error: '+e.message);
+  }
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
