@@ -9631,8 +9631,7 @@ function generarNotaIcNuevaLocal(){
   var sub='Paciente de '+edad+(edad?' años':'')+', '+sexo
     +((_estcivil&&_estcivil!='no especificado')?' — '+_estcivil:'')
     +'. Dx médico: '+(dx||'no registrado')
-    +'. Días internado: '+(_diasInternacion||'no registrado')+'.
-\n\nSOLICITUD\n'
+    +'. Días internado: '+(_diasInternacion||'no registrado')+'.\n\nSOLICITUD\n'
     +(_urgencia?'Urgencia IC: '+_urgencia+'. ':'')
     +(_medSol?'Médico solicitante: '+_medSol+'. ':'')
     +(_motivoMedico?'Motivo de la IC: '+_motivoMedico+'. ':'')
