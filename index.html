@@ -13836,7 +13836,11 @@ window.rdInit = async function(){
   window._rdFichasHoy = {};
   if(!window._rdVistosHoy) window._rdVistosHoy = {};
   if(!window._rdSubidosHoy) window._rdSubidosHoy = {};
-  if(!window._rdExcluidosHoy) window._rdExcluidosHoy = {};
+  // Cargar excluidos del día desde localStorage
+  var _hoyInit=new Date().toISOString().split('T')[0];
+  var _exInit=JSON.parse(localStorage.getItem('rd_excluidos_'+_hoyInit)||'[]');
+  window._rdExcluidosHoy={};
+  _exInit.forEach(function(id){window._rdExcluidosHoy[id]=true;});
   try{
     var snap = await window._getDocs(
       window._fdb.query(
@@ -15047,6 +15051,11 @@ window.rdReprogramarGuardar = async function(pacId){
     // Excluir de la ronda de hoy aunque tenga ficha
     if(!window._rdExcluidosHoy) window._rdExcluidosHoy={};
     window._rdExcluidosHoy[pacId]=true;
+    // Persistir en localStorage
+    var _hoyEx=new Date().toISOString().split('T')[0];
+    var _exData=JSON.parse(localStorage.getItem('rd_excluidos_'+_hoyEx)||'[]');
+    if(!_exData.includes(pacId)) _exData.push(pacId);
+    localStorage.setItem('rd_excluidos_'+_hoyEx,JSON.stringify(_exData));
     var picker=document.getElementById('rd-reprog-picker');
     if(picker) picker.remove();
     if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
