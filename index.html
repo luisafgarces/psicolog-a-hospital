@@ -4822,6 +4822,11 @@ window.mneGuardar=async()=>{
         const pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
         var pacUpdate={};
         var msgs=[];
+        // Seguimiento
+        if(estado==='seguimiento'){
+          pacUpdate.estado='seguimiento';
+          msgs.push('Estado → Seguimiento 📝');
+        }
         // Alta
         if(estado==='alta'||estado==='alta-voluntaria'){
           pacUpdate.estado=estado;
@@ -11869,6 +11874,7 @@ document.addEventListener('DOMContentLoaded',()=>{
           <select id="mne-estado">
             <option value="respondida">Completada</option>
             <option value="pendiente">Pendiente</option>
+            <option value="seguimiento" style="color:#2563eb;font-weight:700">📝 Seguimiento</option>
             <option value="alta" style="color:#16a34a;font-weight:700">✅ Alta psicológica</option>
             <option value="alta-voluntaria" style="color:#d97706;font-weight:700">⚠️ Alta voluntaria</option>
           </select>
