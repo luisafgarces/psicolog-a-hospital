@@ -13796,7 +13796,12 @@ function rdOrdenRonda(pacs){
 
 // ── Inicializar: cargar tablero del día ─────────────────────────────
 window.rdInit = async function(){
-  // Cargar vistos y subidos del día desde Firebase (await para que lleguen antes de renderizar)
+  // Cargar excluidos PRIMERO desde localStorage (síncrono, instantáneo)
+  var _hoyRd=new Date().toISOString().split('T')[0];
+  var _exRd=JSON.parse(localStorage.getItem('rd_excluidos_'+_hoyRd)||'[]');
+  window._rdExcluidosHoy={};
+  _exRd.forEach(function(id){window._rdExcluidosHoy[id]=true;});
+  // Cargar vistos y subidos del día desde Firebase
   if(typeof window.cargarSubidosHoy==='function') window.cargarSubidosHoy();
   if(typeof window.rdCargarVistosFirebase==='function') await window.rdCargarVistosFirebase();
   var cont = document.getElementById('rd-tablero');
@@ -13836,11 +13841,7 @@ window.rdInit = async function(){
   window._rdFichasHoy = {};
   if(!window._rdVistosHoy) window._rdVistosHoy = {};
   if(!window._rdSubidosHoy) window._rdSubidosHoy = {};
-  // Cargar excluidos del día desde localStorage
-  var _hoyInit=new Date().toISOString().split('T')[0];
-  var _exInit=JSON.parse(localStorage.getItem('rd_excluidos_'+_hoyInit)||'[]');
-  window._rdExcluidosHoy={};
-  _exInit.forEach(function(id){window._rdExcluidosHoy[id]=true;});
+  // Excluidos ya cargados al inicio de rdInit
   try{
     var snap = await window._getDocs(
       window._fdb.query(
