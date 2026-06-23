@@ -593,7 +593,7 @@ input.toggle-cb{display:none}
           <div class="ic-pat-field"><label>Nombre del paciente</label><input type="text" id="ic-pnombre" placeholder="Nombre completo"></div>
           <div class="ic-pat-field"><label>Edad / Sexo</label><input type="text" id="ic-edad" placeholder="42 años, F"></div>
           <div class="ic-pat-field" style="flex:2;min-width:160px"><label>Diagnóstico médico</label><div id="ic-pdx-display" style="font-size:0.82rem;color:#e5e7eb;padding:2px 0;border-bottom:1px solid #3a3835;min-height:20px;font-style:italic;opacity:0.8">— se carga del paciente —</div><input type="hidden" id="ic-pdx" value=""></div>
-          <div class="ic-pat-field" style="flex:2;min-width:160px"><label>Motivo de interconsulta</label><div id="ic-motivoic-display" style="font-size:0.82rem;color:#e5e7eb;padding:2px 0;border-bottom:1px solid #3a3835;min-height:20px;font-style:italic;opacity:0.8">— se carga del paciente —</div><input type="hidden" id="ic-motivoic" value=""></div>
+          <input type="hidden" id="ic-motivoic" value="">
           <div class="ic-pat-field"><label>Fecha</label><input type="date" id="ic-pfecha"></div>
           <div class="ic-pat-field"><label>Médico solicitante</label><input type="text" id="ic-medico-sol" placeholder="Dr. García — Medicina Interna"></div>
 
@@ -3772,6 +3772,9 @@ window.selectICPaciente=(id)=>{
     else{diasDisp.textContent=diasVal+' días';diasDisp.style.color=diasVal>14?'var(--warning)':'var(--text2)';}
   }
   if(fecha)fecha.value=new Date().toISOString().split('T')[0];
+  // Cargar médico solicitante
+  const medSolEl=document.getElementById('ic-medico-sol');
+  if(medSolEl&&p.medicoSol) medSolEl.value=p.medicoSol+(p.medicoEsp?' — '+p.medicoEsp:'');
   // Auto-set mode based on patient estado
   if(p.estado==='nueva-interconsulta-pendiente')setICMode('nueva');
   else if(p.estado==='seguimiento')setICMode('seg');
