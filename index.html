@@ -15163,17 +15163,33 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
       var local=getJornadas();
       if(snap.exists()){
         var fbJornadas=(snap.data().jornadas)||[];
-        // Merge por fecha: unir local y Firebase, Firebase gana en conflicto
+        // Merge inteligente: gana el registro MÁS COMPLETO por fecha
         var mapa={};
+        // Primero cargar local
         local.forEach(function(j){if(j.fecha) mapa[j.fecha]=j;});
-        fbJornadas.forEach(function(j){if(j.fecha) mapa[j.fecha]=j;});
+        // Luego Firebase — solo sobreescribe si es más completo
+        fbJornadas.forEach(function(j){
+          if(!j.fecha) return;
+          var existing=mapa[j.fecha];
+          if(!existing){
+            mapa[j.fecha]=j; // Firebase tiene algo que local no tiene
+          } else {
+            // Ganar el más completo: tiene salida > no tiene salida
+            var fbMasCompleto=(j.salida&&!existing.salida)||(j.entrada&&!existing.entrada);
+            var localMasCompleto=(existing.salida&&!j.salida)||(existing.entrada&&!j.entrada);
+            if(fbMasCompleto) mapa[j.fecha]=j;
+            else if(!localMasCompleto){
+              // Mismo nivel de completitud: Firebase gana en horas (más reciente)
+              mapa[j.fecha]=j;
+            }
+            // Si local es más completo, lo conservamos (no sobreescribimos)
+          }
+        });
         var merged=Object.values(mapa).sort(function(a,b){return a.fecha>b.fecha?1:-1;});
         localStorage.setItem('fj_jornadas',JSON.stringify(merged));
-        // Si local tiene jornadas que Firebase no tiene, subir el merge
-        if(local.length>fbJornadas.length){
-          window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa'),
-            {jornadas:merged,updated:new Date().toISOString()}).catch(function(){});
-        }
+        // Siempre subir el merge a Firebase para mantener sincronizado
+        window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa'),
+          {jornadas:merged,updated:new Date().toISOString()}).catch(function(){});
       } else if(local.length>0){
         // Firebase vacío — subir datos locales
         window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa'),
@@ -15190,9 +15206,17 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
             localStorage.setItem('fj_hoy',JSON.stringify(dH));
           } else {
             var lh=JSON.parse(localHoy);
-            // Firebase gana si tiene salida y local no, o si local no tiene entrada
-            if((dH.salida&&!lh.salida)||(!lh.entrada&&dH.entrada)){
-              localStorage.setItem('fj_hoy',JSON.stringify(dH));
+            // Merge inteligente: conservar el registro más completo
+            var mergedHoy=Object.assign({},lh);
+            // Firebase aporta lo que local no tiene
+            if(dH.entrada&&!lh.entrada) mergedHoy.entrada=dH.entrada;
+            if(dH.salida&&!lh.salida) mergedHoy.salida=dH.salida;
+            if(dH.minutos&&!lh.minutos) mergedHoy.minutos=dH.minutos;
+            localStorage.setItem('fj_hoy',JSON.stringify(mergedHoy));
+            // Subir el merge si quedó más completo que Firebase
+            if(mergedHoy.salida&&!dH.salida){
+              window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa_hoy'),
+                mergedHoy).catch(function(){});
             }
           }
         }
@@ -15313,7 +15337,13 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
   window.fichajeEntrada=function(){
     var hora=horaStr();
     var hoy=hoyStr();
-    setEstadoHoy({fecha:hoy,entrada:hora,salida:null});
+    var regEntrada={fecha:hoy,entrada:hora,salida:null};
+    setEstadoHoy(regEntrada);
+    // Subir entrada inmediatamente a Firebase
+    if(window.db&&window._setDoc&&window._doc){
+      window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa_hoy'),
+        regEntrada).catch(function(e){console.warn('sync entrada:',e);});
+    }
     cerrarModal();
     mostrarFAB();
     mostrarBanner(hora);
@@ -15358,6 +15388,13 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     if(idx>=0) j[idx]=reg; else j.push(reg);
     saveJornadas(j);
     setEstadoHoy({fecha:est.fecha,entrada:est.entrada,salida:horaSalida,minutos:minutos});
+    // Subir inmediatamente a Firebase para que otros dispositivos lo vean
+    if(window.db&&window._setDoc&&window._doc){
+      window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa'),
+        {jornadas:j,updated:new Date().toISOString()}).catch(function(e){console.warn('sync salida:',e);});
+      window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa_hoy'),
+        reg).catch(function(e){console.warn('sync hoy salida:',e);});
+    }
     var msg='🔴 Salida: '+horaSalida+' · '+minToHHMM(minutos)+' trabajadas';
     if(salidaMeta&&diff<-5){
       msg+=' · ⚠️ Saliste antes (-'+minToHHMM(Math.abs(diff))+')';
