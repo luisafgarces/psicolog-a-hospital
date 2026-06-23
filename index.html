@@ -14147,10 +14147,10 @@ window.rdGuardar = async function(){
     // Propagar campos al paciente si cambiaron
     if(pac){
       var pacUpdate2={};
-      var rdDxVal=rdGet('rd-dx'); if(rdDxVal&&rdDxVal!==pac.motivo) pacUpdate2.motivo=rdDxVal;
-      var rdTratVal=rdGet('rd-trat-medico'); if(rdTratVal&&rdTratVal!==pac.tratMedico) pacUpdate2.tratMedico=rdTratVal;
-      var rdEdadVal=rdGet('rd-edad'); if(rdEdadVal&&rdEdadVal!==pac.edad) pacUpdate2.edad=rdEdadVal;
-      var rdFechaVal=rdGet('rd-fecha-ingreso'); if(rdFechaVal&&rdFechaVal!==pac.fecha) pacUpdate2.fecha=rdFechaVal;
+      var rdDxVal=rdGet('rd-dx'); if(rdDxVal) pacUpdate2.motivo=rdDxVal;
+      var rdTratVal=rdGet('rd-trat-medico'); if(rdTratVal) pacUpdate2.tratMedico=rdTratVal;
+      var rdEdadVal=rdGet('rd-edad'); if(rdEdadVal) pacUpdate2.edad=rdEdadVal;
+      var rdFechaVal=rdGet('rd-fecha-ingreso'); if(rdFechaVal) pacUpdate2.fecha=rdFechaVal;
       if(Object.keys(pacUpdate2).length>0){
         try{ await updateDoc(doc(db,'pacientes',pac.id),pacUpdate2); Object.assign(pac,pacUpdate2); }catch(e2){}
       }
