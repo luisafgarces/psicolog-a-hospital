@@ -1746,6 +1746,7 @@ input.toggle-cb{display:none}
           <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)">
             <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
               <button class="btn btn-secondary" onclick="revLimpiar()">🗑 Limpiar</button>
+              <button class="btn btn-primary" style="background:#6d28d9;border-color:#6d28d9" onclick="generarNotaIC()">📝 Generar nota</button>
               <button class="btn btn-primary" style="background:#7c3aed;border-color:#7c3aed" onclick="revGuardar()">💾 Guardar revaloración</button>
             </div>
           </div>
@@ -8267,9 +8268,10 @@ window.hpacRenderNotas=()=>{
       window._hpacEgresos=snapE.docs.map(function(d){return Object.assign({id:d.id},d.data(),{_esEgreso:true});});
       var snapR=await window._getDocs(window._query(window._collection(window.db,'reingresos'),window._where('pacienteId','==',_hpacPacId),window._orderBy('fechaReingreso','desc')));
       window._hpacReingresos=snapR.docs.map(function(d){return Object.assign({id:d.id},d.data(),{_esReingreso:true});});
-      // Cargar revaloraciones de notas_pacientes
-      var snapNP=await window._getDocs(window._query(window._collection(window.db,'notas_pacientes'),window._where('pacienteId','==',_hpacPacId),window._orderBy('fecha','desc')));
+      // Cargar revaloraciones de notas_pacientes (sin orderBy para evitar índice)
+      var snapNP=await window._getDocs(window._query(window._collection(window.db,'notas_pacientes'),window._where('pacienteId','==',_hpacPacId)));
       window._hpacNotasPac=snapNP.docs.map(function(d){return Object.assign({id:d.id},d.data(),{_col:'notas_pacientes'});});
+      console.log('[Rev] Revaloraciones encontradas:',window._hpacNotasPac.length);
       hpacRenderNotas();
     }catch(e){console.warn('egresos/reingresos/notas_pac:',e);}
   })();
@@ -8509,8 +8511,9 @@ window.hpacRenderNotas=()=>{
         +rBadgeHtml+respondidaBtn+genBtn
         +(esModoConIA?'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem;opacity:0.85" onclick="hpacGenerarNotaIA(\'' + e.id + '\','+ni+')" title="Regenerar con IA">✨ IA</button>':'')
         +((e._aiFormSnap||e.formulario||e.nota||e.sub)?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="descargarFormIC(\'' + e.id + '\')">📥 Formulario</button>':'')
-        +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacEditar('+ni+')">Editar</button>'
+        +(e._col==='notas_pacientes'?'':'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacEditar('+ni+')">Editar</button>')
         +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacCopiar('+ni+')">Copiar</button>'
+        +(e._col==='notas_pacientes'?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;color:#dc2626;border-color:#dc2626" onclick="hpacEliminarNotaPac(\'' + e.id + '\')" title="Eliminar revaloración">🗑 Eliminar</button>':'')
         +(_hpacPacId?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;background:#f0fdf4;border:1px solid #86efac;color:#166534" onclick="editarPaciente(\'' + _hpacPacId + '\')" title="Editar ficha del paciente">\u270F\uFE0F Editar ficha</button>':'')
         +'</div></div>'
         +'<div class="hpac-nota-body">'+camposHtml+formHtml+'</div>'
@@ -15112,6 +15115,20 @@ window.rdCargarVistosFirebase = async function(){
     (data.subidos||[]).forEach(function(id){window._rdSubidosHoy[id]=true;});
     console.log('[Vistos] Cargado de Firebase:',data.vistos?.length||0,'vistos',data.subidos?.length||0,'subidos');
   }catch(e){console.warn('[Vistos] Error carga:',e);}
+};
+
+// ── ELIMINAR NOTA DE notas_pacientes ────────────────────────────────
+window.hpacEliminarNotaPac = async function(notaId){
+  if(!confirm('¿Eliminar esta revaloración permanentemente?')) return;
+  try{
+    await window._deleteDoc(window._doc(window.db,'notas_pacientes',notaId));
+    // Limpiar caché
+    window._hpacNotasPac=(window._hpacNotasPac||[]).filter(function(n){return n.id!==notaId;});
+    if(typeof hpacRenderNotas==='function') hpacRenderNotas();
+    if(typeof toast==='function') toast('🗑️ Revaloración eliminada');
+  }catch(e){
+    if(typeof toast==='function') toast('❌ Error: '+e.message);
+  }
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
