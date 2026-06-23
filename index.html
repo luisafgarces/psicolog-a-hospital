@@ -13800,12 +13800,15 @@ window.rdInit = async function(){
   if(!cont) return;
 
   var hoy = new Date().toISOString().split('T')[0];
+  var _estadosAlta=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga'];
   var pacs = rdOrdenRonda(
     (window.pacientes||[]).filter(function(p){
-      return p.proxSesion === hoy
-        && p.estado !== 'alta'
-        && p.estado !== 'fallecido'
-        && p.estado !== 'alta-voluntaria';
+      if(_estadosAlta.includes(p.estado)) return false;
+      // Aparece si: proxSesion es hoy, O tiene ficha de hoy, O está marcado como visto hoy
+      var tieneProxHoy = p.proxSesion === hoy;
+      var tieneFichaHoy = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
+      var estaVisto = !!(window._rdVistosHoy && window._rdVistosHoy[p.id]);
+      return tieneProxHoy || tieneFichaHoy || estaVisto;
     })
   );
 
@@ -14251,12 +14254,14 @@ window.rdMarcarVista=function(pacId, cbEl){
 function rdRefrescarTablero(){
   if(typeof window.actualizarContadorPendientes==='function') window.actualizarContadorPendientes();
   var hoy2 = new Date().toISOString().split('T')[0];
+  var _estadosAlta2=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga'];
   var pacs = rdOrdenRonda(
     (window.pacientes||[]).filter(function(p){
-      return p.proxSesion === hoy2
-        && p.estado!=='alta'
-        && p.estado!=='fallecido'
-        && p.estado!=='alta-voluntaria';
+      if(_estadosAlta2.includes(p.estado)) return false;
+      var tieneProxHoy2 = p.proxSesion === hoy2;
+      var tieneFichaHoy2 = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
+      var estaVisto2 = !!(window._rdVistosHoy && window._rdVistosHoy[p.id]);
+      return tieneProxHoy2 || tieneFichaHoy2 || estaVisto2;
     })
   );
   var cont = document.getElementById('rd-tablero');
