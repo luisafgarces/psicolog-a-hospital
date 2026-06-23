@@ -435,7 +435,7 @@ input.toggle-cb{display:none}
   </div>
   <div class="sidebar-nav">
     <div class="nav-section">General</div>
-    <div class="nav-item" onclick="goTo('ronda-diaria')"><span class="icon">🏥</span>Ronda Diaria</div>
+    <div class="nav-item" onclick="goTo('ronda-diaria')"><span class="icon">🏥</span>Ronda Diaria<span id="rd-pendientes-badge" style="display:none;margin-left:auto;background:#d97706;color:#fff;border-radius:10px;padding:1px 7px;font-size:0.7rem;font-weight:700;min-width:18px;text-align:center">0</span></div>
     <div class="nav-item active" onclick="goTo('dashboard')"><span class="icon">🏠</span>Inicio</div>
     <div class="nav-item" onclick="goTo('pacientes')"><span class="icon">👥</span>Pacientes<span class="nav-badge" id="badge-pac">0</span></div>
     <div class="nav-item" onclick="goTo('consulta-externa')"><span class="icon">🚶</span>Consulta Externa<span class="nav-badge" id="badge-ce">0</span></div>
@@ -13784,6 +13784,8 @@ function rdOrdenRonda(pacs){
 
 // ── Inicializar: cargar tablero del día ─────────────────────────────
 window.rdInit = async function(){
+  // Cargar subidos del día
+  if(typeof window.cargarSubidosHoy==='function') window.cargarSubidosHoy();
   var cont = document.getElementById('rd-tablero');
   var resumen = document.getElementById('rd-tablero-resumen');
   if(!cont) return;
@@ -13808,6 +13810,7 @@ window.rdInit = async function(){
   var hoy = new Date().toISOString().split('T')[0];
   window._rdFichasHoy = {};
   if(!window._rdVistosHoy) window._rdVistosHoy = {};
+  if(!window._rdSubidosHoy) window._rdSubidosHoy = {};
   try{
     var snap = await window._getDocs(
       window._fdb.query(
@@ -13870,16 +13873,23 @@ window.rdInit = async function(){
     if(p.estado==='nueva-interconsulta-pendiente') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#dbeafe;color:#1e40af;border-radius:4px;padding:1px 6px;margin-right:2px">IC</span>';
     else if(p.estado==='seguimiento') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#ede9fe;color:#6d28d9;border-radius:4px;padding:1px 6px;margin-right:2px">SEG</span>';
     else if(p.estado==='revaloracion') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#fef3c7;color:#b45309;border-radius:4px;padding:1px 6px;margin-right:2px">REVAL</span>';
-    // Checkbox siempre visible
-    var checkVisto2='<label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;font-weight:600;'
-      +(visto?'color:#16a34a;background:#dcfce7;border:1.5px solid #16a34a;':'color:#64748b;background:#f8fafc;border:1.5px solid #cbd5e1;')
-      +'border-radius:6px;padding:4px 10px;white-space:nowrap">'
-      +'<input type="checkbox" '+(visto?'checked ':'')
-      +'onchange="rdMarcarVista(\''+p.id+'\',this)" style="accent-color:#16a34a;width:15px;height:15px;cursor:pointer">'
-      +(visto?'✅ Visto':'☐ Visto')
-      +'</label>';
-    var bgColor2=visto?'#f0fdf4':prioUp2==='URGENTE'?'#fff5f5':'var(--surface2)';
-    var borderColor2=visto?'#86efac':prioUp2==='URGENTE'?'#fca5a5':'var(--border)';
+    // 3 estados: sin ver / visto (amarillo) / subido (verde)
+    var subido=!!(window._rdSubidosHoy&&window._rdSubidosHoy[p.id]);
+    var checkVisto2;
+    if(subido){
+      checkVisto2='<span style="font-size:0.72rem;font-weight:700;color:#16a34a;background:#dcfce7;border:1.5px solid #16a34a;border-radius:6px;padding:4px 10px;white-space:nowrap">🟢 Subido</span>';
+    } else if(visto){
+      checkVisto2='<div style="display:flex;gap:4px;align-items:center">'
+        +'<span style="font-size:0.72rem;font-weight:700;color:#92400e;background:#fef3c7;border:1.5px solid #d97706;border-radius:6px;padding:4px 10px;white-space:nowrap">🟡 Visto</span>'
+        +'<button onclick="event.stopPropagation();rdMarcarSubido(\''+p.id+'\')" style="font-size:0.68rem;font-weight:700;color:#15803d;background:#f0fdf4;border:1.5px solid #86efac;border-radius:6px;padding:3px 8px;cursor:pointer;white-space:nowrap">✅ Subir</button>'
+        +'</div>';
+    } else {
+      checkVisto2='<label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;font-weight:600;color:#64748b;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:6px;padding:4px 10px;white-space:nowrap">'
+        +'<input type="checkbox" onchange="rdMarcarVista(\''+p.id+'\',this)" style="accent-color:#16a34a;width:15px;height:15px;cursor:pointer">'
+        +'☐ Visto</label>';
+    }
+    var bgColor2=subido?'#f0fdf4':visto?'#fffbeb':prioUp2==='URGENTE'?'#fff5f5':'var(--surface2)';
+    var borderColor2=subido?'#86efac':visto?'#fbbf24':prioUp2==='URGENTE'?'#fca5a5':'var(--border)';
     return separador+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:'+bgColor2+';border:1.5px solid '+borderColor2+';border-radius:9px;flex-wrap:wrap">'
       +'<div style="flex:1;min-width:0;cursor:pointer" onclick="if(typeof abrirPacSheet===\'function\')abrirPacSheet(\''+p.id+'\')" title="Ver ficha del paciente">'
         +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+prioBadge2+hab+tipoBadge2
@@ -14230,6 +14240,7 @@ window.rdMarcarVista=function(pacId, cbEl){
 };
 
 function rdRefrescarTablero(){
+  if(typeof window.actualizarContadorPendientes==='function') window.actualizarContadorPendientes();
   var hoy2 = new Date().toISOString().split('T')[0];
   var pacs = rdOrdenRonda(
     (window.pacientes||[]).filter(function(p){
@@ -14914,6 +14925,45 @@ window.rdVerFichaPaciente = function(){
   }
 };
 
+// ── ESTADO SUBIDO AL SISTEMA ────────────────────────────────────────
+window.rdMarcarSubido = function(pacId){
+  if(!window._rdSubidosHoy) window._rdSubidosHoy={};
+  window._rdSubidosHoy[pacId]=true;
+  // Persistir en localStorage
+  var hoy=new Date().toISOString().split('T')[0];
+  var key='rd_subidos_'+hoy;
+  var data=JSON.parse(localStorage.getItem(key)||'[]');
+  if(!data.includes(pacId)) data.push(pacId);
+  localStorage.setItem(key,JSON.stringify(data));
+  // Refrescar tablero
+  if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+  if(typeof window.actualizarContadorPendientes==='function') window.actualizarContadorPendientes();
+  if(typeof toast==='function') toast('✅ Nota marcada como subida al sistema');
+};
+
+// Cargar subidos del día al iniciar
+window.cargarSubidosHoy = function(){
+  var hoy=new Date().toISOString().split('T')[0];
+  var key='rd_subidos_'+hoy;
+  var data=JSON.parse(localStorage.getItem(key)||'[]');
+  if(!window._rdSubidosHoy) window._rdSubidosHoy={};
+  data.forEach(function(id){window._rdSubidosHoy[id]=true;});
+};
+
+// Contador de pendientes de subir (vistos pero no subidos)
+window.actualizarContadorPendientes = function(){
+  var vistos=Object.keys(window._rdVistosHoy||{});
+  var subidos=window._rdSubidosHoy||{};
+  var pendientes=vistos.filter(function(id){return !subidos[id];}).length;
+  // Badge en menú lateral
+  var badge=document.getElementById('rd-pendientes-badge');
+  if(badge){
+    badge.textContent=pendientes;
+    badge.style.display=pendientes>0?'inline-flex':'none';
+  }
+  return pendientes;
+};
+
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -15409,6 +15459,11 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     var salidaMeta=getSalidaHoy();
     var metaMin=salidaMeta?parseInt(salidaMeta.split(':')[0])*60+parseInt(salidaMeta.split(':')[1]):0;
     var diff=min2-metaMin;
+    // Alertar si hay notas pendientes de subir
+    var _pendientes=typeof window.actualizarContadorPendientes==='function'?window.actualizarContadorPendientes():0;
+    if(_pendientes>0){
+      if(!confirm('⚠️ Tienes '+_pendientes+' nota(s) pendiente(s) de subir al sistema hospitalario.\n\n¿Segura que deseas marcar salida?')) return;
+    }
     if(salidaMeta&&diff<-5){
       var falta=Math.abs(diff);
       var confirmar=confirm(
@@ -15416,7 +15471,7 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
         +'Te faltan '+minToHHMM(falta)+' para cumplir la meta de hoy ('+getSalidaHoyTexto()+').\n\n'
         +'¿Estás segura de que quieres salir ahora?'
       );
-      if(!confirmar) return; // Cancelar — no guardar
+      if(!confirmar) return;
     }
     // ── Guardar en historial ──
     var j=getJornadas();
