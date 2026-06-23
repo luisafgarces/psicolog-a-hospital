@@ -13788,9 +13788,9 @@ function rdOrdenRonda(pacs){
 
 // ── Inicializar: cargar tablero del día ─────────────────────────────
 window.rdInit = async function(){
-  // Cargar vistos y subidos del día desde Firebase
+  // Cargar vistos y subidos del día desde Firebase (await para que lleguen antes de renderizar)
   if(typeof window.cargarSubidosHoy==='function') window.cargarSubidosHoy();
-  if(typeof window.rdCargarVistosFirebase==='function') window.rdCargarVistosFirebase();
+  if(typeof window.rdCargarVistosFirebase==='function') await window.rdCargarVistosFirebase();
   var cont = document.getElementById('rd-tablero');
   var resumen = document.getElementById('rd-tablero-resumen');
   if(!cont) return;
@@ -14287,18 +14287,24 @@ function rdRefrescarTablero(){
     if(p.estado==='nueva-interconsulta-pendiente') tipoBadge='<span style="font-size:0.68rem;font-weight:700;background:#dbeafe;color:#1e40af;border-radius:4px;padding:1px 6px">IC</span>';
     else if(p.estado==='seguimiento') tipoBadge='<span style="font-size:0.68rem;font-weight:700;background:#ede9fe;color:#6d28d9;border-radius:4px;padding:1px 6px">SEG</span>';
     else if(p.estado==='revaloracion') tipoBadge='<span style="font-size:0.68rem;font-weight:700;background:#fef3c7;color:#b45309;border-radius:4px;padding:1px 6px">REVAL</span>';
-    // Checkbox — usa SOLO _rdVistosHoy, nunca _rdFichasHoy
-    var checkVisto = '<label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:5px;cursor:pointer;'
-        +'font-size:0.75rem;font-weight:600;'
-        +(visto?'color:#16a34a;background:#dcfce7;border:1.5px solid #16a34a;':'color:#64748b;background:#f8fafc;border:1.5px solid #cbd5e1;')
-        +'border-radius:6px;padding:4px 10px;white-space:nowrap">'
-        +'<input type="checkbox" '
-        +(visto?'checked ':'')
-        +'onchange="rdMarcarVista(\''+p.id+'\',this)" '
-        +'style="accent-color:#16a34a;width:15px;height:15px;cursor:pointer">'
-        +(visto?'✅ Visto':'☐ Visto')
-        +'</label>';
-    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:'+(visto?'#f0fdf4':'var(--surface2)')+';border:1.5px solid '+(visto?'#86efac':'var(--border)')+';border-radius:9px;flex-wrap:wrap">'
+    // 3 estados: sin ver / visto amarillo / subido verde
+    var subido=!!(window._rdSubidosHoy&&window._rdSubidosHoy[p.id]);
+    var checkVisto;
+    if(subido){
+      checkVisto='<span style="font-size:0.72rem;font-weight:700;color:#16a34a;background:#dcfce7;border:1.5px solid #16a34a;border-radius:6px;padding:4px 10px;white-space:nowrap">🟢 Subido</span>';
+    } else if(visto){
+      checkVisto='<div style="display:flex;gap:4px;align-items:center">'
+        +'<span style="font-size:0.72rem;font-weight:700;color:#92400e;background:#fef3c7;border:1.5px solid #d97706;border-radius:6px;padding:4px 10px;white-space:nowrap">🟡 Visto</span>'
+        +'<button onclick="event.stopPropagation();rdMarcarSubido(\''+p.id+'\')" style="font-size:0.68rem;font-weight:700;color:#15803d;background:#f0fdf4;border:1.5px solid #86efac;border-radius:6px;padding:3px 8px;cursor:pointer;white-space:nowrap">✅ Subir</button>'
+        +'</div>';
+    } else {
+      checkVisto='<label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.75rem;font-weight:600;color:#64748b;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:6px;padding:4px 10px;white-space:nowrap">'
+        +'<input type="checkbox" onchange="rdMarcarVista(\''+p.id+'\',this)" style="accent-color:#d97706;width:15px;height:15px;cursor:pointer">'
+        +'☐ Visto</label>';
+    }
+    var bgColor=subido?'#f0fdf4':visto?'#fffbeb':'var(--surface2)';
+    var borderColor=subido?'#86efac':visto?'#fbbf24':'var(--border)';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:'+bgColor+';border:1.5px solid '+borderColor+';border-radius:9px;flex-wrap:wrap">'
       +'<div style="flex:1;min-width:0;cursor:pointer" onclick="if(typeof abrirPacSheet===\'function\')abrirPacSheet(\''+p.id+'\')" title="Ver ficha del paciente">'
         +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+hab+tipoBadge
           +'<span style="font-size:0.88rem;font-weight:700;color:var(--accent);text-decoration:underline;text-underline-offset:2px">'+(p.nombre||'Sin nombre')+'</span>'+estadoBadge
