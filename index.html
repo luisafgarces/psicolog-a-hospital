@@ -4431,6 +4431,11 @@ window.guardarICFirebase=async()=>{
     } else {
       toast('✅ IC guardada en Firebase');
       setSyncStatus('online');
+      // Volver siempre a ronda diaria
+      if(typeof goTo==='function'){
+        setTimeout(function(){goTo('ronda-diaria');},800);
+      }
+
       if(pacIdFinal&&typeof rdMarcarVistaPorNota==='function') rdMarcarVistaPorNota(pacIdFinal);
       if(pacIdFinal&&typeof icGuardarRondaParte2==='function') icGuardarRondaParte2(pacIdFinal);
       if(pacIdFinal&&riesgo&&typeof propagarRiesgoPaciente==='function') propagarRiesgoPaciente(pacIdFinal,riesgo);
@@ -4513,6 +4518,10 @@ window.guardarAnamnesis=async()=>{
     } else {
       setSyncStatus('online');
       toast('✅ Anamnesis guardada');
+      // Volver siempre a ronda diaria
+      if(typeof goTo==='function'){
+        setTimeout(function(){goTo('ronda-diaria');},800);
+      }
       var _anPacId=document.getElementById('an-pac-sel')?.value||window._anPacId||null;
       if(_anPacId&&typeof rdMarcarVistaPorNota==='function') rdMarcarVistaPorNota(_anPacId);
       if(_anPacId&&typeof icGuardarRondaParte2==='function') icGuardarRondaParte2(_anPacId);
@@ -14572,6 +14581,11 @@ window.revGuardar = async function(){
     // limpiarProxSesionSiAtendido desactivado — proxSesion se maneja manualmente
     if(typeof toast==='function') toast('✅ Revaloración guardada');
     revLimpiar();
+    // Volver siempre a ronda diaria
+    if(typeof goTo==='function'){
+      setTimeout(function(){goTo('ronda-diaria');},800);
+    }
+
     // Resetear selector
     var sel=document.getElementById('rev-pac-sel');
     if(sel) sel.value='';
