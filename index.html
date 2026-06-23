@@ -13997,7 +13997,7 @@ function rdRellenarDesde(pac){
   rdSet('rd-dx-psi',          pac.dxPsi||'');
   rdSet('rd-dx-diferenciales',pac.dxDiferenciales||'');
   rdSet('rd-trat-medico',     pac.tratMedico||'');
-  rdSet('rd-fecha-ingreso',   pac.fecha||'');
+  rdSet('rd-fecha-ingreso',   pac.fecha||'');  // siempre desde el paciente
   // Calcular días de estancia desde fecha de ingreso
   var diasCalc = (typeof calcularDiasInternacion==='function' && pac.fecha)
     ? calcularDiasInternacion(pac.fecha) : null;
@@ -14006,7 +14006,8 @@ function rdRellenarDesde(pac){
   rdSet('rd-dx-psi','');
   rdSet('rd-dx-diferenciales','');
   rdSet('rd-trat-medico','');
-  rdSet('rd-fecha-ingreso','');
+  // No resetear fecha de ingreso — viene del paciente y no cambia
+  // rdSet('rd-fecha-ingreso',''); // comentado intencionalmente
   rdSet('rd-farm-descenso','');
   rdSet('rd-razon-der','');
   rdSet('rd-otras-esp','');
