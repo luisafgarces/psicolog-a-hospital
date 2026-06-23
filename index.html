@@ -9035,6 +9035,7 @@ window.generarNotaIC=function(){
   if(icCurrentMode==='esp'){generarNotaIcEsp();return;}
   if(icCurrentMode==='seg'){generarNotaIcSegLocal();return;}
   if(icCurrentMode==='fam'){generarNotaFamiliarLocal();return;}
+  if(icCurrentMode==='rev'){generarNotaRevLocal();return;}
   // Modo nueva — generar localmente sin IA
   generarNotaIcNuevaLocal();
 };
@@ -9644,8 +9645,23 @@ function generarNotaIcNuevaLocal(){
 
 function generarNotaIcSegLocal(){
   var icvl=function(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';};
+  var icchk=function(id){var el=document.getElementById(id);return el&&el.checked;};
   function chips(label){return icChipsBySubLabel(label).join(', ');}
   var estadoEmoc=chips('Estado emocional referido')||'no especificado';
+  // Sueño y alimentación
+  var sueno=[];
+  if(icchk('seg-sueno-conservado')) sueno.push('conservado');
+  if(icchk('seg-sueno-conciliacion')) sueno.push('insomnio de conciliación');
+  if(icchk('seg-sueno-mantenimiento')) sueno.push('insomnio de mantenimiento');
+  if(icchk('seg-sueno-hipersomnia')) sueno.push('hipersomnia');
+  if(icchk('seg-sueno-hosp')) sueno.push('alterado por hospitalización');
+  var alim=[];
+  if(icchk('seg-alim-adecuada')) alim.push('adecuada');
+  if(icchk('seg-alim-reducido')) alim.push('apetito reducido');
+  if(icchk('seg-alim-aumentado')) alim.push('apetito aumentado');
+  if(icchk('seg-alim-ayuno')) alim.push('ayuno/restricción');
+  var suenoTxt=sueno.length?sueno.join(', '):'no evaluado';
+  var alimentTxt=alim.length?alim.join(', '):'no evaluada';
   var preocupaciones=chips('Principales preocupaciones')||'ninguna referida';
   var pensamientosAut=icChipsBySubLabel('Pensamientos automáticos sobre enfermedad/internación/procedimiento').filter(function(c){return c!=='Ninguno';}).join(', ')||'no identificados';
   var citaTextual=icvl('ic-sub-cita');
@@ -9687,6 +9703,7 @@ function generarNotaIcSegLocal(){
 
   var texto='Paciente en seguimiento psicológico hospitalario'+(dx?', Dx médico: '+dx:'')+'. '
     +'Estado emocional referido: '+estadoEmoc+'. Preocupaciones: '+preocupaciones+'. '
+    +'Sueño: '+suenoTxt+'. Alimentación: '+alimentTxt+'. '
     +(pensamientosAut!=='no identificados'?'Pensamientos automáticos: '+pensamientosAut+'. ':'')
     +(citaTextual?'Cita textual: "'+citaTextual+'". ':'')
     +(intensidad?'Intensidad del malestar: '+intensidad+'/10. ':'')
@@ -9719,6 +9736,72 @@ function generarNotaIcSegLocal(){
   var wrap=document.getElementById('ic-output-wrap');
   if(wrap){wrap.style.display='';wrap.scrollIntoView({behavior:'smooth',block:'start'});}
   toast('✅ Nota generada');
+}
+
+function generarNotaRevLocal(){
+  var gv=function(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';};
+  var gr=function(name){var el=document.querySelector('input[name="'+name+'"]:checked');return el?el.value:'';};
+  var gchecks=function(name){var v=[];document.querySelectorAll('input[name="'+name+'"]:checked').forEach(function(c){v.push(c.value);});return v.join(', ');};
+  var pac=(window.pacientes||[]).find(function(p){return p.id===document.getElementById('rev-pac-sel').value;});
+  var nombre=pac?pac.nombre:'el paciente';
+  var fecha=gv('rev-fecha')||new Date().toISOString().split('T')[0];
+  var motivosRev=gchecks('rev-motivo')||'';
+  var motivoDesc=gv('rev-motivo-desc');
+  var evolucion=gv('rev-evolucion');
+  var respuesta=gr('rev-respuesta');
+  var factores=gv('rev-factores');
+  var redCambio=gr('rev-red-cambio');
+  var redDetalle=gv('rev-red-detalle');
+  var estadoMental=gv('rev-estado-mental');
+  var emChecks=gchecks('rev-em')||'no especificado';
+  var riesgo=gv('rev-riesgo')||'No clasificado';
+  var capacidad=gr('rev-cap');
+  var dxPrevio=gv('rev-dx-previo');
+  var dxActual=gv('rev-dx-actual');
+  var diferenciales=gv('rev-diferenciales');
+  var dxJustif=gv('rev-dx-justif');
+  var plan=gv('rev-plan');
+  var recom=gv('rev-recom');
+  var altaCumplida=gr('rev-alta');
+  var altaCriterio=gv('rev-alta-criterio');
+  var texto='REVALORACIÓN PSICOLÓGICA HOSPITALARIA — '+fecha+'\n\n';
+  texto+='Paciente: '+nombre+'.'+(dxPrevio?' Dx médico: '+dxPrevio:'')+'.\n\n';
+  if(motivosRev||motivoDesc) texto+='MOTIVO DE REVALORACIÓN\n'+(motivosRev?motivosRev+'. ':'')+( motivoDesc||'')+'.\n\n';
+  if(evolucion||respuesta||factores){
+    texto+='EVOLUCIÓN DESDE VALORACIÓN INICIAL\n';
+    if(evolucion) texto+=evolucion+'.\n';
+    if(respuesta) texto+='Respuesta al manejo psicológico: '+respuesta+'.\n';
+    if(factores) texto+='Factores que cambiaron: '+factores+'.\n';
+    if(redCambio) texto+='Red de apoyo: '+redCambio+(redDetalle?' — '+redDetalle:'')+'.\n';
+    texto+='\n';
+  }
+  texto+='ESTADO MENTAL ACTUAL\n';
+  texto+='Estado: '+emChecks+'. '+(estadoMental||'')+'.\n';
+  texto+='Riesgo suicida: '+riesgo+'.'+(capacidad?' Capacidad decisional: '+capacidad+'.':'')+' \n\n';
+  if(dxActual||diferenciales||dxJustif){
+    texto+='REVISIÓN DIAGNÓSTICA\n';
+    if(dxPrevio) texto+='Dx previo: '+dxPrevio+'.\n';
+    if(dxActual) texto+='Dx actual revisado: '+dxActual+'.\n';
+    if(diferenciales) texto+='Diferenciales: '+diferenciales+'.\n';
+    if(dxJustif) texto+='Justificación: '+dxJustif+'.\n';
+    texto+='\n';
+  }
+  if(plan||recom||altaCriterio){
+    texto+='PLAN AJUSTADO\n';
+    if(plan) texto+=plan+'.\n';
+    if(recom) texto+='Recomendaciones al equipo: '+recom+'.\n';
+    if(altaCumplida==='si'&&altaCriterio) texto+='Alta psicológica: '+altaCriterio+'.\n';
+    else if(altaCumplida==='no') texto+='Continúa en seguimiento.\n';
+  }
+  // Mostrar en output
+  setIcOut('ic-out-seg-texto',texto);
+  var seg=document.getElementById('ic-out-seg');
+  var f4=document.getElementById('ic-out-4campos');
+  if(seg)seg.style.display='';
+  if(f4)f4.style.display='none';
+  var wrap=document.getElementById('ic-output-wrap');
+  if(wrap){wrap.style.display='';wrap.scrollIntoView({behavior:'smooth',block:'start'});}
+  if(typeof toast==='function') toast('✅ Nota de revaloración generada');
 }
 
 function generarNotaFamiliarLocal(){
