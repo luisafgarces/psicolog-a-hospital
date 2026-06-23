@@ -5867,6 +5867,7 @@ window.goTo = function(page){
       var _exGoto=JSON.parse(localStorage.getItem('rd_excluidos_'+_hoyGoto)||'[]');
       window._rdExcluidosHoy={};
       _exGoto.forEach(function(id){window._rdExcluidosHoy[id]=true;});
+      console.log('[goTo ronda] Excluidos pre-cargados:',_exGoto.length,_exGoto);
       setTimeout(function(){window.rdInit&&window.rdInit();},100);
     },
     'calendario': function(){setTimeout(function(){window.calRender&&window.calRender();},100);}
@@ -13818,6 +13819,7 @@ window.rdInit = async function(){
   var _exRd=JSON.parse(localStorage.getItem('rd_excluidos_'+_hoyRd)||'[]');
   window._rdExcluidosHoy={};
   _exRd.forEach(function(id){window._rdExcluidosHoy[id]=true;});
+  console.log('[Ronda] Excluidos cargados:',_exRd.length,_exRd);
   // Cargar vistos y subidos del día desde Firebase
   if(typeof window.cargarSubidosHoy==='function') window.cargarSubidosHoy();
   if(typeof window.rdCargarVistosFirebase==='function') await window.rdCargarVistosFirebase();
