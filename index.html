@@ -9614,9 +9614,48 @@ function generarNotaIcNuevaLocal(){
   var _tccEvit=icvl('ic-tcc-evitacion')||'';
   var _tccAct=icvl('ic-tcc-activacion')||'';
   var _tccAdh=icvl('ic-tcc-adherencia')||'';
+  var _sustNotas=icvl('ic-sustancias-notas')||'';
+  var _inicioEvol=icvl('ic-inicio-evolucion')||'';
 
-  var sub='Paciente de '+edad+(edad?' años':'')+', '+sexo+'. Dx médico: '+(dx||'no registrado')+'. Días internado: '+(_diasInternacion||'no registrado')+'.'+(_urgencia?' Urgencia IC: '+_urgencia+'.':'')+(_medSol?' Solicitante: '+_medSol+'.':'')+(_motivoMedico?' Motivo del médico: '+_motivoMedico+'.':'')
-    +' Estado emocional: '+(chips('Estado emocional referido')||'no especificado')+'. Pensamientos automáticos: '+(chips('Pensamientos automáticos sobre enfermedad/internación/procedimiento')||chips('Pensamientos automáticos (CC)')||'no identificados')+(_tccPens?' — '+_tccPens:'')+'. Conductas de evitación: '+(chips('Conductas de evitación / seguridad')||'no exploradas')+(_tccEvit?' — '+_tccEvit:'')+'. Activación conductual: '+(chips('Activación conductual — nivel de actividad en hospital')||chips('Activación conductual')||'no evaluada')+(_tccAct?' — '+_tccAct:'')+'. Adherencia al tto: '+(chips('Adherencia al tratamiento médico')||'no evaluada')+(_tccAdh?' — '+_tccAdh:'')+'. Intensidad malestar: '+(intensidad||'no cuantificada')+'.'+(cita?' Cita textual: "'+cita+'"':'')+'. Ideación autolítica: '+_ideacion+'. Red de apoyo: '+(chips('Red de apoyo funcional')||'no explorada')+(_redDetalle?' — '+_redDetalle:'')+'.';
+  // Antecedentes adicionales
+  var _antSalud=chips('Antecedentes de salud mental')||'sin antecedentes conocidos';
+  var _intentos=(chips('Intentos previos')||'').replace('Ninguno','ninguno')||'ninguno';
+  var _spa=chips('Consumo de SPA')||'';
+  var _educ=chips('Nivel educativo')||'';
+  var _ocup=chips('Ocupación / rol social actual')||'';
+  var _estcivil=chips('Estado civil / situación afectiva')||'';
+  var _sueno=chips('Hábitos de sueño')||'no evaluado';
+  var _alim=chips('Hábitos de alimentación')||'no evaluada';
+  var _quePide=icvl('ic-que-pide')||'';
+
+  var sub='Paciente de '+edad+(edad?' años':'')+', '+sexo
+    +((_estcivil&&_estcivil!='no especificado')?' — '+_estcivil:'')
+    +'. Dx médico: '+(dx||'no registrado')
+    +'. Días internado: '+(_diasInternacion||'no registrado')+'.
+\n\nSOLICITUD\n'
+    +(_urgencia?'Urgencia IC: '+_urgencia+'. ':'')
+    +(_medSol?'Médico solicitante: '+_medSol+'. ':'')
+    +(_motivoMedico?'Motivo de la IC: '+_motivoMedico+'. ':'')
+    +(_quePide?'Interpretación clínica del pedido: '+_quePide+'. ':'')
+    +'\n\nANTECEDENTES\n'
+    +'Salud mental: '+_antSalud+'. Intentos previos: '+_intentos+'. '
+    +(_spa?'Consumo de SPA: '+_spa+'. ':'')
+    +(_educ?'Nivel educativo: '+_educ+'. ':'')
+    +(_ocup?'Ocupación: '+_ocup+'. ':'')
+    +'\n\nMOTIVO SUBJETIVO\n'
+    +'Estado emocional: '+(chips('Estado emocional referido')||'no especificado')+'. '
+    +'Preocupaciones: '+(chips('Principales preocupaciones')||'no referidas')+'. '
+    +'Pensamientos automáticos: '+(chips('Pensamientos automáticos sobre enfermedad/internación/procedimiento')||'no identificados')+(_tccPens?' — '+_tccPens:'')+'. '
+    +'Conductas de evitación: '+(chips('Conductas de evitación / seguridad')||'no exploradas')+(_tccEvit?' — '+_tccEvit:'')+'. '
+    +'Activación conductual: '+(chips('Activación conductual — nivel de actividad en hospital')||'no evaluada')+(_tccAct?' — '+_tccAct:'')+'. '
+    +'Adherencia al tto: '+(chips('Adherencia al tratamiento médico')||'no evaluada')+(_tccAdh?' — '+_tccAdh:'')+'. '
+    +'Sueño: '+_sueno+'. Alimentación: '+_alim+'. '
+    +(_inicioEvol?'Inicio y evolución del malestar: '+_inicioEvol+'. ':'')
+    +'Intensidad malestar: '+(intensidad||'no cuantificada')+'.'+(cita?' Cita textual: "'+cita+'"':'')+'. '
+    +'Ideación autolítica: '+_ideacion+'. '
+    +'Red de apoyo: '+(chips('Red de apoyo funcional')||'no explorada')+(_redDetalle?' — '+_redDetalle:'')+'. '
+    +'Factores protectores: '+(chips('Factores protectores')||'no explorados')+'.'
+    +(_sustNotas?'\nDetalles antecedentes/sustancias: '+_sustNotas+'.':'');
 
   var obj='Porte y apariencia: '+(chips('Porte y apariencia')||'adecuado')+'. Actitud: '+(chips('Actitud durante la entrevista')||'colaborador/a')+'. Conciencia: '+(chips('Conciencia / Colaboración')||'alerta')+'. Orientación: '+(chips('Orientación')||'conservada')+'. Atención: '+(chips('Atención')||'euprosexia')+'. Juicio: '+(chips('Juicio y raciocinio')||'conservado')+'. Pensamiento (curso): '+(chips('Pensamiento — curso')||'lógico')+'. Pensamiento (contenido): '+(chips('Pensamiento — contenido')||'sin alteraciones')+'. Lenguaje: '+(chips('Lenguaje')||'normal')+'. Afecto: '+(chips('Afecto')||'no especificado')+'. Conducta motora: '+(chips('Conducta motora')||'sin alteraciones')+'. Sensopercepción: '+(chips('Sensopercepción')||'sin alteraciones')+'. Insight: '+(chips('Insight')||'conservado')+'. Regulación emocional: '+(chips('Regulación emocional')||'no explorada')+'. Comprensión del Dx: '+(chips('Comprensión del Dx')||'no evaluada')+'. Riesgo suicida: '+sev+'. Factores protectores: '+(chips('Factores protectores')||'no explorados')+'.'+(_notasRiesgo?' Notas riesgo: '+_notasRiesgo+'.':(analisisLibre?' Análisis CC: '+analisisLibre+'.':(_obsDx?' '+_obsDx+'.':'')));
 
@@ -9648,6 +9687,12 @@ function generarNotaIcSegLocal(){
   var icchk=function(id){var el=document.getElementById(id);return el&&el.checked;};
   function chips(label){return icChipsBySubLabel(label).join(', ');}
   var estadoEmoc=chips('Estado emocional referido')||'no especificado';
+  var _segEvolucion=icvl('seg-eventos')||'';
+  var _segInterv=icvl('seg-dificultades')||'';
+  var _segAjustes=icvl('seg-ajustes')||'';
+  var _segObjCorto=icvl('seg-obj-corto')||'';
+  var _segObjLargo=icvl('seg-obj-largo')||'';
+  var _segPacto=icvl('seg-pensamiento')||'';
   // Sueño y alimentación
   var sueno=[];
   if(icchk('seg-sueno-conservado')) sueno.push('conservado');
@@ -9691,6 +9736,7 @@ function generarNotaIcSegLocal(){
   var protectores=chips('Factores protectores')||'no identificados';
   var red=chips('Red de apoyo funcional')||'no evaluada';
   var riesgoNotas=icvl('ic-riesgo-notas');
+  var _segRiesgoOtro=icvl('seg-riesgo-otro-cual')||'';
   var tipoResp=chips('Tipo de respuesta emocional')||'no especificada';
   var impresion=chips('Impresión diagnóstica (chips CIE-11)')||'no especificada';
   var intervencion=chips('Intervención realizada / sugerida')||chips('Intervención realizada hoy')||'valoración clínica';
@@ -9703,6 +9749,7 @@ function generarNotaIcSegLocal(){
 
   var texto='Paciente en seguimiento psicológico hospitalario'+(dx?', Dx médico: '+dx:'')+'. '
     +'Estado emocional referido: '+estadoEmoc+'. Preocupaciones: '+preocupaciones+'. '
+    +(_segEvolucion?'Evolución clínica: '+_segEvolucion+'. ':'')
     +'Sueño: '+suenoTxt+'. Alimentación: '+alimentTxt+'. '
     +(pensamientosAut!=='no identificados'?'Pensamientos automáticos: '+pensamientosAut+'. ':'')
     +(citaTextual?'Cita textual: "'+citaTextual+'". ':'')
@@ -9715,12 +9762,17 @@ function generarNotaIcSegLocal(){
     +', sensopercepción '+sensop+', insight '+insight
     +', regulación emocional '+regulacion+', comprensión del Dx '+comprension+'. '
     +(analisisCC?'Análisis clínico: '+analisisCC+'. ':'')
-    +'Ideación suicida/autolesiva: '+ideacion+'. Nivel de riesgo: '+sev+'. '
+    +'Ideación suicida/autolesiva: '+ideacion+'. Nivel de riesgo: '+sev+(_segRiesgoOtro?' ('+_segRiesgoOtro+')':'')+'. '
     +'Factores protectores: '+protectores+'. Red de apoyo: '+red+'. '
     +(riesgoNotas?'Notas riesgo: '+riesgoNotas+'. ':'')
     +'Respuesta emocional: '+tipoResp+'. Impresión diagnóstica: '+impresion
     +(_cie?' ('+_cie+')':'')+'. '
-    +'Intervención realizada: '+intervencion+'. Seguimiento: '+seguimiento+(plazo?' — plazo: '+plazo:'')+'. '
+    +(_segInterv?'Intervención realizada: '+_segInterv+'. ':('Intervención: '+intervencion+'. '))
+    +(_segAjustes?'Ajustes al manejo: '+_segAjustes+'. ':'')
+    +(_segObjCorto?'Objetivo próxima sesión: '+_segObjCorto+'. ':'')
+    +(_segObjLargo?'Indicación al equipo: '+_segObjLargo+'. ':'')
+    +(_segPacto?'Pacto/acuerdo con el paciente: '+_segPacto+'. ':'')
+    +'Seguimiento: '+seguimiento+(plazo?' — plazo: '+plazo:'')+'. '
     +(tratNotas?'Notas al equipo: '+tratNotas+'.':'')
     +(_cap?'\n\nVALORACIÓN DE CAPACIDAD DECISIONAL\n'+_cap:'');
 
