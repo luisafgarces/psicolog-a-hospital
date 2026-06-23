@@ -14357,6 +14357,7 @@ function rdRefrescarTablero(){
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">'
         +checkVisto
+        +'<button onclick="event.stopPropagation();rdReprogramar(\''+p.id+'\',this)" style="background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;cursor:pointer;white-space:nowrap" title="Reprogramar">📅</button>'
         +'<button onclick="rdCargarPaciente(\''+p.id+'\')" style="'+btnColor+';padding:6px 14px;border-radius:7px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif">'+btnLabel+'</button>'
       +'</div>'
     +'</div>';
