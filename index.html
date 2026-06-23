@@ -15052,7 +15052,13 @@ window.rdReprogramarGuardar = async function(pacId){
 
 // ── SINCRONIZACIÓN VISTO/SUBIDO EN FIREBASE ─────────────────────────
 window.rdSyncVistosFirebase = async function(){
-  if(!window.db||!window._setDoc||!window._doc) return;
+  // Esperar a que db esté listo
+  var intentos=0;
+  while((!window.db||!window._setDoc||!window._doc)&&intentos<10){
+    await new Promise(function(r){setTimeout(r,500);});
+    intentos++;
+  }
+  if(!window.db||!window._setDoc||!window._doc){console.warn('rdSync: db no disponible');return;}
   var hoy=new Date().toISOString().split('T')[0];
   var data={
     vistos:Object.keys(window._rdVistosHoy||{}),
@@ -15061,23 +15067,29 @@ window.rdSyncVistosFirebase = async function(){
     updated:new Date().toISOString()
   };
   try{
-    await window._setDoc(window._doc(window.db,'fichaje_jornadas','vistos_'+hoy),data);
-  }catch(e){console.warn('sync vistos:',e);}
+    await window._setDoc(window._doc(window.db,'ronda_estados',hoy),data);
+    console.log('[Vistos] Sincronizado Firebase:',data.vistos.length,'vistos',data.subidos.length,'subidos');
+  }catch(e){console.warn('[Vistos] Error sync:',e);}
 };
 
 window.rdCargarVistosFirebase = async function(){
-  if(!window.db||!window._getDoc||!window._doc) return;
+  var intentos=0;
+  while((!window.db||!window._getDoc||!window._doc)&&intentos<10){
+    await new Promise(function(r){setTimeout(r,500);});
+    intentos++;
+  }
+  if(!window.db||!window._getDoc||!window._doc){console.warn('rdLoad: db no disponible');return;}
   var hoy=new Date().toISOString().split('T')[0];
   try{
-    var snap=await window._getDoc(window._doc(window.db,'fichaje_jornadas','vistos_'+hoy));
-    if(!snap.exists()) return;
+    var snap=await window._getDoc(window._doc(window.db,'ronda_estados',hoy));
+    if(!snap.exists()){console.log('[Vistos] Sin datos en Firebase para hoy');return;}
     var data=snap.data();
     if(!window._rdVistosHoy) window._rdVistosHoy={};
     if(!window._rdSubidosHoy) window._rdSubidosHoy={};
     (data.vistos||[]).forEach(function(id){window._rdVistosHoy[id]=true;});
     (data.subidos||[]).forEach(function(id){window._rdSubidosHoy[id]=true;});
-    if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
-  }catch(e){console.warn('load vistos:',e);}
+    console.log('[Vistos] Cargado de Firebase:',data.vistos?.length||0,'vistos',data.subidos?.length||0,'subidos');
+  }catch(e){console.warn('[Vistos] Error carga:',e);}
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
