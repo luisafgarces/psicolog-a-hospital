@@ -2681,6 +2681,10 @@ input.toggle-cb{display:none}
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Días de estancia</div>
               <input type="number" id="rd-dias" min="0" placeholder="0" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
             </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Fecha de ingreso hospitalario</div>
+              <input type="date" id="rd-fecha-ingreso" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+            </div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px">
             <div>
@@ -2717,18 +2721,9 @@ input.toggle-cb{display:none}
             <span style="background:#b45309;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">2</span>
             Filtro Clínico-Médico <span style="font-weight:400;font-size:0.68rem;color:var(--text3);text-transform:none">(Revisión HCE)</span>
           </div>
-          <div style="margin-bottom:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Fecha de ingreso hospitalario</div>
-            <input type="date" id="rd-fecha-ingreso" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
-          </div>
-          <div style="margin-bottom:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Dx Médico Principal</div>
-            <input type="text" id="rd-dx" placeholder="Diagnóstico médico principal…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
-          </div>
-          <div style="margin-bottom:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Tratamiento médico actual</div>
-            <textarea id="rd-trat-medico" rows="2" placeholder="Ej: Morfina 10mg c/8h, O2 suplementario, Quimioterapia…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
-          </div>
+          <!-- rd-dx y rd-trat-medico movidos a ficha del paciente — solo ocultos para compatibilidad -->
+          <input type="hidden" id="rd-dx" value="">
+          <input type="hidden" id="rd-trat-medico" value="">
           <div style="margin-bottom:10px">
             <div style="font-size:0.7rem;font-weight:600;color:#7c3aed;margin-bottom:3px">Dx Psicológico Principal</div>
             <input type="text" id="rd-dx-psi" placeholder="Ej: Trastorno adaptativo con ánimo depresivo…" style="width:100%;padding:8px 12px;border:1.5px solid #d8b4fe;border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:#fdf4ff;color:var(--text);outline:none">
