@@ -13788,8 +13788,9 @@ function rdOrdenRonda(pacs){
 
 // ── Inicializar: cargar tablero del día ─────────────────────────────
 window.rdInit = async function(){
-  // Cargar subidos del día
+  // Cargar vistos y subidos del día desde Firebase
   if(typeof window.cargarSubidosHoy==='function') window.cargarSubidosHoy();
+  if(typeof window.rdCargarVistosFirebase==='function') window.rdCargarVistosFirebase();
   var cont = document.getElementById('rd-tablero');
   var resumen = document.getElementById('rd-tablero-resumen');
   if(!cont) return;
@@ -13799,11 +13800,14 @@ window.rdInit = async function(){
   var pacs = rdOrdenRonda(
     (window.pacientes||[]).filter(function(p){
       if(_estadosAlta.includes(p.estado)) return false;
-      // Aparece si: proxSesion es hoy, O tiene ficha de hoy, O está marcado como visto hoy
       var tieneProxHoy = p.proxSesion === hoy;
       var tieneFichaHoy = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
       var estaVisto = !!(window._rdVistosHoy && window._rdVistosHoy[p.id]);
-      return tieneProxHoy || tieneFichaHoy || estaVisto;
+      // Programado hoy: siempre aparece
+      if(tieneProxHoy) return true;
+      // Reprogramado para otro día: solo aparece si ya tiene ficha de hoy o está visto
+      if(tieneFichaHoy || estaVisto) return true;
+      return false;
     })
   );
 
@@ -14222,13 +14226,12 @@ window.rdGuardar = async function(){
 // Refrescar solo el tablero (sin recargar desde Firebase)
 // Marcar chulo automáticamente cuando se guarda una nota desde el formulario
 window.rdMarcarVistaPorNota=function(pacId){
-  // Validar que sea un ID real de paciente (string no vacío, no 'null', no 'undefined')
   if(!pacId||typeof pacId!=='string'||pacId==='null'||pacId==='undefined'||pacId.length<5) return;
-  // Validar que el paciente exista realmente
   var existe=(window.pacientes||[]).some(function(p){return p.id===pacId;});
   if(!existe) return;
   if(!window._rdVistosHoy) window._rdVistosHoy={};
   window._rdVistosHoy[pacId]=true;
+  rdSyncVistosFirebase();
   rdRefrescarTablero();
   if(typeof window.renderDashboard==='function') window.renderDashboard();
 };
@@ -14242,6 +14245,7 @@ window.rdMarcarVista=function(pacId, cbEl){
   } else {
     window._rdVistosHoy[pacId]=true;
   }
+  rdSyncVistosFirebase();
   rdRefrescarTablero();
   if(typeof window.renderDashboard==='function') window.renderDashboard();
   if(typeof toast==='function') toast(yaVisto?'☐ Desmarcado':'✅ Marcado como visto');
@@ -14257,7 +14261,9 @@ function rdRefrescarTablero(){
       var tieneProxHoy2 = p.proxSesion === hoy2;
       var tieneFichaHoy2 = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
       var estaVisto2 = !!(window._rdVistosHoy && window._rdVistosHoy[p.id]);
-      return tieneProxHoy2 || tieneFichaHoy2 || estaVisto2;
+      if(tieneProxHoy2) return true;
+      if(tieneFichaHoy2 || estaVisto2) return true;
+      return false;
     })
   );
   var cont = document.getElementById('rd-tablero');
@@ -14944,12 +14950,13 @@ window.rdVerFichaPaciente = function(){
 window.rdMarcarSubido = function(pacId){
   if(!window._rdSubidosHoy) window._rdSubidosHoy={};
   window._rdSubidosHoy[pacId]=true;
-  // Persistir en localStorage
+  // Persistir en localStorage y Firebase
   var hoy=new Date().toISOString().split('T')[0];
   var key='rd_subidos_'+hoy;
   var data=JSON.parse(localStorage.getItem(key)||'[]');
   if(!data.includes(pacId)) data.push(pacId);
   localStorage.setItem(key,JSON.stringify(data));
+  if(typeof rdSyncVistosFirebase==='function') rdSyncVistosFirebase();
   // Refrescar tablero
   if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
   if(typeof window.actualizarContadorPendientes==='function') window.actualizarContadorPendientes();
@@ -15019,6 +15026,36 @@ window.rdReprogramarGuardar = async function(pacId){
   }catch(e){
     if(typeof toast==='function') toast('❌ Error: '+e.message);
   }
+};
+
+// ── SINCRONIZACIÓN VISTO/SUBIDO EN FIREBASE ─────────────────────────
+window.rdSyncVistosFirebase = async function(){
+  if(!window.db||!window._setDoc||!window._doc) return;
+  var hoy=new Date().toISOString().split('T')[0];
+  var data={
+    vistos:Object.keys(window._rdVistosHoy||{}),
+    subidos:Object.keys(window._rdSubidosHoy||{}),
+    fecha:hoy,
+    updated:new Date().toISOString()
+  };
+  try{
+    await window._setDoc(window._doc(window.db,'fichaje_jornadas','vistos_'+hoy),data);
+  }catch(e){console.warn('sync vistos:',e);}
+};
+
+window.rdCargarVistosFirebase = async function(){
+  if(!window.db||!window._getDoc||!window._doc) return;
+  var hoy=new Date().toISOString().split('T')[0];
+  try{
+    var snap=await window._getDoc(window._doc(window.db,'fichaje_jornadas','vistos_'+hoy));
+    if(!snap.exists()) return;
+    var data=snap.data();
+    if(!window._rdVistosHoy) window._rdVistosHoy={};
+    if(!window._rdSubidosHoy) window._rdSubidosHoy={};
+    (data.vistos||[]).forEach(function(id){window._rdVistosHoy[id]=true;});
+    (data.subidos||[]).forEach(function(id){window._rdSubidosHoy[id]=true;});
+    if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+  }catch(e){console.warn('load vistos:',e);}
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
