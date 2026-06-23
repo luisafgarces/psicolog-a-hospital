@@ -5861,7 +5861,14 @@ window.goTo = function(page){
     'interconsultas': function(){if(window.renderIC)window.renderIC();else setTimeout(function(){window.renderIC&&window.renderIC();},300);},
 'historial-pac': function(){setTimeout(function(){window.hpacRenderLista&&window.hpacRenderLista();},100);},
     'psicoeducacion': function(){setTimeout(function(){window.renderPsicoCards&&window.renderPsicoCards('all');},100);},
-    'ronda-diaria': function(){setTimeout(function(){window.rdInit&&window.rdInit();},100);},
+    'ronda-diaria': function(){
+      // Cargar excluidos síncronamente ANTES de rdInit
+      var _hoyGoto=new Date().toISOString().split('T')[0];
+      var _exGoto=JSON.parse(localStorage.getItem('rd_excluidos_'+_hoyGoto)||'[]');
+      window._rdExcluidosHoy={};
+      _exGoto.forEach(function(id){window._rdExcluidosHoy[id]=true;});
+      setTimeout(function(){window.rdInit&&window.rdInit();},100);
+    },
     'calendario': function(){setTimeout(function(){window.calRender&&window.calRender();},100);}
   };
   if(fn[page]) fn[page]();
