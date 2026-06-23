@@ -1480,6 +1480,10 @@ input.toggle-cb{display:none}
                 <span class="ic-chip" onclick="setIcEsp('sincapacidad',this)">🧠 Sin capacidad cognitiva para intervención</span>
                 <span class="ic-chip" onclick="setIcEsp('somnoliento',this)">😴 Paciente somnoliento / hipoactivo</span>
               </div>
+              <div style="margin-top:12px">
+                <div class="ic-sublabel">Descripción de la condición real del paciente <span style="font-weight:400;color:var(--text3);font-size:0.72rem">(aparecerá en la nota generada)</span></div>
+                <textarea id="ic-esp-condicion" rows="3" placeholder="Ej: Paciente en estado posquirúrgico inmediato, bajo efectos de anestesia, con vía aérea artificial. Se realiza verificación de estado general y se deja constancia de la visita…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;background:var(--surface2);color:var(--text);outline:none;resize:vertical;margin-top:4px"></textarea>
+              </div>
               <div id="ic-esp-preview" style="display:none"><div class="ic-sublabel" style="margin-top:12px">Vista previa de la nota</div><div class="esp-preview" id="ic-esp-text"></div></div>
             </div>
           </div>
@@ -8993,6 +8997,7 @@ var icEspNotes={
 window.setIcEsp=function(type,el){
   icCurrentEsp=type;
   document.querySelectorAll('#ic-mode-esp .ic-chip').forEach(function(c){c.classList.remove('on');});
+  var espCond=document.getElementById('ic-esp-condicion'); if(espCond) espCond.value='';
   el.classList.add('on');
   var preview=document.getElementById('ic-esp-preview');
   var text=document.getElementById('ic-esp-text');
@@ -9917,7 +9922,10 @@ function generarNotaIcEsp(){
     if(typeof toast==='function')toast('⚠️ Selecciona el tipo de nota especial');
     return;
   }
-  setIcOut('ic-out-trat',icEspNotes[icCurrentEsp]);
+  var condicion=(document.getElementById('ic-esp-condicion')?.value||'').trim();
+  var notaEsp=icEspNotes[icCurrentEsp];
+  if(condicion) notaEsp=notaEsp+'\n\nCONDICIÓN CLÍNICA OBSERVADA:\n'+condicion;
+  setIcOut('ic-out-trat',notaEsp);
   setIcOut('ic-out-sub','N/A — Ver tratamiento.');
   setIcOut('ic-out-obj','N/A — Ver tratamiento.');
   setIcOut('ic-out-resp','N/A — Ver tratamiento.');
