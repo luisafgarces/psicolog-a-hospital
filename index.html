@@ -4434,7 +4434,7 @@ window.guardarICFirebase=async()=>{
       if(pacIdFinal&&typeof rdMarcarVistaPorNota==='function') rdMarcarVistaPorNota(pacIdFinal);
       if(pacIdFinal&&typeof icGuardarRondaParte2==='function') icGuardarRondaParte2(pacIdFinal);
       if(pacIdFinal&&riesgo&&typeof propagarRiesgoPaciente==='function') propagarRiesgoPaciente(pacIdFinal,riesgo);
-      if(pacIdFinal&&typeof limpiarProxSesionSiAtendido==='function') limpiarProxSesionSiAtendido(pacIdFinal,fecha||new Date().toISOString().split('T')[0]);
+      // limpiarProxSesionSiAtendido desactivado — proxSesion se maneja manualmente
       // Autoguardar borrador en Firebase sin necesidad de presionar el botón
       try{if(typeof guardarBorradorFirebase==='function')guardarBorradorFirebase('ic');}catch(e){console.warn('autoborrador:',e);}
       // Limpiar backups de localStorage ya sincronizados
@@ -4519,7 +4519,7 @@ window.guardarAnamnesis=async()=>{
       var _anRiesgo=document.getElementById('seg-riesgo')?.value||'';
       if(_anPacId&&_anRiesgo&&typeof propagarRiesgoPaciente==='function') propagarRiesgoPaciente(_anPacId,_anRiesgo);
       var _anFecha=document.getElementById('seg-fecha')?.value||new Date().toISOString().split('T')[0];
-      if(_anPacId&&typeof limpiarProxSesionSiAtendido==='function') limpiarProxSesionSiAtendido(_anPacId,_anFecha);
+      // limpiarProxSesionSiAtendido desactivado — proxSesion se maneja manualmente
       setTimeout(()=>clearAnamnesis(),300);
     }
   }
@@ -14558,7 +14558,7 @@ window.revGuardar = async function(){
     var _revRiesgo=gv('rev-riesgo');
     if(_revRiesgo&&typeof propagarRiesgoPaciente==='function') propagarRiesgoPaciente(pacId,_revRiesgo);
     var _revFecha=gv('rev-fecha')||new Date().toISOString().split('T')[0];
-    if(typeof limpiarProxSesionSiAtendido==='function') limpiarProxSesionSiAtendido(pacId,_revFecha);
+    // limpiarProxSesionSiAtendido desactivado — proxSesion se maneja manualmente
     if(typeof toast==='function') toast('✅ Revaloración guardada');
     revLimpiar();
     // Resetear selector
