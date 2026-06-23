@@ -8218,6 +8218,7 @@ window.hpacFiltrar=(q)=>{
 window.hpacAbrirPaciente=(pacId)=>{
   window._hpacEgresos=[];
   window._hpacReingresos=[];
+  window._hpacNotasPac=[];
   console.log('hpacAbrirPaciente llamado con id:', pacId);
   if(!pacId){toast('⚠️ ID de paciente no disponible');return;}
   _hpacPacId=pacId;window._hpacPacId=pacId;
@@ -8266,8 +8267,11 @@ window.hpacRenderNotas=()=>{
       window._hpacEgresos=snapE.docs.map(function(d){return Object.assign({id:d.id},d.data(),{_esEgreso:true});});
       var snapR=await window._getDocs(window._query(window._collection(window.db,'reingresos'),window._where('pacienteId','==',_hpacPacId),window._orderBy('fechaReingreso','desc')));
       window._hpacReingresos=snapR.docs.map(function(d){return Object.assign({id:d.id},d.data(),{_esReingreso:true});});
-      if(window._hpacEgresos.length||window._hpacReingresos.length) hpacRenderNotas();
-    }catch(e){console.warn('egresos/reingresos:',e);}
+      // Cargar revaloraciones de notas_pacientes
+      var snapNP=await window._getDocs(window._query(window._collection(window.db,'notas_pacientes'),window._where('pacienteId','==',_hpacPacId),window._orderBy('fecha','desc')));
+      window._hpacNotasPac=snapNP.docs.map(function(d){return Object.assign({id:d.id},d.data(),{_col:'notas_pacientes'});});
+      hpacRenderNotas();
+    }catch(e){console.warn('egresos/reingresos/notas_pac:',e);}
   })();
   // Summary bar
   const rb=document.getElementById('hpac-resumen-bar');
@@ -8278,12 +8282,14 @@ window.hpacRenderNotas=()=>{
       badge('📋','Anamnesis',anas.length,'#7b1fa2')+
       badge('🧪','Tests',tests.length,'var(--warning)')+
       badge('⚖️','Cap.',caps.length,'#c0392b')+
-      `<span style="display:inline-flex;align-items:center;gap:5px;background:var(--surface2);color:var(--text2);border-radius:20px;padding:4px 12px;font-size:0.75rem;font-weight:700">📅 ${ics.length+anas.length+tests.length+caps.length} registros totales</span>`;
+      `<span style="display:inline-flex;align-items:center;gap:5px;background:var(--surface2);color:var(--text2);border-radius:20px;padding:4px 12px;font-size:0.75rem;font-weight:700">📅 ${ics.length+anas.length+tests.length+caps.length+(window._hpacNotasPac||[]).length} registros totales</span>`;
   }
+  const notasPacientes=(window._hpacNotasPac||[]).filter(function(n){return n.pacienteId===_hpacPacId;});
   const notas=[].concat(
     ics.map(x=>Object.assign({},x,{_col:'interconsultas'})),
     anas.map(x=>Object.assign({},x,{_col:'anamnesis',modo:x.modo||'Anamnesis'})),
-    caps.map(x=>Object.assign({},x,{_col:'capacidad_decisional',modo:'Capacidad Decisional'}))
+    caps.map(x=>Object.assign({},x,{_col:'capacidad_decisional',modo:'Capacidad Decisional'})),
+    notasPacientes.map(x=>Object.assign({},x,{_col:'notas_pacientes',modo:x.tipo==='revaloracion'?'Revaloración':x.tipo||'Nota'}))
   ).sort((a,b)=>_sk(b)-_sk(a));
   const testsSorted=[].concat(tests).sort((a,b)=>_sk(b)-_sk(a));
   for(var k in _hMap)delete _hMap[k];
@@ -8291,8 +8297,8 @@ window.hpacRenderNotas=()=>{
   if(!notas.length&&!testsSorted.length){
     cont.innerHTML='<div class="empty" style="padding:36px"><p>Sin registros para este paciente.</p></div>';return;
   }
-  var tc={'IC Nueva':'tipo-ic','Seguimiento':'tipo-seg','Anamnesis':'tipo-anam','Nota especial':'tipo-esp','Capacidad Decisional':'tipo-ic'};
-  var tcol={'IC Nueva':'var(--accent2)','Seguimiento':'#1a56db','Anamnesis':'#7b1fa2','Nota especial':'var(--warning)','Capacidad Decisional':'#c0392b'};
+  var tc={'IC Nueva':'tipo-ic','Seguimiento':'tipo-seg','Anamnesis':'tipo-anam','Nota especial':'tipo-esp','Capacidad Decisional':'tipo-ic','Revaloración':'tipo-seg'};
+  var tcol={'IC Nueva':'var(--accent2)','Seguimiento':'#1a56db','Anamnesis':'#7b1fa2','Nota especial':'var(--warning)','Capacidad Decisional':'#c0392b','Revaloración':'#7c3aed'};
 
   // ── TRAYECTO HOSPITALARIO ──
   var egs=window._hpacEgresos||[];
