@@ -13914,7 +13914,7 @@ window.rdCargarPaciente = function(pacId){
   var pac = (window.pacientes||[]).find(function(p){ return p.id === pacId; });
   if(!pac) return;
 
-  if(header) header.textContent = (pac.nombre||'—') + (pac.hab?' · '+pac.hab:'');
+  if(header) header.textContent = (pac.nombre||'—') + (pac.hab?' · '+pac.hab:'') + (pac.cedula?' · CC: '+pac.cedula:'');
 
   // Si ya hay ficha guardada hoy, pre-rellenar con esos datos
   var fichaHoy = window._rdFichasHoy && window._rdFichasHoy[pacId];
