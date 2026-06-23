@@ -13799,14 +13799,17 @@ window.rdInit = async function(){
   var _estadosAlta=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga'];
   var pacs = rdOrdenRonda(
     (window.pacientes||[]).filter(function(p){
-      if(_estadosAlta.includes(p.estado)) return false;
-      var tieneProxHoy = p.proxSesion === hoy;
       var tieneFichaHoy = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
       var estaVisto = !!(window._rdVistosHoy && window._rdVistosHoy[p.id]);
-      // Programado hoy: siempre aparece
-      if(tieneProxHoy) return true;
-      // Reprogramado para otro día: solo aparece si ya tiene ficha de hoy o está visto
+      var estaSubido = !!(window._rdSubidosHoy && window._rdSubidosHoy[p.id]);
+      // Si ya fue subido al sistema, excluirlo siempre
+      if(estaSubido) return false;
+      // Si tiene ficha de hoy o está visto, mantenerlo aunque esté dado de alta
       if(tieneFichaHoy || estaVisto) return true;
+      // Si está dado de alta y no tiene ficha ni visto, excluir
+      if(_estadosAlta.includes(p.estado)) return false;
+      var tieneProxHoy = p.proxSesion === hoy;
+      if(tieneProxHoy) return true;
       return false;
     })
   );
@@ -14257,12 +14260,17 @@ function rdRefrescarTablero(){
   var _estadosAlta2=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga'];
   var pacs = rdOrdenRonda(
     (window.pacientes||[]).filter(function(p){
-      if(_estadosAlta2.includes(p.estado)) return false;
-      var tieneProxHoy2 = p.proxSesion === hoy2;
       var tieneFichaHoy2 = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
       var estaVisto2 = !!(window._rdVistosHoy && window._rdVistosHoy[p.id]);
-      if(tieneProxHoy2) return true;
+      var estaSubido2 = !!(window._rdSubidosHoy && window._rdSubidosHoy[p.id]);
+      // Si ya fue subido, excluir siempre
+      if(estaSubido2) return false;
+      // Si tiene ficha o está visto, mantener aunque esté dado de alta
       if(tieneFichaHoy2 || estaVisto2) return true;
+      // Si está dado de alta sin ficha ni visto, excluir
+      if(_estadosAlta2.includes(p.estado)) return false;
+      var tieneProxHoy2 = p.proxSesion === hoy2;
+      if(tieneProxHoy2) return true;
       return false;
     })
   );
