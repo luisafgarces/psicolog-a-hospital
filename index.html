@@ -8649,12 +8649,10 @@ window.abrirPacSheetSilent = function(p) {
     {l:'Estado',v:estadoLabel[p.estado]||p.estado||'—'},
     capText?{l:'Capacidad decisional',v:capText,color:capColorMap[capVal]}:null,
     {l:'Próxima sesión',v:p.proxSesion?formatDate(p.proxSesion):'No programada'},
-    {l:'Dx médico',v:p.motivo,full:true,editable:'motivo',editLabel:'Diagnóstico médico'},
     p.motivoIC?{l:'Motivo de interconsulta',v:p.motivoIC,full:true}:null,
     p.quePide?{l:'🎯 ¿Qué pide realmente?',v:p.quePide,full:true,color:'#7c3aed'}:null,
     {l:'Impresión psicológica',v:p.dxpsi,full:true},
     {l:'Observaciones de riesgo',v:p.riesgoObs,full:true},
-    {l:'Notas generales',v:p.notas,full:true},
   ].filter(x=>x&&x.v);
   const gridEl = document.getElementById('ps-grid');
   if(gridEl) gridEl.innerHTML = grid.map(ri).join('');
@@ -8762,12 +8760,10 @@ window.abrirPacSheet=async(id)=>{
     {l:'Estado',v:estadoLabel[p.estado]||p.estado||'—'},
     capText?{l:'Capacidad decisional',v:capText,color:capColorMap[capVal]}:null,
     {l:'Próxima sesión',v:p.proxSesion?formatDate(p.proxSesion):'No programada'},
-    {l:'Dx médico',v:p.motivo,full:true,editable:'motivo',editLabel:'Diagnóstico médico'},
     p.motivoIC?{l:'Motivo de interconsulta',v:p.motivoIC,full:true}:null,
     p.quePide?{l:'🎯 ¿Qué pide realmente?',v:p.quePide,full:true,color:'#7c3aed'}:null,
     {l:'Impresión psicológica',v:p.dxpsi,full:true},
     {l:'Observaciones de riesgo',v:p.riesgoObs,full:true},
-    {l:'Notas generales',v:p.notas,full:true},
   ].filter(x=>x&&x.v);
   document.getElementById('ps-grid').innerHTML=grid.map(ri).join('');
   window._psPacId=id;
