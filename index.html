@@ -13810,11 +13810,14 @@ window.rdInit = async function(){
       var tieneFichaHoy = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
       var estaVisto = !!(window._rdVistosHoy && window._rdVistosHoy[p.id]);
       var estaSubido = !!(window._rdSubidosHoy && window._rdSubidosHoy[p.id]);
-      // Si ya fue subido al sistema, excluirlo siempre
+      var estaExcluido = !!(window._rdExcluidosHoy && window._rdExcluidosHoy[p.id]);
+      // Reprogramado para otro día — excluir siempre
+      if(estaExcluido) return false;
+      // Ya subido — excluir
       if(estaSubido) return false;
-      // Si tiene ficha de hoy o está visto, mantenerlo aunque esté dado de alta
+      // Tiene ficha o está visto — mantener
       if(tieneFichaHoy || estaVisto) return true;
-      // Si está dado de alta y no tiene ficha ni visto, excluir
+      // Alta sin ficha ni visto — excluir
       if(_estadosAlta.includes(p.estado)) return false;
       var tieneProxHoy = p.proxSesion === hoy;
       if(tieneProxHoy) return true;
@@ -13833,6 +13836,7 @@ window.rdInit = async function(){
   window._rdFichasHoy = {};
   if(!window._rdVistosHoy) window._rdVistosHoy = {};
   if(!window._rdSubidosHoy) window._rdSubidosHoy = {};
+  if(!window._rdExcluidosHoy) window._rdExcluidosHoy = {};
   try{
     var snap = await window._getDocs(
       window._fdb.query(
@@ -14271,11 +14275,10 @@ function rdRefrescarTablero(){
       var tieneFichaHoy2 = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
       var estaVisto2 = !!(window._rdVistosHoy && window._rdVistosHoy[p.id]);
       var estaSubido2 = !!(window._rdSubidosHoy && window._rdSubidosHoy[p.id]);
-      // Si ya fue subido, excluir siempre
+      var estaExcluido2 = !!(window._rdExcluidosHoy && window._rdExcluidosHoy[p.id]);
+      if(estaExcluido2) return false;
       if(estaSubido2) return false;
-      // Si tiene ficha o está visto, mantener aunque esté dado de alta
       if(tieneFichaHoy2 || estaVisto2) return true;
-      // Si está dado de alta sin ficha ni visto, excluir
       if(_estadosAlta2.includes(p.estado)) return false;
       var tieneProxHoy2 = p.proxSesion === hoy2;
       if(tieneProxHoy2) return true;
@@ -15041,6 +15044,9 @@ window.rdReprogramarGuardar = async function(pacId){
   try{
     await window._updateDoc(window._doc(window.db,'pacientes',pacId),{proxSesion:fecha});
     if(pac) pac.proxSesion=fecha;
+    // Excluir de la ronda de hoy aunque tenga ficha
+    if(!window._rdExcluidosHoy) window._rdExcluidosHoy={};
+    window._rdExcluidosHoy[pacId]=true;
     var picker=document.getElementById('rd-reprog-picker');
     if(picker) picker.remove();
     if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
