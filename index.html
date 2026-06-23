@@ -8848,8 +8848,8 @@ window.psCargarRondaHoy = async function(pacId){
 
   var html = '';
 
-  // Dx + días
-  if(ficha.dx) html += '<div style="font-size:0.82rem;font-weight:700;color:#166534;margin-bottom:6px">'+ficha.dx+(ficha.dias?' · '+ficha.dias+' días':'')+'</div>';
+  // Días de estancia (sin dx — ya aparece abajo)
+  if(ficha.dias) html += '<div style="font-size:0.78rem;font-weight:600;color:#166534;margin-bottom:6px">'+ficha.dias+' días hospitalizados</div>';
 
   // Info clave de contexto médico
   if(ficha.notaMedico)     html += '<div style="font-size:0.78rem;background:#fff;border-left:3px solid #86efac;padding:4px 8px;margin-bottom:4px;border-radius:0 6px 6px 0"><span style="font-size:0.68rem;font-weight:700;color:#15803d">📋 MÉDICO</span><br>'+ficha.notaMedico+'</div>';
@@ -8865,8 +8865,7 @@ window.psCargarRondaHoy = async function(pacId){
   if(ficha.aislamiento==='si') alertas += fila('🚧','Aislamiento:',ficha.aislamientoTipo||'Sí', false);
   if(ficha.conducta && ficha.conducta!=='colaborador') alertas += fila('👤','Conducta:',conductaLabel, ficha.conducta.includes('agresivo'));
   if(ficha.adherencia && ficha.adherencia!=='colabora') alertas += fila('💊','Adherencia:',adherLabel, true);
-  if(ficha.farmacos && ficha.farmacos.length) alertas += fila('💊','Fármacos:',ficha.farmacos.join(', ')+(ficha.farmNotas?' — '+ficha.farmNotas:''), false);
-  else if(ficha.farmNotas) alertas += fila('💊','Fármacos:',ficha.farmNotas, false);
+  // Fármacos omitidos aquí — ya aparecen en Plan Farmacológico abajo
   if(alertas) html += '<div style="margin-bottom:4px">'+alertas+'</div>';
 
   // Intervención y pacto
