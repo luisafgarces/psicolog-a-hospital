@@ -10007,7 +10007,8 @@ function generarNotaIcEsp(){
   if(f4)f4.style.display='';
   if(seg)seg.style.display='none';
   var wrap=document.getElementById('ic-output-wrap');
-  if(wrap)wrap.scrollIntoView({behavior:'smooth',block:'start'});
+  if(wrap){wrap.style.display='';wrap.scrollIntoView({behavior:'smooth',block:'start'});}
+  if(typeof toast==='function') toast('✅ Nota especial generada');
 }
 
 function setIcOut(id,text){
