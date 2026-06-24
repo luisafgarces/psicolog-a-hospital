@@ -2688,7 +2688,7 @@ input.toggle-cb{display:none}
             </div>
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Fecha de ingreso hospitalario</div>
-              <input type="date" id="rd-fecha-ingreso" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+              <input type="date" id="rd-fecha-ingreso" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none" onchange="rdCalcDias()">
             </div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px">
@@ -14060,6 +14060,7 @@ function rdRellenarDesde(pac){
   rdSet('rd-dx-diferenciales',pac.dxDiferenciales||'');
   rdSet('rd-trat-medico',     pac.tratMedico||'');
   rdSet('rd-fecha-ingreso',   pac.fecha||'');  // siempre desde el paciente
+  if(pac.fecha) setTimeout(window.rdCalcDias,50); // calcular días automáticamente
   // Calcular días de estancia desde fecha de ingreso
   var diasCalc = (typeof calcularDiasInternacion==='function' && pac.fecha)
     ? calcularDiasInternacion(pac.fecha) : null;
@@ -14211,10 +14212,9 @@ window.rdGuardar = async function(){
     // Propagar campos al paciente si cambiaron
     if(pac){
       var pacUpdate2={};
-      var rdDxVal=rdGet('rd-dx'); if(rdDxVal) pacUpdate2.motivo=rdDxVal;
-      var rdTratVal=rdGet('rd-trat-medico'); if(rdTratVal) pacUpdate2.tratMedico=rdTratVal;
       var rdEdadVal=rdGet('rd-edad'); if(rdEdadVal) pacUpdate2.edad=rdEdadVal;
       var rdFechaVal=rdGet('rd-fecha-ingreso'); if(rdFechaVal) pacUpdate2.fecha=rdFechaVal;
+      var rdDiasVal=rdGet('rd-dias'); if(rdDiasVal) pacUpdate2.diasHosp=rdDiasVal;
       if(Object.keys(pacUpdate2).length>0){
         try{ await updateDoc(doc(db,'pacientes',pac.id),pacUpdate2); Object.assign(pac,pacUpdate2); }catch(e2){}
       }
@@ -15181,6 +15181,18 @@ window.verNotasPacDirectas = async function(pacId){
     if(typeof toast==='function') toast('❌ Error: '+e.message);
     console.error(e);
   }
+};
+
+// ── CALCULAR DÍAS HOSPITALIZADOS ────────────────────────────────────
+window.rdCalcDias = function(){
+  var fechaEl=document.getElementById('rd-fecha-ingreso');
+  var diasEl=document.getElementById('rd-dias');
+  if(!fechaEl||!diasEl||!fechaEl.value) return;
+  var ingreso=new Date(fechaEl.value+'T00:00:00');
+  var hoy=new Date();
+  hoy.setHours(0,0,0,0);
+  var diff=Math.round((hoy-ingreso)/(1000*60*60*24));
+  if(diff>=0) diasEl.value=diff;
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
