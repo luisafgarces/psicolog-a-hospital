@@ -9070,7 +9070,7 @@ var icEspNotes={
 window.setIcEsp=function(type,el){
   icCurrentEsp=type;
   document.querySelectorAll('#ic-mode-esp .ic-chip').forEach(function(c){c.classList.remove('on');});
-  var espCond=document.getElementById('ic-esp-condicion'); if(espCond) espCond.value='';
+  // No borrar ic-esp-condicion — el usuario puede escribir antes o después de seleccionar chip
   el.classList.add('on');
   var preview=document.getElementById('ic-esp-preview');
   var text=document.getElementById('ic-esp-text');
