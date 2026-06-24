@@ -9774,7 +9774,6 @@ function generarNotaIcNuevaLocal(){
 
 function generarNotaIcSegLocal(){
   var icvl=function(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';};
-  var icchk=function(id){var el=document.getElementById(id);return el&&el.checked;};
   function chips(label){return icChipsBySubLabel(label).join(', ');}
   var estadoEmoc=chips('Estado emocional referido')||'no especificado';
   var _segEvolucion=icvl('seg-eventos')||'';
@@ -9783,20 +9782,9 @@ function generarNotaIcSegLocal(){
   var _segObjCorto=icvl('seg-obj-corto')||'';
   var _segObjLargo=icvl('seg-obj-largo')||'';
   var _segPacto=icvl('seg-pensamiento')||'';
-  // Sueño y alimentación
-  var sueno=[];
-  if(icchk('seg-sueno-conservado')) sueno.push('conservado');
-  if(icchk('seg-sueno-conciliacion')) sueno.push('insomnio de conciliación');
-  if(icchk('seg-sueno-mantenimiento')) sueno.push('insomnio de mantenimiento');
-  if(icchk('seg-sueno-hipersomnia')) sueno.push('hipersomnia');
-  if(icchk('seg-sueno-hosp')) sueno.push('alterado por hospitalización');
-  var alim=[];
-  if(icchk('seg-alim-adecuada')) alim.push('adecuada');
-  if(icchk('seg-alim-reducido')) alim.push('apetito reducido');
-  if(icchk('seg-alim-aumentado')) alim.push('apetito aumentado');
-  if(icchk('seg-alim-ayuno')) alim.push('ayuno/restricción');
-  var suenoTxt=sueno.length?sueno.join(', '):'no evaluado';
-  var alimentTxt=alim.length?alim.join(', '):'no evaluada';
+  // Sueño y alimentación — leer desde chips del formulario IC
+  var suenoTxt=chips('Hábitos de sueño')||'no evaluado';
+  var alimentTxt=chips('Hábitos de alimentación')||'no evaluada';
   var preocupaciones=chips('Principales preocupaciones')||'ninguna referida';
   var pensamientosAut=icChipsBySubLabel('Pensamientos automáticos sobre enfermedad/internación/procedimiento').filter(function(c){return c!=='Ninguno';}).join(', ')||'no identificados';
   var citaTextual=icvl('ic-sub-cita');
