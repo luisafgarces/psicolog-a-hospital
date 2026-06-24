@@ -2994,6 +2994,16 @@ input.toggle-cb{display:none}
 
         <!-- COLUMNA DERECHA: farmacológico, análisis, notas, pendientes, diferenciales -->
         <div id="ps-col-right">
+          <!-- Última nota clínica -->
+          <div id="ps-ultima-nota" style="display:none;margin-bottom:12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-size:0.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em">📝 Última nota clínica</span>
+              <span id="ps-ultima-nota-meta" style="font-size:0.65rem;color:var(--text3)"></span>
+            </div>
+            <div id="ps-ultima-nota-contenido" style="font-size:0.82rem;color:var(--text2);line-height:1.7;white-space:pre-wrap"></div>
+            <button id="ps-ultima-nota-btn-copiar" onclick="psUltimaNotaCopiar()" style="display:none;margin-top:8px;font-size:0.72rem;padding:3px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;font-weight:600">📋 Copiar nota</button>
+          </div>
+
           <!-- Plan farmacológico con historial -->
           <div style="margin-top:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 14px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -8854,6 +8864,7 @@ window.abrirPacSheet=async(id)=>{
   window._mostrarCompletados=false;
   // Cargar ficha de ronda de hoy si existe
   psCargarRondaHoy(id);
+  if(typeof window.psCargarUltimaNota==='function') window.psCargarUltimaNota(id);
   document.getElementById('pac-sheet-overlay').classList.add('open');
   document.body.style.overflow='hidden';
 };
@@ -15444,6 +15455,73 @@ window.guardarICRedirec = async function(){
   }catch(e){
     if(typeof toast==='function') toast('❌ Error: '+e.message);
   }
+};
+
+// ── ÚLTIMA NOTA CLÍNICA EN FICHA DEL PACIENTE ───────────────────────
+window._psUltimaNotaTexto = '';
+
+window.psCargarUltimaNota = async function(pacId){
+  var bloque=document.getElementById('ps-ultima-nota');
+  var cont=document.getElementById('ps-ultima-nota-contenido');
+  var meta=document.getElementById('ps-ultima-nota-meta');
+  var btnCopiar=document.getElementById('ps-ultima-nota-btn-copiar');
+  if(!bloque||!cont) return;
+  bloque.style.display='none';
+  window._psUltimaNotaTexto='';
+  if(!window.db||!window._getDocs||!window._query||!window._collection||!window._where||!window._orderBy||!window._limit) return;
+  try{
+    // Buscar en interconsultas
+    var snapIC=await window._getDocs(window._query(
+      window._collection(window.db,'interconsultas'),
+      window._where('pacienteId','==',pacId),
+      window._orderBy('creado','desc'),
+      window._limit(1)
+    ));
+    // Buscar en anamnesis
+    var snapAN=await window._getDocs(window._query(
+      window._collection(window.db,'anamnesis'),
+      window._where('pacienteId','==',pacId),
+      window._orderBy('creado','desc'),
+      window._limit(1)
+    ));
+    var notas=[];
+    snapIC.docs.forEach(function(d){notas.push(Object.assign({id:d.id,_col:'interconsultas'},d.data()));});
+    snapAN.docs.forEach(function(d){notas.push(Object.assign({id:d.id,_col:'anamnesis'},d.data()));});
+    if(!notas.length) return;
+    // Ordenar por fecha más reciente
+    notas.sort(function(a,b){
+      var fa=a.fechaEditado||a.fecha||'';
+      var fb=b.fechaEditado||b.fecha||'';
+      return fb>fa?1:-1;
+    });
+    var nota=notas[0];
+    // Construir texto de la nota
+    var tipo=nota.modo||'Nota';
+    var fecha=nota.fechaEditado||nota.fecha||'';
+    var partes=[];
+    if(nota.sub) partes.push('ANÁLISIS SUBJETIVO\n'+nota.sub);
+    if(nota.obj) partes.push('ANÁLISIS OBJETIVO\n'+nota.obj);
+    if(nota.resp) partes.push('RESPUESTA / IMPRESIÓN CLÍNICA\n'+nota.resp);
+    if(nota.trat) partes.push('TRATAMIENTO / PLAN\n'+nota.trat);
+    if(nota.nota) partes.push(nota.nota);
+    if(!partes.length) return;
+    var textoCompleto=partes.join('\n\n');
+    window._psUltimaNotaTexto=textoCompleto;
+    // Mostrar en ficha
+    if(meta) meta.textContent=tipo+' · '+fecha;
+    if(cont) cont.textContent=textoCompleto;
+    if(btnCopiar) btnCopiar.style.display='';
+    bloque.style.display='';
+  }catch(e){console.warn('psCargarUltimaNota:',e);}
+};
+
+window.psUltimaNotaCopiar = function(){
+  if(!window._psUltimaNotaTexto) return;
+  navigator.clipboard.writeText(window._psUltimaNotaTexto).then(function(){
+    if(typeof toast==='function') toast('📋 Nota copiada al portapapeles');
+  }).catch(function(){
+    if(typeof toast==='function') toast('❌ No se pudo copiar');
+  });
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
