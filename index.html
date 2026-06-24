@@ -8718,7 +8718,7 @@ window.abrirPacSheetSilent = function(p) {
     {l:'Fecha ingreso',v:p.fecha?formatDate(p.fecha):'—'},
     p.fechaIC?{l:'Fecha solicitud IC',v:formatDate(p.fechaIC)}:null,
     (p.medicoSol||p.medicoEsp)?{l:'Médico solicitante',v:(p.medicoSol||'')+(p.medicoEsp?' · '+p.medicoEsp:'')}:null,
-    {l:'Edad',v:p.edad?p.edad+' años':'—'},
+    {l:'Edad',v:p.edad?p.edad+' años':'—',editable:'edad',editLabel:'Edad (años)'},
     {l:'Sexo',v:p.sexo||'—'},
     {l:'Riesgo suicida',v:p.riesgo||'Sin clasificar',color:riskColor[p.riesgo]||'var(--text2)'},
     {l:'Estado',v:estadoLabel[p.estado]||p.estado||'—'},
@@ -8781,6 +8781,11 @@ window.psEditarCampo=async function(campo, label){
       if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
       if(typeof window.renderDashboard==='function') window.renderDashboard();
     }
+    if(campo==='edad'){
+      var rdEdadEl=document.getElementById('rd-edad');
+      if(rdEdadEl&&window._rdPacId===pacId) rdEdadEl.value=nuevo;
+      if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+    }
     if(typeof toast==='function') toast('✅ '+label+' actualizado');
   }catch(e){
     if(typeof toast==='function') toast('❌ Error al guardar: '+e.message);
@@ -8824,13 +8829,14 @@ window.abrirPacSheet=async(id)=>{
       const color=d>21?'var(--danger)':d>14?'var(--warning)':'var(--text)';
       return {l:'Tiempo hospitalizado',v:label,color};
     })(),
+    p.diasHosp?{l:'Días registrados',v:p.diasHosp+' días',color:'var(--text2)'}:null,
     (()=>{
       if(!p.reingresos||p.reingresos===0) return null;
       var txt=p.reingresos===1?'1er reingreso':p.reingresos===2?'2° reingreso':p.reingresos+'° reingreso';
       if(p.fechaAlta) txt+=' · Último egreso: '+formatDate(p.fechaAlta);
       return {l:'🔄 Ingresos hospitalarios',v:p.reingresos+1+' ingresos · '+txt,color:'#0369a1',full:true};
     })(),
-    {l:'Edad',v:p.edad?p.edad+' años':'—'},
+    {l:'Edad',v:p.edad?p.edad+' años':'—',editable:'edad',editLabel:'Edad (años)'},
     {l:'Sexo',v:p.sexo||'—'},
     {l:'Riesgo suicida',v:p.riesgo||'Sin clasificar',color:riskColor[p.riesgo]||'var(--text2)'},
     {l:'Estado',v:estadoLabel[p.estado]||p.estado||'—'},
@@ -15174,12 +15180,13 @@ window.rdSyncVistosFirebase = async function(){
   var data={
     vistos:Object.keys(window._rdVistosHoy||{}),
     subidos:Object.keys(window._rdSubidosHoy||{}),
+    rechazadas:Object.keys(window._rdRechazadasHoy||{}),
     fecha:hoy,
     updated:new Date().toISOString()
   };
   try{
     await window._setDoc(window._doc(window.db,'ronda_estados',hoy),data);
-    console.log('[Vistos] Sincronizado Firebase:',data.vistos.length,'vistos',data.subidos.length,'subidos');
+    console.log('[Vistos] Sincronizado Firebase:',data.vistos.length,'vistos',data.subidos.length,'subidos',data.rechazadas.length,'rechazadas');
   }catch(e){console.warn('[Vistos] Error sync:',e);}
 };
 
@@ -15197,9 +15204,11 @@ window.rdCargarVistosFirebase = async function(){
     var data=snap.data();
     if(!window._rdVistosHoy) window._rdVistosHoy={};
     if(!window._rdSubidosHoy) window._rdSubidosHoy={};
+    if(!window._rdRechazadasHoy) window._rdRechazadasHoy={};
     (data.vistos||[]).forEach(function(id){window._rdVistosHoy[id]=true;});
     (data.subidos||[]).forEach(function(id){window._rdSubidosHoy[id]=true;});
-    console.log('[Vistos] Cargado de Firebase:',data.vistos?.length||0,'vistos',data.subidos?.length||0,'subidos');
+    (data.rechazadas||[]).forEach(function(id){window._rdRechazadasHoy[id]=true;});
+    console.log('[Vistos] Cargado de Firebase:',data.vistos?.length||0,'vistos',data.subidos?.length||0,'subidos',data.rechazadas?.length||0,'rechazadas');
   }catch(e){console.warn('[Vistos] Error carga:',e);}
 };
 
@@ -15544,6 +15553,7 @@ window.rdMarcarRechazada = function(pacId){
   var data=JSON.parse(localStorage.getItem('rd_rechazadas_'+hoy)||'[]');
   if(!data.includes(pacId)) data.push(pacId);
   localStorage.setItem('rd_rechazadas_'+hoy,JSON.stringify(data));
+  if(typeof window.rdSyncVistosFirebase==='function') window.rdSyncVistosFirebase();
   if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
   if(typeof toast==='function') toast('⛔ IC marcada como rechazada');
 };
@@ -15555,6 +15565,7 @@ window.rdDesmarcarRechazada = function(pacId){
   var data=JSON.parse(localStorage.getItem('rd_rechazadas_'+hoy)||'[]');
   data=data.filter(function(id){return id!==pacId;});
   localStorage.setItem('rd_rechazadas_'+hoy,JSON.stringify(data));
+  if(typeof window.rdSyncVistosFirebase==='function') window.rdSyncVistosFirebase();
   if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
   if(typeof toast==='function') toast('✅ Rechazada desmarcada');
 };
