@@ -448,6 +448,7 @@ input.toggle-cb{display:none}
     <div class="nav-section">Historial</div>
     <div class="nav-item" onclick="goTo('historial-pac')"><span class="icon">📂</span>Historial Pacientes</div>
     <div class="nav-section">Registro</div>
+    <div class="nav-item" onclick="goTo('ic-devueltas')"><span class="icon">⛔</span>IC Dev. / Redirec.</div>
     <div class="nav-item" onclick="goTo('calendario')"><span class="icon">📅</span>Calendario</div>
     <div class="nav-item" onclick="goTo('metricas')"><span class="icon">📊</span>Mis Métricas</div>
   </div>
@@ -2615,6 +2616,21 @@ input.toggle-cb{display:none}
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- PÁGINA: RONDA DIARIA                                         -->
     <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- PÁGINA IC DEVUELTAS Y REDIRECCIONADAS -->
+    <div id="page-ic-devueltas" class="page">
+      <div style="padding:20px 24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+          <h2 style="font-size:1.1rem;font-weight:800;color:var(--text)">⛔ IC Devueltas y Redireccionadas</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-sm btn-secondary" onclick="icDevueltasRender()" id="btn-filter-dev" style="font-weight:700;border-color:var(--danger);color:var(--danger)">⛔ Devueltas</button>
+            <button class="btn btn-sm btn-secondary" onclick="icRedirecRender()" id="btn-filter-redir">↪️ Redireccionadas</button>
+            <button class="btn btn-sm btn-primary" onclick="abrirModalICRedirec()">+ Nueva redirección</button>
+          </div>
+        </div>
+        <div id="ic-devueltas-lista" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+
     <div id="page-ronda-diaria" class="page">
 
       <!-- ── TABLERO DEL DÍA ──────────────────────────────────────── -->
@@ -4441,6 +4457,22 @@ window.guardarICFirebase=async()=>{
       if(pacIdFinal&&typeof icGuardarRondaParte2==='function') icGuardarRondaParte2(pacIdFinal);
       if(pacIdFinal&&riesgo&&typeof propagarRiesgoPaciente==='function') propagarRiesgoPaciente(pacIdFinal,riesgo);
       // limpiarProxSesionSiAtendido desactivado — proxSesion se maneja manualmente
+      // Registrar IC devuelta automáticamente si es nota especial no pertinente
+      if(window.icCurrentMode==='esp'&&window.icCurrentEsp==='nopertinente'){
+        var _condDev=(document.getElementById('ic-esp-condicion')?.value||'').trim();
+        if(typeof window.registrarICDevuelta==='function'){
+          window.registrarICDevuelta({
+            pacienteId:pacIdFinal||null,
+            nombre:nombre,
+            hab:hab,
+            dx:dx,
+            fecha:fecha,
+            medicoSol:icv('ic-medico-sol'),
+            justificacion:_condDev||(window.icEspNotes&&window.icEspNotes.nopertinente)||'',
+            notaCompleta:trat||''
+          });
+        }
+      }
       // Autoguardar borrador en Firebase sin necesidad de presionar el botón
       try{if(typeof guardarBorradorFirebase==='function')guardarBorradorFirebase('ic');}catch(e){console.warn('autoborrador:',e);}
       // Limpiar backups de localStorage ya sincronizados
@@ -5860,6 +5892,7 @@ window.goTo = function(page){
     'consulta-externa': function(){if(window.renderConsultaExterna)window.renderConsultaExterna();else setTimeout(function(){window.renderConsultaExterna&&window.renderConsultaExterna();},300);},
     'dashboard': function(){if(window.renderDashboard)window.renderDashboard();else setTimeout(function(){window.renderDashboard&&window.renderDashboard();},300);},
     'interconsultas': function(){if(window.renderIC)window.renderIC();else setTimeout(function(){window.renderIC&&window.renderIC();},300);},
+'ic-devueltas': function(){setTimeout(function(){if(typeof window.icDevueltasRender==='function')window.icDevueltasRender();},100);},
 'historial-pac': function(){setTimeout(function(){window.hpacRenderLista&&window.hpacRenderLista();},100);},
     'psicoeducacion': function(){setTimeout(function(){window.renderPsicoCards&&window.renderPsicoCards('all');},100);},
     'ronda-diaria': function(){
@@ -15212,6 +15245,205 @@ window.rdCalcDias = function(){
   hoy.setHours(0,0,0,0);
   var diff=Math.round((hoy-ingreso)/(1000*60*60*24));
   if(diff>=0) diasEl.value=diff;
+};
+
+// ── MÓDULO IC DEVUELTAS Y REDIRECCIONADAS ────────────────────────────
+
+// Guardar IC devuelta en Firebase
+window.registrarICDevuelta = async function(datos){
+  if(!window.db||!window._addDoc||!window._collection) return;
+  try{
+    await window._addDoc(window._collection(window.db,'ic_devueltas'),{
+      tipo:'devuelta',
+      pacienteId:datos.pacienteId||null,
+      nombre:datos.nombre||'—',
+      hab:datos.hab||'—',
+      dx:datos.dx||'—',
+      fecha:datos.fecha||new Date().toISOString().split('T')[0],
+      medicoSol:datos.medicoSol||'—',
+      justificacion:datos.justificacion||'',
+      notaCompleta:datos.notaCompleta||'',
+      registrado:new Date().toISOString()
+    });
+    console.log('[ICDev] IC devuelta registrada');
+  }catch(e){console.warn('[ICDev] Error:',e);}
+};
+
+// Renderizar lista de IC devueltas
+window.icDevueltasRender = async function(){
+  var lista=document.getElementById('ic-devueltas-lista');
+  if(!lista) return;
+  lista.innerHTML='<div style="color:var(--text3);font-size:0.82rem;padding:20px 0">Cargando...</div>';
+  document.getElementById('btn-filter-dev').style.fontWeight='800';
+  document.getElementById('btn-filter-redir').style.fontWeight='400';
+  if(!window.db||!window._getDocs||!window._collection||!window._query||!window._orderBy) return;
+  try{
+    var snap=await window._getDocs(window._query(
+      window._collection(window.db,'ic_devueltas'),
+      window._where('tipo','==','devuelta'),
+      window._orderBy('registrado','desc')
+    ));
+    var items=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    if(!items.length){
+      lista.innerHTML='<div style="color:var(--text3);font-size:0.82rem;padding:20px 0;text-align:center">Sin IC devueltas registradas.</div>';
+      return;
+    }
+    lista.innerHTML=items.map(function(r){
+      var nota=r.notaCompleta||r.justificacion||'';
+      return '<div style="background:var(--surface2);border:1.5px solid var(--border);border-left:4px solid var(--danger);border-radius:10px;padding:14px 16px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px">'+
+          '<div>'+
+            '<div style="font-weight:700;font-size:0.9rem;color:var(--text)">'+r.nombre+'</div>'+
+            '<div style="font-size:0.75rem;color:var(--text3)">'+r.hab+' · '+r.fecha+'</div>'+
+          '</div>'+
+          '<div style="display:flex;gap:6px">'+
+            '<button onclick="icDevCopiar(\''+r.id+'\')" style="font-size:0.72rem;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;font-weight:600">📋 Copiar nota</button>'+
+            '<button onclick="icDevEliminar(\''+r.id+'\')" style="font-size:0.72rem;padding:4px 10px;border:1px solid #fca5a5;border-radius:6px;background:#fff5f5;color:#dc2626;cursor:pointer;font-weight:600">🗑</button>'+
+          '</div>'+
+        '</div>'+
+        '<div style="font-size:0.78rem;color:var(--text2);margin-bottom:4px">⛔ <b>IC devuelta</b> · Médico: '+r.medicoSol+'</div>'+
+        '<div style="font-size:0.78rem;color:var(--text3);border-top:1px solid var(--border);padding-top:8px;margin-top:8px;white-space:pre-wrap;line-height:1.6">'+nota.slice(0,300)+(nota.length>300?'…':'')+'</div>'+
+      '</div>';
+    }).join('');
+    window._icDevItems=items;
+  }catch(e){
+    lista.innerHTML='<div style="color:var(--danger);font-size:0.82rem">Error cargando: '+e.message+'</div>';
+    console.warn('[ICDev] Error render:',e);
+  }
+};
+
+// Copiar nota al portapapeles
+window.icDevCopiar = function(id){
+  var items=window._icDevItems||[];
+  var r=items.find(function(x){return x.id===id;});
+  if(!r) return;
+  var texto='IC DEVUELTA — '+r.fecha+'\n'
+    +'Paciente: '+r.nombre+' · '+r.hab+'\n'
+    +'Dx médico: '+r.dx+'\n'
+    +'Médico solicitante: '+r.medicoSol+'\n\n'
+    +(r.notaCompleta||r.justificacion||'');
+  navigator.clipboard.writeText(texto).then(function(){
+    if(typeof toast==='function') toast('📋 Nota copiada al portapapeles');
+  }).catch(function(){
+    if(typeof toast==='function') toast('❌ No se pudo copiar');
+  });
+};
+
+// Eliminar IC devuelta
+window.icDevEliminar = async function(id){
+  if(!confirm('¿Eliminar este registro?')) return;
+  try{
+    await window._deleteDoc(window._doc(window.db,'ic_devueltas',id));
+    if(typeof toast==='function') toast('🗑️ Registro eliminado');
+    window.icDevueltasRender();
+  }catch(e){
+    if(typeof toast==='function') toast('❌ Error: '+e.message);
+  }
+};
+
+// Renderizar lista de IC redireccionadas
+window.icRedirecRender = async function(){
+  var lista=document.getElementById('ic-devueltas-lista');
+  if(!lista) return;
+  lista.innerHTML='<div style="color:var(--text3);font-size:0.82rem;padding:20px 0">Cargando...</div>';
+  document.getElementById('btn-filter-redir').style.fontWeight='800';
+  document.getElementById('btn-filter-dev').style.fontWeight='400';
+  if(!window.db||!window._getDocs||!window._collection||!window._query||!window._orderBy) return;
+  try{
+    var snap=await window._getDocs(window._query(
+      window._collection(window.db,'ic_devueltas'),
+      window._where('tipo','==','redireccionada'),
+      window._orderBy('registrado','desc')
+    ));
+    var items=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    if(!items.length){
+      lista.innerHTML='<div style="color:var(--text3);font-size:0.82rem;padding:20px 0;text-align:center">Sin IC redireccionadas registradas.</div>';
+      return;
+    }
+    lista.innerHTML=items.map(function(r){
+      return '<div style="background:var(--surface2);border:1.5px solid var(--border);border-left:4px solid #2563eb;border-radius:10px;padding:14px 16px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px">'+
+          '<div>'+
+            '<div style="font-weight:700;font-size:0.9rem;color:var(--text)">'+r.nombre+'</div>'+
+            '<div style="font-size:0.75rem;color:var(--text3)">'+r.hab+' · '+r.fecha+'</div>'+
+          '</div>'+
+          '<div style="display:flex;gap:6px">'+
+            '<button onclick="icDevCopiar(\''+r.id+'\')" style="font-size:0.72rem;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;font-weight:600">📋 Copiar nota</button>'+
+            '<button onclick="icDevEliminar(\''+r.id+'\')" style="font-size:0.72rem;padding:4px 10px;border:1px solid #fca5a5;border-radius:6px;background:#fff5f5;color:#dc2626;cursor:pointer;font-weight:600">🗑</button>'+
+          '</div>'+
+        '</div>'+
+        '<div style="font-size:0.78rem;color:#2563eb;margin-bottom:4px">↪️ <b>Redireccionada a:</b> '+r.servicioDestino+'</div>'+
+        '<div style="font-size:0.78rem;color:var(--text3);border-top:1px solid var(--border);padding-top:8px;margin-top:8px">'+r.justificacion+'</div>'+
+      '</div>';
+    }).join('');
+    window._icDevItems=[...(window._icDevItems||[]),...items];
+  }catch(e){
+    lista.innerHTML='<div style="color:var(--danger);font-size:0.82rem">Error: '+e.message+'</div>';
+  }
+};
+
+// Modal nueva redirección
+window.abrirModalICRedirec = function(){
+  var old=document.getElementById('modal-ic-redirec');
+  if(old) old.remove();
+  var div=document.createElement('div');
+  div.id='modal-ic-redirec';
+  div.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:20px';
+  div.innerHTML=
+    '<div style="background:var(--surface);border-radius:12px;padding:22px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto">'+
+      '<h3 style="font-size:1rem;font-weight:800;margin-bottom:16px">↪️ Registrar IC Redireccionada</h3>'+
+      '<div style="display:flex;flex-direction:column;gap:10px">'+
+        '<div><label style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase">Nombre del paciente *</label><input id="redir-nombre" type="text" placeholder="Apellidos, Nombres" style="width:100%;margin-top:3px;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.85rem;font-family:\'DM Sans\',sans-serif"></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+          '<div><label style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase">Habitación</label><input id="redir-hab" type="text" placeholder="Ej. AZU-214" style="width:100%;margin-top:3px;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.85rem;font-family:\'DM Sans\',sans-serif"></div>'+
+          '<div><label style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase">Fecha</label><input id="redir-fecha" type="date" value="'+new Date().toISOString().split('T')[0]+'" style="width:100%;margin-top:3px;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.85rem;font-family:\'DM Sans\',sans-serif"></div>'+
+        '</div>'+
+        '<div><label style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase">Médico solicitante</label><input id="redir-medico" type="text" placeholder="Dr. García — Medicina Interna" style="width:100%;margin-top:3px;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.85rem;font-family:\'DM Sans\',sans-serif"></div>'+
+        '<div><label style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase">Dx médico</label><input id="redir-dx" type="text" placeholder="Diagnóstico médico principal" style="width:100%;margin-top:3px;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.85rem;font-family:\'DM Sans\',sans-serif"></div>'+
+        '<div><label style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase">Servicio al que se redirecciona *</label>'+
+          '<select id="redir-servicio" style="width:100%;margin-top:3px;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.85rem;font-family:\'DM Sans\',sans-serif">'+
+            '<option value="">Seleccionar...</option>'+
+            '<option>Psiquiatría</option><option>Trabajo Social</option><option>Neurología</option>'+
+            '<option>Cuidados Paliativos</option><option>Medicina del Dolor</option><option>Otro</option>'+
+          '</select>'+
+        '</div>'+
+        '<div><label style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase">Justificación de la redirección *</label><textarea id="redir-justificacion" rows="3" placeholder="Ej: Paciente presenta sintomatología que supera el alcance de la psicología de enlace y requiere valoración psiquiátrica especializada..." style="width:100%;margin-top:3px;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:\'DM Sans\',sans-serif;resize:vertical"></textarea></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">'+
+        '<button onclick="document.getElementById(\'modal-ic-redirec\').remove()" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);cursor:pointer;font-size:0.85rem">Cancelar</button>'+
+        '<button onclick="guardarICRedirec()" style="padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:700">↪️ Registrar redirección</button>'+
+      '</div>'+
+    '</div>';
+  div.addEventListener('click',function(e){if(e.target===div)div.remove();});
+  document.body.appendChild(div);
+};
+
+window.guardarICRedirec = async function(){
+  var nombre=(document.getElementById('redir-nombre')?.value||'').trim();
+  var servicio=(document.getElementById('redir-servicio')?.value||'').trim();
+  var justif=(document.getElementById('redir-justificacion')?.value||'').trim();
+  if(!nombre||!servicio||!justif){
+    if(typeof toast==='function') toast('⚠️ Completa los campos obligatorios (*)');
+    return;
+  }
+  try{
+    await window._addDoc(window._collection(window.db,'ic_devueltas'),{
+      tipo:'redireccionada',
+      nombre:nombre,
+      hab:(document.getElementById('redir-hab')?.value||'—').trim(),
+      dx:(document.getElementById('redir-dx')?.value||'—').trim(),
+      fecha:(document.getElementById('redir-fecha')?.value||new Date().toISOString().split('T')[0]),
+      medicoSol:(document.getElementById('redir-medico')?.value||'—').trim(),
+      servicioDestino:servicio,
+      justificacion:justif,
+      registrado:new Date().toISOString()
+    });
+    document.getElementById('modal-ic-redirec').remove();
+    if(typeof toast==='function') toast('↪️ Redirección registrada');
+    window.icRedirecRender();
+  }catch(e){
+    if(typeof toast==='function') toast('❌ Error: '+e.message);
+  }
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
