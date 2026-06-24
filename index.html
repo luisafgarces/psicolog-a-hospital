@@ -3771,6 +3771,8 @@ window.selectICPaciente=(id)=>{
   if(!id)return;
   const p=pacientes.find(x=>x.id===id);
   if(!p)return;
+  // Limpiar formulario antes de cargar nuevo paciente
+  if(typeof limpiarFormIC==='function') limpiarFormIC(false);
   const hab=document.getElementById('ic-hab');
   const nombre=document.getElementById('ic-pnombre');
   const edad=document.getElementById('ic-edad');
