@@ -5912,6 +5912,9 @@ window.goTo = function(page){
       window._rdExcluidosHoy={};
       _exGoto.forEach(function(id){window._rdExcluidosHoy[id]=true;});
       console.log('[goTo ronda] Excluidos pre-cargados:',_exGoto.length,_exGoto);
+      var _recGoto=JSON.parse(localStorage.getItem('rd_rechazadas_'+_hoyGoto)||'[]');
+      window._rdRechazadasHoy={};
+      _recGoto.forEach(function(id){window._rdRechazadasHoy[id]=true;});
       setTimeout(function(){window.rdInit&&window.rdInit();},100);
     },
     'calendario': function(){setTimeout(function(){window.calRender&&window.calRender();},100);}
@@ -13866,6 +13869,10 @@ window.rdInit = async function(){
   window._rdExcluidosHoy={};
   _exRd.forEach(function(id){window._rdExcluidosHoy[id]=true;});
   console.log('[Ronda] Excluidos cargados:',_exRd.length,_exRd);
+  // Cargar rechazadas del día
+  var _recRd=JSON.parse(localStorage.getItem('rd_rechazadas_'+_hoyRd)||'[]');
+  window._rdRechazadasHoy={};
+  _recRd.forEach(function(id){window._rdRechazadasHoy[id]=true;});
   // Cargar vistos y subidos del día desde Firebase
   if(typeof window.cargarSubidosHoy==='function') window.cargarSubidosHoy();
   if(typeof window.rdCargarVistosFirebase==='function') await window.rdCargarVistosFirebase();
@@ -13969,8 +13976,9 @@ window.rdInit = async function(){
     if(p.estado==='nueva-interconsulta-pendiente') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#dbeafe;color:#1e40af;border-radius:4px;padding:1px 6px;margin-right:2px">IC</span>';
     else if(p.estado==='seguimiento') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#ede9fe;color:#6d28d9;border-radius:4px;padding:1px 6px;margin-right:2px">SEG</span>';
     else if(p.estado==='revaloracion') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#fef3c7;color:#b45309;border-radius:4px;padding:1px 6px;margin-right:2px">REVAL</span>';
-    // 3 estados: sin ver / visto (amarillo) / subido (verde)
+    // 3 estados + rechazada
     var subido=!!(window._rdSubidosHoy&&window._rdSubidosHoy[p.id]);
+    var rechazada=!!(window._rdRechazadasHoy&&window._rdRechazadasHoy[p.id]);
     var checkVisto2;
     if(subido){
       checkVisto2='<span style="font-size:0.72rem;font-weight:700;color:#16a34a;background:#dcfce7;border:1.5px solid #16a34a;border-radius:6px;padding:4px 10px;white-space:nowrap">🟢 Subido</span>';
@@ -13984,8 +13992,8 @@ window.rdInit = async function(){
         +'<input type="checkbox" onchange="rdMarcarVista(\''+p.id+'\',this)" style="accent-color:#16a34a;width:15px;height:15px;cursor:pointer">'
         +'☐ Visto</label>';
     }
-    var bgColor2=subido?'#f0fdf4':visto?'#fffbeb':prioUp2==='URGENTE'?'#fff5f5':'var(--surface2)';
-    var borderColor2=subido?'#86efac':visto?'#fbbf24':prioUp2==='URGENTE'?'#fca5a5':'var(--border)';
+    var bgColor2=rechazada?'#fff5f5':subido?'#f0fdf4':visto?'#fffbeb':prioUp2==='URGENTE'?'#fff5f5':'var(--surface2)';
+    var borderColor2=rechazada?'#fca5a5':subido?'#86efac':visto?'#fbbf24':prioUp2==='URGENTE'?'#fca5a5':'var(--border)';
     return separador+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:'+bgColor2+';border:1.5px solid '+borderColor2+';border-radius:9px;flex-wrap:wrap">'
       +'<div style="flex:1;min-width:0;cursor:pointer" onclick="if(typeof abrirPacSheet===\'function\')abrirPacSheet(\''+p.id+'\')" title="Ver ficha del paciente">'
         +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+prioBadge2+hab+tipoBadge2
@@ -13996,8 +14004,9 @@ window.rdInit = async function(){
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">'
         +checkVisto2
+        +(rechazada?'<span style="font-size:0.72rem;font-weight:700;color:#dc2626;background:#fee2e2;border:1.5px solid #fca5a5;border-radius:6px;padding:4px 10px;white-space:nowrap">⛔ Rechazada</span><button onclick="event.stopPropagation();rdDesmarcarRechazada(\''+p.id+'\')" style="font-size:0.68rem;padding:3px 7px;border:1px solid #fca5a5;border-radius:5px;background:#fff5f5;color:#dc2626;cursor:pointer">✕</button>':'<button onclick="event.stopPropagation();rdMarcarRechazada(\''+p.id+'\')" style="background:#fff5f5;border:1.5px solid #fca5a5;color:#dc2626;padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;cursor:pointer;white-space:nowrap" title="Marcar rechazada">⛔</button>')
         +'<button onclick="event.stopPropagation();rdReprogramar(\''+p.id+'\',this)" style="background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;cursor:pointer;white-space:nowrap" title="Reprogramar">📅</button>'
-        +'<button onclick="rdCargarPaciente(\''+p.id+'\')" style="'+btnColor+';padding:6px 14px;border-radius:7px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif">'+btnLabel+'</button>'
+        +(rechazada?'':'<button onclick="rdCargarPaciente(\''+p.id+'\')" style="'+btnColor+';padding:6px 14px;border-radius:7px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif">'+btnLabel+'</button>')
       +'</div>'
     +'</div>';
   }).join('');
@@ -14396,6 +14405,7 @@ function rdRefrescarTablero(){
     else if(p.estado==='revaloracion') tipoBadge='<span style="font-size:0.68rem;font-weight:700;background:#fef3c7;color:#b45309;border-radius:4px;padding:1px 6px">REVAL</span>';
     // 3 estados: sin ver / visto amarillo / subido verde
     var subido=!!(window._rdSubidosHoy&&window._rdSubidosHoy[p.id]);
+    var rechazada2=!!(window._rdRechazadasHoy&&window._rdRechazadasHoy[p.id]);
     var checkVisto;
     if(subido){
       checkVisto='<span style="font-size:0.72rem;font-weight:700;color:#16a34a;background:#dcfce7;border:1.5px solid #16a34a;border-radius:6px;padding:4px 10px;white-space:nowrap">🟢 Subido</span>';
@@ -14409,8 +14419,8 @@ function rdRefrescarTablero(){
         +'<input type="checkbox" onchange="rdMarcarVista(\''+p.id+'\',this)" style="accent-color:#d97706;width:15px;height:15px;cursor:pointer">'
         +'☐ Visto</label>';
     }
-    var bgColor=subido?'#f0fdf4':visto?'#fffbeb':'var(--surface2)';
-    var borderColor=subido?'#86efac':visto?'#fbbf24':'var(--border)';
+    var bgColor=rechazada2?'#fff5f5':subido?'#f0fdf4':visto?'#fffbeb':'var(--surface2)';
+    var borderColor=rechazada2?'#fca5a5':subido?'#86efac':visto?'#fbbf24':'var(--border)';
     return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:'+bgColor+';border:1.5px solid '+borderColor+';border-radius:9px;flex-wrap:wrap">'
       +'<div style="flex:1;min-width:0;cursor:pointer" onclick="if(typeof abrirPacSheet===\'function\')abrirPacSheet(\''+p.id+'\')" title="Ver ficha del paciente">'
         +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+hab+tipoBadge
@@ -14421,8 +14431,9 @@ function rdRefrescarTablero(){
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">'
         +checkVisto
+        +(rechazada2?'<span style="font-size:0.72rem;font-weight:700;color:#dc2626;background:#fee2e2;border:1.5px solid #fca5a5;border-radius:6px;padding:4px 10px;white-space:nowrap">⛔ Rechazada</span><button onclick="event.stopPropagation();rdDesmarcarRechazada(\''+p.id+'\')" style="font-size:0.68rem;padding:3px 7px;border:1px solid #fca5a5;border-radius:5px;background:#fff5f5;color:#dc2626;cursor:pointer">✕</button>':'<button onclick="event.stopPropagation();rdMarcarRechazada(\''+p.id+'\')" style="background:#fff5f5;border:1.5px solid #fca5a5;color:#dc2626;padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;cursor:pointer;white-space:nowrap" title="Marcar como rechazada">⛔</button>')
         +'<button onclick="event.stopPropagation();rdReprogramar(\''+p.id+'\',this)" style="background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:7px;font-size:0.75rem;font-weight:600;cursor:pointer;white-space:nowrap" title="Reprogramar">📅</button>'
-        +'<button onclick="rdCargarPaciente(\''+p.id+'\')" style="'+btnColor+';padding:6px 14px;border-radius:7px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif">'+btnLabel+'</button>'
+        +(rechazada2?'':'<button onclick="rdCargarPaciente(\''+p.id+'\')" style="'+btnColor+';padding:6px 14px;border-radius:7px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif">'+btnLabel+'</button>')
       +'</div>'
     +'</div>';
   }).join('');
@@ -15522,6 +15533,30 @@ window.psUltimaNotaCopiar = function(){
   }).catch(function(){
     if(typeof toast==='function') toast('❌ No se pudo copiar');
   });
+};
+
+// ── MARCAR / DESMARCAR RECHAZADA ────────────────────────────────────
+window.rdMarcarRechazada = function(pacId){
+  if(!pacId) return;
+  if(!window._rdRechazadasHoy) window._rdRechazadasHoy={};
+  window._rdRechazadasHoy[pacId]=true;
+  var hoy=new Date().toISOString().split('T')[0];
+  var data=JSON.parse(localStorage.getItem('rd_rechazadas_'+hoy)||'[]');
+  if(!data.includes(pacId)) data.push(pacId);
+  localStorage.setItem('rd_rechazadas_'+hoy,JSON.stringify(data));
+  if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+  if(typeof toast==='function') toast('⛔ IC marcada como rechazada');
+};
+
+window.rdDesmarcarRechazada = function(pacId){
+  if(!pacId) return;
+  if(window._rdRechazadasHoy) delete window._rdRechazadasHoy[pacId];
+  var hoy=new Date().toISOString().split('T')[0];
+  var data=JSON.parse(localStorage.getItem('rd_rechazadas_'+hoy)||'[]');
+  data=data.filter(function(id){return id!==pacId;});
+  localStorage.setItem('rd_rechazadas_'+hoy,JSON.stringify(data));
+  if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+  if(typeof toast==='function') toast('✅ Rechazada desmarcada');
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
