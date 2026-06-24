@@ -4360,7 +4360,9 @@ window.guardarICFirebase=async()=>{
       const vFamIA=(elFamIA?.textContent||'').trim();
       if(vFamIA&&!vFamIA.startsWith('Genera')&&!vFamIA.startsWith('⏳')&&!vFamIA.startsWith('❌')&&vFamIA.length>50){resp=vFamIA;obj=vFamIA;}
     } else if(window.icCurrentMode==='esp'){
-      // solo en nota para evitar duplicado al renderizar
+      // Capturar nota especial desde ic-out-trat (incluye condición clínica observada)
+      const gs=t=>{const el=document.getElementById(t);if(!el)return'';const v=el.textContent||'';return v.startsWith('Genera')?'':v;};
+      trat=gs('ic-out-trat');
     }
   }catch(ex){console.error('Error capturando datos de seguimiento:',ex);}
   // Capturar SIEMPRE todos los campos del formulario — independiente de si hay nota IA o no
