@@ -2650,6 +2650,7 @@ input.toggle-cb{display:none}
           <div style="display:flex;gap:8px">
             <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4)" onclick="rdGuardar()">💾 Guardar</button>
             <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4)" onclick="rdImprimir()">🖨️ Imprimir</button>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,0.25);color:#fff;border:1px solid rgba(255,255,255,0.5)" onclick="rdVerFichaPaciente()">👤 Ficha</button>
             <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3)" onclick="rdCerrarFicha()">✕ Cerrar</button>
           </div>
         </div>
@@ -14216,7 +14217,11 @@ window.rdGuardar = async function(){
       var rdFechaVal=rdGet('rd-fecha-ingreso'); if(rdFechaVal) pacUpdate2.fecha=rdFechaVal;
       var rdDiasVal=rdGet('rd-dias'); if(rdDiasVal) pacUpdate2.diasHosp=rdDiasVal;
       if(Object.keys(pacUpdate2).length>0){
-        try{ await updateDoc(doc(db,'pacientes',pac.id),pacUpdate2); Object.assign(pac,pacUpdate2); }catch(e2){}
+        try{
+          await window._updateDoc(window._doc(window.db,'pacientes',pac.id),pacUpdate2);
+          Object.assign(pac,pacUpdate2);
+          console.log('[Ronda] Propagado al paciente:',pacUpdate2);
+        }catch(e2){console.warn('[Ronda] Error propagando:',e2);}
       }
       // Si hay notas de fármacos en la ronda, agregarlas al plan farmacológico
       var rdFarmNotas=rdGet('rd-farm-notas');
