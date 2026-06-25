@@ -2759,20 +2759,11 @@ input.toggle-cb{display:none}
             <textarea id="rd-cambio-plan-texto" rows="2" placeholder="Ej: Cirugía reprogramada para mañana, alta inminente, nuevo Dx, cambio de manejo…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
-            <div>
-              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Dolor reportado (EVA 0–10)</div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <input type="range" id="rd-dolor" min="0" max="10" value="0" oninput="document.getElementById('rd-dolor-val').textContent=this.value" style="flex:1">
-                <strong id="rd-dolor-val" style="min-width:18px;text-align:center">0</strong>
-              </div>
-            </div>
+            <input type="hidden" id="rd-dolor" value="0"><span id="rd-dolor-val" style="display:none">0</span>
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Alerta metabólica / laboratorios</div>
+              <textarea id="rd-lab-detalle" rows="2" placeholder="Ej: Na 128 mEq/L (hiponatremia severa), Hb 6.2 g/dL, glucosa 420 mg/dL, creatinina elevada…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical;margin-bottom:6px"></textarea>
               <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-lab" value="normal" id="rd-lab-normal"> Normal</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-lab" value="sodio" id="rd-lab-sodio"> Na alterado</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-lab" value="hb" id="rd-lab-hb"> Hb baja</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-lab" value="deshidratacion" id="rd-lab-deshidratacion"> Deshidratación</label>
               </div>
               <textarea id="rd-lab-detalle" rows="2" placeholder="Detalle de alteración metabólica, valores relevantes, observaciones…" style="width:100%;padding:6px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:0.8rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
             </div>
@@ -2801,44 +2792,7 @@ input.toggle-cb{display:none}
           </div>
         </div>
 
-        <!-- ── SECCIÓN 3: MONITOREO CONDUCTUAL ───────────────────── -->
-        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
-          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#6d28d9;margin-bottom:12px;display:flex;align-items:center;gap:6px">
-            <span style="background:#6d28d9;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">3</span>
-            Monitoreo Conductual <span style="font-weight:400;font-size:0.68rem;color:var(--text3);text-transform:none">(reporte enfermería 24h)</span>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
-            <div>
-              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Estado de conciencia</div>
-              <div style="display:flex;flex-direction:column;gap:4px">
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conciencia" value="alerta" id="rd-conciencia-alerta"> Alerta</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conciencia" value="fluctuante" id="rd-conciencia-fluctuante"> Fluctuante (sospecha delirium)</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conciencia" value="somnoliento" id="rd-conciencia-somnoliento"> Somnoliento</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conciencia" value="estuporoso" id="rd-conciencia-estuporoso"> Estuporoso</label>
-              </div>
-            </div>
-            <div>
-              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Patrón conductual</div>
-              <div style="display:flex;flex-direction:column;gap:4px">
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="colaborador" id="rd-conducta-colaborador"> Colaborador</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="ansioso" id="rd-conducta-ansioso"> Ansioso</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="agresivo-verbal" id="rd-conducta-agresivo-verbal"> Agresivo verbal</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="agresivo-fisico" id="rd-conducta-agresivo-fisico"> Agresivo físico</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="inhibido" id="rd-conducta-inhibido"> Inhibido / aislado</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-conducta" value="llanto" id="rd-conducta-llanto"> Llanto frecuente</label>
-              </div>
-            </div>
-            <div>
-              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Adherencia</div>
-              <div style="display:flex;flex-direction:column;gap:4px">
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-adherencia" value="colabora" id="rd-adherencia-colabora"> Colabora con procedimientos</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-adherencia" value="rechaza" id="rd-adherencia-rechaza"> Rechaza medicación / insumos</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-adherencia" value="alta-voluntaria" id="rd-adherencia-alta-voluntaria"> Exige alta voluntaria</label>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        
         <!-- ── SECCIÓN 4: MATRIZ DE DECISIÓN ─────────────────────── -->
         <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
           <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#dc2626;margin-bottom:12px;display:flex;align-items:center;gap:6px">
@@ -2860,7 +2814,7 @@ input.toggle-cb{display:none}
                 <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-psiq"> Psiquiatría</label>
                 <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-ts"> T. Social</label>
                 <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-pal"> C. Paliativos</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-neuro"> Neuropsicología</label>
+                <input type="hidden" id="rd-der-neuro" value="">
               </div>
               <div style="margin-top:7px">
                 <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Otras especialidades involucradas</div>
@@ -2868,10 +2822,7 @@ input.toggle-cb{display:none}
               </div>
             </div>
           </div>
-          <div style="margin-top:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Razón de derivación</div>
-            <input type="text" id="rd-razon-der" placeholder="Describe la razón de derivación o co-gestión…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
-          </div>
+          <input type="hidden" id="rd-razon-der" value="">
         </div>
 
         <!-- ── SECCIÓN 5: PLAN DE ACCIÓN ─────────────────────────── -->
@@ -2882,55 +2833,23 @@ input.toggle-cb{display:none}
           </div>
           <div style="margin-bottom:10px">
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Objetivo de hoy</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:7px">
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-objetivo" value="desescalada" id="rd-objetivo-desescalada"> Desescalada verbal</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-objetivo" value="prequirurgica" id="rd-objetivo-prequirurgica"> Preparación prequirúrgica</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-objetivo" value="aislamiento" id="rd-objetivo-aislamiento"> Validación distrés por aislamiento</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-objetivo" value="dolor" id="rd-objetivo-dolor"> Afrontamiento dolor</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" name="rd-objetivo" value="otro" id="rd-objetivo-otro"> Otro</label>
-            </div>
             <textarea id="rd-objetivo-texto" rows="2" placeholder="Escribe el objetivo específico de la visita de hoy…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
           </div>
           <div style="margin-bottom:10px">
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Estrategia en cama</div>
             <textarea id="rd-estrategia-cama" rows="2" placeholder="Describe la estrategia psicológica aplicada en la habitación…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
           </div>
-          <div style="margin-bottom:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Intervención realizada</div>
-            <input type="text" id="rd-intervencion" placeholder="Describe brevemente la intervención…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
-          </div>
+          <input type="hidden" id="rd-intervencion" value="">
+          <input type="hidden" id="rd-indicacion" value="">
+          <input type="hidden" id="rd-alta" value="no">
+          <input type="hidden" id="rd-alta-criterio" value="">
           <div>
             <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Pacto / Cierre con el paciente</div>
             <input type="text" id="rd-pacto" placeholder="Acuerdo o cierre con el paciente…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
           </div>
         </div>
 
-        <!-- ── SECCIÓN 6: CRITERIO DE ALTA / SEGUIMIENTO ──────────── -->
-        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px">
-          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#059669;margin-bottom:12px;display:flex;align-items:center;gap:6px">
-            <span style="background:#059669;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">6</span>
-            Criterio de Alta Psicológica / Seguimiento Institucional
-          </div>
-          <div style="margin-bottom:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Criterio de alta psicológica hospitalaria cumplido</div>
-            <div style="display:flex;gap:14px;margin-bottom:8px">
-              <label style="display:flex;align-items:center;gap:5px;font-size:0.84rem;cursor:pointer">
-                <input type="radio" name="rd-alta" value="si">
-                <span style="color:#16a34a;font-weight:600">✅ Sí — Caso cerrado para PsH</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:0.84rem;cursor:pointer">
-                <input type="radio" name="rd-alta" value="no" checked>
-                <span style="color:#b45309;font-weight:600">🔄 No — Continúa en seguimiento</span>
-              </label>
-            </div>
-            <textarea id="rd-alta-criterio" rows="2" placeholder="Describe el criterio de alta psicológica hospitalaria cumplido…" style="width:100%;padding:7px 10px;border:1.5px solid #059669;border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:#f0fdf4;color:var(--text);outline:none;resize:vertical"></textarea>
-          </div>
-          <div>
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Indicación al equipo médico / enfermería</div>
-            <textarea id="rd-indicacion" placeholder="Indicación o alerta para el equipo tratante…" rows="2" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
-          </div>
-        </div>
-
+        
         <!-- ── SECCIÓN 7: PENDIENTES ─────────────────────────────── -->
         <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
           <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#0f766e;margin-bottom:12px;display:flex;align-items:center;gap:6px">
