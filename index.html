@@ -2761,11 +2761,12 @@ input.toggle-cb{display:none}
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
             <input type="hidden" id="rd-dolor" value="0"><span id="rd-dolor-val" style="display:none">0</span>
             <div>
-              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Alerta metabólica / laboratorios</div>
-              <textarea id="rd-lab-detalle" rows="2" placeholder="Ej: Na 128 mEq/L (hiponatremia severa), Hb 6.2 g/dL, glucosa 420 mg/dL, creatinina elevada…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical;margin-bottom:6px"></textarea>
-              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
-              </div>
-              <textarea id="rd-lab-detalle" rows="2" placeholder="Detalle de alteración metabólica, valores relevantes, observaciones…" style="width:100%;padding:6px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:0.8rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+<input type="hidden" id="rd-lab-normal" value="">
+<input type="hidden" id="rd-lab-sodio" value="">
+<input type="hidden" id="rd-lab-hb" value="">
+<input type="hidden" id="rd-lab-deshidratacion" value="">
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">⚠️ Alerta metabólica</div>
+              <textarea id="rd-lab-detalle" rows="2" placeholder="Ej: Na 128 mEq/L (hiponatremia severa), Hb 6.2 g/dL, creatinina elevada…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
             </div>
           </div>
           <div style="margin-top:10px">
@@ -3204,8 +3205,8 @@ input.toggle-cb{display:none}
         <button type="button" onclick="document.getElementById('p-medico-esp').value='UCI'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">UCI</button>
         <button type="button" onclick="document.getElementById('p-medico-esp').value='Pediatría'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">Pediatría</button>
       </div></div>
-      <div class="form-group full"><label id="p-motivo-label">Motivo de interconsulta a psicología</label><textarea id="p-motivo" rows="2" placeholder="Ej: Valorar estado emocional, paciente con ideación suicida…"></textarea></div>
-      <input type="hidden" id="p-motivo-ic" value="">
+      <div class="form-group full"><label id="p-motivo-label">Diagnóstico médico principal</label><textarea id="p-motivo" rows="2" placeholder="Ej: Diabetes insulinodependiente, IRC, Ca. de mama…"></textarea></div>
+      <div class="form-group full"><label>Motivo de interconsulta a psicología</label><textarea id="p-motivo-ic" rows="2" placeholder="Ej: Valorar estado emocional, paciente con ideación suicida…"></textarea></div>
       <div class="form-group full"><label style="color:var(--accent2);font-weight:700">🎯 ¿Qué pide realmente? <span style="font-size:0.72rem;font-weight:400;color:var(--text3)">(tu interpretación clínica)</span></label><textarea id="p-que-pide" rows="2" placeholder="Ej: Quieren descartar riesgo suicida antes del procedimiento…"></textarea></div>
       <div class="form-group full"><label>Prioridad de la interconsulta</label>
         <div id="p-prioridad-btns" style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
@@ -3216,7 +3217,7 @@ input.toggle-cb{display:none}
         <input type="hidden" id="p-prioridad" value="">
       </div>
       <div class="form-group"><label>Estado actual</label>
-        <select id="p-estado"><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="seguimiento">Seguimiento</option><option value="consulta-externa">Consulta externa</option><option value="revaloracion">Revaluación</option><option value="fallecido">✝ Fallecido</option></select>
+        <select id="p-estado"><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="seguimiento">Seguimiento</option><option value="consulta-externa">Consulta externa</option><option value="revaloracion">Revaluación</option><option value="alta">✅ Alta psicología</option><option value="alta-hospitalaria">🏥 Alta hospitalaria</option><option value="alta-voluntaria">⚠️ Alta voluntaria</option><option value="fallecido">✝ Fallecido</option></select>
       </div>
       <div class="form-group"><label>Próxima sesión</label><input type="date" id="p-proxsesion"></div>
     </div></div>
@@ -3804,6 +3805,8 @@ window.selectICPaciente=(id)=>{
       }catch(e){ div.textContent='No se pudieron cargar notas previas.'; }
     })();
   }
+  // Mostrar botón ficha del paciente
+  if(typeof window.icFabActualizar==='function') window.icFabActualizar();
 };
 
 // ── PENDIENTES EN FORMULARIO IC ──────────────────────────────────────
@@ -4812,10 +4815,11 @@ window.mneGuardar=async()=>{
           pacUpdate.fechaAlta=new Date().toISOString().split('T')[0];
           msgs.push('Paciente dado de alta ✅');
         }
-        // Próxima sesión
-        if(proxSesion&&pac&&proxSesion!==pac.proxSesion){
-          pacUpdate.proxSesion=proxSesion;
-          msgs.push('Próxima sesión actualizada 📅');
+        // Próxima sesión — actualizar aunque esté vacía (borrar fecha)
+        var proxSesionVal=proxSesion||null;
+        if(pac&&proxSesionVal!==(pac.proxSesion||null)){
+          pacUpdate.proxSesion=proxSesionVal;
+          msgs.push(proxSesionVal?'Próxima sesión actualizada 📅':'Próxima sesión eliminada');
         }
         if(Object.keys(pacUpdate).length>0){
           await updateDoc(doc(db,'pacientes',pacId),pacUpdate);
@@ -5821,14 +5825,14 @@ window.goTo = function(page){
   }
   // Render page content — setTimeout ensures ES6 module is loaded
   var fn={
-    'pacientes': function(){if(window.renderPacientes)window.renderPacientes();else setTimeout(function(){window.renderPacientes&&window.renderPacientes();},300);},
+    'pacientes': function(){window._currentPage='pacientes';if(window.renderPacientes)window.renderPacientes();else setTimeout(function(){window.renderPacientes&&window.renderPacientes();},300);},
     'consulta-externa': function(){if(window.renderConsultaExterna)window.renderConsultaExterna();else setTimeout(function(){window.renderConsultaExterna&&window.renderConsultaExterna();},300);},
     'dashboard': function(){if(window.renderDashboard)window.renderDashboard();else setTimeout(function(){window.renderDashboard&&window.renderDashboard();},300);},
-    'interconsultas': function(){if(window.renderIC)window.renderIC();else setTimeout(function(){window.renderIC&&window.renderIC();},300);},
+    'interconsultas': function(){window._currentPage='interconsultas';if(window.renderIC)window.renderIC();else setTimeout(function(){window.renderIC&&window.renderIC();},300);},
 'ic-devueltas': function(){setTimeout(function(){if(typeof window.icDevueltasRender==='function')window.icDevueltasRender();},100);},
 'historial-pac': function(){setTimeout(function(){window.hpacRenderLista&&window.hpacRenderLista();},100);},
     'psicoeducacion': function(){setTimeout(function(){window.renderPsicoCards&&window.renderPsicoCards('all');},100);},
-    'ronda-diaria': function(){
+    'ronda-diaria': function(){window._currentPage='ronda-diaria';
       // Cargar excluidos síncronamente ANTES de rdInit
       var _hoyGoto=new Date().toISOString().split('T')[0];
       var _exGoto=JSON.parse(localStorage.getItem('rd_excluidos_'+_hoyGoto)||'[]');
@@ -5840,7 +5844,7 @@ window.goTo = function(page){
       _recGoto.forEach(function(id){window._rdRechazadasHoy[id]=true;});
       setTimeout(function(){window.rdInit&&window.rdInit();},100);
     },
-    'calendario': function(){setTimeout(function(){window.calRender&&window.calRender();},100);}
+    'calendario': function(){window._currentPage='calendario';setTimeout(function(){window.calRender&&window.calRender();},100);}
   };
   if(fn[page]) fn[page]();
 };
@@ -8879,6 +8883,7 @@ window.psCargarRondaHoy = async function(pacId){
   // Intervención y pacto
   if(ficha.intervencion)  html += '<div style="font-size:0.78rem;margin-bottom:3px"><span style="font-size:0.68rem;font-weight:700;color:#15803d">INTERVENCIÓN</span> '+ficha.intervencion+'</div>';
   if(ficha.estrategiaCama) html += '<div style="font-size:0.78rem;margin-bottom:6px;background:#f0f9ff;border-left:3px solid #0369a1;padding:6px 8px;border-radius:0 6px 6px 0"><span style="font-size:0.68rem;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:.04em">🛏 Estrategia en cama</span><div style="margin-top:2px">'+ficha.estrategiaCama+'</div></div>';
+  if(ficha.farmNotas||(ficha.farmacos&&ficha.farmacos.length)) html += '<div style="font-size:0.78rem;margin-bottom:6px;background:#fefce8;border-left:3px solid #ca8a04;padding:6px 8px;border-radius:0 6px 6px 0"><span style="font-size:0.68rem;font-weight:700;color:#ca8a04;text-transform:uppercase;letter-spacing:.04em">💊 Fármacos con impacto conductual</span><div style="margin-top:2px">'+(ficha.farmacos&&ficha.farmacos.length?ficha.farmacos.join(', ')+(ficha.farmNotas?' — '+ficha.farmNotas:''):ficha.farmNotas)+'</div></div>';
   if(ficha.pacto)         html += '<div style="font-size:0.78rem;margin-bottom:3px"><span style="font-size:0.68rem;font-weight:700;color:#15803d">PACTO</span> '+ficha.pacto+'</div>';
   if(ficha.indicacion)    html += '<div style="font-size:0.78rem;margin-bottom:3px;color:#0369a1"><span style="font-weight:700">📋 Indicación equipo:</span> '+ficha.indicacion+'</div>';
   if(ficha.altaCriterio)  html += '<div style="font-size:0.78rem;margin-bottom:3px;color:#15803d;background:#f0fdf4;padding:4px 8px;border-radius:6px"><span style="font-weight:700">✅ Alta psicológica:</span> '+ficha.altaCriterio+'</div>';
@@ -10897,15 +10902,17 @@ window.cargarPlanFarmacologico = async function(pacId) {
         window._where('pacienteId', '==', pacId)
       )
     );
-    if(!snap.empty) {
-      var d = snap.docs[0].data();
+    // Filtrar docs que NO son de la ronda
+    var docsNoRonda = snap.docs.filter(function(d){ return d.data().fuente !== 'ronda'; });
+    if(docsNoRonda.length > 0) {
+      var d = docsNoRonda[0].data();
       txtEl.value = d.texto || '';
       var viewEl = document.getElementById('ps-farm-view');
       if(viewEl) viewEl.textContent = d.texto || '';
       if(fechaEl && d.ultimaEdicion)
         fechaEl.textContent = 'Últ. cambio: ' + d.ultimaEdicion;
       window._farmCache = window._farmCache || {};
-      window._farmCache[pacId] = { _fbId: snap.docs[0].id, historial: d.historial || [] };
+      window._farmCache[pacId] = { _fbId: docsNoRonda[0].id, historial: d.historial || [] };
     } else {
       var inicial = pac.tratMedico || '';
       txtEl.value = inicial;
@@ -11875,6 +11882,7 @@ document.addEventListener('DOMContentLoaded',()=>{
             <option value="pendiente">Pendiente</option>
             <option value="seguimiento" style="color:#2563eb;font-weight:700">📝 Seguimiento</option>
             <option value="alta" style="color:#16a34a;font-weight:700">✅ Alta psicológica</option>
+            <option value="alta-hospitalaria" style="color:#0369a1;font-weight:700">🏥 Alta hospitalaria</option>
             <option value="alta-voluntaria" style="color:#d97706;font-weight:700">⚠️ Alta voluntaria</option>
           </select>
         </div>
@@ -16337,7 +16345,6 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
   font-weight:700;
   cursor:pointer;
   box-shadow:0 4px 16px rgba(37,99,235,.4);
-  display:none;
   align-items:center;
   gap:6px;
   transition:transform .12s;
@@ -16362,18 +16369,27 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
   var fab = document.getElementById('ic-fab-ficha');
   var fabNombre = document.getElementById('ic-fab-ficha-nombre');
 
-  // Mostrar/ocultar según si hay paciente seleccionado en IC
+  // Mostrar botón ficha cuando hay paciente seleccionado en IC
   window.icFabActualizar = function(){
-    var enPaginaIC = document.getElementById('page-interconsultas')
-      && document.getElementById('page-interconsultas').classList.contains('active');
-    if(!enPaginaIC){ if(fab) fab.style.display='none'; return; }
     var sel = document.getElementById('ic-paciente-sel');
     var pacId = sel ? sel.value : '';
-    if(!pacId){ if(fab) fab.style.display='none'; return; }
+    // Verificar si estamos en la página de interconsultas
+    var paginaIC = document.getElementById('page-interconsultas');
+    var enIC = paginaIC
+      ? paginaIC.classList.contains('active')
+      : (window._currentPage==='interconsultas');
+    if(!enIC || !pacId){
+      if(fab) fab.style.display='none';
+      return;
+    }
     var pac = (window.pacientes||[]).find(function(p){ return p.id===pacId; });
-    var nombre = pac ? pac.nombre : 'Ver ficha';
+    var nombre = pac ? pac.nombre : '';
     if(fabNombre) fabNombre.textContent = nombre;
-    if(fab) fab.style.display='flex';
+    if(fab){
+      fab.style.display='flex';
+      fab.style.opacity='1';
+      fab.style.visibility='visible';
+    }
   };
 
   window.icFabAbrirFicha = function(){
