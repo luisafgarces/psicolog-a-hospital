@@ -1864,8 +1864,936 @@ input.toggle-cb{display:none}
               </div>
             </div>
 
-            <input type="hidden" id="rd-lab-normal" value=""><input type="hidden" id="rd-lab-sodio" value=""><input type="hidden" id="rd-lab-hb" value=""><input type="hidden" id="rd-lab-deshidratacion" value=""><input type="hidden" id="rd-lab-detalle" value="">
-          <!-- ── SECCIÓN 4: MATRIZ DE DECISIÓN ─────────────────────── -->
+            <div style="margin-bottom:12px">
+              <div style="font-size:0.8rem;font-weight:600;margin-bottom:6px">Síntomas presentes</div>
+              <div class="ic-chips" id="seg-sintomas-chips">
+                <span class="ic-chip" onclick="icTog(this)">Ánimo deprimido</span>
+                <span class="ic-chip" onclick="icTog(this)">Anhedonia</span>
+                <span class="ic-chip" onclick="icTog(this)">Ansiedad / preocupación</span>
+                <span class="ic-chip" onclick="icTog(this)">Ideación suicida pasiva</span>
+                <span class="ic-chip" onclick="icTog(this)">Ideación suicida activa</span>
+                <span class="ic-chip" onclick="icTog(this)">Desesperanza</span>
+                <span class="ic-chip" onclick="icTog(this)">Labilidad emocional</span>
+                <span class="ic-chip" onclick="icTog(this)">Irritabilidad</span>
+                <span class="ic-chip" onclick="icTog(this)">Insomnio</span>
+                <span class="ic-chip" onclick="icTog(this)">Desorientación / delirium</span>
+                <span class="ic-chip" onclick="icTog(this)">Alucinaciones</span>
+                <span class="ic-chip" onclick="icTog(this)">Ideas delirantes</span>
+                <span class="ic-chip" onclick="icTog(this)">Agitación psicomotora</span>
+                <span class="ic-chip" onclick="icTog(this)">Síntomas somáticos</span>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label>Riesgos detectados</label>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;padding:4px 0">
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-riesgo-ideacion"> Ideación suicida</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-riesgo-autolesion"> Autolesiones</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-riesgo-otro"> Otro: <input type="text" id="seg-riesgo-otro-cual" style="border:none;border-bottom:1px solid var(--border);background:transparent;font-size:0.82rem;outline:none;width:100px;padding:1px 4px;margin-left:4px"></label>
+                </div>
+              </div>
+              <div class="form-group"><label>Nivel de riesgo suicida</label>
+                <div class="sev-row" style="margin-top:5px">
+                  <div class="sev-btn" onclick="setSegRiesgo(this,'SIN RIESGO')" style="color:var(--success)">SIN RIESGO</div>
+                  <div class="sev-btn bajo" onclick="setSegRiesgo(this,'BAJO')">BAJO</div>
+                  <div class="sev-btn medio" onclick="setSegRiesgo(this,'MEDIO')">MEDIO</div>
+                  <div class="sev-btn alto" onclick="setSegRiesgo(this,'ALTO')">ALTO</div>
+                </div>
+                <input type="hidden" id="seg-riesgo" value="">
+              </div>
+            </div>
+          </div>
+
+          <!-- II. INTERVENCIÓN -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">II. Intervención de hoy</div>
+
+            <div class="form-group"><label>Intervención psicológica realizada</label><textarea id="seg-dificultades" rows="3" placeholder="Describe la intervención: técnica usada, foco de la sesión, respuesta del paciente..."></textarea></div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label>Recursos del paciente</label>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;padding:4px 0">
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-rec-insight"> Insight</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-rec-motiv"> Motivación</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" id="seg-rec-apoyo"> Apoyo social</label>
+                </div>
+              </div>
+              <div class="form-group"><label>Ajustes al manejo</label><textarea id="seg-ajustes" rows="2" placeholder="¿Qué cambia en el plan de manejo?..."></textarea></div>
+            </div>
+          </div>
+
+          <!-- III. PLAN -->
+          <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px">
+            <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);margin-bottom:12px">III. Plan</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label>Objetivo próxima sesión</label><textarea id="seg-obj-corto" rows="2" placeholder="¿En qué se enfocará la próxima sesión?..."></textarea></div>
+              <div class="form-group"><label>Indicación al equipo tratante</label><textarea id="seg-obj-largo" rows="2" placeholder="Alertas o recomendaciones al equipo médico..."></textarea></div>
+            </div>
+            <div class="form-group"><label>Pacto / acuerdo con el paciente</label><input type="text" id="seg-pensamiento" placeholder="Acuerdo o compromiso establecido con el paciente..." style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface);outline:none"></div>
+          </div>
+
+          <input type="hidden" id="seg-humor-escala" value="">
+          <input type="hidden" id="seg-impresion-hidden" value="">
+
+          <!-- Próxima cita + botones -->
+          <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)">
+            <div class="form-group"><label>Próxima cita</label><input type="date" id="seg-proxcita" style="padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem"></div>
+            <div class="form-group"><label>Modalidad</label>
+              <div style="display:flex;gap:12px;padding:9px 0">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="seg-modalidad" value="Presencial" id="seg-mod-pres"> Presencial</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="seg-modalidad" value="Online" id="seg-mod-online"> Online</label>
+              </div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-secondary" onclick="anamSegLimpiar()">🗑 Limpiar</button>
+              <button class="btn btn-primary" onclick="anamSegGuardar()">💾 Guardar nota</button>
+              <button class="btn btn-secondary" onclick="guardarFormularioLocal('an')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Borrador de emergencia — no aparece en historial">📋 Borrador local</button>
+              <button class="btn btn-secondary" onclick="mostrarFormulariosGuardados('an')" style="color:#92400e" title="Ver borradores guardados">📂 Ver borradores</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Panel historial sesiones -->
+      <div id="anam-panel-historial" style="display:none">
+        <div style="margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <select id="seg-historial-pac-sel" onchange="anamHistorialRender(this.value)" style="padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;min-width:220px">
+            <option value="">— Seleccionar paciente —</option>
+          </select>
+          <span id="seg-historial-count" style="font-size:0.8rem;color:var(--text3)"></span>
+        </div>
+        <div id="seg-historial-lista"></div>
+      </div>
+      <div class="timer-bar">
+        <div class="timer-step"><div class="ts-time">0–5 min</div>Escucha / motivo</div>
+        <div class="timer-step"><div class="ts-time">5–15 min</div>Historia</div>
+        <div class="timer-step"><div class="ts-time">15–20 min</div>Examen mental</div>
+        <div class="timer-step"><div class="ts-time">20–25 min</div>Diagnóstico</div>
+        <div class="timer-step"><div class="ts-time">25–30 min</div>Plan</div>
+      </div>
+      <form id="form-anamnesis">
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header open" onclick="toggleSection(this)"><span>🪪</span><h4>Datos de identificación</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body open"><div class="form-grid">
+            <div class="form-group"><label>Fecha</label><input type="date" id="an-fecha"></div>
+            <div class="form-group"><label>Nombre completo</label><input type="text" id="an-nombre"></div>
+            <div class="form-group"><label>Edad</label><input type="number" id="an-edad" min="0" max="120"></div>
+            <div class="form-group"><label>Cédula</label><input type="text" id="an-cedula"></div>
+            <div class="form-group"><label>Estado civil</label><select id="an-ecivil"><option value="">Seleccionar...</option><option>Soltero/a</option><option>Casado/a</option><option>Unión libre</option><option>Separado/a</option><option>Divorciado/a</option><option>Viudo/a</option></select></div>
+            <div class="form-group"><label>Escolaridad</label><select id="an-esc"><option value="">Seleccionar...</option><option>Ninguna</option><option>Primaria</option><option>Secundaria</option><option>Técnico/Tecnólogo</option><option>Universitario</option><option>Posgrado</option></select></div>
+            <div class="form-group"><label>Ocupación</label><input type="text" id="an-ocupacion"></div>
+            <div class="form-group"><label>Remitido por</label><input type="text" id="an-remitido"></div>
+          </div></div>
+        </div>
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>💬</span><h4>Motivo de consulta</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-group"><label>En palabras del paciente</label><textarea id="an-motivo" placeholder='"¿Qué le trae por aquí hoy?"'></textarea></div></div>
+        </div>
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>📖</span><h4>Historia del problema actual</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-grid">
+            <div class="form-group"><label>Inicio</label><div class="checkgroup"><label><input type="radio" name="an-inicio" value="Repentino"><span>Repentino</span></label><label><input type="radio" name="an-inicio" value="Gradual"><span>Gradual</span></label></div></div>
+            <div class="form-group"><label>Tiempo de evolución</label><input type="text" id="an-evolucion" placeholder="Ej: 3 meses"></div>
+            <div class="form-group full"><label>Desencadenantes</label><div class="checkgroup" id="an-desenc"><label><input type="checkbox" value="Laboral"><span>Laboral</span></label><label><input type="checkbox" value="Familiar"><span>Familiar</span></label><label><input type="checkbox" value="Pareja"><span>Pareja</span></label><label><input type="checkbox" value="Académico"><span>Académico</span></label><label><input type="checkbox" value="Duelo"><span>Duelo</span></label><label><input type="checkbox" value="Salud propia"><span>Salud propia</span></label><label><input type="checkbox" value="Económico"><span>Económico</span></label><label><input type="checkbox" value="Otro"><span>Otro</span></label></div></div>
+            <div class="form-group full"><label>Síntomas principales</label><div class="checkgroup" id="an-sint"><label><input type="checkbox" value="Tristeza"><span>Tristeza</span></label><label><input type="checkbox" value="Ansiedad"><span>Ansiedad</span></label><label><input type="checkbox" value="Miedo"><span>Miedo</span></label><label><input type="checkbox" value="Irritabilidad"><span>Irritabilidad</span></label><label><input type="checkbox" value="Insomnio"><span>Insomnio</span></label><label><input type="checkbox" value="Apatía"><span>Apatía</span></label><label><input type="checkbox" value="Anhedonia"><span>Anhedonia</span></label><label><input type="checkbox" value="Desesperanza"><span>Desesperanza</span></label><label><input type="checkbox" value="Ataques de pánico"><span>Ataques de pánico</span></label><label><input type="checkbox" value="Alucinaciones"><span>Alucinaciones</span></label></div></div>
+            <div class="form-group"><label>Intensidad (1–10): <strong id="an-intens-val">5</strong></label><input type="range" id="an-intens" min="1" max="10" value="5" oninput="document.getElementById('an-intens-val').textContent=this.value" style="margin-top:8px"></div>
+            <div class="form-group full"><label>Impacto funcional</label><div class="checkgroup" id="an-impacto"><label><input type="checkbox" value="Laboral"><span>Laboral</span></label><label><input type="checkbox" value="Familiar"><span>Familiar</span></label><label><input type="checkbox" value="Social"><span>Social</span></label><label><input type="checkbox" value="Pareja"><span>Pareja</span></label><label><input type="checkbox" value="Autocuidado"><span>Autocuidado</span></label></div></div>
+            <div class="form-group full"><label>Descripción</label><textarea id="an-descripcion" rows="3"></textarea></div>
+          </div></div>
+        </div>
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🗂️</span><h4>Antecedentes de salud mental</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-grid">
+            <div class="form-group"><label>Tto. psicológico previo</label><div class="checkgroup"><label><input type="radio" name="an-tpsi" value="No"><span>No</span></label><label><input type="radio" name="an-tpsi" value="Sí"><span>Sí</span></label></div></div>
+            <div class="form-group"><label>¿Cuándo? / ¿Dónde?</label><input type="text" id="an-tpsi-cuando" placeholder="Ej: 2022, Hospital X"></div>
+            <div class="form-group"><label>Tto. psiquiátrico previo</label><div class="checkgroup"><label><input type="radio" name="an-tpsiq" value="No"><span>No</span></label><label><input type="radio" name="an-tpsiq" value="Sí"><span>Sí</span></label></div></div>
+            <div class="form-group"><label>¿Cuándo? / Diagnóstico previo</label><input type="text" id="an-tpsiq-dx" placeholder="Ej: 2021, depresión mayor"></div>
+            <div class="form-group full"><label>Diagnósticos psiquiátricos previos conocidos</label><div class="checkgroup" id="an-dx-previos"><label><input type="checkbox" value="Trastorno depresivo mayor"><span>Depresión mayor</span></label><label><input type="checkbox" value="Trastorno de ansiedad generalizada"><span>TAG</span></label><label><input type="checkbox" value="Trastorno bipolar"><span>Trastorno bipolar</span></label><label><input type="checkbox" value="TEPT"><span>TEPT</span></label><label><input type="checkbox" value="Trastorno de pánico"><span>Pánico</span></label><label><input type="checkbox" value="TOC"><span>TOC</span></label><label><input type="checkbox" value="Trastorno de personalidad"><span>T. personalidad</span></label><label><input type="checkbox" value="Esquizofrenia / Psicosis"><span>Psicosis</span></label><label><input type="checkbox" value="TDAH"><span>TDAH</span></label><label><input type="checkbox" value="Otro"><span>Otro</span></label><label><input type="checkbox" value="Ninguno conocido"><span>Ninguno conocido</span></label></div></div>
+            <div class="form-group"><label>Hospitalizaciones psiquiátricas</label><div class="checkgroup"><label><input type="radio" name="an-hosp-psiq" value="No"><span>No</span></label><label><input type="radio" name="an-hosp-psiq" value="Sí"><span>Sí</span></label></div></div>
+            <div class="form-group"><label>N° de hospitalizaciones / ¿Cuándo?</label><input type="text" id="an-hosp-psiq-det" placeholder="Ej: 2 veces, última en 2023"></div>
+            <div class="form-group"><label>Ideación suicida previa</label><div class="checkgroup"><label><input type="radio" name="an-is-prev" value="No"><span>No</span></label><label><input type="radio" name="an-is-prev" value="Sí — pasiva"><span>Sí — pasiva</span></label><label><input type="radio" name="an-is-prev" value="Sí — activa"><span>Sí — activa</span></label></div></div>
+            <div class="form-group"><label>Intentos de suicidio previos</label><div class="checkgroup"><label><input type="radio" name="an-is" value="No"><span>No</span></label><label><input type="radio" name="an-is" value="Sí"><span>Sí</span></label></div></div>
+            <div class="form-group"><label>N° intentos / ¿Cuándo?</label><input type="text" id="an-is-det" placeholder="Ej: 1 vez, hace 2 años"></div>
+            <div class="form-group"><label>Medicamentos actuales (psiquiátricos)</label><input type="text" id="an-meds" placeholder="Ej: Sertralina 50mg, Clonazepam 0.5mg"></div>
+            <div class="form-group"><label>Medicamentos previos relevantes</label><input type="text" id="an-meds-prev" placeholder="Ej: Fluoxetina (suspendida por efectos secundarios)"></div>
+            <div class="form-group"><label>Enfermedades médicas</label><input type="text" id="an-enf"></div>
+            <div class="form-group full"><label>Autolesiones sin intención suicida</label><div class="checkgroup" id="an-autolesion"><label><input type="checkbox" value="Ninguna"><span>Ninguna</span></label><label><input type="checkbox" value="Cortes / rasguños"><span>Cortes / rasguños</span></label><label><input type="checkbox" value="Golpes a sí mismo/a"><span>Golpes a sí mismo/a</span></label><label><input type="checkbox" value="Quemaduras"><span>Quemaduras</span></label><label><input type="checkbox" value="Otro"><span>Otro</span></label></div></div>
+            <div class="form-group full"><label>Red de apoyo</label><div class="checkgroup"><label><input type="radio" name="an-red" value="Adecuada"><span>Adecuada</span></label><label><input type="radio" name="an-red" value="Escasa"><span>Escasa</span></label><label><input type="radio" name="an-red" value="Ausente"><span>Ausente</span></label><label><input type="radio" name="an-red" value="Conflictiva"><span>Conflictiva</span></label></div></div>
+          </div></div>
+        </div>
+        <!-- HISTORIA PERSONAL Y SOCIAL -->
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🏠</span><h4>Historia personal y social</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-grid">
+            <div class="form-group full"><label>¿Con quién vive?</label><input type="text" id="an-convive" placeholder="Ej: Esposo/a e hijos, solo/a, familia de origen"></div>
+            <div class="form-group full"><label>Dinámica familiar</label><div class="checkgroup" id="an-dinamica"><label><input type="checkbox" value="Funcional"><span>Funcional</span></label><label><input type="checkbox" value="Conflictiva"><span>Conflictiva</span></label><label><input type="checkbox" value="Ausente"><span>Ausente</span></label><label><input type="checkbox" value="Sobreprotectora"><span>Sobreprotectora</span></label></div></div>
+            <div class="form-group full"><label>Relaciones interpersonales</label><div class="checkgroup"><label><input type="radio" name="an-relaciones" value="Adecuadas"><span>Adecuadas</span></label><label><input type="radio" name="an-relaciones" value="Escasas"><span>Escasas</span></label><label><input type="radio" name="an-relaciones" value="Conflictivas"><span>Conflictivas</span></label><label><input type="radio" name="an-relaciones" value="Aislamiento"><span>Aislamiento</span></label></div></div>
+            <div class="form-group full"><label>Situación de pareja</label><div class="checkgroup"><label><input type="radio" name="an-pareja" value="Estable"><span>Estable</span></label><label><input type="radio" name="an-pareja" value="Inestable"><span>Inestable</span></label><label><input type="radio" name="an-pareja" value="Sin pareja"><span>Sin pareja</span></label></div></div>
+            <div class="form-group full"><label>Historia de violencia — tamizaje (marcar si aplica)</label><div class="checkgroup" id="an-violencia"><label><input type="checkbox" value="Ninguna reportada"><span>Ninguna reportada</span></label><label><input type="checkbox" value="Maltrato infantil físico"><span>Maltrato físico infantil</span></label><label><input type="checkbox" value="Maltrato infantil psicológico"><span>Maltrato psicológico infantil</span></label><label><input type="checkbox" value="Abuso sexual en la infancia"><span>Abuso sexual infantil</span></label><label><input type="checkbox" value="Abuso sexual en la adultez"><span>Abuso sexual adultez</span></label><label><input type="checkbox" value="Violencia de pareja — física"><span>VIF física</span></label><label><input type="checkbox" value="Violencia de pareja — psicológica"><span>VIF psicológica</span></label><label><input type="checkbox" value="Violencia de pareja — sexual"><span>VIF sexual</span></label><label><input type="checkbox" value="Conflicto armado / desplazamiento"><span>Conflicto armado / desplazamiento</span></label><label><input type="checkbox" value="Testigo de violencia intrafamiliar"><span>Testigo de violencia familiar</span></label><label><input type="checkbox" value="Acoso escolar (bullying)"><span>Bullying</span></label><label><input type="checkbox" value="Acoso laboral (mobbing)"><span>Acoso laboral</span></label></div></div>
+            <div class="form-group full"><label>Observaciones de violencia / contexto adicional</label><textarea id="an-violencia-obs" rows="2" placeholder="Solo detectar, no elaborar. Ej: refiere VIF actual, pareja controladora. Remitir a trabajo social si es necesario."></textarea></div>
+            <div class="form-group full"><label>Rendimiento escolar / laboral</label><div class="checkgroup"><label><input type="radio" name="an-rendimiento" value="Bueno"><span>Bueno</span></label><label><input type="radio" name="an-rendimiento" value="Regular"><span>Regular</span></label><label><input type="radio" name="an-rendimiento" value="Malo"><span>Malo</span></label></div></div>
+          </div></div>
+        </div>
+        <!-- HÁBITOS DE ALIMENTACIÓN Y SUEÑO -->
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🍽️</span><h4>Hábitos de alimentación, sueño y sustancias</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-grid">
+            <div class="form-group full"><label>Alimentación</label><div class="checkgroup" id="an-alimentacion"><label><input type="checkbox" value="Adecuada"><span>Adecuada</span></label><label><input type="checkbox" value="Apetito reducido"><span>Apetito reducido</span></label><label><input type="checkbox" value="Apetito aumentado"><span>Apetito aumentado</span></label><label><input type="checkbox" value="Pérdida de peso significativa"><span>Pérdida de peso significativa</span></label><label><input type="checkbox" value="Atracones / restricción"><span>Atracones / restricción</span></label><label><input type="checkbox" value="Dieta restrictiva">  <span>Dieta restrictiva</span></label></div></div>
+            <div class="form-group full"><label>Sueño</label><div class="checkgroup" id="an-sueno"><label><input type="checkbox" value="Conservado"><span>Conservado</span></label><label><input type="checkbox" value="Insomnio de conciliación"><span>Insomnio de conciliación</span></label><label><input type="checkbox" value="Insomnio de mantenimiento"><span>Insomnio de mantenimiento</span></label><label><input type="checkbox" value="Despertar temprano"><span>Despertar temprano</span></label><label><input type="checkbox" value="Pesadillas"><span>Pesadillas</span></label><label><input type="checkbox" value="Hipersomnia"><span>Hipersomnia</span></label><label><input type="checkbox" value="Insomnio severo"><span>Insomnio severo</span></label></div></div>
+            <div class="form-group"><label>Horas promedio de sueño</label><input type="text" id="an-horas-sueno" placeholder="Ej: 4–5 horas"></div>
+            <div class="form-group"><label>Calidad del sueño (1-10)</label><input type="number" id="an-calidad-sueno" min="1" max="10" placeholder="1=pésima, 10=excelente"></div>
+            <div class="form-group full"><label>Consumo de sustancias</label><div class="checkgroup" id="an-sustancias"><label><input type="checkbox" value="Niega consumo"><span>Niega consumo</span></label><label><input type="checkbox" value="Alcohol ocasional"><span>Alcohol ocasional</span></label><label><input type="checkbox" value="Alcohol problemático"><span>Alcohol problemático</span></label><label><input type="checkbox" value="Tabaco"><span>Tabaco</span></label><label><input type="checkbox" value="Marihuana"><span>Marihuana</span></label><label><input type="checkbox" value="Cocaína"><span>Cocaína</span></label><label><input type="checkbox" value="Benzodiacepinas sin Rx"><span>Benzodiacepinas sin Rx</span></label></div></div>
+            <div class="form-group full"><label>Frecuencia / descripción consumo</label><div class="checkgroup"><label><input type="radio" name="an-freq-sust" value="Diario"><span>Diario</span></label><label><input type="radio" name="an-freq-sust" value="Semanal"><span>Semanal</span></label><label><input type="radio" name="an-freq-sust" value="Quincenal"><span>Quincenal</span></label><label><input type="radio" name="an-freq-sust" value="Ocasional"><span>Ocasional</span></label><label><input type="radio" name="an-freq-sust" value="N/A"><span>N/A</span></label></div></div>
+          </div></div>
+        </div>
+        <!-- ANTECEDENTES FAMILIARES -->
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>👨‍👩‍👧</span><h4>Antecedentes familiares</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-grid">
+            <div class="form-group full"><label>Trastorno mental en familiares</label><div class="checkgroup"><label><input type="radio" name="an-fam-tmh" value="No"><span>No</span></label><label><input type="radio" name="an-fam-tmh" value="Sí"><span>Sí</span></label></div></div>
+            <div class="form-group"><label>¿Quién? y ¿Diagnóstico?</label><input type="text" id="an-fam-quien" placeholder="Ej: Madre — depresión"></div>
+            <div class="form-group"><label>Suicidio en familiares</label><div class="checkgroup"><label><input type="radio" name="an-fam-suicidio" value="No"><span>No</span></label><label><input type="radio" name="an-fam-suicidio" value="Sí"><span>Sí</span></label></div></div>
+            <div class="form-group"><label>¿Quién?</label><input type="text" id="an-fam-suicidio-quien" placeholder="Ej: Hermano"></div>
+          </div></div>
+        </div>
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🧠</span><h4>Examen mental</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-grid">
+
+            <!-- Presentación -->
+            <div class="form-group full" style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);padding-bottom:0;margin-bottom:-4px">Presentación general</div>
+            <div class="form-group full"><label>Porte y apariencia</label><div class="checkgroup"><label><input type="checkbox" value="Adecuado a la edad"><span>Adecuado a la edad</span></label><label><input type="checkbox" value="Descuidado"><span>Descuidado</span></label><label><input type="checkbox" value="Discordante con la edad"><span>Discordante con la edad</span></label><label><input type="checkbox" value="Signos de consumo SPA"><span>Signos de consumo SPA</span></label><label><input type="checkbox" value="Signo de Russell"><span>Signo de Russell</span></label></div></div>
+            <div class="form-group full"><label>Actitud durante la entrevista</label><div class="checkgroup"><label><input type="checkbox" value="Colaborador/a"><span>Colaborador/a</span></label><label><input type="checkbox" value="Aprehensivo/a"><span>Aprehensivo/a</span></label><label><input type="checkbox" value="Agresivo/a"><span>Agresivo/a</span></label><label><input type="checkbox" value="Complaciente"><span>Complaciente</span></label><label><input type="checkbox" value="Paranoide"><span>Paranoide</span></label><label><input type="checkbox" value="Manipulador/a"><span>Manipulador/a</span></label><label><input type="checkbox" value="Pueril"><span>Pueril</span></label><label><input type="checkbox" value="Inadecuado/a al contexto"><span>Inadecuado/a al contexto</span></label></div></div>
+
+            <!-- Cognición -->
+            <div class="form-group full" style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);padding-bottom:0;margin-bottom:-4px">Cognición</div>
+            <div class="form-group full"><label>Conciencia</label><div class="checkgroup"><label><input type="radio" name="an-conciencia" value="Alerta"><span>Alerta</span></label><label><input type="radio" name="an-conciencia" value="Hiperalerta"><span>Hiperalerta</span></label><label><input type="radio" name="an-conciencia" value="Obnubilado/a"><span>Obnubilado/a</span></label><label><input type="radio" name="an-conciencia" value="Somnoliento/a"><span>Somnoliento/a</span></label><label><input type="radio" name="an-conciencia" value="Estupor"><span>Estupor</span></label></div></div>
+            <div class="form-group full"><label>Orientación</label><div class="checkgroup" id="an-orient"><label><input type="checkbox" value="Tiempo"><span>Tiempo</span></label><label><input type="checkbox" value="Espacio"><span>Espacio</span></label><label><input type="checkbox" value="Persona"><span>Persona</span></label><label><input type="checkbox" value="Desorientado/a"><span>Desorientado/a</span></label></div></div>
+            <div class="form-group full"><label>Atención</label><div class="checkgroup"><label><input type="radio" name="an-atencion" value="Euprosexia (normal)"><span>Euprosexia (normal)</span></label><label><input type="radio" name="an-atencion" value="Hipoprosexia"><span>Hipoprosexia</span></label><label><input type="radio" name="an-atencion" value="Hiperprosexia"><span>Hiperprosexia</span></label><label><input type="radio" name="an-atencion" value="Pseudoaprosexia"><span>Pseudoaprosexia</span></label><label><input type="radio" name="an-atencion" value="Aprosexia"><span>Aprosexia</span></label></div></div>
+            <div class="form-group full"><label>Memoria y atención</label><div class="checkgroup"><label><input type="radio" name="an-mem" value="Conservadas"><span>Conservadas</span></label><label><input type="radio" name="an-mem" value="Atención deteriorada"><span>Atención deteriorada</span></label><label><input type="radio" name="an-mem" value="Memoria deteriorada"><span>Memoria deteriorada</span></label><label><input type="radio" name="an-mem" value="Ambas deterioradas"><span>Ambas deterioradas</span></label></div></div>
+            <div class="form-group full"><label>Juicio y raciocinio</label><div class="checkgroup"><label><input type="radio" name="an-juicio" value="Conservado"><span>Conservado</span></label><label><input type="radio" name="an-juicio" value="Desviado / comprometido"><span>Desviado / comprometido</span></label><label><input type="radio" name="an-juicio" value="Suspendido"><span>Suspendido</span></label><label><input type="radio" name="an-juicio" value="Delirante"><span>Delirante</span></label></div></div>
+
+            <!-- Pensamiento y lenguaje -->
+            <div class="form-group full" style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);padding-bottom:0;margin-bottom:-4px">Pensamiento y lenguaje</div>
+            <div class="form-group full"><label>Pensamiento — Curso</label><div class="checkgroup"><label><input type="radio" name="an-pcurso" value="Lógico"><span>Lógico</span></label><label><input type="radio" name="an-pcurso" value="Bradipsiquia"><span>Bradipsiquia</span></label><label><input type="radio" name="an-pcurso" value="Taquipsiquia"><span>Taquipsiquia</span></label><label><input type="radio" name="an-pcurso" value="Alogia"><span>Alogia</span></label><label><input type="radio" name="an-pcurso" value="Mente en blanco"><span>Mente en blanco</span></label></div></div>
+            <div class="form-group full"><label>Pensamiento — Contenido</label><div class="checkgroup"><label><input type="checkbox" value="Sin alteraciones"><span>Sin alteraciones</span></label><label><input type="checkbox" value="Ideas de muerte / suicidio"><span>Ideas de muerte / suicidio</span></label><label><input type="checkbox" value="Ideación delirante"><span>Ideación delirante</span></label><label><input type="checkbox" value="Ideas obsesivas"><span>Ideas obsesivas</span></label><label><input type="checkbox" value="Ideas de minusvalía / autorreproche"><span>Ideas de minusvalía / autorreproche</span></label><label><input type="checkbox" value="Ideas nihilistas"><span>Ideas nihilistas</span></label><label><input type="checkbox" value="Celotipia de novo"><span title="Posible deterioro cognitivo mayor en ≥60 años">Celotipia de novo</span></label></div></div>
+            <div class="form-group full"><label>Lenguaje</label><div class="checkgroup"><label><input type="checkbox" value="Normal"><span>Normal</span></label><label><input type="checkbox" value="Taquilalia"><span>Taquilalia</span></label><label><input type="checkbox" value="Bradilalia"><span>Bradilalia</span></label><label><input type="checkbox" value="Mutismo"><span>Mutismo</span></label><label><input type="checkbox" value="Logorrea / prolijo"><span>Logorrea / prolijo</span></label><label><input type="checkbox" value="Ensalada de palabras"><span>Ensalada de palabras</span></label><label><input type="checkbox" value="Neologismos"><span>Neologismos</span></label><label><input type="checkbox" value="Verbigeración"><span>Verbigeración</span></label><label><input type="checkbox" value="Ecolalia"><span>Ecolalia</span></label><label><input type="checkbox" value="Palilalia"><span>Palilalia</span></label></div></div>
+
+            <!-- Afecto, conducta, percepción -->
+            <div class="form-group full" style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);padding-bottom:0;margin-bottom:-4px">Afecto, conducta y percepción</div>
+            <div class="form-group full"><label>Afecto</label><div class="checkgroup" id="an-afecto"><label><input type="checkbox" value="Eutímico"><span>Eutímico</span></label><label><input type="checkbox" value="Modulado"><span>Modulado</span></label><label><input type="checkbox" value="Depresivo"><span>Depresivo</span></label><label><input type="checkbox" value="Ansioso"><span>Ansioso</span></label><label><input type="checkbox" value="Lábil"><span>Lábil</span></label><label><input type="checkbox" value="Aplanado"><span>Aplanado / Plano</span></label><label><input type="checkbox" value="Exaltado / eufórico"><span>Exaltado / eufórico</span></label><label><input type="checkbox" value="Disociación ideoafectiva"><span>Disociación ideoafectiva</span></label><label><input type="checkbox" value="Síndrome amotivacional"><span>Síndrome amotivacional</span></label></div></div>
+            <div class="form-group full"><label>Conducta motora</label><div class="checkgroup"><label><input type="checkbox" value="Sin alteraciones"><span>Sin alteraciones</span></label><label><input type="checkbox" value="Inquietud / agitación"><span>Inquietud / agitación</span></label><label><input type="checkbox" value="Bradiquinesia"><span>Bradiquinesia</span></label><label><input type="checkbox" value="Acatisia"><span>Acatisia</span></label><label><input type="checkbox" value="Catatonía"><span>Catatonía</span></label><label><input type="checkbox" value="Manerismos"><span>Manerismos</span></label><label><input type="checkbox" value="Asterixis"><span>Asterixis (delirium)</span></label><label><input type="checkbox" value="Flexibilidad cérea"><span>Flexibilidad cérea</span></label><label><input type="checkbox" value="Ecopraxia"><span>Ecopraxia</span></label></div></div>
+            <div class="form-group full"><label>Sensopercepción</label><div class="checkgroup"><label><input type="checkbox" value="Sin alteraciones"><span>Sin alteraciones</span></label><label><input type="checkbox" value="Alucinaciones visuales"><span>Alucinaciones visuales</span></label><label><input type="checkbox" value="Alucinaciones auditivas"><span>Alucinaciones auditivas</span></label><label><input type="checkbox" value="Alucinaciones táctiles"><span>Alucinaciones táctiles</span></label><label><input type="checkbox" value="Alucinaciones olfativas"><span>Alucinaciones olfativas</span></label><label><input type="checkbox" value="Formicación"><span>Formicación (delirium)</span></label><label><input type="checkbox" value="Ilusiones"><span>Ilusiones</span></label><label><input type="checkbox" value="Pseudoalucinaciones"><span>Pseudoalucinaciones</span></label><label><input type="checkbox" value="Flashbacks"><span>Flashbacks</span></label></div></div>
+            <div class="form-group full"><label>Insight</label><div class="checkgroup" id="an-insight"><label><input type="checkbox" value="Conservado"><span>Conservado</span></label><label><input type="checkbox" value="Parcial"><span>Parcial</span></label><label><input type="checkbox" value="Sin insight"><span>Sin insight</span></label></div></div>
+
+          </div></div>
+        </div>
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🧠</span><h4>Distorsiones cognitivas</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-grid">
+            <div class="form-group full"><div class="checkgroup" id="an-distorsiones"><label title="Ver en blanco o negro, sin matices" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Pensamiento todo o nada"><span style="font-weight:600">Pensamiento todo o nada</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">Ver en blanco o negro, sin matices</span></label><label title="&quot;Siempre me pasa lo mismo&quot;" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Sobregeneralización"><span style="font-weight:600">Sobregeneralización</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">"Siempre me pasa lo mismo"</span></label><label title="Solo ve lo negativo, ignora lo positivo" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Filtro mental"><span style="font-weight:600">Filtro mental</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">Solo ve lo negativo, ignora lo positivo</span></label><label title="&quot;Eso fue suerte, no cuenta&quot;" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Descalificar lo positivo"><span style="font-weight:600">Descalificar lo positivo</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">"Eso fue suerte, no cuenta"</span></label><label title="&quot;Sé que me juzgan / les caigo mal&quot;" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Lectura de mente"><span style="font-weight:600">Lectura de mente</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">"Sé que me juzgan / les caigo mal"</span></label><label title="&quot;Sé que va a salir mal&quot;" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Error del adivino"><span style="font-weight:600">Error del adivino</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">"Sé que va a salir mal"</span></label><label title="Exagera lo malo, minimiza lo bueno" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Catastrofismo / Minimización"><span style="font-weight:600">Catastrofismo / Minimización</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">Exagera lo malo, minimiza lo bueno</span></label><label title="&quot;Me siento culpable, entonces lo soy&quot;" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Razonamiento emocional"><span style="font-weight:600">Razonamiento emocional</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">"Me siento culpable, entonces lo soy"</span></label><label title="&quot;Debería poder con todo solo&quot;" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Deberías (Imperativos)"><span style="font-weight:600">Deberías (Imperativos)</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">"Debería poder con todo solo"</span></label><label title="&quot;Soy un fracasado / perdedor&quot;" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Etiquetado"><span style="font-weight:600">Etiquetado</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">"Soy un fracasado / perdedor"</span></label><label title="&quot;Todo lo malo es mi culpa&quot;" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Personalización"><span style="font-weight:600">Personalización</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">"Todo lo malo es mi culpa"</span></label><label title="&quot;No es justo que me pase a mí&quot;" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Falacia de justicia"><span style="font-weight:600">Falacia de justicia</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">"No es justo que me pase a mí"</span></label><label><input type="checkbox" value="Ninguna"><span>Ninguna</span></label></div></div>
+          </div></div>
+        </div>
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>💭</span><h4>Ideas irracionales</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-grid">
+            <div class="form-group full"><div class="checkgroup" id="an-irracionales"><label title="Necesita ser aprobado por todos" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Necesidad de aprobación"><span style="font-weight:600">Necesidad de aprobación</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">Necesita ser aprobado por todos</span></label><label title="Debe ser perfecto para tener valor" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Exigencia de competencia"><span style="font-weight:600">Exigencia de competencia</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">Debe ser perfecto para tener valor</span></label><label title="Quien falla merece castigo" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Culpar y castigar"><span style="font-weight:600">Culpar y castigar</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">Quien falla merece castigo</span></label><label title="Todo lo malo es horrible e insoportable" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Catastrofismo"><span style="font-weight:600">Catastrofismo</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">Todo lo malo es horrible e insoportable</span></label><label title="Mi infelicidad es culpa de otros" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Victimismo"><span style="font-weight:600">Victimismo</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">Mi infelicidad es culpa de otros</span></label><label title="El mundo es peligroso, siempre alerta" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Preocupación por peligros"><span style="font-weight:600">Preocupación por peligros</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">El mundo es peligroso, siempre alerta</span></label><label title="Es mejor evitar que enfrentar" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Evitación de problemas"><span style="font-weight:600">Evitación de problemas</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">Es mejor evitar que enfrentar</span></label><label title="Necesita de alguien más fuerte" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Dependencia"><span style="font-weight:600">Dependencia</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">Necesita de alguien más fuerte</span></label><label title="El pasado determina mi presente" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Determinismo"><span style="font-weight:600">Determinismo</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">El pasado determina mi presente</span></label><label title="Debe resolver los problemas de todos" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Preocupación por problemas ajenos"><span style="font-weight:600">Preocupación por problemas ajenos</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">Debe resolver los problemas de todos</span></label><label title="Existe una solución perfecta para todo" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Perfeccionismo"><span style="font-weight:600">Perfeccionismo</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">Existe una solución perfecta para todo</span></label><label title="El sacrificio siempre tendrá recompensa" style="display:flex;flex-direction:column;gap:1px;padding:4px 0"><span style="display:flex;align-items:center;gap:6px"><input type="checkbox" value="Falacia de la recompensa"><span style="font-weight:600">Falacia de la recompensa</span></span><span style="font-size:0.65rem;color:var(--text3);padding-left:22px;line-height:1.3">El sacrificio siempre tendrá recompensa</span></label><label><input type="checkbox" value="Ninguna"><span>Ninguna</span></label></div></div>
+          </div></div>
+        </div>
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🔴</span><h4>Riesgo suicida — NUNCA OMITIR</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-grid">
+            <div class="form-group full"><label>Ideación actual</label><div class="checkgroup"><label><input type="radio" name="an-ideacion" value="Ninguna"><span>Ninguna</span></label><label><input type="radio" name="an-ideacion" value="Pasiva"><span>Pasiva</span></label><label><input type="radio" name="an-ideacion" value="Activa"><span>Activa</span></label><label><input type="radio" name="an-ideacion" value="Con plan"><span>Con plan</span></label></div></div>
+            <div class="form-group full"><label>Clasificación de riesgo</label>
+              <div class="risk-selector"><div class="risk-btn" style="color:var(--text2)" onclick="setRisk('SIN RIESGO',this)">SIN RIESGO</div><div class="risk-btn low" onclick="setRisk('BAJO',this)">BAJO</div><div class="risk-btn med" onclick="setRisk('MEDIO',this)">MEDIO</div><div class="risk-btn high" onclick="setRisk('ALTO',this)">ALTO</div></div>
+              <input type="hidden" id="an-riesgo" value="">
+            </div>
+            <div class="form-group full"><label>Notas riesgo</label><textarea id="an-riesgo-notas"></textarea></div>
+          </div></div>
+        </div>
+        <div class="anamnesis-section">
+
+        <!-- SÍNTOMAS ANAMNESIS -->
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🩺</span><h4>Síntomas presentes — CIE-11 / DSM-5</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body">
+            <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px">Selecciona todos los síntomas presentes. La IA generará la impresión diagnóstica y diferenciales CIE-11.</div>
+            <div class="ic-chips" id="an-sintomas-chips">
+              <span class="ic-chip" onclick="icTog(this)">Ánimo deprimido persistente (&gt;2 sem)</span>
+              <span class="ic-chip" onclick="icTog(this)">Anhedonia</span>
+              <span class="ic-chip" onclick="icTog(this)">Pérdida de apetito / peso</span>
+              <span class="ic-chip" onclick="icTog(this)">Insomnio</span>
+              <span class="ic-chip" onclick="icTog(this)">Hipersomnia</span>
+              <span class="ic-chip" onclick="icTog(this)">Fatiga / pérdida de energía</span>
+              <span class="ic-chip" onclick="icTog(this)">Agitación psicomotora</span>
+              <span class="ic-chip" onclick="icTog(this)">Enlentecimiento psicomotor</span>
+              <span class="ic-chip" onclick="icTog(this)">Culpa excesiva / inutilidad</span>
+              <span class="ic-chip" onclick="icTog(this)">Dificultad para concentrarse</span>
+              <span class="ic-chip" onclick="icTog(this)">Pensamientos recurrentes de muerte</span>
+              <span class="ic-chip" onclick="icTog(this)">Ideación suicida pasiva</span>
+              <span class="ic-chip" onclick="icTog(this)">Ideación suicida activa sin plan</span>
+              <span class="ic-chip" onclick="icTog(this)">Ideación suicida con plan</span>
+              <span class="ic-chip" onclick="icTog(this)">Intento de suicidio reciente</span>
+              <span class="ic-chip" onclick="icTog(this)">Intentos previos relevantes</span>
+              <span class="ic-chip" onclick="icTog(this)">Autolesiones sin intención suicida</span>
+              <span class="ic-chip" onclick="icTog(this)">Desesperanza marcada</span>
+              <span class="ic-chip" onclick="icTog(this)">Ánimo elevado / eufórico</span>
+              <span class="ic-chip" onclick="icTog(this)">Grandiosidad / autoestima inflada</span>
+              <span class="ic-chip" onclick="icTog(this)">Disminución necesidad de sueño</span>
+              <span class="ic-chip" onclick="icTog(this)">Logorrea / pensamiento acelerado</span>
+              <span class="ic-chip" onclick="icTog(this)">Desinhibición / impulsividad</span>
+              <span class="ic-chip" onclick="icTog(this)">Labilidad emocional</span>
+              <span class="ic-chip" onclick="icTog(this)">Irritabilidad</span>
+              <span class="ic-chip" onclick="icTog(this)">Ansiedad / preocupación excesiva</span>
+              <span class="ic-chip" onclick="icTog(this)">Ataques de pánico</span>
+              <span class="ic-chip" onclick="icTog(this)">Evitación fóbica</span>
+              <span class="ic-chip" onclick="icTog(this)">Tensión muscular</span>
+              <span class="ic-chip" onclick="icTog(this)">Obsesiones (pensamientos intrusivos)</span>
+              <span class="ic-chip" onclick="icTog(this)">Compulsiones (rituales)</span>
+              <span class="ic-chip" onclick="icTog(this)">Ansiedad anticipatoria a procedimientos</span>
+              <span class="ic-chip" onclick="icTog(this)">Hipervigilancia somática</span>
+              <span class="ic-chip" onclick="icTog(this)">Reexperimentación / flashbacks</span>
+              <span class="ic-chip" onclick="icTog(this)">Pesadillas recurrentes</span>
+              <span class="ic-chip" onclick="icTog(this)">Evitación de estímulos traumáticos</span>
+              <span class="ic-chip" onclick="icTog(this)">Hiperactivación / sobresalto exagerado</span>
+              <span class="ic-chip" onclick="icTog(this)">Disociación / despersonalización</span>
+              <span class="ic-chip" onclick="icTog(this)">Entumecimiento emocional</span>
+              <span class="ic-chip" onclick="icTog(this)">Respuesta desproporcionada a estresor</span>
+              <span class="ic-chip" onclick="icTog(this)">Ideas delirantes</span>
+              <span class="ic-chip" onclick="icTog(this)">Alucinaciones auditivas</span>
+              <span class="ic-chip" onclick="icTog(this)">Alucinaciones visuales</span>
+              <span class="ic-chip" onclick="icTog(this)">Pensamiento desorganizado</span>
+              <span class="ic-chip" onclick="icTog(this)">Comportamiento desorganizado / catatónico</span>
+              <span class="ic-chip" onclick="icTog(this)">Síntomas negativos (alogia, abulia, aplanamiento)</span>
+              <span class="ic-chip" onclick="icTog(this)">Insight deteriorado</span>
+              <span class="ic-chip" onclick="icTog(this)">Alteración aguda de conciencia</span>
+              <span class="ic-chip" onclick="icTog(this)">Desorientación</span>
+              <span class="ic-chip" onclick="icTog(this)">Fluctuación del estado mental</span>
+              <span class="ic-chip" onclick="icTog(this)">Agitación nocturna</span>
+              <span class="ic-chip" onclick="icTog(this)">Deterioro de memoria reciente</span>
+              <span class="ic-chip" onclick="icTog(this)">Deterioro cognitivo progresivo</span>
+              <span class="ic-chip" onclick="icTog(this)">Inestabilidad emocional intensa</span>
+              <span class="ic-chip" onclick="icTog(this)">Impulsividad dañina</span>
+              <span class="ic-chip" onclick="icTog(this)">Relaciones inestables / idealización-devaluación</span>
+              <span class="ic-chip" onclick="icTog(this)">Miedo intenso al abandono</span>
+              <span class="ic-chip" onclick="icTog(this)">Consumo problemático a pesar de consecuencias</span>
+              <span class="ic-chip" onclick="icTog(this)">Síndrome de abstinencia activo</span>
+              <span class="ic-chip" onclick="icTog(this)">Síntomas somáticos desproporcionados</span>
+              <span class="ic-chip" onclick="icTog(this)">Dolor crónico con componente emocional</span>
+              <span class="ic-chip" onclick="icTog(this)">Insomnio de inicio</span>
+              <span class="ic-chip" onclick="icTog(this)">Insomnio de mantenimiento</span>
+              <span class="ic-chip" onclick="icTog(this)">Sueño no reparador</span>
+            </div>
+            <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <button onclick="generarImpresionDxAn()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.78rem;font-weight:700;cursor:pointer" id="an-dx-btn">✨ Generar impresión diagnóstica</button>
+              <span style="font-size:0.7rem;color:var(--text3)">CIE-11 + diferenciales según síntomas</span>
+            </div>
+            <div id="an-dx-out" style="display:none;margin-top:8px;background:var(--accent-light);border:1.5px solid var(--accent2);border-radius:10px;padding:12px 14px;font-size:0.78rem;line-height:1.7;color:var(--text)"></div>
+            <input type="hidden" id="an-impresion-hidden" value="">
+          </div>
+        </div>
+          <div class="anamnesis-section-header" onclick="toggleSection(this)"><span>🎯</span><h4>Impresión diagnóstica y plan</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body"><div class="form-grid">
+            <div class="form-group full"><label>Diagnóstico</label><div class="checkgroup" id="an-dx"><label><input type="checkbox" value="Trastorno adaptativo"><span>T. adaptativo</span></label><label><input type="checkbox" value="Trastorno depresivo leve"><span>Dep. leve</span></label><label><input type="checkbox" value="Trastorno depresivo moderado"><span>Dep. moderado</span></label><label><input type="checkbox" value="Trastorno depresivo grave"><span>Dep. grave</span></label><label><input type="checkbox" value="TAG"><span>TAG</span></label><label><input type="checkbox" value="Trastorno de pánico"><span>Pánico</span></label><label><input type="checkbox" value="TEPT"><span>TEPT</span></label><label><input type="checkbox" value="TOC"><span>TOC</span></label></div></div>
+            <div class="form-group"><label>CIE-11</label><input type="text" id="an-cie"></div>
+            <div class="form-group full"><label>Observaciones</label><textarea id="an-dx-obs"></textarea></div>
+            <div class="form-group full"><label>Plan terapéutico</label><div class="checkgroup" id="an-enfoque"><label><input type="checkbox" value="TCC"><span>TCC</span></label><label><input type="checkbox" value="Terapia de apoyo"><span>Apoyo</span></label><label><input type="checkbox" value="Psicoeducación"><span>Psicoeducación</span></label><label><input type="checkbox" value="Relajación"><span>Relajación</span></label></div></div>
+            <div class="form-group full"><label>Remisiones</label><div class="checkgroup" id="an-remisiones"><label><input type="checkbox" value="Ninguna"><span>Ninguna</span></label><label><input type="checkbox" value="Psiquiatría"><span>Psiquiatría</span></label><label><input type="checkbox" value="Trabajo social"><span>Trabajo social</span></label></div></div>
+            <div class="form-group"><label>Próxima cita</label><input type="date" id="an-proxcita"></div>
+          </div></div>
+        </div>
+
+        <div class="anamnesis-section" id="an-cap-section">
+          <div class="anamnesis-section-header" onclick="toggleSection(this)" style="background:var(--surface2);border-top:2px solid #c0392b22">
+            <span>⚖️</span><h4 style="color:#c0392b">Valoración de Capacidad Decisional <span style="font-size:0.72rem;font-weight:400;color:var(--text3)">(opcional)</span></h4>
+            <svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+          </div>
+          <div class="anamnesis-section-body" style="padding:14px 16px">
+            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px;background:#fff5f5;border:1px solid #fecaca;border-radius:7px;padding:8px 12px">
+              ⚖️ <strong>Criterio Appelbaum:</strong> Comprensión · Apreciación · Razonamiento · Expresión de decisión. Todos deben estar presentes para capacidad conservada.
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+              <div class="form-group"><label>Decisión a evaluar</label><input type="text" id="an-cap-decision" placeholder="Ej: Consentimiento para cirugía"></div>
+              <div class="form-group"><label>Solicitado por</label><input type="text" id="an-cap-solicitante" placeholder="Ej: Cirugía, UCI"></div>
+            </div>
+            <div style="display:grid;gap:8px;margin-bottom:10px">
+              <div class="form-group">
+                <label>1. Comprensión — ¿Entiende el diagnóstico, tratamiento y alternativas?</label>
+                <select id="an-cap-c1" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  <option value="">— No evaluado —</option>
+                  <option value="Conservada">✅ Conservada</option>
+                  <option value="Parcial">⚠️ Parcial</option>
+                  <option value="Ausente">❌ Ausente</option>
+                </select>
+                <input type="text" id="an-cap-c1-obs" placeholder="Observaciones…" style="margin-top:4px;width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif">
+              </div>
+              <div class="form-group">
+                <label>2. Apreciación — ¿Reconoce que le aplica a su situación?</label>
+                <select id="an-cap-c2" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  <option value="">— No evaluado —</option>
+                  <option value="Conservada">✅ Conservada</option>
+                  <option value="Parcial">⚠️ Parcial</option>
+                  <option value="Ausente">❌ Ausente</option>
+                </select>
+                <input type="text" id="an-cap-c2-obs" placeholder="Observaciones…" style="margin-top:4px;width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif">
+              </div>
+              <div class="form-group">
+                <label>3. Razonamiento — ¿Puede comparar opciones y consecuencias?</label>
+                <select id="an-cap-c3" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  <option value="">— No evaluado —</option>
+                  <option value="Conservada">✅ Conservada</option>
+                  <option value="Parcial">⚠️ Parcial</option>
+                  <option value="Ausente">❌ Ausente</option>
+                </select>
+                <input type="text" id="an-cap-c3-obs" placeholder="Observaciones…" style="margin-top:4px;width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif">
+              </div>
+              <div class="form-group">
+                <label>4. Expresión de la decisión — ¿Comunica una elección consistente?</label>
+                <select id="an-cap-c4" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  <option value="">— No evaluado —</option>
+                  <option value="Conservada">✅ Conservada</option>
+                  <option value="Parcial">⚠️ Parcial</option>
+                  <option value="Ausente">❌ Ausente</option>
+                </select>
+                <input type="text" id="an-cap-c4-obs" placeholder="Observaciones…" style="margin-top:4px;width:100%;padding:5px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label>Conclusión</label>
+              <select id="an-cap-conclusion" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem" onchange="updateCapConclusion('an')">
+                <option value="">— No determinada —</option>
+                <option value="CAPACIDAD CONSERVADA">✅ CAPACIDAD CONSERVADA</option>
+                <option value="CAPACIDAD PARCIALMENTE CONSERVADA">⚠️ CAPACIDAD PARCIALMENTE CONSERVADA</option>
+                <option value="CAPACIDAD NO CONSERVADA">❌ CAPACIDAD NO CONSERVADA</option>
+                <option value="NO EVALUABLE EN ESTE MOMENTO">⏸️ NO EVALUABLE EN ESTE MOMENTO</option>
+              </select>
+            </div>
+            <div id="an-cap-conclusion-badge" style="display:none;padding:8px 14px;border-radius:8px;font-size:0.82rem;font-weight:700;margin-bottom:8px;text-align:center"></div>
+            <div class="form-group">
+              <label>Observaciones adicionales</label>
+              <textarea id="an-cap-obs" rows="2" placeholder="Factores que afectaron la evaluación, recomendaciones al equipo…" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="anamnesis-section">
+          <div class="anamnesis-section-header open" onclick="toggleSection(this)"><span>📄</span><h4>Nota clínica generada</h4><svg class="chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="anamnesis-section-body open">
+            <div id="nota-output" class="nota-output">Completa los campos y presiona "Generar nota clínica"…</div>
+            <!-- API key Gemini — OCULTO (IA desactivada) -->
+            <div style="display:none">
+              <span style="font-size:0.75rem;font-weight:700;color:#1e4d8c;white-space:nowrap">🤖 IA Clínica — Google Gemini</span>
+              <input type="password" id="an-gemini-key" placeholder="API Key de Google Gemini…" style="flex:1;min-width:160px;padding:5px 9px;border:1px solid #bfdbfe;border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('gemini_api_key',this.value);document.getElementById('an-key-status').textContent='✅ Guardada';">
+              <span id="an-key-status" style="font-size:0.7rem;color:#1e4d8c;white-space:nowrap">Guardada en este dispositivo</span>
+            </div>
+            <div class="flex gap-2 mt-4" style="flex-wrap:wrap">
+              <button type="button" class="btn btn-primary" onclick="guardarAnamnesis()" title="Guarda la anamnesis en Firebase (historial del paciente)">💾 Guardar nota</button>
+              <button type="button" class="btn btn-primary" onclick="generarNota_local()">📝 Generar nota</button>
+              <button type="button" class="btn btn-secondary" onclick="copiarNota()">Copiar</button>
+              <button type="button" class="btn btn-secondary" onclick="guardarFormularioLocal('an')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Borrador de emergencia — no aparece en historial">📋 Borrador local</button>
+              <button type="button" class="btn btn-secondary" onclick="mostrarFormulariosGuardados('an')" style="color:#92400e">📂 Ver borradores</button>
+            </div>
+            <!-- BARRA DE NAVEGACIÓN RÁPIDA AL FINAL -->
+            <div style="display:flex;gap:8px;margin-top:14px;padding:10px 0;border-top:1.5px solid var(--border);flex-wrap:wrap">
+              <button type="button" class="btn btn-secondary" onclick="goTo('ronda-diaria')" style="display:flex;align-items:center;gap:5px">🏥 Volver a Ronda</button>
+              <button type="button" class="btn btn-secondary" onclick="(function(){var id=document.getElementById('anamnesis-paciente-sel')?.value;if(id&&typeof abrirPacSheet==='function')abrirPacSheet(id);else toast('⚠️ Selecciona un paciente primero');})()" style="display:flex;align-items:center;gap:5px">👤 Ver ficha del paciente</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- TESTS -->
+    <div id="page-tests" class="page">
+      <!-- Selector de paciente SIEMPRE visible -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label style="font-size:0.78rem;font-weight:600;color:var(--text2);flex-shrink:0">👤 Paciente para este test</label>
+        <select id="test-pac-sel" onchange="selectTestPaciente(this.value)" style="flex:1;min-width:200px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem">
+          <option value="">— Seleccionar paciente —</option>
+        </select>
+        <input type="text" id="test-pac-nombre" placeholder="O escribe nombre manualmente" style="flex:1;min-width:160px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem">
+        <input type="number" id="test-pac-edad" placeholder="Edad" min="0" max="120" style="width:80px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem">
+        <select id="test-pac-esc" onchange="updateEscolaridad(this.value)" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem">
+          <option value="0">Sin escolaridad</option>
+          <option value="1">Primaria incompleta</option>
+          <option value="2">Primaria completa</option>
+          <option value="3">Bachillerato</option>
+          <option value="4">Técnico/Tecnólogo</option>
+          <option value="5" selected>Universidad o más</option>
+        </select>
+      </div>
+      <!-- Panel de tests — UNIFICADO -->
+      <div id="tests-home" class="test-screen active">
+        <div class="assisted-bar" style="margin-bottom:12px">
+          <label><input type="checkbox" class="toggle-cb" id="assisted-mode-toggle" onchange="toggleAssisted(this.checked)"><span class="toggle"></span><span>🔤 <strong>Modo lectura asistida</strong> — Texto grande para baja escolaridad</span></label>
+        </div>
+
+        <!-- Selector de test -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <label style="font-size:0.82rem;font-weight:700;color:var(--text2);flex-shrink:0">📋 Seleccionar test</label>
+          <select id="test-selector" onchange="showTest(this.value)" style="flex:1;min-width:220px;padding:9px 12px;border:1.5px solid var(--accent2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--surface);color:var(--text);font-weight:600">
+            <option value="">— Elige el instrumento —</option>
+            <optgroup label="🧠 Cognitivo">
+              <option value="mmse">MMSE — Tamizaje cognitivo general (30 pts · 7–10 min)</option>
+              <option value="minicog">Mini-Cog — Tamizaje ultrabreve hospitalario (5 pts · 3 min)</option>
+              <option value="aceiii">ACE-III — Addenbrooke's Cognitive Examination (100 pts · 15–20 min)</option>
+              <option value="moca">MoCA — Deterioro leve y función ejecutiva (30 pts · 10 min)</option>
+              <option value="mocab">MoCA-B — Versión oral hospitalaria / analfabetas (22 pts · 5 min)</option>
+              <option value="cam">CAM — Delirium en hospitalización (4 criterios · 3–5 min)</option>
+              <option value="test4at">4AT — Delirium y deterioro cognitivo (12 pts · 2 min)</option>
+            </optgroup>
+            <optgroup label="🧠 Neurológico / UCI">
+              <option value="glasgow">Glasgow — Nivel de conciencia (3–15 pts · 1 min)</option>
+              <option value="rass">RASS — Agitación y sedación en UCI (-5 a +4 · 1 min)</option>
+              <option value="hunter">Hunter — Criterio Síndrome Serotoninérgico (2 min)</option>
+            </optgroup>
+            <optgroup label="💙 Ánimo">
+              <option value="phq9">PHQ-9 — Depresión + ideación suicida (27 pts · 3–5 min)</option>
+              <option value="gad7">GAD-7 — Ansiedad generalizada (21 pts · 3 min)</option>
+              <option value="hads">HADS — Ansiedad y depresión hospitalaria (42 pts · 5–7 min)</option>
+              <option value="madrs">MADRS — Depresión Montgomery-Åsberg (60 pts · 15–20 min)</option>
+              <option value="distress">Distress Thermometer — Malestar emocional (0–10 · 3 min)</option>
+              <option value="sas">SAS — Ansiedad por Aislamiento Hospitalario (5 min)</option>
+            </optgroup>
+            <optgroup label="🔴 Riesgo & Adherencia">
+              <option value="cssrs">C-SSRS — Riesgo suicida Columbia (5 min)</option>
+              <option value="interraisa">InterRAI SA — Tamizaje autolesión/suicidio (5 min)</option>
+              <option value="mmas4">MMAS-4 — Adherencia al tratamiento (2 min)</option>
+              <option value="duelo">Duelo — Proceso de duelo Colombia (5 min)</option>
+            </optgroup>
+            <optgroup label="🌪️ Trauma">
+              <option value="pcl5">PCL-5 — TEPT según DSM-5 (80 pts · 5–7 min)</option>
+            </optgroup>
+            <optgroup label="⚖️ Forense Clínica">
+              <option value="svacbca">SVA/CBCA — Credibilidad del testimonio (19 criterios)</option>
+              <option value="sims">SIMS — Detección de simulación (75 ítems V/F)</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <!-- Área dinámica de preguntas -->
+        <div id="test-dynamic-area" style="display:none">
+          <div id="test-dynamic-header" style="margin-bottom:14px"></div>
+          <div id="test-dynamic-note" style="margin-bottom:14px"></div>
+          <div id="test-dynamic-extra" style="margin-bottom:14px"></div>
+          <div id="test-questions"></div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;flex-wrap:wrap">
+            <button class="btn btn-secondary" onclick="resetTestActual()">↺ Reiniciar</button>
+            <button class="btn btn-primary" id="test-calc-btn" onclick="calcTestActual()">Ver resultado →</button>
+          </div>
+          <div id="test-result-area" style="margin-top:16px"></div>
+        </div>
+
+        <!-- Tests especiales con su propia pantalla (SVA/CBCA y SIMS se renderizan aquí también) -->
+        <div style="background:var(--warning-light);border:1px solid #f0d080;border-radius:var(--radius);padding:12px 16px;margin-top:16px;font-size:0.78rem;color:#5a4000;line-height:1.6" id="tests-tip">
+          💡 <strong>Adaptaciones población colombiana</strong> — Lenguaje sencillo y cercano. Active modo lectura asistida para texto grande. MMSE y MoCA se ajustan automáticamente por escolaridad.
+        </div>
+      </div>
+
+
+
+      <!-- SIMS -->
+      <div id="test-sims" class="test-screen">
+        <div class="test-header">
+          <div class="tc-icon" style="font-size:2rem">🎭</div>
+          <div><h2>SIMS — Structured Inventory of Malingered Symptomatology</h2><p>Detección de simulación de síntomas · 75 ítems V/F · Smith & Burger (1997)</p></div>
+          <button class="btn btn-secondary" onclick="showTest('home')">← Volver</button>
+        </div>
+        <div class="clinician-note">📌 <strong>Nota clínica:</strong> El SIMS detecta presentación no creíble de síntomas psicológicos y neurológicos. <strong>Punto de corte ≥ 16</strong> sugiere simulación (sensibilidad 75%, especificidad 90%). No es diagnóstico definitivo — es indicador de necesidad de evaluación más profunda. Administrar como autoinforme o lectura asistida.</div>
+
+        <div style="background:var(--accent-light);border:1px solid var(--accent2);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:0.8rem;color:var(--text2)">
+          <strong>Instrucciones para el paciente:</strong> "A continuación hay una serie de afirmaciones. Responda <strong>VERDADERO</strong> si la afirmación describe algo que le ocurre o ha ocurrido, o <strong>FALSO</strong> si no le describe. No hay respuestas correctas o incorrectas. Sea tan honesto como pueda."
+        </div>
+
+        <div id="sims-form" style="margin-bottom:20px"></div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+          <button class="btn btn-primary" onclick="calcularSIMS()">📊 Calcular resultado</button>
+          <button class="btn btn-secondary" onclick="resetSIMS()">↺ Reiniciar</button>
+        </div>
+        <div id="sims-resultado" style="display:none"></div>
+      </div>
+      <!-- SVA/CBCA -->
+      <div id="test-svacbca" class="test-screen">
+        <div class="test-header">
+          <div class="tc-icon" style="font-size:2rem">⚖️</div>
+          <div><h2>SVA/CBCA — Análisis de Credibilidad del Testimonio</h2><p>Statement Validity Assessment · Criteria-Based Content Analysis · 19 criterios · 15–20 min</p></div>
+          <button class="btn btn-secondary" onclick="showTest('home')">← Volver</button>
+        </div>
+        <div class="clinician-note">📌 <strong>Nota clínica:</strong> Este instrumento evalúa la credibilidad del relato, no la veracidad del evento. Aplicar tras entrevista libre o narrativa espontánea. No es diagnóstico ni prueba legal — es apoyo clínico para contexto hospitalario.</div>
+
+        <!-- Datos del relato -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px">
+          <div style="font-weight:700;font-size:0.85rem;margin-bottom:10px">📋 Datos del relato evaluado</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="form-group"><label>Tipo de evento reportado</label>
+              <select id="sva-tipo-evento" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                <option value="">Seleccionar…</option>
+                <option>Violencia física</option><option>Violencia sexual</option><option>Violencia psicológica</option>
+                <option>Abuso infantil</option><option>Violencia intrafamiliar</option><option>Trauma por conflicto armado</option>
+                <option>Negligencia / abandono</option><option>Otro</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Relación con el agresor (si aplica)</label>
+              <select id="sva-relacion" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                <option value="">Seleccionar…</option>
+                <option>Familiar directo</option><option>Pareja / expareja</option><option>Conocido</option>
+                <option>Desconocido</option><option>Figura de autoridad</option><option>No aplica / No refiere</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:8px"><label>Resumen del relato (opcional — para IA)</label>
+            <textarea id="sva-relato" rows="3" placeholder="Breve descripción del contenido del relato evaluado…" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem"></textarea>
+          </div>
+        </div>
+
+        <!-- CATEGORÍA 1 -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">
+          <div style="font-weight:700;font-size:0.82rem;color:var(--accent2);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em">I. Características generales</div>
+          <div id="sva-cat1"></div>
+        </div>
+        <!-- CATEGORÍA 2 -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">
+          <div style="font-weight:700;font-size:0.82rem;color:var(--accent2);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em">II. Contenidos específicos</div>
+          <div id="sva-cat2"></div>
+        </div>
+        <!-- CATEGORÍA 3 -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">
+          <div style="font-weight:700;font-size:0.82rem;color:var(--accent2);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em">III. Peculiaridades del contenido</div>
+          <div id="sva-cat3"></div>
+        </div>
+        <!-- CATEGORÍA 4 -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">
+          <div style="font-weight:700;font-size:0.82rem;color:var(--accent2);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em">IV. Contenidos referidos a la motivación</div>
+          <div id="sva-cat4"></div>
+        </div>
+        <!-- CATEGORÍA 5 -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px">
+          <div style="font-weight:700;font-size:0.82rem;color:var(--accent2);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em">V. Elementos específicos de la ofensa</div>
+          <div id="sva-cat5"></div>
+        </div>
+
+        <div style="text-align:right;margin-top:4px">
+          <button class="btn btn-primary" onclick="calcSVACBCA()">Ver resultado y generar nota →</button>
+        </div>
+        <div id="svacbca-result" style="display:none"></div>
+      </div>
+
+      <!-- PHQ-9 -->
+
+      <!-- GAD-7 -->
+
+
+
+      <!-- MoCA -->
+
+
+      <!-- C-SSRS -->
+
+      <!-- MMAS-4 -->
+
+
+      <!-- PCL-5 TEPT -->
+    </div>
+
+    <!-- CAPACIDAD DECISIONAL -->
+
+    <!-- HISTORIAL TESTS -->
+
+
+    <!-- PSICOEDUCACIÓN -->
+    <div id="page-psicoeducacion" class="page">
+      <div class="section-header">
+        <h2>📚 Guías de Psicoeducación Clínica</h2>
+        <p style="font-size:0.82rem;color:var(--text3);margin-top:4px">ESE Hospital La María · Medellín, Antioquia · Adaptadas a contexto hospitalario de tercer nivel</p>
+      </div>
+
+      <!-- PRIORIDADES -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:20px">
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:12px 14px">
+          <div style="font-weight:700;font-size:0.82rem;color:#991b1b;margin-bottom:4px">🔴 Prioridad 1 — Alta complejidad</div>
+          <div style="font-size:0.75rem;color:#7f1d1d;line-height:1.5">Intervención urgente y presencial. Riesgo vital, negativa a tratamiento, cuidados paliativos, amputaciones, rechazo a diálisis o insulina.<br><strong>Tiempo:</strong> 15–20 min · <strong>Seguimiento:</strong> Diario o c/48h</div>
+        </div>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px 14px">
+          <div style="font-weight:700;font-size:0.82rem;color:#92400e;margin-bottom:4px">🟡 Prioridad 2 — Complejidad moderada</div>
+          <div style="font-size:0.75rem;color:#78350f;line-height:1.5">Psicoeducación focalizada 1–2 sesiones + material impreso. Diabetes complicada, pie diabético, osteomielitis, ACV, TCE, enf. crónicas con baja adherencia.<br><strong>Tiempo:</strong> 10–15 min</div>
+        </div>
+        <div style="background:#dbeafe;border:1px solid #86efac;border-radius:10px;padding:12px 14px">
+          <div style="font-weight:700;font-size:0.82rem;color:#1e4d8c;margin-bottom:4px">🟢 Prioridad 3 — Intervención breve</div>
+          <div style="font-size:0.75rem;color:#14532d;line-height:1.5">Sesión única 5–10 min + material impreso. Puede delegarse parcialmente a enfermería.<br><strong>Tiempo:</strong> 5–10 min</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+          <div style="font-weight:700;font-size:0.82rem;color:var(--text2);margin-bottom:4px">⚪ Prioridad 4 — No requiere psicología</div>
+          <div style="font-size:0.75rem;color:var(--text3);line-height:1.5">Delegar a enfermería o material impreso. Sin factores de riesgo psicosocial ni complicaciones emocionales.</div>
+        </div>
+      </div>
+
+      <!-- FILTRO -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+        <button class="btn btn-sm btn-secondary psico-filtro active" data-filtro="all" onclick="filtrarPsico('all',this)">Todas</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="p1" onclick="filtrarPsico('p1',this)">🔴 P1</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="p2" onclick="filtrarPsico('p2',this)">🟡 P2</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="p3" onclick="filtrarPsico('p3',this)">🟢 P3</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="diabetes" onclick="filtrarPsico('diabetes',this)">🩸 Diabetes</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="duelo" onclick="filtrarPsico('duelo',this)">🕊️ Duelo</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="oncologia" onclick="filtrarPsico('oncologia',this)">🎗️ Oncología</button>
+        <button class="btn btn-sm btn-secondary psico-filtro" data-filtro="cardio" onclick="filtrarPsico('cardio',this)">❤️ Cardio/Neuro</button>
+      </div>
+
+      <!-- TARJETAS -->
+      <div id="psico-cards" style="display:grid;gap:10px"></div>
+    </div>
+
+    <!-- HISTORIAL PACIENTES -->
+    <!-- PÁGINA CALENDARIO -->
+    <div id="page-calendario" class="page">
+      <div style="max-width:900px;margin:0 auto;padding:4px 0 24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+          <div style="font-family:'DM Serif Display',serif;font-size:1.3rem;font-weight:700;color:var(--accent)">📅 Calendario de pacientes</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button onclick="calNavMes(-1)" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:0.9rem">◀</button>
+            <span id="cal-titulo" style="font-size:0.95rem;font-weight:700;color:var(--text);min-width:160px;text-align:center"></span>
+            <button onclick="calNavMes(1)" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:0.9rem">▶</button>
+            <button onclick="calIrHoy()" style="background:var(--accent);color:#fff;border:none;border-radius:7px;padding:6px 14px;cursor:pointer;font-size:0.78rem;font-weight:700">↺ Hoy</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:var(--text3);padding:6px">LUN</div>
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:var(--text3);padding:6px">MAR</div>
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:var(--text3);padding:6px">MIÉ</div>
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:var(--text3);padding:6px">JUE</div>
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:var(--text3);padding:6px">VIE</div>
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:#dc2626;padding:6px">SAB</div>
+          <div style="text-align:center;font-size:0.7rem;font-weight:700;color:#dc2626;padding:6px">DOM</div>
+        </div>
+        <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px"></div>
+        <div style="margin-top:14px;display:flex;gap:16px;flex-wrap:wrap;font-size:0.72rem;color:var(--text3)">
+          <span>🔴 Riesgo ALTO</span><span>🟡 Riesgo MEDIO</span><span>🟢 Riesgo BAJO / Sin clasificar</span>
+        </div>
+      </div>
+    </div><!-- /page-calendario -->
+
+    <div id="page-historial-pac" class="page">
+      <div id="hpac-lista-view">
+        <div class="section-header"><h2>📂 Historial de Pacientes</h2></div>
+        <div style="margin-bottom:14px;position:relative">
+          <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text3)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="search" id="hpac-search" placeholder="Buscar paciente..." oninput="hpacFiltrar(this.value)" style="width:100%;padding:10px 12px 10px 36px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);font-size:0.9rem;outline:none;font-family:'DM Sans',sans-serif;color:var(--text)">
+        </div>
+        <div id="hpac-lista"></div>
+      </div>
+      <div id="hpac-notas-view" style="display:none">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="hpacVolverLista()">← Volver</button>
+          <div>
+            <div style="font-family:'DM Serif Display',serif;font-size:1.2rem" id="hpac-pac-nombre"></div>
+            <div style="font-size:0.75rem;color:var(--text3)" id="hpac-pac-info"></div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="if(window._hpacPacId&&typeof abrirPacSheet==='function')abrirPacSheet(window._hpacPacId)" title="Ver ficha completa del paciente" style="display:flex;align-items:center;gap:4px">👤 Ver ficha</button>
+          <button class="btn btn-secondary btn-sm" onclick="goTo('ronda-diaria')" title="Ir a Ronda Diaria de hoy" style="display:flex;align-items:center;gap:4px">🏥 Ronda de hoy</button>
+          <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="hpacNuevaNota()">📝 Nuevo seguimiento</button>
+        </div>
+        <div id="hpac-resumen-bar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+        <div id="hpac-notas-list"></div>
+      </div>
+    </div>
+
+    <div id="page-consulta-externa" class="page">
+      <div class="section-header">
+        <h2>🚶 Pacientes Consulta Externa EPS</h2>
+        <button class="btn btn-primary" onclick="openModal('modal-paciente');document.getElementById('p-tipo-ext').click();setPTipo('consulta-externa')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 4v16m8-8H4"/></svg>Nuevo paciente
+        </button>
+      </div>
+      <div style="background:var(--warning-light);border:1px solid #f0d080;border-radius:var(--radius);padding:10px 16px;margin-bottom:16px;font-size:0.82rem;color:#5a4000">
+        🚶 Pacientes de consulta externa EPS — Sesiones programadas, anamnesis y seguimiento ambulatorio
+      </div>
+      <div style="margin-bottom:14px;position:relative">
+        <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text3)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="search" id="ce-search" placeholder="Buscar por nombre o cédula…" oninput="renderConsultaExterna(this.value)" style="width:100%;padding:10px 12px 10px 36px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);font-size:0.9rem;outline:none;font-family:'DM Sans',sans-serif;color:var(--text)">
+      </div>
+      <div id="ce-lista"></div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- PÁGINA: RONDA DIARIA                                         -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- PÁGINA IC DEVUELTAS Y REDIRECCIONADAS -->
+    <div id="page-ic-devueltas" class="page">
+      <div style="padding:20px 24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+          <h2 style="font-size:1.1rem;font-weight:800;color:var(--text)">⛔ IC Devueltas y Redireccionadas</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-sm btn-secondary" onclick="icDevueltasRender()" id="btn-filter-dev" style="font-weight:700;border-color:var(--danger);color:var(--danger)">⛔ Devueltas</button>
+            <button class="btn btn-sm btn-secondary" onclick="icRedirecRender()" id="btn-filter-redir">↪️ Redireccionadas</button>
+            <button class="btn btn-sm btn-primary" onclick="abrirModalICRedirec()">+ Nueva redirección</button>
+          </div>
+        </div>
+        <div id="ic-devueltas-lista" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+
+    <div id="page-ronda-diaria" class="page">
+
+      <!-- ── TABLERO DEL DÍA ──────────────────────────────────────── -->
+      <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent)">📋 Pacientes de hoy</span>
+            <span id="rd-tablero-resumen" style="font-size:0.72rem;color:var(--text3)"></span>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="rdInit()" title="Refrescar lista">🔄 Actualizar</button>
+        </div>
+        <div id="rd-tablero" style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:0.82rem;color:var(--text3);text-align:center;padding:12px 0">Cargando pacientes…</div>
+        </div>
+      </div>
+
+      <!-- Estado vacío (cuando no hay paciente seleccionado) -->
+      <div id="rd-empty" style="text-align:center;padding:40px 20px;color:var(--text3)">
+        <div style="font-size:2.4rem;margin-bottom:10px">☝️</div>
+        <div style="font-size:0.9rem;font-weight:600;margin-bottom:5px">Selecciona un paciente del tablero</div>
+        <div style="font-size:0.82rem">Toca "Iniciar ficha" en cualquier paciente para registrar su ronda.</div>
+      </div>
+
+      <!-- Ficha de Ronda (oculta hasta seleccionar paciente) -->
+      <div id="rd-ficha" style="display:none">
+
+        <!-- Header de paciente activo -->
+        <div id="rd-pac-header" style="background:var(--accent);color:#fff;border-radius:var(--radius);padding:10px 18px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;opacity:0.8">Registrando ronda para</div>
+            <div id="rd-pac-header-nombre" style="font-size:1rem;font-weight:700"></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4)" onclick="rdGuardar()">💾 Guardar</button>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4)" onclick="rdImprimir()">🖨️ Imprimir</button>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,0.25);color:#fff;border:1px solid rgba(255,255,255,0.5)" onclick="rdVerFichaPaciente()">👤 Ficha</button>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3)" onclick="rdCerrarFicha()">✕ Cerrar</button>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span style="background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">1</span>
+            Identificación y Contexto
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Fecha</div>
+              <input type="date" id="rd-fecha" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Habitación</div>
+              <div style="display:flex;gap:4px;margin-bottom:5px;flex-wrap:wrap">
+                <button type="button" onclick="rdPrefijHab('AZU-')" style="font-size:0.68rem;font-weight:700;padding:2px 8px;border:1.5px solid #3b82f6;color:#1d4ed8;background:#eff6ff;border-radius:5px;cursor:pointer">🔵 AZU</button>
+                <button type="button" onclick="rdPrefijHab('UCI-')" style="font-size:0.68rem;font-weight:700;padding:2px 8px;border:1.5px solid #ef4444;color:#dc2626;background:#fef2f2;border-radius:5px;cursor:pointer">🔴 UCI</button>
+                <button type="button" onclick="rdPrefijHab('URG-')" style="font-size:0.68rem;font-weight:700;padding:2px 8px;border:1.5px solid #f59e0b;color:#d97706;background:#fffbeb;border-radius:5px;cursor:pointer">🟡 URG</button>
+                <button type="button" onclick="rdPrefijHab('')" style="font-size:0.68rem;font-weight:700;padding:2px 8px;border:1.5px solid var(--border);color:var(--text3);background:var(--surface);border-radius:5px;cursor:pointer">✕ Limpiar</button>
+              </div>
+              <input type="text" id="rd-hab" placeholder="Ej. AZU-304B, UCI-14, 322B…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Edad / Sexo</div>
+              <div style="display:flex;gap:6px">
+                <input type="text" id="rd-edad" placeholder="Edad" style="width:60px;padding:7px 8px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+                <select id="rd-sexo" style="flex:1;padding:7px 8px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+                  <option value="">—</option><option>F</option><option>M</option><option>NB</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Días de estancia</div>
+              <input type="number" id="rd-dias" min="0" placeholder="0" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Fecha de ingreso hospitalario</div>
+              <input type="date" id="rd-fecha-ingreso" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none" onchange="rdCalcDias()">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px">
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Aislamiento</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-aislamiento" value="no" checked> No</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-aislamiento" value="si"> Sí:</label>
+                <input type="text" id="rd-aislamiento-tipo" placeholder="tipo…" style="width:100px;padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Tipo de paciente</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="nuevo" checked> 🆕 Nuevo (IC)</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="seguimiento"> 🔄 Seguimiento</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="revaloracion"> 🔁 Revaloración</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="reingreso"> 🔄 Reingreso</label>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Acompañante</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-acomp" value="solo" id="rd-acomp-solo"> Solo</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-acomp" value="familiar" id="rd-acomp-familiar"> Familiar</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-acomp" value="cuidador" id="rd-acomp-cuidador"> Cuidador</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECCIÓN 2: FILTRO CLÍNICO-MÉDICO ─────────────────── -->
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#b45309;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span style="background:#b45309;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">2</span>
+            Filtro Clínico-Médico <span style="font-weight:400;font-size:0.68rem;color:var(--text3);text-transform:none">(Revisión HCE)</span>
+          </div>
+          <!-- rd-dx y rd-trat-medico movidos a ficha del paciente — solo ocultos para compatibilidad -->
+          <input type="hidden" id="rd-dx" value="">
+          <input type="hidden" id="rd-trat-medico" value="">
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:#7c3aed;margin-bottom:3px">Dx Psicológico Principal</div>
+            <input type="text" id="rd-dx-psi" placeholder="Ej: Trastorno adaptativo con ánimo depresivo…" style="width:100%;padding:8px 12px;border:1.5px solid #d8b4fe;border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:#fdf4ff;color:var(--text);outline:none">
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:#9333ea;margin-bottom:3px">Diferenciales Psicológicos <span style="font-weight:400;font-size:0.68rem;color:var(--text3)">(corto)</span></div>
+            <input type="text" id="rd-dx-diferenciales" placeholder="Ej: Descartar T. depresivo mayor, T. de ajuste vs duelo normal…" style="width:100%;padding:8px 12px;border:1.5px solid #e9d5ff;border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:#faf5ff;color:var(--text);outline:none">
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Cambio de plan médico hoy</div>
+            <textarea id="rd-cambio-plan-texto" rows="2" placeholder="Ej: Cirugía reprogramada para mañana, alta inminente, nuevo Dx, cambio de manejo…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
+            <input type="hidden" id="rd-dolor" value="0"><span id="rd-dolor-val" style="display:none">0</span>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Alerta metabólica / laboratorios</div>
+              <textarea id="rd-lab-detalle" rows="2" placeholder="Ej: Na 128 mEq/L (hiponatremia severa), Hb 6.2 g/dL, glucosa 420 mg/dL, creatinina elevada…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical;margin-bottom:6px"></textarea>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+              </div>
+              <textarea id="rd-lab-detalle" rows="2" placeholder="Detalle de alteración metabólica, valores relevantes, observaciones…" style="width:100%;padding:6px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:0.8rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+            </div>
+          </div>
+          <div style="margin-top:10px">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Fármacos con impacto conductual</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:7px">
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-cort"> Corticoides</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-opio"> Opioides</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-benzo"> Benzodiacepinas</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-antip"> Antipsicóticos</label>
+              <span style="display:flex;align-items:center;gap:4px;font-size:0.8rem">Descenso de: <input type="text" id="rd-farm-descenso" placeholder="fármaco…" style="width:110px;padding:3px 7px;border:1.5px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none"></span>
+            </div>
+            <textarea id="rd-farm-notas" rows="2" placeholder="Nombre del fármaco, dosis, efecto conductual observado o esperado…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+          </div>
+          <!-- Notas de HCE y enfermería -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">📋 Nota del médico tratante (HCE)</div>
+              <textarea id="rd-nota-medico" rows="3" placeholder="Lo más relevante de la última nota médica… Ej: 'Planea cirugía mañana', 'Inicio de QT hoy', 'Paciente con dolor no controlado'" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+            </div>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">🩺 Reporte de enfermería (últimas 24h)</div>
+              <textarea id="rd-nota-enfermeria" rows="3" placeholder="Lo más relevante del reporte de enfermería… Ej: 'Noche agitada', 'Rechazó medicación', 'Llanto persistente', 'Sin novedad'" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+            </div>
+          </div>
+        </div>
+
+        
+        <!-- ── SECCIÓN 4: MATRIZ DE DECISIÓN ─────────────────────── -->
         <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
           <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#dc2626;margin-bottom:12px;display:flex;align-items:center;gap:6px">
             <span style="background:#dc2626;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">4</span>
@@ -2276,8 +3204,8 @@ input.toggle-cb{display:none}
         <button type="button" onclick="document.getElementById('p-medico-esp').value='UCI'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">UCI</button>
         <button type="button" onclick="document.getElementById('p-medico-esp').value='Pediatría'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">Pediatría</button>
       </div></div>
-      <div class="form-group full"><label id="p-motivo-label">Diagnóstico médico principal</label><textarea id="p-motivo" rows="2" placeholder="Ej: Diabetes insulinodependiente, IRC, Ca. de mama…"></textarea></div>
-      <div class="form-group full"><label>Motivo de interconsulta a psicología</label><textarea id="p-motivo-ic" rows="2" placeholder="Ej: Valorar estado emocional, paciente con ideación suicida…"></textarea></div>
+      <div class="form-group full"><label id="p-motivo-label">Motivo de interconsulta a psicología</label><textarea id="p-motivo" rows="2" placeholder="Ej: Valorar estado emocional, paciente con ideación suicida…"></textarea></div>
+      <input type="hidden" id="p-motivo-ic" value="">
       <div class="form-group full"><label style="color:var(--accent2);font-weight:700">🎯 ¿Qué pide realmente? <span style="font-size:0.72rem;font-weight:400;color:var(--text3)">(tu interpretación clínica)</span></label><textarea id="p-que-pide" rows="2" placeholder="Ej: Quieren descartar riesgo suicida antes del procedimiento…"></textarea></div>
       <div class="form-group full"><label>Prioridad de la interconsulta</label>
         <div id="p-prioridad-btns" style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
@@ -2288,7 +3216,7 @@ input.toggle-cb{display:none}
         <input type="hidden" id="p-prioridad" value="">
       </div>
       <div class="form-group"><label>Estado actual</label>
-        <select id="p-estado"><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="seguimiento">Seguimiento</option><option value="consulta-externa">Consulta externa</option><option value="revaloracion">Revaluación</option><option value="alta">✅ Alta psicología</option><option value="alta-hospitalaria">🏥 Alta hospitalaria</option><option value="alta-voluntaria">⚠️ Alta voluntaria</option><option value="fallecido">✝ Fallecido</option></select>
+        <select id="p-estado"><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="seguimiento">Seguimiento</option><option value="consulta-externa">Consulta externa</option><option value="revaloracion">Revaluación</option><option value="fallecido">✝ Fallecido</option></select>
       </div>
       <div class="form-group"><label>Próxima sesión</label><input type="date" id="p-proxsesion"></div>
     </div></div>
