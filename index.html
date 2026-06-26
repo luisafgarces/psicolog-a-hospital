@@ -3555,6 +3555,8 @@ window.selectCapPaciente=(id)=>{
   if(!id)return;
   const p=pacientes.find(x=>x.id===id);
   if(!p)return;
+  // Limpiar formulario antes de cargar nuevo paciente
+  if(typeof window.limpiarCapacidad==='function') window.limpiarCapacidad();
   const set=(eid,v)=>{const el=document.getElementById(eid);if(el)el.value=v||'';};
   set('cap-nombre',p.nombre);
   set('cap-edad',(p.edad?p.edad+' años':'')+(p.sexo?' · '+p.sexo:''));
