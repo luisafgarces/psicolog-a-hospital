@@ -2924,6 +2924,12 @@ input.toggle-cb{display:none}
             <button id="ps-ultima-nota-btn-copiar" onclick="psUltimaNotaCopiar()" style="display:none;margin-top:8px;font-size:0.72rem;padding:3px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;font-weight:600">📋 Copiar nota</button>
           </div>
 
+          <!-- Historial de reinterconsultas -->
+          <div id="ps-reinterc-historial" style="display:none;margin-bottom:12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px">
+            <div style="font-size:0.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">🔁 Historial de reinterconsultas</div>
+            <div id="ps-reinterc-lista" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+
           <!-- Plan farmacológico con historial -->
           <div style="margin-top:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 14px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -3114,6 +3120,10 @@ input.toggle-cb{display:none}
       <div class="form-group">
         <label>Nuevo motivo de interconsulta</label>
         <textarea id="reinterc-motivo" rows="3" placeholder="¿Por qué vuelven a solicitar interconsulta?" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical"></textarea>
+      </div>
+      <div class="form-group">
+        <label style="color:var(--accent2);font-weight:700">🎯 ¿Qué pide realmente? <span style="font-size:0.72rem;font-weight:400;color:var(--text3)">(tu interpretación clínica)</span></label>
+        <textarea id="reinterc-que-pide" rows="2" placeholder="Ej: Quieren descartar riesgo suicida ante nueva conducta…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical"></textarea>
       </div>
       <div class="form-group">
         <label>¿Es pertinente la reinterconsulta?</label>
@@ -8803,6 +8813,7 @@ window.abrirPacSheet=async(id)=>{
   // Cargar ficha de ronda de hoy si existe
   psCargarRondaHoy(id);
   if(typeof window.psCargarUltimaNota==='function') window.psCargarUltimaNota(id);
+  if(typeof window.psCargarHistorialReinterc==='function') window.psCargarHistorialReinterc(id);
   document.getElementById('pac-sheet-overlay').classList.add('open');
   document.body.style.overflow='hidden';
 };
@@ -14922,6 +14933,7 @@ window.abrirReinterconsulta=function(pacId){
   document.getElementById('reinterc-hab').value=pac.hab||'';
   document.getElementById('reinterc-motivo').value='';
   document.getElementById('reinterc-justif').value='';
+  var qp=document.getElementById('reinterc-que-pide'); if(qp) qp.value='';
   document.getElementById('reinterc-prox-sesion').value='';
   document.querySelectorAll('input[name="reinterc-pertinente"]').forEach(function(r){r.checked=false;});
   if(typeof openModal==='function') openModal('modal-reinterc');
@@ -14939,9 +14951,10 @@ window.guardarReinterconsulta=async function(){
   var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
   try{
     var reintercHab=document.getElementById('reinterc-hab')?.value.trim()||'';
+    var reintercQuePide=document.getElementById('reinterc-que-pide')?.value.trim()||'';
     await window._addDoc(window._collection(window.db,'reinterconsultas'),{
       pacienteId:pacId, paciente:pac?.nombre||'',
-      fecha:fecha, motivo:motivo, hab:reintercHab,
+      fecha:fecha, motivo:motivo, hab:reintercHab, quePide:reintercQuePide,
       pertinente:pertinente, justificacion:justif,
       timestamp:new Date().toISOString()
     });
@@ -14959,10 +14972,10 @@ window.guardarReinterconsulta=async function(){
     // Actualizar motivo IC del paciente si es pertinente
     if(pertinente==='si'&&pac){
       await window._updateDoc(window._doc(window.db,'pacientes',pacId),{
-        motivoIC:motivo, fechaIC:fecha,
+        motivoIC:motivo, fechaIC:fecha, quePide:reintercQuePide,
         estado:'nueva-interconsulta-pendiente'
       });
-      pac.motivoIC=motivo; pac.fechaIC=fecha;
+      pac.motivoIC=motivo; pac.fechaIC=fecha; pac.quePide=reintercQuePide;
       pac.estado='nueva-interconsulta-pendiente';
       if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
       if(typeof window.renderDashboard==='function') window.renderDashboard();
@@ -15491,6 +15504,38 @@ window.rdDesmarcarRechazada = function(pacId){
   if(typeof window.rdSyncVistosFirebase==='function') window.rdSyncVistosFirebase();
   if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
   if(typeof toast==='function') toast('✅ Rechazada desmarcada');
+};
+
+window.psCargarHistorialReinterc = async function(pacId){
+  var bloque=document.getElementById('ps-reinterc-historial');
+  var lista=document.getElementById('ps-reinterc-lista');
+  if(!bloque||!lista) return;
+  bloque.style.display='none';
+  lista.innerHTML='';
+  if(!window.db||!window._getDocs||!window._query||!window._collection||!window._where||!window._orderBy) return;
+  try{
+    var snap=await window._getDocs(window._query(
+      window._collection(window.db,'reinterconsultas'),
+      window._where('pacienteId','==',pacId),
+      window._orderBy('timestamp','desc')
+    ));
+    var items=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    if(!items.length) return;
+    lista.innerHTML=items.map(function(r){
+      var pertColor=r.pertinente==='si'?'#16a34a':r.pertinente==='no'?'#dc2626':'#6b7280';
+      var pertLabel=r.pertinente==='si'?'✅ Pertinente':r.pertinente==='no'?'⛔ No pertinente':'';
+      return '<div style="border-left:3px solid '+pertColor+';padding:6px 10px;background:var(--surface);border-radius:0 6px 6px 0">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">'
+        +'<span style="font-size:0.72rem;font-weight:700;color:var(--text3)">'+(r.fecha||'')+'</span>'
+        +(pertLabel?'<span style="font-size:0.68rem;font-weight:700;color:'+pertColor+'">'+pertLabel+'</span>':'')
+        +'</div>'
+        +'<div style="font-size:0.8rem;color:var(--text2)">'+(r.motivo||'—')+'</div>'
+        +(r.quePide?'<div style="font-size:0.74rem;color:#7c3aed;margin-top:3px"><b>🎯</b> '+r.quePide+'</div>':'')
+        +(r.justificacion?'<div style="font-size:0.74rem;color:var(--text3);margin-top:3px;font-style:italic">'+r.justificacion+'</div>':'')
+        +'</div>';
+    }).join('');
+    bloque.style.display='';
+  }catch(e){console.warn('psCargarHistorialReinterc:',e);}
 };
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
