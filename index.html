@@ -635,9 +635,12 @@ input.toggle-cb{display:none}
 
           <!-- R0: RESUMEN DEL PACIENTE -->
           <div class="ic-form-section ic-only-nueva" id="ic-resumen-pac-section" style="background:var(--accent-light);border-color:var(--accent2)">
-            <div class="ic-form-head" style="background:var(--accent2)22;border-left-color:var(--accent)">
-              <span class="ft">📌 Resumen del paciente</span>
-              <span style="font-size:0.68rem;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">Se carga automáticamente al seleccionar el paciente</span>
+            <div class="ic-form-head" style="background:var(--accent2)22;border-left-color:var(--accent);display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <span class="ft">📌 Resumen del paciente</span>
+                <span style="font-size:0.68rem;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;display:block">Se carga automáticamente al seleccionar el paciente</span>
+              </div>
+              
             </div>
             <div class="ic-form-body">
               <div id="ic-resumen-pac-contenido" style="font-size:0.82rem;color:var(--text2);line-height:1.7">
@@ -3236,6 +3239,9 @@ input.toggle-cb{display:none}
 
 
 
+<!-- BOTÓN FLOTANTE VER FICHA IC -->
+<button id="ic-btn-ficha-float" onclick="(function(){var id=document.getElementById('ic-paciente-sel')?.value||window._currentICPacId||''  ;if(id&&typeof abrirPacSheet==='function')abrirPacSheet(id);})()" style="display:none;position:fixed;bottom:24px;left:200px;z-index:8886;background:#7c3aed;color:#fff;border:none;border-radius:50px;padding:8px 18px;font-size:0.78rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.4);white-space:nowrap;align-items:center;gap:6px">👤 <span id="ic-float-nombre" style="font-size:0.72rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span></button>
+
 <div id="toast"></div>
 
 <!-- FIREBASE -->
@@ -3753,6 +3759,16 @@ window.selectICPaciente=(id)=>{
   if(typeof window.cargarPendientesIC === 'function') window.cargarPendientesIC(id);
 
   // ── RESUMEN DEL PACIENTE ──────────────────────────────────────────
+  // Mostrar botón flotante Ver ficha
+  var _btnFloat=document.getElementById('ic-btn-ficha-float');
+  var _floatNombre=document.getElementById('ic-float-nombre');
+  if(p && _btnFloat){
+    window._currentICPacId=id;
+    if(_floatNombre) _floatNombre.textContent=(p.nombre||'').split(' ').slice(0,2).join(' ');
+    _btnFloat.style.display='flex';
+  } else if(_btnFloat){
+    _btnFloat.style.display='none';
+  }
   const resCont = document.getElementById('ic-resumen-pac-contenido');
   if(resCont && p){
     // Calcular días
@@ -16373,111 +16389,6 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
 })();
 </script>
 
-<!-- Botón flotante Ver ficha del paciente -->
-<style>
-#ic-fab-ficha{
-  display:none;
-  position:fixed;
-  bottom:70px;
-  left:22px;
-  z-index:8887;
-  background:var(--accent,#2563eb);
-  color:#fff;
-  border:none;
-  border-radius:50px;
-  padding:9px 16px;
-  font-size:0.78rem;
-  font-weight:700;
-  cursor:pointer;
-  box-shadow:0 4px 16px rgba(37,99,235,.4);
-  align-items:center;
-  gap:6px;
-  transition:transform .12s;
-  font-family:'DM Sans',sans-serif;
-}
-#ic-fab-ficha:active{transform:scale(.95);}
-#ic-fab-ficha .ic-fab-nombre{
-  max-width:150px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:0.72rem;
-  font-weight:600;
-  opacity:0.85;
-}
-</style>
-<button id="ic-fab-ficha" onclick="icFabAbrirFicha()">
-  👤 <span id="ic-fab-ficha-nombre" class="ic-fab-nombre"></span>
-</button>
-<script>
-(function(){
-  var fab = document.getElementById('ic-fab-ficha');
-  var fabNombre = document.getElementById('ic-fab-ficha-nombre');
 
-  // Obtener paciente actual — desde selector o desde _currentICPacId
-  function getPacIdIC(){
-    var sel = document.getElementById('ic-paciente-sel');
-    return (sel && sel.value) ? sel.value : (window._currentICPacId||'');
-  }
-
-  // Verificar si estamos en IC — por clase active o por _currentPage
-  function enPaginaIC(){
-    var p = document.getElementById('page-interconsultas');
-    if(p) return p.classList.contains('active');
-    return window._currentPage === 'interconsultas';
-  }
-
-  window.icFabActualizar = function(){
-    if(!enPaginaIC()){ if(fab) fab.style.display='none'; return; }
-    var pacId = getPacIdIC();
-    if(!pacId){ if(fab) fab.style.display='none'; return; }
-    var pac = (window.pacientes||[]).find(function(p){ return p.id===pacId; });
-    var nombre = pac ? (pac.nombre||'').split(' ').slice(0,2).join(' ') : '👤';
-    if(fabNombre) fabNombre.textContent = nombre;
-    if(fab) fab.style.display='flex';
-  };
-
-  window.icFabAbrirFicha = function(){
-    var pacId = getPacIdIC();
-    if(pacId && typeof abrirPacSheet==='function') abrirPacSheet(pacId);
-    else if(typeof toast==='function') toast('⚠️ Selecciona un paciente primero');
-  };
-
-  // Cuando selectICPaciente carga un paciente, guardar el ID
-  var _origSelectIC = window.selectICPaciente;
-  window.selectICPaciente = function(id){
-    window._currentICPacId = id;
-    if(_origSelectIC) _origSelectIC(id);
-    setTimeout(window.icFabActualizar, 100);
-  };
-
-  // Escuchar cambios en el selector
-  document.addEventListener('change', function(e){
-    if(e.target && e.target.id==='ic-paciente-sel'){
-      window._currentICPacId = e.target.value;
-      icFabActualizar();
-    }
-  });
-
-  // Escuchar navegación
-  var _goToOrig2 = window.goTo;
-  window.goTo = function(page){
-    if(_goToOrig2) _goToOrig2(page);
-    if(page !== 'interconsultas') window._currentICPacId = '';
-    setTimeout(icFabActualizar, 300);
-  };
-
-  // Limpiar FAB al limpiar formulario
-  var _limpiarFormICOrig = window.limpiarFormIC;
-  window.limpiarFormIC = function(confirm){
-    if(_limpiarFormICOrig) _limpiarFormICOrig(confirm);
-    window._currentICPacId = '';
-    if(fab) fab.style.display='none';
-  };
-
-  // Verificar cada segundo
-  setInterval(icFabActualizar, 1000);
-})();
-</script>
 </body>
 </html>
