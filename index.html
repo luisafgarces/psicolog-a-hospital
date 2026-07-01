@@ -15429,16 +15429,12 @@ window.psCargarUltimaNota = async function(pacId){
     // Buscar en interconsultas
     var snapIC=await window._getDocs(window._query(
       window._collection(window.db,'interconsultas'),
-      window._where('pacienteId','==',pacId),
-      window._orderBy('creado','desc'),
-      window._limit(1)
+      window._where('pacienteId','==',pacId)
     ));
     // Buscar en anamnesis
     var snapAN=await window._getDocs(window._query(
       window._collection(window.db,'anamnesis'),
-      window._where('pacienteId','==',pacId),
-      window._orderBy('creado','desc'),
-      window._limit(1)
+      window._where('pacienteId','==',pacId)
     ));
     var notas=[];
     snapIC.docs.forEach(function(d){notas.push(Object.assign({id:d.id,_col:'interconsultas'},d.data()));});
@@ -15516,8 +15512,7 @@ window.psCargarHistorialReinterc = async function(pacId){
   try{
     var snap=await window._getDocs(window._query(
       window._collection(window.db,'reinterconsultas'),
-      window._where('pacienteId','==',pacId),
-      window._orderBy('timestamp','desc')
+      window._where('pacienteId','==',pacId)
     ));
     var items=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
     if(!items.length) return;
