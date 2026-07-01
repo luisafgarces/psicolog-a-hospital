@@ -5851,6 +5851,12 @@ window.goTo = function(page){
     if(ov) ov.classList.remove('open');
   }
   // Render page content — setTimeout ensures ES6 module is loaded
+  // Ocultar botón flotante ficha si salimos de interconsultas
+  if(page !== 'interconsultas'){
+    window._currentICPacId='';
+    var _bf=document.getElementById('ic-btn-ficha-float');
+    if(_bf) _bf.style.display='none';
+  }
   var fn={
     'pacientes': function(){window._currentPage='pacientes';if(window.renderPacientes)window.renderPacientes();else setTimeout(function(){window.renderPacientes&&window.renderPacientes();},300);},
     'consulta-externa': function(){if(window.renderConsultaExterna)window.renderConsultaExterna();else setTimeout(function(){window.renderConsultaExterna&&window.renderConsultaExterna();},300);},
@@ -10029,6 +10035,9 @@ window.limpiarFormIC=function(confirm_=true){
   var ep=document.getElementById('ic-esp-preview');if(ep)ep.style.display='none';
   var sel=document.getElementById('ic-paciente-sel');if(sel)sel.value='';
   var pf=document.getElementById('ic-pfecha');if(pf)pf.value=new Date().toISOString().split('T')[0];
+  // Ocultar botón flotante ficha
+  window._currentICPacId='';
+  var _bf=document.getElementById('ic-btn-ficha-float');if(_bf)_bf.style.display='none';
   setICMode('nueva');
 };
 
