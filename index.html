@@ -3814,7 +3814,6 @@ window.selectICPaciente=(id)=>{
         const snap = await window._getDocs(window._query(
           window._collection(window.db,'notas_pacientes'),
           window._where('pacienteId','==',id),
-          window._orderBy('fecha','desc'),
           window._limit(3)
         ));
         const notas = snap.docs.map(d=>Object.assign({id:d.id},d.data()));
@@ -6500,7 +6499,6 @@ window.cargarNotasRapidas = async function(pacId){
       window._query(
         window._collection(window.db,'notas_rapidas'),
         window._where('pacienteId','==',pacId),
-        window._orderBy('creado','desc'),
         window._limit(20)
       )
     );
@@ -8279,9 +8277,9 @@ window.hpacRenderNotas=()=>{
   (async function(){
     try{
       if(!window._getDocs||!window._query||!window._collection||!window._where||!window._orderBy) return;
-      var snapE=await window._getDocs(window._query(window._collection(window.db,'egresos'),window._where('pacienteId','==',_hpacPacId),window._orderBy('fecha','desc')));
+      var snapE=await window._getDocs(window._query(window._collection(window.db,'egresos'),window._where('pacienteId','==',_hpacPacId)));
       window._hpacEgresos=snapE.docs.map(function(d){return Object.assign({id:d.id},d.data(),{_esEgreso:true});});
-      var snapR=await window._getDocs(window._query(window._collection(window.db,'reingresos'),window._where('pacienteId','==',_hpacPacId),window._orderBy('fechaReingreso','desc')));
+      var snapR=await window._getDocs(window._query(window._collection(window.db,'reingresos'),window._where('pacienteId','==',_hpacPacId)));
       window._hpacReingresos=snapR.docs.map(function(d){return Object.assign({id:d.id},d.data(),{_esReingreso:true});});
       // Cargar revaloraciones de notas_pacientes (sin orderBy para evitar índice)
       var snapNP=await window._getDocs(window._query(window._collection(window.db,'notas_pacientes'),window._where('pacienteId','==',_hpacPacId)));
@@ -14538,7 +14536,6 @@ window.icGuardarRondaParte2 = async function(pacId){
       window._collection(window.db,'fichas_ronda'),
       window._where('pacienteId','==',pacId),
       window._where('fecha','==',hoy),
-      window._orderBy('creado','desc'),
       window._limit(1)
     ));
     var update = {
@@ -15271,10 +15268,10 @@ window.icDevueltasRender = async function(){
   try{
     var snap=await window._getDocs(window._query(
       window._collection(window.db,'ic_devueltas'),
-      window._where('tipo','==','devuelta'),
-      window._orderBy('registrado','desc')
+      window._where('tipo','==','devuelta')
     ));
     var items=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    items.sort(function(a,b){return (b.registrado||'')>(a.registrado||'')?1:-1;});
     if(!items.length){
       lista.innerHTML='<div style="color:var(--text3);font-size:0.82rem;padding:20px 0;text-align:center">Sin IC devueltas registradas.</div>';
       return;
@@ -15343,10 +15340,10 @@ window.icRedirecRender = async function(){
   try{
     var snap=await window._getDocs(window._query(
       window._collection(window.db,'ic_devueltas'),
-      window._where('tipo','==','redireccionada'),
-      window._orderBy('registrado','desc')
+      window._where('tipo','==','redireccionada')
     ));
     var items=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    items.sort(function(a,b){return (b.registrado||'')>(a.registrado||'')?1:-1;});
     if(!items.length){
       lista.innerHTML='<div style="color:var(--text3);font-size:0.82rem;padding:20px 0;text-align:center">Sin IC redireccionadas registradas.</div>';
       return;
