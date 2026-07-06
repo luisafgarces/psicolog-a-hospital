@@ -396,7 +396,7 @@ input.toggle-cb{display:none}
 .out-field-label-ic{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:7px}
 .out-text-ic{font-size:0.8rem;line-height:1.65;white-space:pre-wrap;min-height:60px;color:var(--text)}
 .out-text-ic.ph{color:var(--text3);font-style:italic}
-.copy-field-btn-ic{font-size:0.7rem;padding:3px 8px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text2);float:right;margin-bottom:6px;transition:all 0.15s}
+.copy-field-btn-ic{font-size:0.78rem;padding:6px 14px;border-radius:7px;border:1px solid var(--accent2);background:var(--accent2);color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;float:right;margin-bottom:6px;transition:all 0.15s}
 .copy-field-btn-ic:hover{background:var(--border)}.copy-field-btn-ic.done{background:var(--success-light);border-color:var(--success);color:var(--success)}
 .out-seg-wrap{padding:16px}
 .esp-preview{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:14px;font-size:0.82rem;line-height:1.65;white-space:pre-wrap;margin-top:10px}
@@ -3118,6 +3118,10 @@ input.toggle-cb{display:none}
           <button type="button" onclick="document.getElementById('reinterc-hab').value='URG-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🟡 URG</button>
           <button type="button" onclick="document.getElementById('reinterc-hab').value='UCI-'" class="btn btn-secondary btn-sm" style="font-size:0.72rem;padding:2px 8px">🔴 UCI</button>
         </div>
+      </div>
+      <div class="form-group">
+        <label>Médico que solicita la reinterconsulta</label>
+        <input type="text" id="reinterc-medico" placeholder="Dr. García · Medicina Interna" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
       </div>
       <div class="form-group">
         <label>Nuevo motivo de interconsulta</label>
@@ -14955,6 +14959,7 @@ window.abrirReinterconsulta=function(pacId){
   document.getElementById('reinterc-motivo').value='';
   document.getElementById('reinterc-justif').value='';
   var qp=document.getElementById('reinterc-que-pide'); if(qp) qp.value='';
+  var rm=document.getElementById('reinterc-medico'); if(rm) rm.value='';
   document.getElementById('reinterc-prox-sesion').value='';
   document.querySelectorAll('input[name="reinterc-pertinente"]').forEach(function(r){r.checked=false;});
   if(typeof openModal==='function') openModal('modal-reinterc');
@@ -14976,6 +14981,7 @@ window.guardarReinterconsulta=async function(){
     await window._addDoc(window._collection(window.db,'reinterconsultas'),{
       pacienteId:pacId, paciente:pac?.nombre||'',
       fecha:fecha, motivo:motivo, hab:reintercHab, quePide:reintercQuePide,
+      medicoSol:(document.getElementById('reinterc-medico')?.value||'').trim(),
       pertinente:pertinente, justificacion:justif,
       timestamp:new Date().toISOString()
     });
