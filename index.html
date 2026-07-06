@@ -8429,9 +8429,10 @@ window.hpacRenderNotas=()=>{
       var esPendienteIA=esModoConIA&&!tieneContenidoReal&&e._aiFormSnap;
       if(cv.length){
         for(var j=0;j<cv.length;j++){
+          var _rows=Math.max(3,Math.ceil((cv[j].text||'').length/80));
           camposHtml+='<div class="hpac-campo">'
             +'<div class="hpac-campo-label">'+cv[j].label+'</div>'
-            +'<div class="hpac-campo-text">'+cv[j].text+'</div>'
+            +'<textarea readonly rows="'+_rows+'" style="width:100%;border:none;background:transparent;font-family:\'DM Sans\',sans-serif;font-size:0.82rem;line-height:1.6;color:var(--text);resize:none;padding:0;outline:none;cursor:text">'+cv[j].text+'</textarea>'
             +'</div>';
         }
       } else if(esPendienteIA&&e._aiFormSnap){
@@ -10041,6 +10042,13 @@ window.limpiarFormIC=function(confirm_=true){
   });
   var outFour=document.getElementById('ic-out-4campos');if(outFour)outFour.style.display='none';
   icCurrentEsp=null;
+  window.icCurrentEsp=null;
+  // Limpiar campo de descripción condición
+  var espCond=document.getElementById('ic-esp-condicion');if(espCond)espCond.value='';
+  // Limpiar chips seleccionados en nota especial
+  document.querySelectorAll('#ic-mode-esp .ic-chip').forEach(function(c){c.classList.remove('on');});
+  // Limpiar preview de nota especial
+  var espText=document.getElementById('ic-esp-text');if(espText)espText.textContent='';
   var ep=document.getElementById('ic-esp-preview');if(ep)ep.style.display='none';
   var sel=document.getElementById('ic-paciente-sel');if(sel)sel.value='';
   var pf=document.getElementById('ic-pfecha');if(pf)pf.value=new Date().toISOString().split('T')[0];
