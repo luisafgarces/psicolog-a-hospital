@@ -8431,7 +8431,7 @@ window.hpacRenderNotas=()=>{
         for(var j=0;j<cv.length;j++){
           camposHtml+='<div class="hpac-campo">'
             +'<div class="hpac-campo-label">'+cv[j].label+'</div>'
-            +'<div class="hpac-campo-text" style="user-select:text;-webkit-user-select:text;cursor:text">'+cv[j].text+'</div>'
+            +'<textarea class="hpac-campo-text" readonly onclick="this.select()" style="width:100%;border:none;background:transparent;padding:0;margin:0;resize:none;outline:none;font-family:inherit;font-size:0.82rem;line-height:1.6;color:var(--text);white-space:pre-wrap;overflow:hidden;cursor:text;user-select:text;-webkit-user-select:text">'+cv[j].text+'</textarea>'
             +'</div>';
         }
       } else if(esPendienteIA&&e._aiFormSnap){
@@ -8571,6 +8571,11 @@ window.hpacRenderNotas=()=>{
   }
 
   cont.innerHTML=notasParts.join('')+testParts.join('');
+  // Auto-height para textareas de notas
+  cont.querySelectorAll('textarea.hpac-campo-text').forEach(function(ta){
+    ta.style.height='auto';
+    ta.style.height=(ta.scrollHeight)+'px';
+  });
 };
 
 window.hpacNuevaNota=()=>{
