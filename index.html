@@ -394,7 +394,7 @@ input.toggle-cb{display:none}
 .out-field-ic{border-right:1px solid var(--border);padding:14px 16px}
 .out-field-ic:nth-child(2){border-right:none}.out-field-ic:nth-child(3){border-top:1px solid var(--border)}.out-field-ic:nth-child(4){border-top:1px solid var(--border);border-right:none}
 .out-field-label-ic{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:7px}
-.out-text-ic{font-size:0.8rem;line-height:1.65;white-space:pre-wrap;min-height:60px;color:var(--text)}
+.out-text-ic{font-size:0.8rem;line-height:1.65;white-space:pre-wrap;min-height:60px;color:var(--text);user-select:text;-webkit-user-select:text;cursor:text}
 .out-text-ic.ph{color:var(--text3);font-style:italic}
 .copy-field-btn-ic{font-size:0.78rem;padding:6px 14px;border-radius:7px;border:1px solid var(--accent2);background:var(--accent2);color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;float:right;margin-bottom:6px;transition:all 0.15s}
 .copy-field-btn-ic:hover{background:var(--border)}.copy-field-btn-ic.done{background:var(--success-light);border-color:var(--success);color:var(--success)}
@@ -1607,14 +1607,14 @@ input.toggle-cb{display:none}
             <div class="out-section-head"><span>Nota clínica — lista para copiar al sistema</span><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn btn-secondary btn-sm" onclick="copiarTodoIC()">Copiar todo</button><button class="btn btn-secondary btn-sm" onclick="descargarNotaICPDF()" style="background:#e0f2fe;border:1.5px solid #0ea5e9;color:#0369a1;font-weight:700" title="Descargar nota como PDF">📄 Descargar PDF</button></div></div>
             <div id="ic-out-4campos">
               <div class="out-fields">
-                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-sub',this)">Copiar</button><div class="out-field-label-ic">Análisis Subjetivo</div><textarea class="out-text-ic ph" id="ic-out-sub" readonly style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</textarea></div>
-                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-obj',this)">Copiar</button><div class="out-field-label-ic">Análisis Objetivo</div><textarea class="out-text-ic ph" id="ic-out-obj" readonly style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</textarea></div>
-                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-resp',this)">Copiar</button><div class="out-field-label-ic">Respuesta</div><textarea class="out-text-ic ph" id="ic-out-resp" readonly style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</textarea></div>
-                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-trat',this)">Copiar</button><div class="out-field-label-ic">Tratamiento</div><textarea class="out-text-ic ph" id="ic-out-trat" readonly style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</textarea></div>
+                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-sub',this)">Copiar</button><div class="out-field-label-ic">Análisis Subjetivo</div><div class="out-text-ic ph" id="ic-out-sub" style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</div></div>
+                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-obj',this)">Copiar</button><div class="out-field-label-ic">Análisis Objetivo</div><div class="out-text-ic ph" id="ic-out-obj" style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</div></div>
+                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-resp',this)">Copiar</button><div class="out-field-label-ic">Respuesta</div><div class="out-text-ic ph" id="ic-out-resp" style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</div></div>
+                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-trat',this)">Copiar</button><div class="out-field-label-ic">Tratamiento</div><div class="out-text-ic ph" id="ic-out-trat" style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</div></div>
 
               </div>
             </div>
-            <div id="ic-out-seg" style="display:none"><div class="out-seg-wrap"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-seg-texto',this)">Copiar</button><div class="out-field-label-ic">Nota de seguimiento</div><textarea class="out-text-ic ph" id="ic-out-seg-texto" readonly style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</textarea></div></div>
+            <div id="ic-out-seg" style="display:none"><div class="out-seg-wrap"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-seg-texto',this)">Copiar</button><div class="out-field-label-ic">Nota de seguimiento</div><div class="out-text-ic ph" id="ic-out-seg-texto" style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</div></div></div>
           </div>
         </div>
         <!-- BARRA DE NAVEGACIÓN RÁPIDA AL FINAL -->
@@ -4149,7 +4149,7 @@ window.guardarICFirebase=async()=>{
   let sub='',obj='',resp='',trat='';
   try{
     if(window.icCurrentMode==='nueva'){
-      const gs=t=>{const el=document.getElementById(t);if(!el)return'';const v=(el.tagName==='TEXTAREA'?el.value:el.textContent)||'';return v.startsWith('Genera')?'':v;};
+      const gs=t=>{const el=document.getElementById(t);if(!el)return'';const v=el.textContent||'';return v.startsWith('Genera')?'':v;};
       sub=gs('ic-out-sub');obj=gs('ic-out-obj');resp=gs('ic-out-resp');trat=gs('ic-out-trat');
     } else if(window.icCurrentMode==='seg'){
       // Primero intentar usar la nota generada por IA
@@ -4315,7 +4315,7 @@ window.guardarICFirebase=async()=>{
       if(vFamIA&&!vFamIA.startsWith('Genera')&&!vFamIA.startsWith('⏳')&&!vFamIA.startsWith('❌')&&vFamIA.length>50){resp=vFamIA;obj=vFamIA;}
     } else if(window.icCurrentMode==='esp'){
       // Capturar nota especial desde ic-out-trat (incluye condición clínica observada)
-      const gs=t=>{const el=document.getElementById(t);if(!el)return'';const v=(el.tagName==='TEXTAREA'?el.value:el.textContent)||'';return v.startsWith('Genera')?'':v;};
+      const gs=t=>{const el=document.getElementById(t);if(!el)return'';const v=el.textContent||'';return v.startsWith('Genera')?'':v;};
       trat=gs('ic-out-trat');
     }
   }catch(ex){console.error('Error capturando datos de seguimiento:',ex);}
@@ -8429,10 +8429,9 @@ window.hpacRenderNotas=()=>{
       var esPendienteIA=esModoConIA&&!tieneContenidoReal&&e._aiFormSnap;
       if(cv.length){
         for(var j=0;j<cv.length;j++){
-          var _rows=Math.max(3,Math.ceil((cv[j].text||'').length/80));
           camposHtml+='<div class="hpac-campo">'
             +'<div class="hpac-campo-label">'+cv[j].label+'</div>'
-            +'<textarea readonly rows="'+_rows+'" style="width:100%;border:none;background:transparent;font-family:\'DM Sans\',sans-serif;font-size:0.82rem;line-height:1.6;color:var(--text);resize:none;padding:0;outline:none;cursor:text">'+cv[j].text+'</textarea>'
+            +'<div class="hpac-campo-text" style="user-select:text;-webkit-user-select:text;cursor:text">'+cv[j].text+'</div>'
             +'</div>';
         }
       } else if(esPendienteIA&&e._aiFormSnap){
@@ -9968,21 +9967,16 @@ function generarNotaIcEsp(){
 function setIcOut(id,text){
   var el=document.getElementById(id);
   if(!el)return;
-  // Soporta tanto div como textarea
-  if(el.tagName==='TEXTAREA') el.value=text;
-  else el.textContent=text;
+  el.textContent=text;
   el.classList.remove('ph');
   el.style.color='var(--text)';
   el.style.fontStyle='normal';
-  // Auto-resize textarea
-  if(el.tagName==='TEXTAREA'){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
 }
 
 window.copiarCampoIC=function(id,btn){
   var el=document.getElementById(id);
   if(!el)return;
-  var txt=el.tagName==='TEXTAREA'?el.value:el.textContent;
-  navigator.clipboard.writeText(txt).then(function(){
+  navigator.clipboard.writeText(el.textContent).then(function(){
     btn.textContent='✓ Copiado';btn.classList.add('done');
     setTimeout(function(){btn.textContent='Copiar';btn.classList.remove('done');},2000);
   });
