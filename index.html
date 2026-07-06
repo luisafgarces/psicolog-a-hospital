@@ -1607,14 +1607,14 @@ input.toggle-cb{display:none}
             <div class="out-section-head"><span>Nota clínica — lista para copiar al sistema</span><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn btn-secondary btn-sm" onclick="copiarTodoIC()">Copiar todo</button><button class="btn btn-secondary btn-sm" onclick="descargarNotaICPDF()" style="background:#e0f2fe;border:1.5px solid #0ea5e9;color:#0369a1;font-weight:700" title="Descargar nota como PDF">📄 Descargar PDF</button></div></div>
             <div id="ic-out-4campos">
               <div class="out-fields">
-                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-sub',this)">Copiar</button><div class="out-field-label-ic">Análisis Subjetivo</div><div class="out-text-ic ph" id="ic-out-sub">Genera la nota para ver el contenido…</div></div>
-                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-obj',this)">Copiar</button><div class="out-field-label-ic">Análisis Objetivo</div><div class="out-text-ic ph" id="ic-out-obj">Genera la nota para ver el contenido…</div></div>
-                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-resp',this)">Copiar</button><div class="out-field-label-ic">Respuesta</div><div class="out-text-ic ph" id="ic-out-resp">Genera la nota para ver el contenido…</div></div>
-                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-trat',this)">Copiar</button><div class="out-field-label-ic">Tratamiento</div><div class="out-text-ic ph" id="ic-out-trat">Genera la nota para ver el contenido…</div></div>
+                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-sub',this)">Copiar</button><div class="out-field-label-ic">Análisis Subjetivo</div><textarea class="out-text-ic ph" id="ic-out-sub" readonly style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</textarea></div>
+                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-obj',this)">Copiar</button><div class="out-field-label-ic">Análisis Objetivo</div><textarea class="out-text-ic ph" id="ic-out-obj" readonly style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</textarea></div>
+                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-resp',this)">Copiar</button><div class="out-field-label-ic">Respuesta</div><textarea class="out-text-ic ph" id="ic-out-resp" readonly style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</textarea></div>
+                <div class="out-field-ic"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-trat',this)">Copiar</button><div class="out-field-label-ic">Tratamiento</div><textarea class="out-text-ic ph" id="ic-out-trat" readonly style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</textarea></div>
 
               </div>
             </div>
-            <div id="ic-out-seg" style="display:none"><div class="out-seg-wrap"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-seg-texto',this)">Copiar</button><div class="out-field-label-ic">Nota de seguimiento</div><div class="out-text-ic ph" id="ic-out-seg-texto">Genera la nota para ver el contenido…</div></div></div>
+            <div id="ic-out-seg" style="display:none"><div class="out-seg-wrap"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-seg-texto',this)">Copiar</button><div class="out-field-label-ic">Nota de seguimiento</div><textarea class="out-text-ic ph" id="ic-out-seg-texto" readonly style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</textarea></div></div>
           </div>
         </div>
         <!-- BARRA DE NAVEGACIÓN RÁPIDA AL FINAL -->
@@ -4149,7 +4149,7 @@ window.guardarICFirebase=async()=>{
   let sub='',obj='',resp='',trat='';
   try{
     if(window.icCurrentMode==='nueva'){
-      const gs=t=>{const el=document.getElementById(t);if(!el)return'';const v=el.textContent||'';return v.startsWith('Genera')?'':v;};
+      const gs=t=>{const el=document.getElementById(t);if(!el)return'';const v=(el.tagName==='TEXTAREA'?el.value:el.textContent)||'';return v.startsWith('Genera')?'':v;};
       sub=gs('ic-out-sub');obj=gs('ic-out-obj');resp=gs('ic-out-resp');trat=gs('ic-out-trat');
     } else if(window.icCurrentMode==='seg'){
       // Primero intentar usar la nota generada por IA
@@ -4315,7 +4315,7 @@ window.guardarICFirebase=async()=>{
       if(vFamIA&&!vFamIA.startsWith('Genera')&&!vFamIA.startsWith('⏳')&&!vFamIA.startsWith('❌')&&vFamIA.length>50){resp=vFamIA;obj=vFamIA;}
     } else if(window.icCurrentMode==='esp'){
       // Capturar nota especial desde ic-out-trat (incluye condición clínica observada)
-      const gs=t=>{const el=document.getElementById(t);if(!el)return'';const v=el.textContent||'';return v.startsWith('Genera')?'':v;};
+      const gs=t=>{const el=document.getElementById(t);if(!el)return'';const v=(el.tagName==='TEXTAREA'?el.value:el.textContent)||'';return v.startsWith('Genera')?'':v;};
       trat=gs('ic-out-trat');
     }
   }catch(ex){console.error('Error capturando datos de seguimiento:',ex);}
@@ -9967,14 +9967,21 @@ function generarNotaIcEsp(){
 function setIcOut(id,text){
   var el=document.getElementById(id);
   if(!el)return;
-  el.textContent=text;
+  // Soporta tanto div como textarea
+  if(el.tagName==='TEXTAREA') el.value=text;
+  else el.textContent=text;
   el.classList.remove('ph');
+  el.style.color='var(--text)';
+  el.style.fontStyle='normal';
+  // Auto-resize textarea
+  if(el.tagName==='TEXTAREA'){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
 }
 
 window.copiarCampoIC=function(id,btn){
   var el=document.getElementById(id);
   if(!el)return;
-  navigator.clipboard.writeText(el.textContent).then(function(){
+  var txt=el.tagName==='TEXTAREA'?el.value:el.textContent;
+  navigator.clipboard.writeText(txt).then(function(){
     btn.textContent='✓ Copiado';btn.classList.add('done');
     setTimeout(function(){btn.textContent='Copiar';btn.classList.remove('done');},2000);
   });
