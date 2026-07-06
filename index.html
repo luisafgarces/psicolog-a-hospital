@@ -308,15 +308,15 @@ input.toggle-cb{display:none}
 /* HISTORIAL PACIENTES */
 .hpac-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.15s}
 .hpac-card:hover{box-shadow:var(--shadow);border-color:var(--accent2);transform:translateY(-1px)}
-.hpac-nota{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}
+.hpac-nota{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;user-select:text;-webkit-user-select:text}
 .hpac-nota-head{padding:11px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;border-left:4px solid var(--accent2)}
 .hpac-nota-head.tipo-seg{border-left-color:#1a56db}
 .hpac-nota-head.tipo-anam{border-left-color:#7b1fa2}
 .hpac-nota-head.tipo-esp{border-left-color:var(--warning)}
-.hpac-nota-body{padding:14px 16px}
+.hpac-nota-body{padding:14px 16px;user-select:text;-webkit-user-select:text}
 .hpac-campo{margin-bottom:12px}.hpac-campo:last-child{margin-bottom:0}
 .hpac-campo-label{font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--text3);margin-bottom:5px}
-.hpac-campo-text{font-size:0.82rem;line-height:1.6;color:var(--text);white-space:pre-wrap}
+.hpac-campo-text{font-size:0.82rem;line-height:1.6;color:var(--text);white-space:pre-wrap;user-select:text;-webkit-user-select:text;cursor:text}
 @media(max-width:600px){#mhic-body [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}}
 
 /* RONDA DEL DÍA */
