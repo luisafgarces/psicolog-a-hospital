@@ -8529,7 +8529,7 @@ window.hpacRenderNotas=()=>{
         +(esModoConIA?'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem;opacity:0.85" onclick="hpacGenerarNotaIA(\'' + e.id + '\','+ni+')" title="Regenerar con IA">✨ IA</button>':'')
         +((e._aiFormSnap||e.formulario||e.nota||e.sub)?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="descargarFormIC(\'' + e.id + '\')">📥 Formulario</button>':'')
         +(e._col==='notas_pacientes'?'':'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacEditar('+ni+')">Editar</button>')
-        +'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacCopiar('+ni+')">Copiar</button>'
+        +'<button class="btn btn-sm" style="padding:6px 14px;font-size:0.78rem;font-weight:700;background:#2563eb;color:#fff;border:none;border-radius:7px;cursor:pointer" onclick="hpacCopiar('+ni+')">📋 Copiar nota</button>'
         +(e._col==='notas_pacientes'?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;color:#dc2626;border-color:#dc2626" onclick="hpacEliminarNotaPac(\'' + e.id + '\')" title="Eliminar revaloración">🗑 Eliminar</button>':'')
         +(_hpacPacId?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;background:#f0fdf4;border:1px solid #86efac;color:#166534" onclick="editarPaciente(\'' + _hpacPacId + '\')" title="Editar ficha del paciente">\u270F\uFE0F Editar ficha</button>':'')
         +'</div></div>'
@@ -8640,12 +8640,16 @@ window.hpacCopiar=(ni)=>{
   const e=m.col==='interconsultas'?interconsultas.find(x=>x.id===m.id):anamnesisList.find(x=>x.id===m.id);
   if(!e)return;
   const parts=[];
-  if(e.sub)parts.push('ANÁLISIS SUBJETIVO\n'+e.sub);
-  if(e.obj)parts.push('ANÁLISIS OBJETIVO\n'+e.obj);
-  if(e.resp)parts.push('RESPUESTA\n'+e.resp);
-  if(e.trat)parts.push('TRATAMIENTO\n'+e.trat);
-  if(e.nota)parts.push('NOTAS\n'+e.nota);
-  const txt=parts.length?parts.join('\n\n---\n\n'):(e.nota||'Sin nota');
+  const tieneCampos=e.sub||e.obj||e.resp||e.trat;
+  if(tieneCampos){
+    if(e.sub)parts.push('ANÁLISIS SUBJETIVO\n'+e.sub);
+    if(e.obj)parts.push('ANÁLISIS OBJETIVO\n'+e.obj);
+    if(e.resp)parts.push('RESPUESTA\n'+e.resp);
+    if(e.trat)parts.push('TRATAMIENTO\n'+e.trat);
+  } else if(e.nota){
+    parts.push(e.nota);
+  }
+  const txt=parts.length?parts.join('\n\n'):(e.nota||'Sin nota');
   navigator.clipboard.writeText(txt).then(()=>toast('📋 Nota copiada')).catch(()=>toast('Error al copiar'));
 };
 
