@@ -5868,7 +5868,7 @@ window.goTo = function(page){
 'ic-devueltas': function(){setTimeout(function(){if(typeof window.icDevueltasRender==='function')window.icDevueltasRender();},100);},
 'historial-pac': function(){setTimeout(function(){window.hpacRenderLista&&window.hpacRenderLista();},100);},
     'psicoeducacion': function(){setTimeout(function(){window.renderPsicoCards&&window.renderPsicoCards('all');},100);},
-    'ronda-diaria': function(){window._currentPage='ronda-diaria';
+    'ronda-diaria': function(){window._currentPage='ronda-diaria';if(typeof window.rdIniciarAutoSync==='function')window.rdIniciarAutoSync();
       // Cargar excluidos síncronamente ANTES de rdInit
       var _hoyGoto=new Date().toISOString().split('T')[0];
       var _exGoto=JSON.parse(localStorage.getItem('rd_excluidos_'+_hoyGoto)||'[]');
@@ -15197,6 +15197,27 @@ window.rdCargarVistosFirebase = async function(){
 };
 
 // ── ELIMINAR NOTA DE notas_pacientes ────────────────────────────────
+
+// ── AUTO-SYNC RONDA CADA 30s ─────────────────────────────────────
+(function(){
+  var _rdSyncInterval=null;
+  window.rdIniciarAutoSync=function(){
+    if(_rdSyncInterval) clearInterval(_rdSyncInterval);
+    _rdSyncInterval=setInterval(async function(){
+      var paginaRonda=document.getElementById('page-ronda-diaria');
+      var enRonda=paginaRonda?paginaRonda.classList.contains('active'):(window._currentPage==='ronda-diaria');
+      if(!enRonda) return;
+      if(typeof window.rdCargarVistosFirebase==='function'){
+        await window.rdCargarVistosFirebase();
+        if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+      }
+    },30000); // cada 30 segundos
+  };
+  // Iniciar cuando cargue la página
+  document.addEventListener('DOMContentLoaded',function(){ window.rdIniciarAutoSync(); });
+  setTimeout(function(){ window.rdIniciarAutoSync(); },2000);
+})();
+
 window.hpacEliminarNotaPac = async function(notaId){
   if(!confirm('¿Eliminar esta revaloración permanentemente?')) return;
   try{
