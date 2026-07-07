@@ -15064,6 +15064,13 @@ window.rdMarcarSubido = function(pacId){
   if(!data.includes(pacId)) data.push(pacId);
   localStorage.setItem(key,JSON.stringify(data));
   if(typeof rdSyncVistosFirebase==='function') rdSyncVistosFirebase();
+  // Limpiar proxSesion para que no vuelva a aparecer en ronda
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  if(pac&&pac.proxSesion&&window._updateDoc&&window._doc&&window.db){
+    window._updateDoc(window._doc(window.db,'pacientes',pacId),{proxSesion:null})
+      .then(function(){if(pac)pac.proxSesion=null;})
+      .catch(function(e){console.warn('proxSesion clear:',e);});
+  }
   // Refrescar tablero
   if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
   if(typeof window.actualizarContadorPendientes==='function') window.actualizarContadorPendientes();
