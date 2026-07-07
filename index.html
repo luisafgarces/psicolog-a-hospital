@@ -8915,6 +8915,7 @@ window.psCargarRondaHoy = async function(pacId){
   if(ficha.laboratorio && ficha.laboratorio!=='normal') alertas += fila('🧪','Labs:',ficha.laboratorio+(ficha.labDetalle?' — '+ficha.labDetalle:''), true);
   else if(ficha.labDetalle) alertas += fila('🧪','Labs:',ficha.labDetalle, false);
   if(ficha.aislamiento==='si') alertas += fila('🚧','Aislamiento:',ficha.aislamientoTipo||'Sí', false);
+  else if(ficha.aislamiento==='no') alertas += fila('✅','Aislamiento:','No', false);
   if(ficha.conducta && ficha.conducta!=='colaborador') alertas += fila('👤','Conducta:',conductaLabel, ficha.conducta.includes('agresivo'));
   if(ficha.adherencia && ficha.adherencia!=='colabora') alertas += fila('💊','Adherencia:',adherLabel, true);
   // Fármacos omitidos aquí — ya aparecen en Plan Farmacológico abajo
