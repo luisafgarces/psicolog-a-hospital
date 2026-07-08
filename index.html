@@ -8530,6 +8530,7 @@ window.hpacRenderNotas=()=>{
         +((e._aiFormSnap||e.formulario||e.nota||e.sub)?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="descargarFormIC(\'' + e.id + '\')">📥 Formulario</button>':'')
         +(e._col==='notas_pacientes'?'':'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="event.stopPropagation();hpacEditar('+ni+')">Editar</button>')
         +'<button class="btn btn-sm" style="padding:6px 14px;font-size:0.78rem;font-weight:700;background:#2563eb;color:#fff;border:none;border-radius:7px;cursor:pointer" onclick="event.stopPropagation();hpacCopiar('+ni+')">📋 Copiar nota</button>'
+        +'<button class="btn btn-sm" style="padding:6px 14px;font-size:0.78rem;font-weight:700;background:#7c3aed;color:#fff;border:none;border-radius:7px;cursor:pointer" onclick="event.stopPropagation();hpacVerNota('+ni+')">↗️ Ver/Seleccionar</button>'
         +(e._col==='notas_pacientes'?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;color:#dc2626;border-color:#dc2626" onclick="hpacEliminarNotaPac(\'' + e.id + '\')" title="Eliminar revaloración">🗑 Eliminar</button>':'')
         +(_hpacPacId?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;background:#f0fdf4;border:1px solid #86efac;color:#166534" onclick="editarPaciente(\'' + _hpacPacId + '\')" title="Editar ficha del paciente">\u270F\uFE0F Editar ficha</button>':'')
         +'</div></div>'
@@ -8632,6 +8633,35 @@ window.hpacDescargarFormPDF=function(docId){
   var meta=entry.meta;var filas=entry.filas;
   (function(meta,filas){  try{    var rows=Array.isArray(filas)?filas:[];    var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Formulario '+( meta.modo||'')+'</title>';    html+='<style>body{font-family:Arial,sans-serif;font-size:11px;color:#111;padding:20px;margin:0}';    html+='h1{font-size:15px;color:#1a3a6a;margin:0 0 4px}h2{font-size:11px;color:#555;margin:0 0 16px;font-weight:400}';    html+='.grid{display:grid;grid-template-columns:minmax(130px,auto) 1fr;gap:5px 14px;margin-top:8px}';    html+='.label{font-weight:700;color:#3a5a7a}.value{color:#111}';    html+='.footer{font-size:9px;color:#888;border-top:1px solid #ddd;padding-top:8px;margin-top:20px}';    html+='@media print{.np{display:none}}</style></head><body>';    html+='<div class="np" style="margin-bottom:12px"><button onclick="window.print()" style="background:#2563a8;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;cursor:pointer;font-weight:700">🖨️ Imprimir / Guardar PDF</button></div>';    html+='<h1>'+( meta.modo||'Formulario')+' — Psicología Hospitalaria</h1>';    html+='<h2>Paciente: '+(meta.nombre||'—')+' · Fecha: '+(meta.fecha||'—')+'</h2>';    html+='<div class="grid">';    rows.forEach(function(r){html+='<span class="label">'+r[0]+':</span><span class="value">'+r[1]+'</span>';});    html+='</div>';    html+='<div class="footer">Generado desde PsicoHosp · Psicología Hospitalaria · '+(new Date().toLocaleString('es-CO'))+'</div>';    html+='</body></html>';    var win=window.open('','_blank');    if(win){win.document.write(html);win.document.close();}    else alert('El navegador bloqueó la ventana. Habilita popups para este sitio.');  }catch(err){console.error('hpacDescargarFormPDF:',err);}}
   )(meta,filas);
+};
+
+window.hpacVerNota=function(ni){
+  const m=_hMap[ni];if(!m)return;
+  const interconsultas=window.interconsultas||[];const anamnesisList=window.anamnesisList||[];
+  const e=m.col==='interconsultas'?interconsultas.find(x=>x.id===m.id):anamnesisList.find(x=>x.id===m.id);
+  if(!e)return;
+  const tieneCampos=e.sub||e.obj||e.resp||e.trat;
+  var contenido='';
+  if(tieneCampos){
+    if(e.sub) contenido+='ANÁLISIS SUBJETIVO\n'+e.sub+'\n\n';
+    if(e.obj) contenido+='ANÁLISIS OBJETIVO\n'+e.obj+'\n\n';
+    if(e.resp) contenido+='RESPUESTA / IMPRESIÓN CLÍNICA\n'+e.resp+'\n\n';
+    if(e.trat) contenido+='TRATAMIENTO / PLAN\n'+e.trat+'\n\n';
+  } else {
+    contenido=e.nota||e.obj||'';
+  }
+  var win=window.open('','_blank','width=700,height=600,scrollbars=yes');
+  if(!win){if(typeof toast==='function')toast('⚠️ Habilita popups para este sitio');return;}
+  win.document.write('<html><head><meta charset="UTF-8"><title>Nota clínica</title>'
+    +'<style>body{font-family:Arial,sans-serif;font-size:14px;line-height:1.7;padding:30px;color:#111;max-width:700px;margin:0 auto}'
+    +'h3{color:#1a3a6a;font-size:16px;margin-bottom:4px}'
+    +'.btn{background:#2563eb;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:14px;cursor:pointer;font-weight:700;margin-bottom:20px}'
+    +'pre{white-space:pre-wrap;font-family:Arial,sans-serif;font-size:14px;line-height:1.7;margin:0}'
+    +'</style></head><body>'
+    +'<button class="btn" onclick="document.execCommand(\'selectAll\');document.execCommand(\'copy\');this.textContent=\'✓ Copiado!\';setTimeout(()=>this.textContent=\'📋 Seleccionar todo y copiar\',2000)">📋 Seleccionar todo y copiar</button>'
+    +'<pre id="nota">'+contenido.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre>'
+    +'</body></html>');
+  win.document.close();
 };
 
 window.hpacCopiar=(ni)=>{
@@ -15209,7 +15239,9 @@ window.rdCargarVistosFirebase = async function(){
       if(!enRonda) return;
       if(typeof window.rdCargarVistosFirebase==='function'){
         await window.rdCargarVistosFirebase();
-        if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+        // Solo actualizar badges visuales, no re-renderizar el tablero completo
+        if(typeof window.rdActualizarBadgesVisuales==='function') window.rdActualizarBadgesVisuales();
+        if(typeof window.rdActualizarBadgePendientes==='function') window.rdActualizarBadgePendientes();
       }
     },30000); // cada 30 segundos
   };
