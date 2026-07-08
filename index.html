@@ -8533,7 +8533,7 @@ window.hpacRenderNotas=()=>{
         +(e._col==='notas_pacientes'?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;color:#dc2626;border-color:#dc2626" onclick="hpacEliminarNotaPac(\'' + e.id + '\')" title="Eliminar revaloración">🗑 Eliminar</button>':'')
         +(_hpacPacId?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;background:#f0fdf4;border:1px solid #86efac;color:#166534" onclick="editarPaciente(\'' + _hpacPacId + '\')" title="Editar ficha del paciente">\u270F\uFE0F Editar ficha</button>':'')
         +'</div></div>'
-        +'<div class="hpac-nota-body" onclick="event.stopPropagation()">'+camposHtml+formHtml+'</div>'
+        +'<div class="hpac-nota-body">'+camposHtml+formHtml+'</div>'
         +'</div>'
       );
     }
