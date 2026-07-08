@@ -8429,9 +8429,13 @@ window.hpacRenderNotas=()=>{
       var esPendienteIA=esModoConIA&&!tieneContenidoReal&&e._aiFormSnap;
       if(cv.length){
         for(var j=0;j<cv.length;j++){
+          var _cid='hpac-campo-'+ni+'-'+j;
           camposHtml+='<div class="hpac-campo">'
-            +'<div class="hpac-campo-label">'+cv[j].label+'</div>'
-            +'<div class="hpac-campo-text">'+cv[j].text+'</div>'
+            +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">'
+            +'<div class="hpac-campo-label" style="margin-bottom:0">'+cv[j].label+'</div>'
+            +'<button onclick="event.stopPropagation();navigator.clipboard.writeText(document.getElementById(\''+_cid+'\').textContent).then(function(){this.textContent=\'✓\';setTimeout(function(){document.querySelector(\'[data-cid=\\\''+_cid+'\\\']\').textContent=\'📋\'},1500)}.bind(this))" data-cid="'+_cid+'" style="background:none;border:1px solid var(--border);border-radius:5px;padding:1px 7px;font-size:0.68rem;cursor:pointer;color:var(--text3);flex-shrink:0">📋</button>'
+            +'</div>'
+            +'<div class="hpac-campo-text" id="'+_cid+'">'+cv[j].text+'</div>'
             +'</div>';
         }
       } else if(esPendienteIA&&e._aiFormSnap){
@@ -8528,8 +8532,8 @@ window.hpacRenderNotas=()=>{
         +rBadgeHtml+respondidaBtn+genBtn
         +(esModoConIA?'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem;opacity:0.85" onclick="hpacGenerarNotaIA(\'' + e.id + '\','+ni+')" title="Regenerar con IA">✨ IA</button>':'')
         +((e._aiFormSnap||e.formulario||e.nota||e.sub)?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="descargarFormIC(\'' + e.id + '\')">📥 Formulario</button>':'')
-        +(e._col==='notas_pacientes'?'':'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacEditar('+ni+')">Editar</button>')
-        +'<button class="btn btn-sm" style="padding:6px 14px;font-size:0.78rem;font-weight:700;background:#2563eb;color:#fff;border:none;border-radius:7px;cursor:pointer" onclick="hpacCopiar('+ni+')">📋 Copiar nota</button>'
+        +(e._col==='notas_pacientes'?'':'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="event.stopPropagation();hpacEditar('+ni+')">Editar</button>')
+        +'<button class="btn btn-sm" style="padding:6px 14px;font-size:0.78rem;font-weight:700;background:#2563eb;color:#fff;border:none;border-radius:7px;cursor:pointer" onclick="event.stopPropagation();hpacCopiar('+ni+')">📋 Copiar nota</button>'
         +(e._col==='notas_pacientes'?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;color:#dc2626;border-color:#dc2626" onclick="hpacEliminarNotaPac(\'' + e.id + '\')" title="Eliminar revaloración">🗑 Eliminar</button>':'')
         +(_hpacPacId?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;background:#f0fdf4;border:1px solid #86efac;color:#166534" onclick="editarPaciente(\'' + _hpacPacId + '\')" title="Editar ficha del paciente">\u270F\uFE0F Editar ficha</button>':'')
         +'</div></div>'
