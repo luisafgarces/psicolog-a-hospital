@@ -4845,11 +4845,10 @@ window.mneGuardar=async()=>{
           pacUpdate.fechaAlta=new Date().toISOString().split('T')[0];
           msgs.push('Paciente dado de alta ✅');
         }
-        // Próxima sesión — actualizar aunque esté vacía (borrar fecha)
-        var proxSesionVal=proxSesion||null;
-        if(pac&&proxSesionVal!==(pac.proxSesion||null)){
-          pacUpdate.proxSesion=proxSesionVal;
-          msgs.push(proxSesionVal?'Próxima sesión actualizada 📅':'Próxima sesión eliminada');
+        // Próxima sesión — solo actualizar si hay valor O si el usuario la borró explícitamente
+        if(proxSesion&&pac&&proxSesion!==(pac.proxSesion||null)){
+          pacUpdate.proxSesion=proxSesion;
+          msgs.push('Próxima sesión actualizada 📅');
         }
         if(Object.keys(pacUpdate).length>0){
           await updateDoc(doc(db,'pacientes',pacId),pacUpdate);
@@ -8528,7 +8527,7 @@ window.hpacRenderNotas=()=>{
         +rBadgeHtml+respondidaBtn+genBtn
         +(esModoConIA?'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem;opacity:0.85" onclick="hpacGenerarNotaIA(\'' + e.id + '\','+ni+')" title="Regenerar con IA">✨ IA</button>':'')
         +((e._aiFormSnap||e.formulario||e.nota||e.sub)?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="descargarFormIC(\'' + e.id + '\')">📥 Formulario</button>':'')
-        +(e._col==='notas_pacientes'?'':'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="event.stopPropagation();hpacEditar('+ni+')">Editar</button>')
+        +(e._col==='notas_pacientes'?'':'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="event.stopPropagation();hpacEditarPorId(\''+e.id+'\',\''+e._col+'\')"  >Editar</button>')
         +'<button class="btn btn-sm" style="padding:6px 14px;font-size:0.78rem;font-weight:700;background:#2563eb;color:#fff;border:none;border-radius:7px;cursor:pointer" onclick="event.stopPropagation();hpacCopiar('+ni+')">📋 Copiar nota</button>'
         +'<button class="btn btn-sm" style="padding:6px 14px;font-size:0.78rem;font-weight:700;background:#7c3aed;color:#fff;border:none;border-radius:7px;cursor:pointer" onclick="event.stopPropagation();hpacVerNota('+ni+')">↗️ Ver/Seleccionar</button>'
         +(e._col==='notas_pacientes'?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;color:#dc2626;border-color:#dc2626" onclick="hpacEliminarNotaPac(\'' + e.id + '\')" title="Eliminar revaloración">🗑 Eliminar</button>':'')
@@ -8590,6 +8589,38 @@ window.hpacNuevaNota=()=>{
     if(top)top.scrollIntoView({behavior:'smooth',block:'start'});
     toast('📝 Formulario listo — Modo Seguimiento');
   },200);
+};
+
+window.hpacEditarPorId=function(id,col){
+  const interconsultas=window.interconsultas||[];const anamnesisList=window.anamnesisList||[];
+  const e=col==='interconsultas'?interconsultas.find(x=>x.id===id):anamnesisList.find(x=>x.id===id);
+  if(!e){console.warn('hpacEditarPorId: no encontrado',id,col);return;}
+  window._hPacId=_hpacPacId;
+  const p=(window.pacientes||[]).find(x=>x.id===_hpacPacId);
+  window._hPacNombre=p?p.nombre:(e.pacienteNombre||'');
+  document.getElementById('mne-title').textContent='Editar nota';
+  document.getElementById('mne-fecha').value=e.fecha||'';
+  document.getElementById('mne-tipo').value=e.modo||'IC Nueva';
+  document.getElementById('mne-riesgo').value=e.riesgo||'';
+  document.getElementById('mne-estado').value=e.estado||'respondida';
+  window._mneOrig={sub:e.sub||'',obj:e.obj||'',resp:e.resp||'',trat:e.trat||'',nota:e.nota||''};
+  const _esSeg2=(e.modo||'').toLowerCase().includes('seguimiento');
+  document.getElementById('mne-campos-4').style.display=_esSeg2?'none':'';
+  document.getElementById('mne-campos-seg').style.display=_esSeg2?'':'none';
+  if(_esSeg2){
+    document.getElementById('mne-seg-texto').value=e.obj||e.nota||'';
+  } else {
+    document.getElementById('mne-sub').value=e.sub||'';
+    document.getElementById('mne-obj').value=e.obj||'';
+    document.getElementById('mne-resp').value=e.resp||'';
+    document.getElementById('mne-trat').value=e.trat||'';
+  }
+  document.getElementById('mne-del-btn').style.display='';
+  var proxEl=document.getElementById('mne-prox-sesion');
+  if(proxEl) proxEl.value=e.proxSesion||'';
+  window._mneId=id;window._mneCol=col;
+  window._mneOnSave=()=>setTimeout(hpacRenderNotas,500);
+  document.getElementById('modal-nota-edit').style.display='flex';
 };
 
 window.hpacEditar=(ni)=>{
@@ -15095,13 +15126,6 @@ window.rdMarcarSubido = function(pacId){
   if(!data.includes(pacId)) data.push(pacId);
   localStorage.setItem(key,JSON.stringify(data));
   if(typeof rdSyncVistosFirebase==='function') rdSyncVistosFirebase();
-  // Limpiar proxSesion para que no vuelva a aparecer en ronda
-  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
-  if(pac&&pac.proxSesion&&window._updateDoc&&window._doc&&window.db){
-    window._updateDoc(window._doc(window.db,'pacientes',pacId),{proxSesion:null})
-      .then(function(){if(pac)pac.proxSesion=null;})
-      .catch(function(e){console.warn('proxSesion clear:',e);});
-  }
   // Refrescar tablero
   if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
   if(typeof window.actualizarContadorPendientes==='function') window.actualizarContadorPendientes();
