@@ -5864,10 +5864,14 @@ window.goTo = function(page){
     'consulta-externa': function(){if(window.renderConsultaExterna)window.renderConsultaExterna();else setTimeout(function(){window.renderConsultaExterna&&window.renderConsultaExterna();},300);},
     'dashboard': function(){if(window.renderDashboard)window.renderDashboard();else setTimeout(function(){window.renderDashboard&&window.renderDashboard();},300);},
     'interconsultas': function(){window._currentPage='interconsultas';if(window.renderIC)window.renderIC();else setTimeout(function(){window.renderIC&&window.renderIC();},300);},
-'ic-devueltas': function(){setTimeout(function(){if(typeof window.icDevueltasRender==='function')window.icDevueltasRender();},100);},
+'ic-devueltas': function(){
+      // Resetear estado de ronda para evitar contaminación al volver
+      window._rdTableroContaminado=true;
+      setTimeout(function(){if(typeof window.icDevueltasRender==='function')window.icDevueltasRender();},100);
+    },
 'historial-pac': function(){setTimeout(function(){window.hpacRenderLista&&window.hpacRenderLista();},100);},
     'psicoeducacion': function(){setTimeout(function(){window.renderPsicoCards&&window.renderPsicoCards('all');},100);},
-    'ronda-diaria': function(){window._currentPage='ronda-diaria';if(typeof window.rdIniciarAutoSync==='function')window.rdIniciarAutoSync();
+    'ronda-diaria': function(){window._currentPage='ronda-diaria';if(typeof window.rdIniciarAutoSync==='function')window.rdIniciarAutoSync();if(typeof window.rdInit==='function')window.rdInit();
       // Cargar excluidos síncronamente ANTES de rdInit
       var _hoyGoto=new Date().toISOString().split('T')[0];
       var _exGoto=JSON.parse(localStorage.getItem('rd_excluidos_'+_hoyGoto)||'[]');
@@ -15615,7 +15619,7 @@ window.rdMarcarRechazada = function(pacId){
   if(!data.includes(pacId)) data.push(pacId);
   localStorage.setItem('rd_rechazadas_'+hoy,JSON.stringify(data));
   if(typeof window.rdSyncVistosFirebase==='function') window.rdSyncVistosFirebase();
-  if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+  if(typeof window.rdInit==='function') window.rdInit();
   if(typeof toast==='function') toast('⛔ IC marcada como rechazada');
 };
 
@@ -15627,7 +15631,7 @@ window.rdDesmarcarRechazada = function(pacId){
   data=data.filter(function(id){return id!==pacId;});
   localStorage.setItem('rd_rechazadas_'+hoy,JSON.stringify(data));
   if(typeof window.rdSyncVistosFirebase==='function') window.rdSyncVistosFirebase();
-  if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+  if(typeof window.rdInit==='function') window.rdInit();
   if(typeof toast==='function') toast('✅ Rechazada desmarcada');
 };
 
