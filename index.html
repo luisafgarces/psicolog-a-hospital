@@ -2702,6 +2702,10 @@ input.toggle-cb{display:none}
               </div>
             </div>
             <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Especialidad tratante</div>
+              <input type="text" id="rd-esp-tratante" placeholder="Ej: Medicina Interna" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+            </div>
+            <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Días de estancia</div>
               <input type="number" id="rd-dias" min="0" placeholder="0" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
             </div>
@@ -14101,6 +14105,7 @@ function rdRellenar(d){
   rdSet('rd-dx-diferenciales',d.dxDiferenciales||'');
   rdSet('rd-trat-medico',     d.tratMedico||'');
   rdSet('rd-fecha-ingreso',   d.fechaIngreso||'');
+  rdSet('rd-esp-tratante',    d.espTratante||pac?.medicoEsp||'');
   rdSet('rd-edad',     d.edad||'');
   rdSet('rd-sexo',     d.sexo||'');
   rdSet('rd-dias',     d.dias||'');
@@ -14164,6 +14169,7 @@ function rdRellenarDesde(pac){
   rdSet('rd-dx-diferenciales',pac.dxDiferenciales||'');
   rdSet('rd-trat-medico',     pac.tratMedico||'');
   rdSet('rd-fecha-ingreso',   pac.fecha||'');  // siempre desde el paciente
+  rdSet('rd-esp-tratante',    pac.medicoEsp||'');
   if(pac.fecha) setTimeout(function(){if(typeof window.rdCalcDias==='function') window.rdCalcDias();},100);
   // Calcular días de estancia desde fecha de ingreso
   var diasCalc = (typeof calcularDiasInternacion==='function' && pac.fecha)
@@ -14192,6 +14198,7 @@ function rdRellenarDesde(pac){
   rdSet('rd-cambio-plan-texto','');
   rdSetChecks('rd-lab',[]);
   rdSet('rd-lab-detalle','');
+  rdSet('rd-esp-tratante','');
   rdSet('rd-farm-notas','');
   rdSetChecks('rd-conciencia',[]);
   rdSetChecks('rd-conducta',[]);
@@ -14281,6 +14288,7 @@ function rdRecolectar(){
     dolor:           dolorEl?dolorEl.value:'0',
     laboratorio:     rdGetChecks('rd-lab').join(', '),
     labDetalle:      rdGet('rd-lab-detalle'),
+    espTratante:     rdGet('rd-esp-tratante'),
     farmacos:        farmacos,
     farmDescenso:    rdGet('rd-farm-descenso'),
     farmNotas:       rdGet('rd-farm-notas'),
