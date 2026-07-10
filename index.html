@@ -447,6 +447,8 @@ input.toggle-cb{display:none}
     <div class="nav-item" onclick="goTo('psicoeducacion')"><span class="icon">📚</span>Guías Clínicas</div>
     <div class="nav-section">Historial</div>
     <div class="nav-item" onclick="goTo('historial-pac')"><span class="icon">📂</span>Historial Pacientes</div>
+    <div class="nav-section">Clínico</div>
+    <div class="nav-item" onclick="abrirHerramientas()"><span class="icon">🧰</span>Herramientas</div>
     <div class="nav-section">Registro</div>
     <div class="nav-item" onclick="goTo('ic-devueltas')"><span class="icon">⛔</span>IC Dev. / Redirec.</div>
     <div class="nav-item" onclick="goTo('calendario')"><span class="icon">📅</span>Calendario</div>
@@ -2743,121 +2745,44 @@ input.toggle-cb{display:none}
           </div>
         </div>
 
-        <!-- ── SECCIÓN 2: FILTRO CLÍNICO-MÉDICO ─────────────────── -->
+        <!-- ── SECCIÓN 2: DX PSICOLÓGICO ──────────────────────────────────── -->
         <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
-          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#b45309;margin-bottom:12px;display:flex;align-items:center;gap:6px">
-            <span style="background:#b45309;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">2</span>
-            Filtro Clínico-Médico <span style="font-weight:400;font-size:0.68rem;color:var(--text3);text-transform:none">(Revisión HCE)</span>
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+            <span style="background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">2</span>
+            Diagnóstico psicológico principal
           </div>
-          <!-- rd-dx y rd-trat-medico movidos a ficha del paciente — solo ocultos para compatibilidad -->
-          <input type="hidden" id="rd-dx" value="">
-          <input type="hidden" id="rd-trat-medico" value="">
-          <div style="margin-bottom:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:#7c3aed;margin-bottom:3px">Dx Psicológico Principal</div>
-            <input type="text" id="rd-dx-psi" placeholder="Ej: Trastorno adaptativo con ánimo depresivo…" style="width:100%;padding:8px 12px;border:1.5px solid #d8b4fe;border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:#fdf4ff;color:var(--text);outline:none">
-          </div>
-          <div style="margin-bottom:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:#9333ea;margin-bottom:3px">Diferenciales Psicológicos <span style="font-weight:400;font-size:0.68rem;color:var(--text3)">(corto)</span></div>
-            <input type="text" id="rd-dx-diferenciales" placeholder="Ej: Descartar T. depresivo mayor, T. de ajuste vs duelo normal…" style="width:100%;padding:8px 12px;border:1.5px solid #e9d5ff;border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:#faf5ff;color:var(--text);outline:none">
-          </div>
-          <div style="margin-bottom:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Cambio de plan médico hoy</div>
-            <textarea id="rd-cambio-plan-texto" rows="2" placeholder="Ej: Cirugía reprogramada para mañana, alta inminente, nuevo Dx, cambio de manejo…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
-            <input type="hidden" id="rd-dolor" value="0"><span id="rd-dolor-val" style="display:none">0</span>
-            <div>
-<input type="hidden" id="rd-lab-normal" value="">
-<input type="hidden" id="rd-lab-sodio" value="">
-<input type="hidden" id="rd-lab-hb" value="">
-<input type="hidden" id="rd-lab-deshidratacion" value="">
-              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">⚠️ Alerta metabólica</div>
-              <textarea id="rd-lab-detalle" rows="2" placeholder="Ej: Na 128 mEq/L (hiponatremia severa), Hb 6.2 g/dL, creatinina elevada…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
-            </div>
-          </div>
+          <input type="text" id="rd-dx-psi" placeholder="Ej: Trastorno adaptativo con ánimo depresivo…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
           <div style="margin-top:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Fármacos con impacto conductual</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:7px">
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-cort"> Corticoides</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-opio"> Opioides</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-benzo"> Benzodiacepinas</label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="rd-farm-antip"> Antipsicóticos</label>
-              <span style="display:flex;align-items:center;gap:4px;font-size:0.8rem">Descenso de: <input type="text" id="rd-farm-descenso" placeholder="fármaco…" style="width:110px;padding:3px 7px;border:1.5px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none"></span>
-            </div>
-            <textarea id="rd-farm-notas" rows="2" placeholder="Nombre del fármaco, dosis, efecto conductual observado o esperado…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
-          </div>
-          <!-- Notas de HCE y enfermería -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
-            <div>
-              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">📋 Nota del médico tratante (HCE)</div>
-              <textarea id="rd-nota-medico" rows="3" placeholder="Lo más relevante de la última nota médica… Ej: 'Planea cirugía mañana', 'Inicio de QT hoy', 'Paciente con dolor no controlado'" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
-            </div>
-            <div>
-              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">🩺 Reporte de enfermería (últimas 24h)</div>
-              <textarea id="rd-nota-enfermeria" rows="3" placeholder="Lo más relevante del reporte de enfermería… Ej: 'Noche agitada', 'Rechazó medicación', 'Llanto persistente', 'Sin novedad'" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
-            </div>
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Diferenciales psicológicos</div>
+            <input type="text" id="rd-dx-diferenciales" placeholder="Ej: Descartar T. depresivo mayor, duelo normal…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
           </div>
         </div>
 
-        
-        <!-- ── SECCIÓN 4: MATRIZ DE DECISIÓN ─────────────────────── -->
+        <!-- ── SECCIÓN 3: NOTAS RELEVANTES ──────────────────────────────── -->
         <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
-          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#dc2626;margin-bottom:12px;display:flex;align-items:center;gap:6px">
-            <span style="background:#dc2626;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">4</span>
-            Matriz de Decisión Clínica
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
-            <div>
-              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">¿Pertenece a Psicología Hospitalaria?</div>
-              <div style="display:flex;gap:10px">
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-pertenece" value="si" id="rd-pertenece-si"> Sí</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-pertenece" value="no" id="rd-pertenece-no"> No</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="rd-pertenece" value="mixto" id="rd-pertenece-mixto"> Mixto</label>
-              </div>
-            </div>
-            <div>
-              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Derivación / Co-gestión</div>
-              <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-psiq"> Psiquiatría</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-ts"> T. Social</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer"><input type="checkbox" id="rd-der-pal"> C. Paliativos</label>
-                <input type="hidden" id="rd-der-neuro" value="">
-              </div>
-              <div style="margin-top:7px">
-                <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Otras especialidades involucradas</div>
-                <input type="text" id="rd-otras-esp" placeholder="Ej: Oncología, Cirugía, Medicina Interna, UCI…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
-              </div>
-            </div>
-          </div>
-          <input type="hidden" id="rd-razon-der" value="">
-        </div>
-
-        <!-- ── SECCIÓN 5: PLAN DE ACCIÓN ─────────────────────────── -->
-        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
-          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#0369a1;margin-bottom:12px;display:flex;align-items:center;gap:6px">
-            <span style="background:#0369a1;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">5</span>
-            Plan de Acción en Habitación <span style="font-weight:400;font-size:0.68rem;color:var(--text3);text-transform:none">(10–15 min)</span>
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span style="background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">3</span>
+            Notas relevantes (HCE)
           </div>
           <div style="margin-bottom:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Objetivo de hoy</div>
-            <textarea id="rd-objetivo-texto" rows="2" placeholder="Escribe el objetivo específico de la visita de hoy…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Última nota médica</div>
+            <textarea id="rd-nota-medica" rows="3" placeholder="Pega aquí lo más relevante de la última nota médica…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
           </div>
-          <div style="margin-bottom:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Estrategia en cama</div>
-            <textarea id="rd-estrategia-cama" rows="2" placeholder="Describe la estrategia psicológica aplicada en la habitación…" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
-          </div>
-          <input type="hidden" id="rd-intervencion" value="">
-          <input type="hidden" id="rd-indicacion" value="">
-          <input type="hidden" id="rd-alta" value="no">
-          <input type="hidden" id="rd-alta-criterio" value="">
           <div>
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Pacto / Cierre con el paciente</div>
-            <input type="text" id="rd-pacto" placeholder="Acuerdo o cierre con el paciente…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Última nota de enfermería</div>
+            <textarea id="rd-nota-enfermeria" rows="3" placeholder="Pega aquí lo más relevante de la última nota de enfermería…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;resize:vertical"></textarea>
           </div>
         </div>
 
-        
-        <!-- ── SECCIÓN 7: PENDIENTES ─────────────────────────────── -->
+        <!-- Hidden compatibility fields -->
+        <input type="hidden" id="rd-estrategia-cama" value="">
+        <input type="hidden" id="rd-pacto" value="">
+        <input type="hidden" id="rd-farm-notas" value="">
+        <input type="hidden" id="rd-objetivo-texto" value="">
+        <input type="hidden" id="rd-indicacion" value="">
+        <input type="hidden" id="rd-trat-medico" value="">
+
+<!-- ── SECCIÓN 7: PENDIENTES ─────────────────────────────── -->
         <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
           <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#0f766e;margin-bottom:12px;display:flex;align-items:center;gap:6px">
             <span style="background:#0f766e;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">7</span>
@@ -3249,6 +3174,24 @@ input.toggle-cb{display:none}
 
 <!-- BOTÓN FLOTANTE VER FICHA IC -->
 <button id="ic-btn-ficha-float" onclick="(function(){var id=document.getElementById('ic-paciente-sel')?.value||window._currentICPacId||''  ;if(id&&typeof abrirPacSheet==='function')abrirPacSheet(id);})()" style="display:none;position:fixed;bottom:24px;left:200px;z-index:8886;background:#7c3aed;color:#fff;border:none;border-radius:50px;padding:8px 18px;font-size:0.78rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.4);white-space:nowrap;align-items:center;gap:6px">👤 <span id="ic-float-nombre" style="font-size:0.72rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span></button>
+
+
+<!-- PANEL HERRAMIENTAS Y TÉCNICAS -->
+<div id="panel-herramientas" style="display:none;position:fixed;top:0;right:0;width:420px;max-width:100vw;height:100vh;background:var(--surface);border-left:2px solid var(--border);z-index:9500;overflow-y:auto;box-shadow:-4px 0 20px rgba(0,0,0,0.15);flex-direction:column">
+  <div style="background:var(--accent);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1">
+    <div>
+      <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;opacity:0.8">Referencia clínica</div>
+      <div style="font-size:1rem;font-weight:800">🧰 Herramientas y Técnicas</div>
+    </div>
+    <button onclick="cerrarHerramientas()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:700">✕</button>
+  </div>
+  <div style="padding:16px">
+    <!-- Buscador -->
+    <input type="text" id="herr-buscar" oninput="filtrarHerramientas(this.value)" placeholder="🔍 Buscar técnica..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none;margin-bottom:14px">
+    <div id="herr-lista"></div>
+  </div>
+</div>
+<div id="panel-herramientas-overlay" onclick="cerrarHerramientas()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:9499"></div>
 
 <div id="toast"></div>
 
@@ -14103,6 +14046,8 @@ function rdRellenar(d){
   rdSet('rd-dx',              d.dx||'');
   rdSet('rd-dx-psi',          d.dxPsi||'');
   rdSet('rd-dx-diferenciales',d.dxDiferenciales||'');
+  rdSet('rd-nota-medica',     d.notaMedica||'');
+  rdSet('rd-nota-enfermeria', d.notaEnfermeria||'');
   rdSet('rd-trat-medico',     d.tratMedico||'');
   rdSet('rd-fecha-ingreso',   d.fechaIngreso||'');
   rdSet('rd-esp-tratante',    d.espTratante||pac?.medicoEsp||'');
@@ -14178,6 +14123,8 @@ function rdRellenarDesde(pac){
   rdSet('rd-aislamiento-tipo','');
   rdSet('rd-dx-psi','');
   rdSet('rd-dx-diferenciales','');
+  rdSet('rd-nota-medica','');
+  rdSet('rd-nota-enfermeria','');
   rdSet('rd-trat-medico','');
   // No resetear fecha de ingreso — viene del paciente y no cambia
   // rdSet('rd-fecha-ingreso',''); // comentado intencionalmente
@@ -14281,6 +14228,8 @@ function rdRecolectar(){
     dx:              rdGet('rd-dx'),
     dxPsi:           rdGet('rd-dx-psi'),
     dxDiferenciales: rdGet('rd-dx-diferenciales'),
+    notaMedica:      rdGet('rd-nota-medica'),
+    notaEnfermeria:  rdGet('rd-nota-enfermeria'),
     tratMedico:      rdGet('rd-trat-medico'),
     edadPac:         rdGet('rd-edad'),
     fechaIngreso:    rdGet('rd-fecha-ingreso'),
@@ -14417,6 +14366,8 @@ window.rdMarcarVista=function(pacId, cbEl){
 };
 
 function rdRefrescarTablero(){
+  // Delegar a rdInit para mantener agrupación por pisos y prioridades
+  if(typeof window.rdInit==='function'){ window.rdInit(); return; }
   if(typeof window.actualizarContadorPendientes==='function') window.actualizarContadorPendientes();
   var hoy2 = new Date().toISOString().split('T')[0];
   var _estadosAlta2=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga'];
@@ -15673,6 +15624,86 @@ window.psCargarHistorialReinterc = async function(pacId){
     bloque.style.display='';
   }catch(e){console.warn('psCargarHistorialReinterc:',e);}
 };
+
+
+// ── MÓDULO HERRAMIENTAS Y TÉCNICAS ───────────────────────────────────
+window._herramientas = [
+  {
+    id: 'rueda-cambio',
+    nombre: 'Rueda del Cambio',
+    categoria: 'Entrevista Motivacional',
+    icono: '🔄',
+    indicacion: 'Explorar disposición al cambio de conductas en pacientes con baja adherencia, alta voluntaria, consumo de sustancias o conductas de riesgo.',
+    descripcion: 'Herramienta visual/conversacional derivada del Modelo Transteórico de Prochaska y DiClemente. Ayuda al paciente a identificar en qué estadio del cambio se encuentra y qué lo mueve o detiene.',
+    estadios: [
+      { nombre: 'Precontemplación', color: '#ef4444', desc: 'No reconoce el problema ni considera cambiar. "No tengo ningún problema."' },
+      { nombre: 'Contemplación', color: '#f59e0b', desc: 'Reconoce el problema pero ambivalente. "Sé que debo cambiar, pero…"' },
+      { nombre: 'Preparación', color: '#3b82f6', desc: 'Intención de cambiar en el corto plazo. "Estoy pensando en hacerlo pronto."' },
+      { nombre: 'Acción', color: '#8b5cf6', desc: 'Está modificando activamente la conducta. "Ya lo estoy haciendo."' },
+      { nombre: 'Mantenimiento', color: '#10b981', desc: 'Sostiene el cambio >6 meses. Trabaja en prevención de recaída.' },
+      { nombre: 'Recaída', color: '#6b7280', desc: 'Retorno a la conducta anterior. Oportunidad de aprendizaje, no fracaso.' },
+    ],
+    pasos: [
+      'Pregunta abierta: "¿Cómo ve usted su situación con [conducta]?"',
+      'Explora ambivalencia: "¿Qué cosas le preocupan de seguir igual? ¿Qué perdería si cambia?"',
+      'Identifica el estadio por el lenguaje del paciente.',
+      'Usa la escala de importancia/confianza: "Del 1 al 10, ¿qué tan importante es cambiar esto para usted? ¿Qué tan capaz se siente?"',
+      'Refuerza discrepancia: conecta la conducta con sus propios valores y metas.',
+      'Registra el estadio en la nota y ajusta el plan según el nivel de disposición.',
+    ],
+    frases: [
+      '"¿Qué tendría que pasar para que considerar cambiar fuera más importante para usted?"',
+      '"Noto que por un lado dice X, pero por otro lado Y. ¿Cómo lo ve usted?"',
+      '"En una escala del 1 al 10, ¿qué tan listo se siente para cambiar esto?"',
+      '"¿Qué es lo que más le importa en su vida en este momento?"',
+    ],
+    nota_ejemplo: 'Paciente se encuentra en estadio de contemplación frente a [conducta]. Reconoce consecuencias negativas pero mantiene ambivalencia significativa. Se exploran pros y contras del cambio desde la perspectiva del paciente. Motivación intrínseca identificada: [valor]. Próximo paso: fortalecer discrepancia y trabajar confianza en la capacidad de cambio.',
+  }
+];
+
+window.abrirHerramientas = function(){
+  var panel = document.getElementById('panel-herramientas');
+  var overlay = document.getElementById('panel-herramientas-overlay');
+  if(panel){ panel.style.display='flex'; }
+  if(overlay){ overlay.style.display='block'; }
+  renderHerramientas('');
+};
+
+window.cerrarHerramientas = function(){
+  var panel = document.getElementById('panel-herramientas');
+  var overlay = document.getElementById('panel-herramientas-overlay');
+  if(panel) panel.style.display='none';
+  if(overlay) overlay.style.display='none';
+};
+
+window.filtrarHerramientas = function(q){
+  renderHerramientas(q);
+};
+
+function renderHerramientas(q){
+  var lista = document.getElementById('herr-lista');
+  if(!lista) return;
+  var filtradas = window._herramientas.filter(function(h){
+    if(!q) return true;
+    return h.nombre.toLowerCase().includes(q.toLowerCase()) || h.categoria.toLowerCase().includes(q.toLowerCase());
+  });
+  if(!filtradas.length){
+    lista.innerHTML='<div style="color:var(--text3);text-align:center;padding:20px">Sin resultados</div>';
+    return;
+  }
+  lista.innerHTML = filtradas.map(function(h){
+    return '<div style="border:1.5px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden">'      +'<div style="background:var(--surface2);padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="toggleHerr(\''+h.id+'\')">'      +'<div>'      +'<div style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">'+h.categoria+'</div>'      +'<div style="font-weight:800;font-size:0.95rem">'+h.icono+' '+h.nombre+'</div>'      +'</div>'      +'<span id="herr-arrow-'+h.id+'" style="font-size:1.1rem;color:var(--text3)">▼</span>'      +'</div>'      +'<div id="herr-body-'+h.id+'" style="display:none;padding:14px">'      +'<div style="font-size:0.78rem;color:#0369a1;background:#f0f9ff;border-radius:6px;padding:8px 10px;margin-bottom:12px"><b>¿Cuándo usarla?</b> '+h.indicacion+'</div>'      +'<div style="font-size:0.82rem;color:var(--text2);margin-bottom:12px">'+h.descripcion+'</div>'      +(h.estadios ? '<div style="margin-bottom:12px"><div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Estadios</div>'      +h.estadios.map(function(e){ return '<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px">'      +'<span style="background:'+e.color+';color:#fff;border-radius:5px;padding:2px 8px;font-size:0.68rem;font-weight:700;white-space:nowrap;margin-top:2px">'+e.nombre+'</span>'      +'<span style="font-size:0.78rem;color:var(--text2)">'+e.desc+'</span></div>'; }).join('')+'</div>' : '')      +'<div style="margin-bottom:12px"><div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Pasos</div>'      +h.pasos.map(function(p,i){ return '<div style="display:flex;gap:8px;margin-bottom:5px"><span style="background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800">'+(i+1)+'</span><span style="font-size:0.78rem;color:var(--text2)">'+p+'</span></div>'; }).join('')+'</div>'      +(h.frases ? '<div style="margin-bottom:12px"><div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Frases útiles</div>'      +h.frases.map(function(f){ return '<div style="font-size:0.78rem;color:#6d28d9;background:#f5f3ff;border-left:3px solid #7c3aed;padding:6px 10px;border-radius:0 6px 6px 0;margin-bottom:5px;font-style:italic">'+f+'</div>'; }).join('')+'</div>' : '')      +(h.nota_ejemplo ? '<div><div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px">📝 Ejemplo para la nota</div>'      +'<div style="font-size:0.78rem;color:var(--text2);background:var(--surface2);border-radius:6px;padding:8px 10px;line-height:1.6">'+h.nota_ejemplo+'</div>'      +'<button onclick="navigator.clipboard.writeText(document.getElementById(\'nota-ej-'+h.id+'\').textContent);if(typeof toast===\'function\')toast(\'📋 Ejemplo copiado\')" style="margin-top:6px;background:none;border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:0.72rem;cursor:pointer;color:var(--text3)">📋 Copiar ejemplo</button>'      +'<div id="nota-ej-'+h.id+'" style="display:none">'+h.nota_ejemplo+'</div>'      +'</div>' : '')      +'</div>'      +'</div>';
+  }).join('');
+}
+
+function toggleHerr(id){
+  var body = document.getElementById('herr-body-'+id);
+  var arrow = document.getElementById('herr-arrow-'+id);
+  if(!body) return;
+  var open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if(arrow) arrow.textContent = open ? '▼' : '▲';
+}
 
 // ── FIN MÓDULO RONDA DIARIA ──────────────────────────────────────────</script>
 
