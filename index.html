@@ -15571,15 +15571,74 @@ window.psUltimaNotaCopiar = function(){
 // ── MARCAR / DESMARCAR RECHAZADA ────────────────────────────────────
 window.rdMarcarRechazada = function(pacId){
   if(!pacId) return;
+  // Abrir modal para capturar motivo de rechazo
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  var nombre=pac?pac.nombre:'Paciente';
+  var old=document.getElementById('modal-rechazo-ic');
+  if(old) old.remove();
+  var div=document.createElement('div');
+  div.id='modal-rechazo-ic';
+  div.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:20px';
+  div.innerHTML='<div style="background:var(--surface);border-radius:12px;padding:22px;max-width:500px;width:100%">'
+    +'<h3 style="font-size:0.95rem;font-weight:800;margin-bottom:4px">⛔ Rechazar IC — '+nombre+'</h3>'
+    +'<p style="font-size:0.78rem;color:var(--text3);margin-bottom:14px">El paciente seguirá en la ronda hasta que marques ✅ Subir</p>'
+    +'<div style="margin-bottom:12px"><label style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase">Motivo de rechazo *</label>'
+    +'<textarea id="rechazo-motivo" rows="4" placeholder="Ej: Tras valoración de la historia clínica, la IC no resulta pertinente dado que..." style="width:100%;margin-top:4px;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:\'DM Sans\',sans-serif;resize:vertical"></textarea></div>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end">'
+    +'<button onclick="document.getElementById(\'modal-rechazo-ic\').remove()" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);cursor:pointer">Cancelar</button>'
+    +'<button onclick="rdConfirmarRechazo(\''+pacId+'\')" style="padding:8px 16px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700">⛔ Confirmar rechazo</button>'
+    +'</div></div>';
+  document.body.appendChild(div);
+  setTimeout(function(){var t=document.getElementById('rechazo-motivo');if(t)t.focus();},100);
+};
+
+window.rdConfirmarRechazo = async function(pacId){
+  var motivo=(document.getElementById('rechazo-motivo')?.value||'').trim();
+  if(!motivo){if(typeof toast==='function')toast('⚠️ Escribe el motivo de rechazo');return;}
+  var modal=document.getElementById('modal-rechazo-ic');
+  if(modal) modal.remove();
+  // Marcar como rechazada en estado
   if(!window._rdRechazadasHoy) window._rdRechazadasHoy={};
   window._rdRechazadasHoy[pacId]=true;
   var hoy=new Date().toISOString().split('T')[0];
   var data=JSON.parse(localStorage.getItem('rd_rechazadas_'+hoy)||'[]');
   if(!data.includes(pacId)) data.push(pacId);
   localStorage.setItem('rd_rechazadas_'+hoy,JSON.stringify(data));
+  // Guardar nota de rechazo en interconsultas
+  var pac=(window.pacientes||[]).find(function(p){return p.id===pacId;});
+  if(pac&&window.db&&window._addDoc&&window._collection&&window._serverTimestamp){
+    try{
+      var notaRechazo='ANÁLISIS SUBJETIVO\nSe recibe interconsulta a psicología hospitalaria y se realiza revisión de la historia clínica disponible.\n\nRESPUESTA / IMPRESIÓN CLÍNICA\n'+motivo+'\n\nTRATAMIENTO / PLAN\nSe devuelve la interconsulta al servicio solicitante con la justificación descrita. Se sugiere nueva solicitud si se presentan cambios en el estado emocional o conductual del paciente que lo justifiquen.';
+      await window._addDoc(window._collection(window.db,'interconsultas'),{
+        pacienteId:pacId,
+        pacienteNombre:pac.nombre,
+        fecha:hoy,
+        modo:'Nota especial',
+        estado:'rechazada',
+        riesgo:'',
+        trat:motivo,
+        nota:notaRechazo,
+        motivoRechazo:motivo,
+        creado:window._serverTimestamp()
+      });
+      // Registrar en ic_devueltas
+      await window._addDoc(window._collection(window.db,'ic_devueltas'),{
+        tipo:'devuelta',
+        pacienteId:pacId,
+        nombre:pac.nombre,
+        hab:pac.hab||'—',
+        dx:pac.motivo||'—',
+        fecha:hoy,
+        medicoSol:pac.medicoSol||'—',
+        justificacion:motivo,
+        notaCompleta:notaRechazo,
+        registrado:new Date().toISOString()
+      });
+      if(typeof toast==='function') toast('⛔ IC rechazada — nota guardada');
+    }catch(e){console.warn('rechazo nota:',e);}
+  }
   if(typeof window.rdSyncVistosFirebase==='function') window.rdSyncVistosFirebase();
   if(typeof window.rdInit==='function') window.rdInit();
-  if(typeof toast==='function') toast('⛔ IC marcada como rechazada');
 };
 
 window.rdDesmarcarRechazada = function(pacId){
