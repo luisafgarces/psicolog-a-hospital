@@ -2703,10 +2703,7 @@ input.toggle-cb{display:none}
                 </select>
               </div>
             </div>
-            <div>
-              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Especialidad tratante</div>
-              <input type="text" id="rd-esp-tratante" placeholder="Ej: Medicina Interna" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
-            </div>
+            <input type="hidden" id="rd-esp-tratante" value="">
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Días de estancia</div>
               <input type="number" id="rd-dias" min="0" placeholder="0" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
@@ -8783,6 +8780,7 @@ window.abrirPacSheet=async(id)=>{
     {l:'Fecha ingreso',v:p.fecha?formatDate(p.fecha):'—'},
     p.fechaIC?{l:'Fecha solicitud IC',v:formatDate(p.fechaIC)}:null,
     (p.medicoSol||p.medicoEsp)?{l:'Médico solicitante',v:(p.medicoSol||'')+(p.medicoEsp?' · '+p.medicoEsp:''),full:false}:null,
+    {l:'Especialidad tratante',v:p.espTratante||'—',full:false,editable:'espTratante',editLabel:'Especialidad tratante'},
     (()=>{
       const d=calcularDiasInternacion(p.fecha);
       if(d===null) return null;
