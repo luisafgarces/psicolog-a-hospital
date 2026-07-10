@@ -2745,18 +2745,8 @@ input.toggle-cb{display:none}
           </div>
         </div>
 
-        <!-- ── SECCIÓN 2: DX PSICOLÓGICO ──────────────────────────────────── -->
-        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
-          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:6px">
-            <span style="background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800">2</span>
-            Diagnóstico psicológico principal
-          </div>
-          <input type="text" id="rd-dx-psi" placeholder="Ej: Trastorno adaptativo con ánimo depresivo…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
-          <div style="margin-top:10px">
-            <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:3px">Diferenciales psicológicos</div>
-            <input type="text" id="rd-dx-diferenciales" placeholder="Ej: Descartar T. depresivo mayor, duelo normal…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
-          </div>
-        </div>
+        <input type="hidden" id="rd-dx-psi" value="">
+        <input type="hidden" id="rd-dx-diferenciales" value="">
 
         <!-- ── SECCIÓN 3: NOTAS RELEVANTES ──────────────────────────────── -->
         <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px">
@@ -8703,6 +8693,7 @@ window.abrirPacSheetSilent = function(p) {
     capText?{l:'Capacidad decisional',v:capText,color:capColorMap[capVal]}:null,
     {l:'Próxima sesión',v:p.proxSesion?formatDate(p.proxSesion):'No programada'},
     {l:'Dx médico',v:p.motivo||'—',full:true,editable:'motivo',editLabel:'Diagnóstico médico'},
+    {l:'Dx psicológico',v:p.dxPsi||'—',full:true,editable:'dxPsi',editLabel:'Diagnóstico psicológico'},
     p.motivoIC?{l:'Motivo de interconsulta',v:p.motivoIC,full:true}:null,
     p.quePide?{l:'🎯 ¿Qué pide realmente?',v:p.quePide,full:true,color:'#7c3aed'}:null,
     {l:'Impresión psicológica',v:p.dxpsi,full:true},
@@ -8821,6 +8812,7 @@ window.abrirPacSheet=async(id)=>{
     capText?{l:'Capacidad decisional',v:capText,color:capColorMap[capVal]}:null,
     {l:'Próxima sesión',v:p.proxSesion?formatDate(p.proxSesion):'No programada'},
     {l:'Dx médico',v:p.motivo||'—',full:true,editable:'motivo',editLabel:'Diagnóstico médico'},
+    {l:'Dx psicológico',v:p.dxPsi||'—',full:true,editable:'dxPsi',editLabel:'Diagnóstico psicológico'},
     p.motivoIC?{l:'Motivo de interconsulta',v:p.motivoIC,full:true}:null,
     p.quePide?{l:'🎯 ¿Qué pide realmente?',v:p.quePide,full:true,color:'#7c3aed'}:null,
     {l:'Impresión psicológica',v:p.dxpsi,full:true},
