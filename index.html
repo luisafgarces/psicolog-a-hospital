@@ -2725,15 +2725,7 @@ input.toggle-cb{display:none}
                 <input type="text" id="rd-aislamiento-tipo" placeholder="tipo…" style="width:100px;padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:0.8rem;font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text);outline:none">
               </div>
             </div>
-            <div>
-              <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Tipo de paciente</div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="nuevo" checked> 🆕 Nuevo (IC)</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="seguimiento"> 🔄 Seguimiento</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="revaloracion"> 🔁 Revaloración</label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer"><input type="radio" name="rd-tipo-pac" value="reingreso"> 🔄 Reingreso</label>
-              </div>
-            </div>
+            <input type="hidden" name="rd-tipo-pac" id="rd-tipo-pac-auto" value="">
             <div>
               <div style="font-size:0.7rem;font-weight:600;color:var(--text3);margin-bottom:5px">Acompañante</div>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -14108,6 +14100,13 @@ function rdRellenarDesde(pac){
   rdSet('rd-fecha-ingreso',   pac.fecha||'');  // siempre desde el paciente
   rdSet('rd-esp-tratante',    pac.medicoEsp||'');
   if(pac.fecha) setTimeout(function(){if(typeof window.rdCalcDias==='function') window.rdCalcDias();},100);
+  // Auto-set tipo desde estado del paciente
+  var _tipoAuto='nuevo';
+  if(pac.estado==='seguimiento') _tipoAuto='seguimiento';
+  else if(pac.estado==='revaloracion') _tipoAuto='revaloracion';
+  else if(pac.estado==='reingreso') _tipoAuto='reingreso';
+  var _tipoel=document.getElementById('rd-tipo-pac-auto');
+  if(_tipoel) _tipoel.value=_tipoAuto;
   // Calcular días de estancia desde fecha de ingreso
   var diasCalc = (typeof calcularDiasInternacion==='function' && pac.fecha)
     ? calcularDiasInternacion(pac.fecha) : null;
