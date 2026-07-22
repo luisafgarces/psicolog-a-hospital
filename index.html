@@ -14100,13 +14100,15 @@ window.rdInit = async function(){
   if(!cont) return;
 
   var hoy = new Date().toISOString().split('T')[0];
-  var _estadosAlta=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga'];
+  var _estadosAlta=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga','transferido','de-colega'];
   var pacs = rdOrdenRonda(
     (window.pacientes||[]).filter(function(p){
       var tieneFichaHoy = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
       var estaVisto = !!(window._rdVistosHoy && window._rdVistosHoy[p.id]);
       var estaSubido = !!(window._rdSubidosHoy && window._rdSubidosHoy[p.id]);
       var estaExcluido = !!(window._rdExcluidosHoy && window._rdExcluidosHoy[p.id]);
+      // Transferido o de colega — nunca en mi ronda, aunque tenga ficha o próxima sesión
+      if(p.estado==='transferido' || p.estado==='de-colega') return false;
       // Reprogramado para otro día — excluir siempre
       if(estaExcluido) return false;
       // Ya subido — excluir
@@ -14604,13 +14606,14 @@ function rdRefrescarTablero(){
   if(typeof window.rdInit==='function'){ window.rdInit(); return; }
   if(typeof window.actualizarContadorPendientes==='function') window.actualizarContadorPendientes();
   var hoy2 = new Date().toISOString().split('T')[0];
-  var _estadosAlta2=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga'];
+  var _estadosAlta2=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga','transferido','de-colega'];
   var pacs = rdOrdenRonda(
     (window.pacientes||[]).filter(function(p){
       var tieneFichaHoy2 = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
       var estaVisto2 = !!(window._rdVistosHoy && window._rdVistosHoy[p.id]);
       var estaSubido2 = !!(window._rdSubidosHoy && window._rdSubidosHoy[p.id]);
       var estaExcluido2 = !!(window._rdExcluidosHoy && window._rdExcluidosHoy[p.id]);
+      if(p.estado==='transferido' || p.estado==='de-colega') return false;
       if(estaExcluido2) return false;
       if(estaSubido2) return false;
       if(tieneFichaHoy2 || estaVisto2) return true;
