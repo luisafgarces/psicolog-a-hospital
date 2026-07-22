@@ -565,6 +565,12 @@ input.toggle-cb{display:none}
         <button class="btn btn-secondary btn-sm" onclick="document.getElementById('pac-search-local').value='';buscarPacientesLocal('')">✕ Limpiar</button>
       </div>
 
+      <div id="pac-colega-filtro" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+        <button type="button" class="btn btn-sm" data-f="mios" onclick="setPacColegaFiltro('mios')" style="background:var(--primary);color:#fff;border:none">👤 Míos</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-f="colega" onclick="setPacColegaFiltro('colega')">👥 De colega</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-f="todos" onclick="setPacColegaFiltro('todos')">Todos</button>
+      </div>
+
       <div class="table-wrap"><table>
         <thead><tr><th>Paciente</th><th>Cédula</th><th>Edad/Sexo</th><th>Dx / Motivo IC</th><th>Riesgo</th><th>Estado</th><th style="min-width:110px">Próxima sesión</th><th>Acciones</th></tr></thead>
         <tbody id="tabla-pacientes"><tr><td colspan="8"><div class="loading"><div class="spinner"></div><br>Cargando…</div></td></tr></tbody>
@@ -3142,7 +3148,12 @@ input.toggle-cb{display:none}
         <input type="hidden" id="p-prioridad" value="">
       </div>
       <div class="form-group"><label>Estado actual</label>
-        <select id="p-estado"><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="seguimiento">Seguimiento</option><option value="consulta-externa">Consulta externa</option><option value="revaloracion">Revaluación</option><option value="alta">✅ Alta psicología</option><option value="alta-hospitalaria">🏥 Alta hospitalaria</option><option value="alta-voluntaria">⚠️ Alta voluntaria</option><option value="fallecido">✝ Fallecido</option></select>
+        <select id="p-estado" onchange="(function(v){var w=document.getElementById('p-colega-wrap');if(w)w.style.display=(v==='de-colega'||v==='transferido')?'block':'none';})(this.value)"><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="seguimiento">Seguimiento</option><option value="consulta-externa">Consulta externa</option><option value="revaloracion">Revaluación</option><option value="alta">✅ Alta psicología</option><option value="alta-hospitalaria">🏥 Alta hospitalaria</option><option value="alta-voluntaria">⚠️ Alta voluntaria</option><option value="fallecido">✝ Fallecido</option><option value="de-colega">👥 De mi colega</option><option value="transferido">➡️ Transferido a colega</option></select>
+        <div id="p-colega-wrap" style="display:none;margin-top:8px">
+          <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Nombre de la colega a cargo</label>
+          <input type="text" id="p-colega-nombre" placeholder="Ej: Dra. María López" style="width:100%">
+          <div style="font-size:0.72rem;color:var(--text3);margin-top:4px">💡 Para pacientes de tu colega, registra solo lo básico (nombre, habitación). No cargues su historia clínica.</div>
+        </div>
       </div>
       <div class="form-group"><label>Próxima sesión</label><input type="date" id="p-proxsesion"></div>
     </div></div>
@@ -3412,6 +3423,7 @@ window.guardarPaciente=async()=>{
       quePide:gv('p-que-pide'),
       tipo:gv('p-tipo')||'hospitalizado',
       estado:gv('p-estado')||'seguimiento',
+      colegaNombre:gv('p-colega-nombre'),
       proxSesion:gv('p-proxsesion'),
       notas:gv('p-notas'),
       tratMedico:gv('p-trat-medico'),
@@ -3421,16 +3433,23 @@ window.guardarPaciente=async()=>{
     });
     closeModal('modal-paciente');
     toast('✅ Paciente registrado');
-    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-motivo-ic','p-que-pide','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad','p-medico-sol','p-medico-esp'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['p-nombre','p-cedula','p-edad','p-hab','p-motivo','p-motivo-ic','p-que-pide','p-notas','p-proxsesion','p-trat-medico','p-fecha-ic','p-prioridad','p-medico-sol','p-medico-esp','p-colega-nombre'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    var _cw=document.getElementById('p-colega-wrap');if(_cw)_cw.style.display='none';
     document.querySelectorAll('#p-prioridad-btns .risk-btn').forEach(b=>b.classList.remove('sel'));
   }
   catch(e){setSyncStatus('offline');toast('❌ Error: '+e.message);}
 };
 
 window.renderPacientes=(lista)=>{
-  const ESTADOS_INACTIVOS=['alta-voluntaria','fallecido'];
+  const ESTADOS_INACTIVOS=['alta-voluntaria','fallecido','transferido'];
   const raw_data=lista!==undefined?lista:pacientes;
-  const data=raw_data.filter(p=>!ESTADOS_INACTIVOS.includes(p.estado));
+  const _colFiltro=window._pacColegaFiltro||'mios';
+  const data=raw_data.filter(p=>{
+    if(ESTADOS_INACTIVOS.includes(p.estado))return false;
+    if(_colFiltro==='mios')return p.estado!=='de-colega';
+    if(_colFiltro==='colega')return p.estado==='de-colega';
+    return true; // 'todos'
+  });
   const tbody=document.getElementById('tabla-pacientes');
   if(!tbody)return;
 
@@ -3464,7 +3483,7 @@ window.renderPacientes=(lista)=>{
   const pisoCustomOrder=['🔵 Bloque Azul','Piso 1','Piso 6','🔴 UCI','Piso 5','Piso 4','Piso 3','Piso 2','🟡 Urgencias','🚶 Consulta Externa'];
   const pisoOrder=Object.keys(grouped).sort((a,b)=>{const ia=pisoCustomOrder.indexOf(a),ib=pisoCustomOrder.indexOf(b);if(ia!==-1&&ib!==-1)return ia-ib;if(ia!==-1)return-1;if(ib!==-1)return 1;const na=parseInt(a.replace('Piso ','')),nb=parseInt(b.replace('Piso ',''));return isNaN(na)?1:isNaN(nb)?-1:na-nb;});
   const riskBadge=(r)=>{if(!r||r==='SIN RIESGO')return'<span class="badge badge-green">Sin riesgo</span>';if(r==='BAJO')return'<span class="badge badge-green">Bajo</span>';if(r==='MEDIO')return'<span class="badge badge-yellow">Medio</span>';if(r==='ALTO')return'<span class="badge badge-red">Alto</span>';return'<span class="badge badge-gray">—</span>';};
-  const estadoBadge=(e)=>{const m={'seguimiento':'badge-blue','nueva-interconsulta-pendiente':'badge-yellow','consulta-externa':'badge-purple','alta':'badge-gray','revaloracion':'badge-purple','alta-voluntaria':'badge-orange','fallecido':'badge-black'};const l={'seguimiento':'Seguimiento','nueva-interconsulta-pendiente':'IC pendiente','consulta-externa':'C. Externa','alta':'Alta','revaloracion':'Revaluación','alta-voluntaria':'⚠ Alta voluntaria','fallecido':'✝ Fallecido'};return`<span class="badge ${m[e]||'badge-gray'}">${l[e]||e||'—'}</span>`;};
+  const estadoBadge=(e)=>{const m={'seguimiento':'badge-blue','nueva-interconsulta-pendiente':'badge-yellow','consulta-externa':'badge-purple','alta':'badge-gray','revaloracion':'badge-purple','alta-voluntaria':'badge-orange','fallecido':'badge-black','de-colega':'badge-gray','transferido':'badge-orange'};const l={'seguimiento':'Seguimiento','nueva-interconsulta-pendiente':'IC pendiente','consulta-externa':'C. Externa','alta':'Alta','revaloracion':'Revaluación','alta-voluntaria':'⚠ Alta voluntaria','fallecido':'✝ Fallecido','de-colega':'👥 De colega','transferido':'➡️ Transferido'};return`<span class="badge ${m[e]||'badge-gray'}">${l[e]||e||'—'}</span>`;};
   const hoyStr=new Date().toISOString().split('T')[0];
   const proxBadge=(p)=>{
     if(!p.proxSesion)return'<span style="color:var(--text3);font-size:12px">—</span>';
@@ -3479,9 +3498,75 @@ window.renderPacientes=(lista)=>{
   let html=q?`<tr><td colspan="8" style="background:#1a3a2a;font-size:0.75rem;color:#34D399;padding:7px 14px;">🔍 Mostrando ${filtered.length} resultado${filtered.length>1?'s':''} para "<strong>${q}</strong>" — <a href="#" onclick="window._searchQ='';document.getElementById('global-search').value='';(window.renderPacientes&&window.renderPacientes)();return false;" style="color:#34D399">Limpiar</a></td></tr>`:'';
   pisoOrder.forEach(piso=>{
     if(!q)html+=`<tr><td colspan="8" style="background:var(--surface2);font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;padding:7px 14px;">🏢 ${piso}</td></tr>`;
-    html+=grouped[piso].map(p=>`<tr><td><strong>${p.nombre}</strong><div class="td-sub">${p.hab?'Hab. '+p.hab:''} ${p.fecha?'· '+formatDate(p.fecha):''}</div></td><td>${p.cedula}</td><td>${p.edad?p.edad+' a.':''} ${p.sexo?p.sexo.charAt(0):''}</td><td>${p.motivo?p.motivo.slice(0,40)+(p.motivo.length>40?'…':''):'—'}</td><td>${riskBadge(p.riesgo)}</td><td>${estadoBadge(p.estado)}</td><td>${proxBadge(p)}</td><td><button class="btn btn-sm btn-secondary" onclick="verPacienteUnificado('${p.id}')">👤 Ver Paciente</button></td></tr>`).join('');
+    html+=grouped[piso].map(p=>{const _esCol=p.estado==='de-colega';const _colNom=_esCol&&p.colegaNombre?' · 👥 '+p.colegaNombre:'';return`<tr style="${_esCol?'opacity:0.6':''}"><td><strong>${p.nombre}</strong><div class="td-sub">${p.hab?'Hab. '+p.hab:''} ${p.fecha?'· '+formatDate(p.fecha):''}${_colNom}</div></td><td>${p.cedula}</td><td>${p.edad?p.edad+' a.':''} ${p.sexo?p.sexo.charAt(0):''}</td><td>${_esCol?'<span style=\"color:var(--text3);font-size:12px\">— (paciente de colega)</span>':(p.motivo?p.motivo.slice(0,40)+(p.motivo.length>40?'…':''):'—')}</td><td>${_esCol?'—':riskBadge(p.riesgo)}</td><td>${estadoBadge(p.estado)}</td><td>${_esCol?'—':proxBadge(p)}</td><td><button class="btn btn-sm btn-secondary" onclick="verPacienteUnificado('${p.id}')">👤 Ver Paciente</button></td></tr>`;}).join('');
   });
   tbody.innerHTML=html;
+};
+
+window.exportarResumenTraspaso=(pacId)=>{
+  const pac=(window.pacientes||[]).find(p=>p.id===pacId);
+  if(!pac){toast('⚠️ Paciente no encontrado');return;}
+  const ics=(window.interconsultas||[]).filter(i=>i.pacienteId===pacId||i.pacienteNombre===pac.nombre)
+    .sort((a,b)=>{const ta=a.creado&&a.creado.toMillis?a.creado.toMillis():0;const tb=b.creado&&b.creado.toMillis?b.creado.toMillis():0;return tb-ta;});
+  const ult=ics[0];
+  const dias=(typeof calcularDiasInternacion==='function')?calcularDiasInternacion(pac.fecha):'';
+  const L=[];
+  L.push('RESUMEN PARA TRASPASO — PSICOLOGÍA HOSPITALARIA');
+  L.push('Fecha de traspaso: '+new Date().toLocaleDateString('es-CO'));
+  L.push('');
+  L.push('Paciente: '+(pac.nombre||'—'));
+  if(pac.edad||pac.sexo)L.push('Edad/Sexo: '+((pac.edad?pac.edad+' años':'')+(pac.sexo?' · '+pac.sexo:'')).trim());
+  if(pac.hab)L.push('Habitación: '+pac.hab);
+  if(dias&&dias!=='—')L.push('Días de hospitalización: '+dias);
+  if(pac.motivo)L.push('Dx médico / motivo: '+pac.motivo);
+  if(pac.dxpsi)L.push('Impresión psicológica: '+pac.dxpsi);
+  if(pac.riesgo)L.push('Riesgo suicida: '+pac.riesgo);
+  L.push('Sesiones de psicología registradas: '+ics.length);
+  L.push('');
+  if(ult){
+    L.push('ÚLTIMA NOTA ('+(ult.modo||'seguimiento')+(ult.fecha?' — '+ult.fecha:'')+'):');
+    if(ult.nota){L.push(ult.nota);}
+    else{
+      if(ult.sub)L.push('Subjetivo: '+ult.sub);
+      if(ult.obj)L.push('Objetivo: '+ult.obj);
+      if(ult.resp)L.push('Impresión: '+ult.resp);
+      if(ult.trat)L.push('Plan: '+ult.trat);
+    }
+  }else{
+    L.push('(Sin notas de psicología registradas para este paciente.)');
+  }
+  L.push('');
+  L.push('— Resumen generado desde PsicoHosp para continuidad de atención. Los datos completos permanecen en la historia clínica institucional.');
+  const texto=L.join('\n');
+  const cerrar=()=>{if(typeof closePacSheet==='function')closePacSheet();};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(()=>{toast('✅ Resumen copiado — pégalo donde se lo envíes a tu colega');})
+      .catch(()=>{mostrarResumenTraspasoModal(texto);});
+  }else{
+    mostrarResumenTraspasoModal(texto);
+  }
+};
+
+window.mostrarResumenTraspasoModal=(texto)=>{
+  const prev=document.getElementById('modal-traspaso');if(prev)prev.remove();
+  const ov=document.createElement('div');
+  ov.id='modal-traspaso';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML='<div style="background:var(--surface,#fff);border-radius:14px;max-width:560px;width:100%;max-height:80vh;display:flex;flex-direction:column;overflow:hidden"><div style="padding:14px 18px;border-bottom:1px solid var(--border,#ddd);font-weight:700;color:var(--text,#111)">➡️ Resumen para traspaso</div><textarea readonly style="flex:1;min-height:280px;margin:14px;padding:12px;border:1px solid var(--border,#ccc);border-radius:8px;font-size:0.82rem;font-family:inherit;resize:none;background:var(--surface2,#f7f7f7);color:var(--text,#111)"></textarea><div style="padding:12px 18px;border-top:1px solid var(--border,#ddd);display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-secondary btn-sm" onclick="document.getElementById(\'modal-traspaso\').remove()">Cerrar</button><button class="btn btn-primary btn-sm" onclick="var t=this.closest(\'#modal-traspaso\').querySelector(\'textarea\');t.select();document.execCommand(\'copy\');toast(\'✅ Copiado\');">📋 Copiar</button></div></div>';
+  ov.querySelector('textarea').value=texto;
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+  document.body.appendChild(ov);
+};
+
+window.setPacColegaFiltro=(f)=>{
+  window._pacColegaFiltro=f;
+  var cont=document.getElementById('pac-colega-filtro');
+  if(cont)cont.querySelectorAll('button').forEach(function(b){
+    var on=b.getAttribute('data-f')===f;
+    b.className='btn btn-sm'+(on?'':' btn-secondary');
+    b.style.background=on?'var(--primary)':'';b.style.color=on?'#fff':'';b.style.border=on?'none':'';
+  });
+  if(window.renderPacientes)window.renderPacientes();
 };
 
 window.eliminarPaciente=async(id)=>{if(!confirm('¿Eliminar este paciente?'))return;try{await deleteDoc(doc(db,'pacientes',id));toast('🗑️ Paciente eliminado');}catch(e){toast('❌ '+e.message);}};
@@ -3864,6 +3949,8 @@ window.editarPaciente=(id)=>{
   _sv('p-motivo-ic',p.motivoIC||'');
   _sv('p-que-pide',p.quePide||'');
   _sv('p-estado',p.estado||'seguimiento');
+  _sv('p-colega-nombre',p.colegaNombre||'');
+  (function(){var w=document.getElementById('p-colega-wrap');if(w)w.style.display=(p.estado==='de-colega'||p.estado==='transferido')?'block':'none';})();
   _sv('p-proxsesion',p.proxSesion);
   _sv('p-notas',p.notas);
   _sv('p-trat-medico',p.tratMedico);
@@ -3882,7 +3969,13 @@ window.actualizarPaciente=async(id)=>{
   setSyncStatus('syncing');
   try{
     var nuevoTratMedico=document.getElementById('p-trat-medico').value;
-    await updateDoc(doc(db,'pacientes',id),{
+    // Preservar campos que NO están en el formulario grande, para que no se pierdan al actualizar
+    var _pacActual=(window.pacientes||[]).find(function(p){return p.id===id;})||{};
+    var _preserva={};
+    ['espTratante','dxpsi','riesgo','riesgoObs','riesgoNivel'].forEach(function(k){
+      if(_pacActual[k]!==undefined&&_pacActual[k]!=='')_preserva[k]=_pacActual[k];
+    });
+    await updateDoc(doc(db,'pacientes',id),Object.assign({
       nombre:document.getElementById('p-nombre').value.trim(),
       cedula:document.getElementById('p-cedula').value.trim(),
       edad:document.getElementById('p-edad').value,
@@ -3894,6 +3987,7 @@ window.actualizarPaciente=async(id)=>{
       quePide:document.getElementById('p-que-pide')?.value||'',
       tipo:document.getElementById('p-tipo').value||'hospitalizado',
       estado:document.getElementById('p-estado').value,
+      colegaNombre:document.getElementById('p-colega-nombre')?.value||'',
       proxSesion:document.getElementById('p-proxsesion').value,
       notas:document.getElementById('p-notas').value,
       tratMedico:nuevoTratMedico,
@@ -3901,7 +3995,7 @@ window.actualizarPaciente=async(id)=>{
       prioridad:document.getElementById('p-prioridad').value,
       medicoSol:document.getElementById('p-medico-sol').value,
       medicoEsp:document.getElementById('p-medico-esp').value
-    });
+    },_preserva));
     // Actualizar objeto local
     var pacLocal=(window.pacientes||[]).find(p=>p.id===id);
     if(pacLocal){
@@ -3911,6 +4005,7 @@ window.actualizarPaciente=async(id)=>{
       pacLocal.motivoIC=document.getElementById('p-motivo-ic')?.value||'';
       pacLocal.quePide=document.getElementById('p-que-pide')?.value||'';
       pacLocal.estado=document.getElementById('p-estado').value;
+      pacLocal.colegaNombre=document.getElementById('p-colega-nombre')?.value||'';
       pacLocal.hab=document.getElementById('p-hab').value;
       pacLocal.proxSesion=document.getElementById('p-proxsesion').value;
       pacLocal.prioridad=document.getElementById('p-prioridad').value;
@@ -8814,6 +8909,7 @@ window.abrirPacSheet=async(id)=>{
   document.getElementById('ps-actions').innerHTML=`
     <button class="btn btn-primary btn-sm" onclick="closePacSheet();goTo('interconsultas');setTimeout(()=>{const sel=document.getElementById('ic-paciente-sel');if(sel){sel.value='${id}';selectICPaciente('${id}');}const top=document.getElementById('page-interconsultas');if(top)top.scrollIntoView({behavior:'smooth',block:'start'});},300)">💬 IC</button>
     <button class="btn btn-secondary btn-sm" onclick="closePacSheet();goTo('anamnesis');setTimeout(()=>{const sel=document.getElementById('anamnesis-paciente-sel');if(sel){sel.value='${id}';if(typeof selectAnamPaciente==='function')selectAnamPaciente('${id}');}},250)">📋 Anamnesis</button>
+    <button class="btn btn-sm" onclick="exportarResumenTraspaso('${id}')" style="background:#7c3aed;color:#fff;border:none" title="Genera un resumen clínico para entregar a tu colega">➡️ Exportar resumen para traspaso</button>
     <button class="btn btn-secondary btn-sm" onclick="closePacSheet();goTo('tests');setTimeout(()=>{const sel=document.getElementById('test-pac-sel');if(sel){sel.value='${id}';if(typeof selectTestPaciente==='function')selectTestPaciente('${id}');}},250)">🧪 Test</button>
     <button class="btn btn-secondary btn-sm" onclick="editarPaciente('${id}');closePacSheet()">✏️ Editar</button>
     <button class="btn btn-secondary btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="closePacSheet();eliminarPaciente('${id}')">🗑️ Eliminar</button>
