@@ -15766,9 +15766,15 @@ window.psCargarUltimaNota = async function(pacId){
       window._collection(window.db,'anamnesis'),
       window._where('pacienteId','==',pacId)
     ));
+    // Buscar en notas_pacientes (revaloraciones)
+    var snapNP=await window._getDocs(window._query(
+      window._collection(window.db,'notas_pacientes'),
+      window._where('pacienteId','==',pacId)
+    ));
     var notas=[];
     snapIC.docs.forEach(function(d){notas.push(Object.assign({id:d.id,_col:'interconsultas'},d.data()));});
     snapAN.docs.forEach(function(d){notas.push(Object.assign({id:d.id,_col:'anamnesis'},d.data()));});
+    snapNP.docs.forEach(function(d){notas.push(Object.assign({id:d.id,_col:'notas_pacientes'},d.data()));});
     if(!notas.length) return;
     // Ordenar por fecha más reciente
     notas.sort(function(a,b){
@@ -15778,11 +15784,19 @@ window.psCargarUltimaNota = async function(pacId){
     });
     var nota=notas[0];
     // Construir texto de la nota — usar campos separados O nota completa, no ambos
-    var tipo=nota.modo||'Nota';
+    var tipo=nota.modo||(nota.tipo==='revaloracion'?'Revaloración':nota.tipo)||'Nota';
     var fecha=nota.fechaEditado||nota.fecha||'';
     var partes=[];
     var tieneCampos=nota.sub||nota.obj||nota.resp||nota.trat;
-    if(tieneCampos){
+    if(nota._col==='notas_pacientes'||nota.tipo==='revaloracion'){
+      // Formato de revaloración
+      if(nota.evolucion) partes.push('EVOLUCIÓN\n'+nota.evolucion);
+      if(nota.estadoMental) partes.push('ESTADO MENTAL\n'+nota.estadoMental);
+      if(nota.dxActual) partes.push('DIAGNÓSTICO ACTUAL\n'+nota.dxActual);
+      if(nota.plan) partes.push('PLAN\n'+nota.plan);
+      if(nota.recom) partes.push('RECOMENDACIONES\n'+nota.recom);
+      if(!partes.length && nota.motivoDesc) partes.push(nota.motivoDesc);
+    } else if(tieneCampos){
       if(nota.sub) partes.push('ANÁLISIS SUBJETIVO\n'+nota.sub);
       if(nota.obj) partes.push('ANÁLISIS OBJETIVO\n'+nota.obj);
       if(nota.resp) partes.push('RESPUESTA / IMPRESIÓN CLÍNICA\n'+nota.resp);
