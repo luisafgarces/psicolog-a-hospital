@@ -1573,8 +1573,8 @@ input.toggle-cb{display:none}
         <div style="margin-top:8px;background:#fef9ec;border:1.5px solid #f0d060;border-radius:10px;padding:10px 14px;font-size:0.78rem;color:#7b4f00;line-height:1.6">
           ⚠️ <strong>Nota clínica:</strong> La impresión diagnóstica es <strong>tentativa y no definitiva</strong>. Este instrumento apoya la evaluación en contexto hospitalario agudo. Evitar sobrediagnóstico. La nota generada debe ser revisada y firmada por el psicólogo tratante.
         </div>
-        <!-- GEMINI API KEY — OCULTO (IA desactivada) -->
-        <div style="display:none">
+        <!-- GEMINI API KEY — visible para ver/cambiar la key -->
+        <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
           <span style="font-size:0.78rem;font-weight:700;color:#1e4d8c;white-space:nowrap">🤖 IA Clínica — Google Gemini</span>
           <input type="password" id="gemini-api-key" placeholder="Pega tu API Key de Google Gemini…" style="flex:1;min-width:200px;padding:7px 11px;border:1px solid #bfdbfe;border-radius:7px;font-size:0.82rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff" oninput="localStorage.setItem('gemini_api_key',this.value);document.getElementById('gemini-key-status').textContent='✅ API key guardada';">
           <span id="gemini-key-status" style="font-size:0.72rem;color:#1e4d8c;white-space:nowrap">Guardada en este dispositivo</span>
@@ -1585,6 +1585,7 @@ input.toggle-cb{display:none}
             💾 Guardar nota
           </button>
           <button class="btn btn-primary" onclick="generarNotaIC()">📝 Generar nota</button>
+          <button class="btn btn-primary" style="background:#7c3aed;border-color:#7c3aed" onclick="generarNotaIC_IA()" title="Genera la nota con IA en formato institucional DGW (IC nueva y seguimiento)">✨ Generar con IA</button>
           <button class="btn btn-secondary" onclick="guardarBorradorFirebase('ic')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Guarda en la nube — disponible en todos tus dispositivos">
             📋 Borrador local
           </button>
@@ -9095,6 +9096,32 @@ window.generarNotaIC=function(){
   generarNotaIcNuevaLocal();
 };
 
+// ── GENERACIÓN CON IA (formato institucional DGW) — botón ✨ ─────────
+window.generarNotaIC_IA=function(){
+  var modo=icCurrentMode||'nueva';
+  if(modo==='esp'||modo==='fam'||modo==='rev'){
+    toast('✨ La generación con IA está disponible para IC nueva y seguimiento por ahora');
+    return;
+  }
+  var apiKey=getGeminiKey();
+  if(!apiKey){
+    var keyInput=document.getElementById('gemini-api-key');
+    if(keyInput&&keyInput.parentElement){
+      keyInput.parentElement.style.display='flex';
+      keyInput.parentElement.style.gap='8px';
+      keyInput.parentElement.style.alignItems='center';
+      keyInput.parentElement.style.marginTop='8px';
+      keyInput.focus();
+    }
+    toast('🔑 Pega tu API key de Gemini y vuelve a presionar ✨ Generar con IA');
+    return;
+  }
+  var wrap=document.getElementById('ic-output-wrap');
+  if(wrap)wrap.style.display='';
+  if(modo==='seg'){generarSegConGemini(apiKey);return;}
+  generarNotaIcConGemini(apiKey);
+};
+
 // ── HELPER: obtener resumen de tests recientes del paciente ──────────
 function getTestsResumenPaciente(pacienteId, pacienteNombre){
   const tests=window.testHistory||[];
@@ -9228,9 +9255,12 @@ async function generarNotaIcConGemini(apiKey){
 
   // Instrucción base compartida — los datos demográficos van UNA SOLA VEZ en ctx
   // Cada sección recibe SOLO sus datos específicos para evitar repetición
-  var estiloBase = 'Eres un psicólogo clínico hospitalario experto con enfoque cognitivo-conductual. '+
+  var estiloBase = 'Eres psicóloga clínica hospitalaria de la ESE Hospital La María y redactas una RESPUESTA A INTERCONSULTA en formato institucional DGW: jurídicamente sólida (defendible ante auditoría, comité de ética o ente de control), clínicamente rigurosa y útil para el equipo tratante. '+
     'Redacta en texto corrido, UN SOLO PÁRRAFO sin listas ni viñetas. No uses el nombre del paciente. '+
     'Lenguaje técnico-clínico preciso y conciso — no enumeres datos, analízalos. '+
+    'HONESTIDAD CLÍNICA (regla crítica): si algo no pudo evaluarse por somnolencia, confusión, negativa u otra causa, dilo EXPLÍCITAMENTE ("no evaluable por [motivo]" o "no evaluado en esta valoración"). NUNCA inventes lo que no está en la ficha ni escribas "sin alteraciones" sobre un campo sin dato registrado. '+
+    'LÍMITES DE COMPETENCIA: no emitas juicios sobre diagnósticos médicos, ajustes farmacológicos ni manejo de delirium (salvo sugerir derivación), ni sobre problemas sociales o dolor sin sufrimiento psicológico; si el caso corresponde a otra especialidad, indícalo con fundamento. '+
+    'Diferencia siempre lo que refiere el paciente de lo que refiere el familiar/cuidador. '+
     'CRÍTICO: NO repitas datos demográficos (edad, sexo, diagnóstico) que ya aparecen en otras secciones. '+
     'Cada sección aporta información nueva y específica. Termina siempre con punto final. '+
     'CONTEXTO GENERAL DEL CASO (solo referencia, no repetir en la nota): '+ctx;
@@ -9241,7 +9271,9 @@ async function generarNotaIcConGemini(apiKey){
     'Este reporte contrasta con la observación del personal de enfermería, que describe ánimo hipotímico y llanto constante durante la estancia. '+
     'Sin antecedentes psiquiátricos ni intentos suicidas previos. Se registra historial de exposición a violencia en contexto de conflicto armado, '+
     'lo cual podría estar modulando la expresión y el reconocimiento del malestar emocional actual."'+
-    '\n\nEscribe el SUBJETIVO: lo que el paciente refiere, cita textual si aplica, antecedentes relevantes. '+
+    '\n\nEscribe el ANÁLISIS SUBJETIVO: lo que el paciente refiere textual o parafraseado, cita textual si aplica, antecedentes relevantes. '+
+    'Si NO se pudo obtener por estado de conciencia, delirio, negativa u otra causa, DILO EXPLÍCITAMENTE. '+
+    'Diferencia lo que dice el paciente de lo que refiere el familiar/cuidador. '+
     'NO incluyas hallazgos del examen mental (eso va en objetivo). Datos:\n'+dSub;
 
   var promptObj = estiloBase +
@@ -9250,7 +9282,10 @@ async function generarNotaIcConGemini(apiKey){
     'Sin alteraciones psicóticas ni distorsiones cognitivas significativas. Insight conservado. '+
     'La incongruencia entre el discurso y lo reportado por enfermería sugiere minimización defensiva del malestar. '+
     'Red de apoyo familiar ausente. Riesgo suicida: BAJO."'+
-    '\n\nEscribe el OBJETIVO: examen mental + formulación CC. NO repitas lo que el paciente refirió (eso ya está en subjetivo). '+
+    '\n\nEscribe el ANÁLISIS OBJETIVO: lo observado durante la valoración (conducta, interacción, entorno, colaboración) + formulación CC + EXAMEN MENTAL COMPLETO. '+
+    'El examen mental DEBE nombrar cada uno de estos campos, integrados en la prosa: apariencia y vestimenta, olor, actitud, juicio y raciocinio, sensopercepción, conciencia, atención, pensamiento (origen, curso y contenido), afecto, lenguaje, conducta motora, memoria, sueño referido y conducta alimentaria referida. '+
+    'Para cada campo sin dato en la ficha escribe "no evaluado en esta valoración" o "no evaluable por [motivo]" — nunca lo omitas ni lo inventes. '+
+    'NO repitas lo que el paciente refirió (eso ya está en subjetivo). '+
     'NO menciones edad ni diagnóstico médico de nuevo. Datos:\n'+dObj;
 
   var promptResp = estiloBase +
@@ -9258,15 +9293,22 @@ async function generarNotaIcConGemini(apiKey){
     '"Respuesta emocional esperable ante estrés médico agudo con vulnerabilidad psicosocial significativa. '+
     'No se identifican criterios para trastorno depresivo mayor ni trastorno de adaptación. Sin código CIE-10 aplicable en esta fase. '+
     'El llanto observado se interpreta como expresión de afrontamiento por supresión, más que como ausencia real de sufrimiento. Riesgo suicida: BAJO."'+
-    '\n\nEscribe la RESPUESTA: impresión diagnóstica y análisis clínico. NO repitas hallazgos del examen mental ni lo referido por el paciente. '+
-    'Incluye CIE-10 si aplica y descarte diferencial si es pertinente. Datos:\n'+dResp;
+    '\n\nEscribe el ANÁLISIS / IMPRESIÓN CLÍNICA: formulación psicológica en contexto hospitalario. NO repitas hallazgos del examen mental ni lo referido por el paciente. '+
+    'Incluye diagnóstico CIE-10 si corresponde y diagnósticos diferenciales si es pertinente. '+
+    'Si no hay elementos suficientes, escribe "Valoración no concluyente". '+
+    'Si hay elementos orgánicos que expliquen el estado mental, menciónalos y sugiere derivación a la especialidad correspondiente. '+
+    'Si el caso NO corresponde a psicología, indícalo claramente con fundamento. Datos:\n'+dResp;
 
   var promptTrat = estiloBase +
     '\n\nEJEMPLO DE ESTILO para el TRATAMIENTO:\n'+
     '"Se realizó escucha activa, validación emocional y exploración de factores protectores. Se da alta de psicología. '+
     'Se recomienda al equipo monitorizar el estado anímico y alertar a psicología ante cambios conductuales o expresiones de desesperanza."'+
-    '\n\nEscribe el TRATAMIENTO: intervención realizada hoy y plan. NO repitas la impresión diagnóstica ni datos clínicos previos. '+
-    'Solo lo que se hizo y lo que sigue. Datos:\n'+dTrat+_capIcInstruccion;
+    '\n\nEscribe el PLAN / RECOMENDACIONES: intervención realizada hoy y plan CONCRETO y REALISTA. NO repitas la impresión diagnóstica ni datos clínicos previos. '+
+    'Debe responder explícitamente: ¿Requiere seguimiento por psicología? (Sí/No). '+
+    'Si SÍ: frecuencia factible (única psicóloga en la institución — cada 48-72 horas, no seguimiento diario salvo riesgo crítico) y número estimado de sesiones. '+
+    'Si NO: "Alta psicológica" o "No requiere seguimiento" con fundamento. '+
+    'Incluye derivaciones a otra especialidad si corresponde (a cuál y por qué) y recomendaciones concretas y accionables al equipo tratante. '+
+    'NO incluyas advertencia legal ni nota aclaratoria — se agrega automáticamente. Datos:\n'+dTrat+_capIcInstruccion;
 
   try{
     var [sub,obj,res,tra]=await Promise.all([
@@ -9278,6 +9320,9 @@ async function generarNotaIcConGemini(apiKey){
     setIcOut('ic-out-sub',sub);
     setIcOut('ic-out-obj',obj);
     setIcOut('ic-out-resp',res);
+    // Advertencia legal obligatoria (Doc institucional) — anexada en código, no depende de la IA
+    var ADVERTENCIA_LEGAL_IC='ADVERTENCIA LEGAL: Las presentes observaciones tienen carácter consultivo y no sustituyen las decisiones diagnósticas ni terapéuticas del equipo médico tratante. La presente nota fue generada con apoyo de inteligencia artificial y revisada por la psicóloga tratante, quien asume la responsabilidad legal de su contenido. Esta nota no debe ser interpretada como una orden médica ni como indicación de tratamiento farmacológico.';
+    if(tra&&!/ADVERTENCIA LEGAL|NOTA ACLARATORIA/i.test(tra))tra=tra.trim()+'\n\n'+ADVERTENCIA_LEGAL_IC;
     setIcOut('ic-out-trat',tra);
   }catch(e){
     console.error('Gemini IC error:',e);
@@ -9406,45 +9451,62 @@ async function generarSegConGemini(apiKey){
   var chips=icChipsBySubLabel.bind(null);
   var icvl=function(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';};
 
-  // Estado emocional y examen mental
+  // Estado emocional y examen mental — LABELS EXACTOS del formulario (espejo del generador local)
   var estadoEmoc=icChipsBySubLabel('Estado emocional referido');
   var preocupaciones=icChipsBySubLabel('Principales preocupaciones');
-  var pensamientosAut=icChipsBySubLabel('Pensamientos automáticos');
+  var pensamientosAut=icChipsBySubLabel('Pensamientos automáticos sobre enfermedad/internación/procedimiento');
   var citaTextual=icvl('ic-sub-cita');
   var intensidad=icvl('ic-sub-intensidad');
-  var funcionalidad=icChipsBySubLabel('Funcionalidad física actual');
+  var funcionalidad=icChipsBySubLabel('Activación conductual — nivel de actividad en hospital');
 
+  var porte=icChipsBySubLabel('Porte y apariencia');
+  var actitud=icChipsBySubLabel('Actitud durante la entrevista');
   var orientacion=icChipsBySubLabel('Orientación');
   var conciencia=icChipsBySubLabel('Conciencia / Colaboración');
-  var conducta=icChipsBySubLabel('Conducta');
+  var atencion=icChipsBySubLabel('Atención');
+  var juicio=icChipsBySubLabel('Juicio y raciocinio');
+  var pensCurso=icChipsBySubLabel('Pensamiento — curso');
+  var pensCont=icChipsBySubLabel('Pensamiento — contenido');
+  var conducta=icChipsBySubLabel('Conducta motora');
+  var sensop=icChipsBySubLabel('Sensopercepción');
   var afecto=icChipsBySubLabel('Afecto');
-  var pensamiento=icChipsBySubLabel('Pensamiento');
-  var lenguaje=icChipsBySubLabel('Lenguaje / Insight');
+  var lenguaje=icChipsBySubLabel('Lenguaje');
+  var insight=icChipsBySubLabel('Insight');
   var regulacion=icChipsBySubLabel('Regulación emocional');
-  var afrontamiento=icChipsBySubLabel('Estrategias de afrontamiento');
+  var afrontamiento=icChipsBySubLabel('Conductas de evitación / seguridad');
   var comprension=icChipsBySubLabel('Comprensión del Dx');
+  var adherencia=icChipsBySubLabel('Adherencia al tratamiento médico');
+  var sueno=icChipsBySubLabel('Hábitos de sueño');
+  var alimentacion=icChipsBySubLabel('Hábitos de alimentación');
 
-  var distorsiones=icChipsBySubLabel('Distorsiones cognitivas').filter(function(c){return c!=='Ninguna';});
-  var ideasIrrac=icChipsBySubLabel('Ideas irracionales').filter(function(c){return c!=='Ninguna';});
+  // Antecedentes de salud mental
+  var antecedentesSM=icChipsBySubLabel('Antecedentes de salud mental');
+  var consumoSPA=icChipsBySubLabel('Consumo de SPA');
+  var antecedentesNotas=icvl('ic-sustancias-notas');
+  var eventoCritico=icChipsBySubLabel('Evento crítico reciente');
 
   // Riesgo
-  var ideacion=icChipsBySubLabel('Ideación actual');
+  var ideacion=icChipsBySubLabel('Ideación autolítica actual');
+  if(!ideacion.length)ideacion=icChipsBySubLabel('Ideación actual');
+  var intentosPrevios=icChipsBySubLabel('Intentos previos');
   var protectores=icChipsBySubLabel('Factores protectores');
   var sev=icvl('ic-riesgo-nivel')||'No clasificado';
   var riesgoNotas=icvl('ic-riesgo-notas');
 
   // Respuesta e impresión clínica
   var tipoResp=icChipsBySubLabel('Tipo de respuesta emocional');
-  var impresion=icChipsBySubLabel('Impresión clínica');
-  var esquema=icChipsBySubLabel('Esquema cognitivo predominante');
+  var impresion=icChipsBySubLabel('Impresión diagnóstica (chips CIE-11)');
+  var cieCod=icvl('ic-cie');
   var red=icChipsBySubLabel('Red de apoyo funcional');
   var analisisCC=icvl('ic-resp-analisis');
 
   // Intervención y plan
-  var intervencion=icChipsBySubLabel('Intervención realizada hoy');
-  var plan=icChipsBySubLabel('Plan');
-  var frecuencia=icChipsBySubLabel('Frecuencia de seguimiento');
+  var intervencion=icChipsBySubLabel('Intervención realizada / sugerida');
+  if(!intervencion.length)intervencion=icChipsBySubLabel('Intervención realizada hoy');
+  var plan=icChipsBySubLabel('Seguimiento');
+  var frecuencia=[icvl('ic-seguimiento-plazo')].filter(Boolean);
   var tratNotas=icvl('ic-trat-notas');
+  var recomEquipo=icChipsBySubLabel('Recomendaciones al equipo médico');
 
   // Datos del paciente
   var nombre=icvl('ic-pnombre')||'el paciente';
@@ -9455,12 +9517,20 @@ async function generarSegConGemini(apiKey){
   const _segPacObj=_segPacId?(pacientes||[]).find(p=>p.id===_segPacId):null;
   const _segNombreExacto=_segPacObj?_segPacObj.nombre:nombre;
   var _segTestsResumen=getTestsResumenPaciente(_segPacId,_segNombreExacto);
+  var edadSeg=icvl('ic-edad');
+  var diasSeg=icvl('ic-dias-internacion');
 
   var datos=`
 TIPO DE NOTA: Seguimiento psicológico hospitalario
 
-DATOS DEL PACIENTE:
-- Nombre: ${nombre}${dx?' | Dx: '+dx:''}${fecha?' | Fecha: '+fecha:''}
+CONTEXTO MÉDICO (solo referencia clínica — NO copiar en la nota):
+- Dx médico: ${dx||'No registrado'}${diasSeg?' | Días hospitalizado: '+diasSeg:''}${fecha?' | Fecha: '+fecha:''}
+
+ANTECEDENTES DE SALUD MENTAL:
+- Antecedentes: ${antecedentesSM.length?antecedentesSM.join(', '):'No registrados'}
+- Consumo de SPA: ${consumoSPA.length?consumoSPA.join(', '):'No registrado'}
+${antecedentesNotas?'- Notas sobre antecedentes: '+antecedentesNotas:''}
+- Evento crítico reciente: ${eventoCritico.length?eventoCritico.join(', '):'Ninguno registrado'}
 
 ESTADO EMOCIONAL REFERIDO (SUBJETIVO):
 - Estado emocional: ${estadoEmoc.length?estadoEmoc.join(', '):'No especificado'}
@@ -9468,58 +9538,65 @@ ESTADO EMOCIONAL REFERIDO (SUBJETIVO):
 - Pensamientos automáticos: ${pensamientosAut.filter(function(c){return c!=='Ninguno';}).join(', ')||'No identificados'}
 - Cita textual: ${citaTextual||'No registrada'}
 - Intensidad de malestar: ${intensidad||'No evaluada'}
-- Funcionalidad física: ${funcionalidad.length?funcionalidad.join(', '):'No especificada'}
+- Sueño (referido): ${sueno.length?sueno.join(', '):'No evaluado'}
+- Conducta alimentaria (referida): ${alimentacion.length?alimentacion.join(', '):'No evaluada'}
+- Activación conductual: ${funcionalidad.length?funcionalidad.join(', '):'No evaluada'}
+- Adherencia al tratamiento: ${adherencia.length?adherencia.join(', '):'No evaluada'}
 
 EXAMEN MENTAL (OBJETIVO):
-- Orientación: ${orientacion.length?orientacion.join(', '):'No evaluada'}
+- Porte y apariencia: ${porte.length?porte.join(', '):'No evaluado'}
+- Actitud: ${actitud.length?actitud.join(', '):'No especificada'}
 - Conciencia/Colaboración: ${conciencia.length?conciencia.join(', '):'No especificada'}
-- Conducta: ${conducta.length?conducta.join(', '):'No especificada'}
+- Orientación: ${orientacion.length?orientacion.join(', '):'No evaluada'}
+- Atención: ${atencion.length?atencion.join(', '):'No evaluada'}
+- Juicio y raciocinio: ${juicio.length?juicio.join(', '):'No evaluado'}
+- Pensamiento — curso: ${pensCurso.length?pensCurso.join(', '):'No evaluado'}
+- Pensamiento — contenido: ${pensCont.length?pensCont.join(', '):'No evaluado'}
+- Sensopercepción: ${sensop.length?sensop.join(', '):'No evaluada'}
 - Afecto: ${afecto.length?afecto.join(', '):'No especificado'}
-- Pensamiento: ${pensamiento.length?pensamiento.join(', '):'No especificado'}
-- Lenguaje/Insight: ${lenguaje.length?lenguaje.join(', '):'No especificado'}
+- Lenguaje: ${lenguaje.length?lenguaje.join(', '):'No especificado'}
+- Conducta motora: ${conducta.length?conducta.join(', '):'No especificada'}
+- Insight: ${insight.length?insight.join(', '):'No evaluado'}
 - Regulación emocional: ${regulacion.length?regulacion.join(', '):'No evaluada'}
-- Estrategias de afrontamiento: ${afrontamiento.length?afrontamiento.join(', '):'No especificadas'}
+- Conductas de evitación/seguridad: ${afrontamiento.length?afrontamiento.join(', '):'No evaluadas'}
 - Comprensión del Dx/pronóstico: ${comprension.length?comprension.join(', '):'No evaluada'}
-
-COGNICIÓN:
-- Distorsiones cognitivas: ${distorsiones.length?distorsiones.join(', '):'Ninguna identificada'}
-- Ideas irracionales: ${ideasIrrac.length?ideasIrrac.join(', '):'Ninguna identificada'}
 - Análisis cognitivo-conductual: ${analisisCC||'No registrado'}
-- Esquema cognitivo predominante: ${esquema.filter(function(c){return c!=='Sin esquema disfuncional predominante';}).join(', ')||'Sin esquema disfuncional predominante'}
 
 EVALUACIÓN DE RIESGO:
 - Ideación suicida/autolesiva: ${ideacion.join(', ')||'No evaluada'}
+- Intentos previos: ${intentosPrevios.length?intentosPrevios.join(', '):'No registrados'}
 - Nivel de riesgo: ${sev}
 - Factores protectores: ${protectores.length?protectores.join(', '):'No identificados'}
 ${riesgoNotas?'- Notas de riesgo: '+riesgoNotas:''}
 
 IMPRESIÓN CLÍNICA:
 - Tipo de respuesta emocional: ${tipoResp.length?tipoResp.join(', '):'No especificada'}
-- Impresión diagnóstica: ${impresion.length?impresion.join(', '):'No especificada'}
+- Impresión diagnóstica: ${impresion.length?impresion.join(', '):'No especificada'}${cieCod?' | Código: '+cieCod:''}
 - Red de apoyo: ${red.length?red.join(', '):'No evaluada'}
 ${(function(){var h=document.getElementById('seg-impresion-hidden');var v=h?h.value.trim():'';return v?'\nIMPRESIÓN DIAGNÓSTICA IA (CIE-11 / DSM-5):\n'+v:'';})()} 
 
 INTERVENCIÓN Y PLAN:
 - Intervención realizada: ${intervencion.length?intervencion.join(', '):'No especificada'}
 - Plan: ${plan.length?plan.join(', '):'No especificado'}
-- Frecuencia de seguimiento: ${frecuencia.length?frecuencia.join(', '):'No especificada'}
+- Plazo de seguimiento: ${frecuencia.length?frecuencia.join(', '):'No especificado'}
+- Recomendaciones al equipo: ${recomEquipo.length?recomEquipo.join(', '):'Ninguna registrada'}
 ${tratNotas?'- Notas de tratamiento: '+tratNotas:''}
 ${_segTestsResumen?'\n'+_segTestsResumen:''}
 ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
 `.trim();
 
-  var prompt='Eres un psicólogo clínico hospitalario experto con enfoque cognitivo-conductual. '+
-    'Escribe una NOTA DE SEGUIMIENTO PSICOLÓGICO en un solo párrafo continuo, texto corrido, sin listas ni títulos. '+
-    'No uses el nombre del paciente. Lenguaje técnico-clínico con criterio propio — no enumeres datos, analízalos e interprètalos. '+
-    'Termina con punto final. '+
-    '\n\nEJEMPLO DEL ESTILO ESPERADO:\n'+
-    '"Paciente en seguimiento psicológico hospitalario, consciente, orientado y colaborador durante la entrevista. '+
-    'Refiere estado emocional estable, aunque se observa afecto lábil con momentos de llanto contenido al abordar la situación familiar. '+
-    'El análisis cognitivo-conductual evidencia pensamientos de incertidumbre frente al pronóstico médico, con respuesta emocional congruente al estresor identificado. '+
-    'No se identifican distorsiones cognitivas predominantes ni ideación suicida activa. Riesgo suicida: BAJO. '+
-    'Se realizó intervención de contención emocional y psicoeducación sobre el proceso de hospitalización. '+
-    'Continúa en seguimiento activo por psicología; se recomienda al equipo alertar ante cambios conductuales o expresiones de desesperanza."'+
-    '\n\nAHORA escribe la nota de seguimiento con ese estilo, usando solo estos datos reales — no inventes ni generalices:\n\n'+datos
+  var prompt='Eres psicóloga clínica hospitalaria de la ESE Hospital La María. Redacta una NOTA DE EVOLUCIÓN (SEGUIMIENTO) para el sistema DGW, jurídicamente sólida, clínicamente rigurosa y útil para el equipo tratante. '+
+    '\n\nFORMATO OBLIGATORIO: UN SOLO PÁRRAFO continuo, texto corrido, sin viñetas, sin títulos ni saltos de línea. NO incluyas nombre del paciente, edad, habitación, número de sesión ni listado de diagnósticos médicos o códigos CIE — el sistema DGW ya muestra la identificación y los diagnósticos; NUNCA escribas "no registrado" sobre esos datos. Empieza directamente con "Paciente en sesión de seguimiento por psicología hospitalaria" y alude al contexto médico solo en una frase breve si es clínicamente relevante (ej. "en contexto de postoperatorio de fractura de tibia"), nunca como enumeración. El párrafo debe incluir EN ESTE ORDEN: '+
+    '(1) examen mental COMPLETO nombrando cada campo: apariencia y vestimenta, olor, actitud, juicio y raciocinio, sensopercepción, conciencia, atención, pensamiento (origen, curso, contenido), afecto, lenguaje, conducta motora, memoria, sueño referido, conducta alimentaria referida — si un campo no tiene dato en la ficha escribe "no evaluado en esta sesión" o "no evaluable por [motivo]"; PROHIBIDO escribir "sin alteraciones" en un campo del que no hay dato registrado; '+
+    '(2) estado actual: diferenciar lo que el paciente refiere de lo que se observa, integrando antecedentes de salud mental si son relevantes; indicar explícitamente si se exploró ideación suicida y su resultado; '+
+    '(3) intervención realizada en la sesión (técnica concreta); '+
+    '(4) recomendación concreta y accionable al equipo tratante, si aplica; '+
+    '(5) derivación y compensación: elegir UNA opción según los datos — A) "No requiere derivación a otra especialidad. Seguimiento exclusivo por psicología hospitalaria." B) "Requiere valoración por [especialidad] de forma independiente. Se suspende seguimiento por psicología hasta que el paciente sea valorado y compensado por dicha especialidad." C) "Paciente con patología de base [especificar] que requiere manejo por [especialidad]. Una vez compensado, se retomará seguimiento por psicología para [especificar]." D) "El caso corresponde exclusivamente a [especialidad]. No se requiere intervención por psicología hospitalaria."; '+
+    '(6) plan de psicología: ALTA PSICOLÓGICA (decirlo explícitamente si cumple criterios), PRÓXIMA SESIÓN EN X DÍAS, REVALUAR EN X DÍAS o SUSPENDER HASTA COMPENSACIÓN — plan realista: única psicóloga en la institución, seguimiento cada 48-72 horas como mínimo salvo riesgo crítico.'+
+    '\n\nLÍMITES DE COMPETENCIA: no emitas juicios sobre diagnósticos médicos, ajustes farmacológicos ni manejo de delirium (salvo sugerir derivación), ni sobre problemas sociales o dolor sin sufrimiento psicológico. HONESTIDAD CLÍNICA: no inventes nada que no esté en la ficha. NO incluyas nota aclaratoria ni advertencia legal de ningún tipo al final.'+
+    '\n\nDETECCIÓN DE INCONGRUENCIAS (OBLIGATORIO): analiza la ficha buscando contradicciones entre lo que dice el paciente y lo observado, entre lo que refiere el familiar y lo observado, datos médicos que contradicen el reporte, información crítica faltante (ej. ideación suicida no explorada pese a expresiones de deseo de muerte) o riesgo legal (afirmar algo no evaluado). Redacta la nota de forma conservadora, sin afirmar lo no evaluado.'+
+    '\n\nFORMATO EXACTO DE TU RESPUESTA: primero escribe en una línea sola ===NOTA=== y a continuación el párrafo completo de la nota. DESPUÉS, si detectaste incongruencias, escribe en una línea sola ===INCONGRUENCIAS=== seguido de máximo 5 hallazgos, UNA línea breve por hallazgo (qué contradice qué y qué verificar), estilo telegráfico. Si no hay incongruencias, termina después de la nota sin esa sección.'+
+    '\n\nFICHA DE RONDA (POST-SESIÓN) — usa solo estos datos reales:\n\n'+datos
     + (function(){
         var _capSeg=(typeof getCapInlineTexto==='function')?getCapInlineTexto('ic'):'';
         return (_capSeg&&_capSeg.trim())
@@ -9539,10 +9616,53 @@ ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
   if(wrap){wrap.style.display='';wrap.scrollIntoView({behavior:'smooth',block:'start'});}
 
   try{
-    var texto=await window.geminiCall(apiKey, prompt, 4000);
+    var texto=await window.geminiCall(apiKey, prompt, 8000);
     console.log('[SEG] Gemini respuesta length:', texto?.length);
     if(!texto)throw new Error('Respuesta vacía de Gemini');
-    setIcOut('ic-out-seg-texto',texto);
+    // Separar nota e incongruencias — marcadores en cualquier orden, a prueba de truncamiento
+    var _incong='',_nota='';
+    var _t=texto.trim();
+    var _nIdx=_t.indexOf('===NOTA===');
+    var _iIdx=_t.indexOf('===INCONGRUENCIAS===');
+    if(_nIdx>-1){
+      var _notaFin=(_iIdx>_nIdx)?_iIdx:_t.length;
+      _nota=_t.slice(_nIdx+10,_notaFin).trim();
+      if(_iIdx>-1){
+        var _incFin=(_iIdx<_nIdx)?_nIdx:_t.length;
+        _incong=_t.slice(_iIdx+20,_incFin).trim();
+      }else if(_nIdx>0){
+        // Compatibilidad: texto antes de ===NOTA=== se trata como incongruencias
+        _incong=_t.slice(0,_nIdx).replace(/^INCONGRUENCIAS:?\s*/i,'').trim();
+      }
+    }else if(/^INCONGRUENCIAS/i.test(_t)){
+      // Respuesta truncada: llegaron incongruencias pero la nota se cortó
+      _incong=_t.replace(/^INCONGRUENCIAS:?\s*/i,'').trim();
+      _nota='';
+    }else{
+      _nota=_t;
+    }
+    // Sin nota aclaratoria en seguimiento (pedido de la usuaria) — si la IA la incluye, se elimina
+    if(_nota)_nota=_nota.replace(/\s*(NOTA ACLARATORIA|ADVERTENCIA LEGAL):[\s\S]*$/i,'').trim();
+    // Aviso de incongruencias (fuera del campo copiable — no se pega en DGW)
+    var _incDiv=document.getElementById('ic-seg-incong');
+    if(!_incDiv){
+      var _host=document.getElementById('ic-out-seg');
+      if(_host){
+        _host.insertAdjacentHTML('afterbegin','<div id="ic-seg-incong" style="display:none;margin-bottom:10px;background:#fffbeb;border:1.5px solid #d97706;border-radius:10px;padding:10px 14px;font-size:0.8rem;color:#92400e;line-height:1.6;white-space:pre-wrap"></div>');
+        _incDiv=document.getElementById('ic-seg-incong');
+      }
+    }
+    if(_incDiv){
+      if(_incong){_incDiv.textContent='⚠️ INCONGRUENCIAS DETECTADAS — revisa antes de firmar:\n'+_incong;_incDiv.style.display='';}
+      else{_incDiv.style.display='none';_incDiv.textContent='';}
+    }
+    if(_nota){
+      setIcOut('ic-out-seg-texto',_nota);
+    }else{
+      var _outTrunc=document.getElementById('ic-out-seg-texto');
+      if(_outTrunc){_outTrunc.classList.remove('ph');_outTrunc.textContent='⚠️ La respuesta de la IA llegó incompleta (la nota se cortó). Presiona ✨ Generar con IA de nuevo.';}
+      toast('⚠️ Respuesta incompleta — vuelve a generar');
+    }
   }catch(e){
     console.error('Gemini seg error:',e);
     var outEl=document.getElementById('ic-out-seg-texto');
