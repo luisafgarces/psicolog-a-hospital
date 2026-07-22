@@ -8800,6 +8800,7 @@ window.abrirPacSheetSilent = function(p) {
     {l:'Fecha ingreso',v:p.fecha?formatDate(p.fecha):'—'},
     p.fechaIC?{l:'Fecha solicitud IC',v:formatDate(p.fechaIC)}:null,
     (p.medicoSol||p.medicoEsp)?{l:'Médico solicitante',v:(p.medicoSol||'')+(p.medicoEsp?' · '+p.medicoEsp:'')}:null,
+    {l:'Especialidad tratante',v:p.espTratante||'—',editable:'espTratante',editLabel:'Especialidad tratante'},
     {l:'Edad',v:p.edad?p.edad+' años':'—',editable:'edad',editLabel:'Edad (años)'},
     {l:'Sexo',v:p.sexo||'—'},
     {l:'Riesgo suicida',v:p.riesgo||'Sin clasificar',color:riskColor[p.riesgo]||'var(--text2)'},
