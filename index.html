@@ -1591,7 +1591,7 @@ input.toggle-cb{display:none}
             💾 Guardar nota
           </button>
           <button class="btn btn-primary" onclick="generarNotaIC()">📝 Generar nota</button>
-          <button class="btn btn-primary" style="background:#7c3aed;border-color:#7c3aed" onclick="generarNotaIC_IA()" title="Genera la nota con IA en formato institucional DGW (IC nueva y seguimiento)">✨ Generar con IA</button>
+          <button class="btn btn-primary" style="background:#7c3aed;border-color:#7c3aed" onclick="generarNotaIC_IA()" title="Genera la nota con IA (revaloración usa formato interconsulta; familiar y especial, formato seguimiento)">✨ Generar con IA</button>
           <button class="btn btn-secondary" onclick="guardarBorradorFirebase('ic')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Guarda en la nube — disponible en todos tus dispositivos">
             📋 Borrador local
           </button>
@@ -1623,7 +1623,7 @@ input.toggle-cb{display:none}
 
               </div>
             </div>
-            <div id="ic-out-seg" style="display:none"><div class="out-seg-wrap"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-seg-texto',this)">Copiar</button><div class="out-field-label-ic">Nota de seguimiento</div><div class="out-text-ic ph" id="ic-out-seg-texto" style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text">Genera la nota para ver el contenido…</div></div></div>
+            <div id="ic-out-seg" style="display:none"><div class="out-seg-wrap"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-seg-texto',this)">Copiar</button><div class="out-field-label-ic">Nota de seguimiento</div><div class="out-text-ic ph" id="ic-out-seg-texto" style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text;white-space:pre-wrap">Genera la nota para ver el contenido…</div></div></div>
           </div>
         </div>
         <!-- BARRA DE NAVEGACIÓN RÁPIDA AL FINAL -->
@@ -3148,7 +3148,7 @@ input.toggle-cb{display:none}
         <input type="hidden" id="p-prioridad" value="">
       </div>
       <div class="form-group"><label>Estado actual</label>
-        <select id="p-estado" onchange="aplicarModoColega(this.value)"><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="seguimiento">Seguimiento</option><option value="consulta-externa">Consulta externa</option><option value="revaloracion">Revaluación</option><option value="alta">✅ Alta psicología</option><option value="alta-hospitalaria">🏥 Alta hospitalaria</option><option value="alta-voluntaria">⚠️ Alta voluntaria</option><option value="fallecido">✝ Fallecido</option><option value="de-colega">👥 De mi colega</option><option value="transferido">➡️ Transferido a colega</option></select>
+        <select id="p-estado" onchange="aplicarModoColega(this.value)"><option value="nueva-interconsulta-pendiente">Nueva interconsulta pendiente</option><option value="seguimiento">Seguimiento</option><option value="consulta-externa">Consulta externa</option><option value="revaloracion">Revaluación</option><option value="alta">✅ Alta psicología</option><option value="alta-hospitalaria">🏥 Alta hospitalaria</option><option value="alta-voluntaria">⚠️ Alta voluntaria</option><option value="fallecido">✝ Fallecido</option><option value="rechazado">🚫 Paciente rechazado</option><option value="de-colega">👥 De mi colega</option><option value="transferido">➡️ Transferido a colega</option></select>
         <div id="p-colega-wrap" style="display:none;margin-top:8px">
           <label style="font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Nombre de la colega a cargo</label>
           <input type="text" id="p-colega-nombre" placeholder="Ej: Dra. María López" style="width:100%">
@@ -3507,7 +3507,7 @@ window.renderPacientes=(lista)=>{
   const pisoCustomOrder=['🔵 Bloque Azul','Piso 1','Piso 6','🔴 UCI','Piso 5','Piso 4','Piso 3','Piso 2','🟡 Urgencias','🚶 Consulta Externa'];
   const pisoOrder=Object.keys(grouped).sort((a,b)=>{const ia=pisoCustomOrder.indexOf(a),ib=pisoCustomOrder.indexOf(b);if(ia!==-1&&ib!==-1)return ia-ib;if(ia!==-1)return-1;if(ib!==-1)return 1;const na=parseInt(a.replace('Piso ','')),nb=parseInt(b.replace('Piso ',''));return isNaN(na)?1:isNaN(nb)?-1:na-nb;});
   const riskBadge=(r)=>{if(!r||r==='SIN RIESGO')return'<span class="badge badge-green">Sin riesgo</span>';if(r==='BAJO')return'<span class="badge badge-green">Bajo</span>';if(r==='MEDIO')return'<span class="badge badge-yellow">Medio</span>';if(r==='ALTO')return'<span class="badge badge-red">Alto</span>';return'<span class="badge badge-gray">—</span>';};
-  const estadoBadge=(e)=>{const m={'seguimiento':'badge-blue','nueva-interconsulta-pendiente':'badge-yellow','consulta-externa':'badge-purple','alta':'badge-gray','revaloracion':'badge-purple','alta-voluntaria':'badge-orange','fallecido':'badge-black','de-colega':'badge-gray','transferido':'badge-orange'};const l={'seguimiento':'Seguimiento','nueva-interconsulta-pendiente':'IC pendiente','consulta-externa':'C. Externa','alta':'Alta','revaloracion':'Revaluación','alta-voluntaria':'⚠ Alta voluntaria','fallecido':'✝ Fallecido','de-colega':'👥 De colega','transferido':'➡️ Transferido'};return`<span class="badge ${m[e]||'badge-gray'}">${l[e]||e||'—'}</span>`;};
+  const estadoBadge=(e)=>{const m={'seguimiento':'badge-blue','nueva-interconsulta-pendiente':'badge-yellow','consulta-externa':'badge-purple','alta':'badge-gray','revaloracion':'badge-purple','alta-voluntaria':'badge-orange','fallecido':'badge-black','rechazado':'badge-orange','de-colega':'badge-gray','transferido':'badge-orange'};const l={'seguimiento':'Seguimiento','nueva-interconsulta-pendiente':'IC pendiente','consulta-externa':'C. Externa','alta':'Alta','revaloracion':'Revaluación','alta-voluntaria':'⚠ Alta voluntaria','fallecido':'✝ Fallecido','rechazado':'🚫 Rechazado','de-colega':'👥 De colega','transferido':'➡️ Transferido'};return`<span class="badge ${m[e]||'badge-gray'}">${l[e]||e||'—'}</span>`;};
   const hoyStr=new Date().toISOString().split('T')[0];
   const proxBadge=(p)=>{
     if(!p.proxSesion)return'<span style="color:var(--text3);font-size:12px">—</span>';
@@ -3522,7 +3522,7 @@ window.renderPacientes=(lista)=>{
   let html=q?`<tr><td colspan="8" style="background:#1a3a2a;font-size:0.75rem;color:#34D399;padding:7px 14px;">🔍 Mostrando ${filtered.length} resultado${filtered.length>1?'s':''} para "<strong>${q}</strong>" — <a href="#" onclick="window._searchQ='';document.getElementById('global-search').value='';(window.renderPacientes&&window.renderPacientes)();return false;" style="color:#34D399">Limpiar</a></td></tr>`:'';
   pisoOrder.forEach(piso=>{
     if(!q)html+=`<tr><td colspan="8" style="background:var(--surface2);font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;padding:7px 14px;">🏢 ${piso}</td></tr>`;
-    html+=grouped[piso].map(p=>{const _esCol=p.estado==='de-colega';const _esTransf=p.estado==='transferido';const _atenuar=_esCol||_esTransf;const _colNom=_atenuar&&p.colegaNombre?' · 👥 '+p.colegaNombre:'';return`<tr style="${_atenuar?'opacity:0.6':''}"><td><strong>${p.nombre}</strong><div class="td-sub">${p.hab?'Hab. '+p.hab:''} ${p.fecha?'· '+formatDate(p.fecha):''}${_colNom}</div></td><td>${p.cedula}</td><td>${p.edad?p.edad+' a.':''} ${p.sexo?p.sexo.charAt(0):''}</td><td>${_esCol?'<span style=\"color:var(--text3);font-size:12px\">— (paciente de colega)</span>':(p.motivo?p.motivo.slice(0,40)+(p.motivo.length>40?'…':''):'—')}</td><td>${_esCol?'—':riskBadge(p.riesgo)}</td><td>${estadoBadge(p.estado)}</td><td>${_esCol?'—':proxBadge(p)}</td><td><button class="btn btn-sm btn-secondary" onclick="verPacienteUnificado('${p.id}')">👤 Ver Paciente</button></td></tr>`;}).join('');
+    html+=grouped[piso].map(p=>{const _esCol=p.estado==='de-colega';const _esTransf=p.estado==='transferido';const _esRech=p.estado==='rechazado';const _atenuar=_esCol||_esTransf||_esRech;const _colNom=(_esCol||_esTransf)&&p.colegaNombre?' · 👥 '+p.colegaNombre:'';return`<tr style="${_atenuar?'opacity:0.6':''}"><td><strong>${p.nombre}</strong><div class="td-sub">${p.hab?'Hab. '+p.hab:''} ${p.fecha?'· '+formatDate(p.fecha):''}${_colNom}</div></td><td>${p.cedula}</td><td>${p.edad?p.edad+' a.':''} ${p.sexo?p.sexo.charAt(0):''}</td><td>${_esCol?'<span style=\"color:var(--text3);font-size:12px\">— (paciente de colega)</span>':(p.motivo?p.motivo.slice(0,40)+(p.motivo.length>40?'…':''):'—')}</td><td>${_esCol?'—':riskBadge(p.riesgo)}</td><td>${estadoBadge(p.estado)}</td><td>${_esCol?'—':proxBadge(p)}</td><td><button class="btn btn-sm btn-secondary" onclick="verPacienteUnificado('${p.id}')">👤 Ver Paciente</button></td></tr>`;}).join('');
   });
   tbody.innerHTML=html;
 };
@@ -9229,10 +9229,6 @@ window.generarNotaIC=function(){
 // ── GENERACIÓN CON IA (formato institucional DGW) — botón ✨ ─────────
 window.generarNotaIC_IA=function(){
   var modo=icCurrentMode||'nueva';
-  if(modo==='esp'||modo==='fam'||modo==='rev'){
-    toast('✨ La generación con IA está disponible para IC nueva y seguimiento por ahora');
-    return;
-  }
   var apiKey=getGeminiKey();
   if(!apiKey){
     var keyInput=document.getElementById('gemini-api-key');
@@ -9248,8 +9244,113 @@ window.generarNotaIC_IA=function(){
   }
   var wrap=document.getElementById('ic-output-wrap');
   if(wrap)wrap.style.display='';
+  // IC nueva → formato 4 campos DGW
+  if(modo==='nueva'){generarNotaIcConGemini(apiKey);return;}
+  // Revaloración → formato de interconsulta (4 campos DGW)
+  if(modo==='rev'){generarNotaGenericaIA(apiKey,'rev','ic');return;}
+  // Seguimiento → formato párrafo
   if(modo==='seg'){generarSegConGemini(apiKey);return;}
+  // Familiar y Especial → formato de seguimiento (párrafo)
+  if(modo==='fam'){generarNotaGenericaIA(apiKey,'fam','seg');return;}
+  if(modo==='esp'){generarNotaGenericaIA(apiKey,'esp','seg');return;}
   generarNotaIcConGemini(apiKey);
+};
+
+// Recolecta el contenido del formulario activo de un modo IC
+window.recolectarFormularioIC=function(modoContainerId){
+  var cont=document.getElementById(modoContainerId);
+  if(!cont)return '';
+  var lineas=[];
+  // Inputs y textareas con valor
+  cont.querySelectorAll('input[type="text"],input[type="date"],input[type="number"],textarea').forEach(function(el){
+    var val=(el.value||'').trim();
+    if(!val)return;
+    var lbl='';
+    var fg=el.closest('.form-group,.ic-field,.ic-pat-field');
+    if(fg){var lb=fg.querySelector('label,.ic-sublabel');if(lb)lbl=(lb.textContent||'').trim();}
+    lineas.push((lbl?lbl+': ':'')+val);
+  });
+  // Radios y checkboxes marcados
+  var marcados={};
+  cont.querySelectorAll('input[type="radio"]:checked,input[type="checkbox"]:checked').forEach(function(el){
+    var val=(el.value||'').trim();if(!val)return;
+    var lbl='';var fg=el.closest('.form-group,.ic-field');
+    if(fg){var lb=fg.querySelector('label,.ic-sublabel');if(lb)lbl=(lb.textContent||'').trim();}
+    var key=lbl||'Selección';
+    if(!marcados[key])marcados[key]=[];
+    marcados[key].push(val);
+  });
+  // Chips activos
+  cont.querySelectorAll('.ic-chip.on,.ic-chip.on-r,.ic-chip.on-a,.ic-chip.on-g').forEach(function(el){
+    var val=(el.textContent||'').trim();if(!val)return;
+    var lbl='';var fg=el.closest('.ic-field');
+    if(fg){var lb=fg.querySelector('.ic-sublabel');if(lb)lbl=(lb.textContent||'').trim();}
+    var key=lbl||'Datos';
+    if(!marcados[key])marcados[key]=[];
+    marcados[key].push(val);
+  });
+  Object.keys(marcados).forEach(function(k){lineas.push(k+': '+marcados[k].join(', '));});
+  return lineas.join('\n');
+};
+
+// Genera nota con IA para rev/fam/esp reutilizando la infraestructura Gemini
+window.generarNotaGenericaIA=async function(apiKey,modo,formato){
+  var contId={rev:'ic-mode-rev',fam:'ic-mode-fam',esp:'ic-mode-esp'}[modo];
+  var datos=recolectarFormularioIC(contId);
+  if(!datos||datos.length<10){toast('⚠️ Llena el formulario antes de generar con IA');return;}
+  var nombre=(document.getElementById('ic-pnombre')||{}).value||'el paciente';
+  var edad=(document.getElementById('ic-edad')||{}).value||'';
+  var dx=(document.getElementById('ic-pdx')||{}).value||'';
+  var ctxPac='DATOS DEL PACIENTE (referencia, no repetir literal): '+(edad?edad+' años. ':'')+(dx?'Dx médico: '+dx+'. ':'');
+  var tipoNota={rev:'REVALORACIÓN PSICOLÓGICA HOSPITALARIA',fam:'INTERVENCIÓN CON FAMILIA / CUIDADORES',esp:'NOTA ESPECIAL'}[modo];
+
+  // Mostrar carga en el output compartido
+  var seg=document.getElementById('ic-out-seg');
+  var f4=document.getElementById('ic-out-4campos');
+  if(seg)seg.style.display='';
+  if(f4)f4.style.display='none';
+  var outEl=document.getElementById('ic-out-seg-texto');
+  if(outEl){outEl.classList.remove('ph');outEl.textContent='⏳ Generando nota con IA clínica…';}
+  var wrap=document.getElementById('ic-output-wrap');
+  if(wrap){wrap.style.display='';wrap.scrollIntoView({behavior:'smooth',block:'start'});}
+
+  var prompt;
+  if(formato==='ic'){
+    // Formato interconsulta (4 secciones DGW) para REVALORACIÓN
+    prompt='Eres psicóloga clínica hospitalaria de la ESE Hospital La María. Redacta una nota de '+tipoNota+' en formato institucional DGW, jurídicamente sólida, clínicamente rigurosa y útil para el equipo tratante. '+
+      'Estructura la nota en CUATRO secciones claramente separadas con estos títulos EXACTOS en mayúscula, cada una en su propio bloque: '+
+      '"ANÁLISIS SUBJETIVO" (lo que refiere el paciente; si no se pudo obtener, dilo explícitamente; diferenciar paciente de familiar), '+
+      '"ANÁLISIS OBJETIVO" (lo observado + examen mental completo nombrando cada campo: apariencia, actitud, conciencia, atención, orientación, pensamiento curso y contenido, sensopercepción, afecto, lenguaje, juicio, memoria; campo sin dato = "no evaluado en esta valoración", nunca "sin alteraciones" inventado), '+
+      '"ANÁLISIS / IMPRESIÓN CLÍNICA" (formulación, comparación con valoración previa, evolución, CIE-10 si aplica, o "Valoración no concluyente"), '+
+      '"PLAN / RECOMENDACIONES" (¿requiere seguimiento? Sí/No; frecuencia realista 48-72h única psicóloga; alta psicológica si aplica; derivaciones; recomendaciones concretas al equipo). '+
+      'HONESTIDAD CLÍNICA: no inventes nada fuera de la ficha. LÍMITES DE COMPETENCIA: no juicios médicos ni farmacológicos. NO agregues advertencia legal (se añade automáticamente). '+
+      '\n\n'+ctxPac+'\n\nFICHA DE '+tipoNota+' (usa solo estos datos reales):\n\n'+datos;
+  }else{
+    // Formato seguimiento (párrafo único) para FAMILIAR y ESPECIAL
+    prompt='Eres psicóloga clínica hospitalaria de la ESE Hospital La María. Redacta una nota de '+tipoNota+' para el sistema DGW, jurídicamente sólida, clínicamente rigurosa y útil para el equipo tratante. '+
+      'FORMATO: UN SOLO PÁRRAFO continuo, texto corrido, sin viñetas ni títulos ni saltos de línea. No uses el nombre del paciente. Lenguaje técnico-clínico, analiza los datos en vez de enumerarlos. '+
+      (modo==='fam'?'Enfócate en: quiénes asistieron y su vínculo, estado emocional de la familia, preocupaciones principales, dinámica familiar, comprensión del diagnóstico, riesgo de claudicación del cuidador, intervención realizada y plan de seguimiento. Diferencia lo que refiere la familia de lo observado. ':'')+
+      (modo==='esp'?'Redacta la nota especial según el tipo y la situación descrita, de forma conservadora y defendible. ':'')+
+      'HONESTIDAD CLÍNICA: no inventes nada fuera de la ficha; lo no evaluado se dice explícitamente. LÍMITES DE COMPETENCIA: no juicios médicos ni farmacológicos. NO agregues nota aclaratoria ni advertencia legal. '+
+      '\n\n'+ctxPac+'\n\nFICHA DE '+tipoNota+' (usa solo estos datos reales):\n\n'+datos;
+  }
+
+  try{
+    var texto=await window.geminiCall(apiKey,prompt,8000);
+    if(!texto)throw new Error('Respuesta vacía de Gemini');
+    texto=texto.trim();
+    if(formato==='ic'){
+      // Anexar advertencia legal DGW al final
+      var ADV='\n\nADVERTENCIA LEGAL: Las presentes observaciones tienen carácter consultivo y no sustituyen las decisiones diagnósticas ni terapéuticas del equipo médico tratante. La presente nota fue generada con apoyo de inteligencia artificial y revisada por la psicóloga tratante, quien asume la responsabilidad legal de su contenido. Esta nota no debe ser interpretada como una orden médica ni como indicación de tratamiento farmacológico.';
+      if(!/ADVERTENCIA LEGAL|NOTA ACLARATORIA/i.test(texto))texto+=ADV;
+    }
+    setIcOut('ic-out-seg-texto',texto);
+  }catch(e){
+    console.error('IA '+modo+' error:',e);
+    var el=document.getElementById('ic-out-seg-texto');
+    if(el){el.classList.remove('ph');el.textContent='❌ Error al generar: '+e.message;}
+    toast('❌ Error al generar con IA');
+  }
 };
 
 // ── HELPER: obtener resumen de tests recientes del paciente ──────────
@@ -14105,7 +14206,7 @@ window.rdInit = async function(){
   if(!cont) return;
 
   var hoy = new Date().toISOString().split('T')[0];
-  var _estadosAlta=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga','transferido','de-colega'];
+  var _estadosAlta=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga','transferido','de-colega','rechazado'];
   var pacs = rdOrdenRonda(
     (window.pacientes||[]).filter(function(p){
       var tieneFichaHoy = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
@@ -14113,7 +14214,7 @@ window.rdInit = async function(){
       var estaSubido = !!(window._rdSubidosHoy && window._rdSubidosHoy[p.id]);
       var estaExcluido = !!(window._rdExcluidosHoy && window._rdExcluidosHoy[p.id]);
       // Transferido o de colega — nunca en mi ronda, aunque tenga ficha o próxima sesión
-      if(p.estado==='transferido' || p.estado==='de-colega') return false;
+      if(p.estado==='transferido' || p.estado==='de-colega' || p.estado==='rechazado') return false;
       // Reprogramado para otro día — excluir siempre
       if(estaExcluido) return false;
       // Ya subido — excluir
@@ -14611,14 +14712,14 @@ function rdRefrescarTablero(){
   if(typeof window.rdInit==='function'){ window.rdInit(); return; }
   if(typeof window.actualizarContadorPendientes==='function') window.actualizarContadorPendientes();
   var hoy2 = new Date().toISOString().split('T')[0];
-  var _estadosAlta2=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga','transferido','de-colega'];
+  var _estadosAlta2=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga','transferido','de-colega','rechazado'];
   var pacs = rdOrdenRonda(
     (window.pacientes||[]).filter(function(p){
       var tieneFichaHoy2 = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
       var estaVisto2 = !!(window._rdVistosHoy && window._rdVistosHoy[p.id]);
       var estaSubido2 = !!(window._rdSubidosHoy && window._rdSubidosHoy[p.id]);
       var estaExcluido2 = !!(window._rdExcluidosHoy && window._rdExcluidosHoy[p.id]);
-      if(p.estado==='transferido' || p.estado==='de-colega') return false;
+      if(p.estado==='transferido' || p.estado==='de-colega' || p.estado==='rechazado') return false;
       if(estaExcluido2) return false;
       if(estaSubido2) return false;
       if(tieneFichaHoy2 || estaVisto2) return true;
