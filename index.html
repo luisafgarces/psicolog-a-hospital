@@ -3944,6 +3944,8 @@ window.openModal=(id)=>{
     if(btn){btn.textContent='Registrar';btn.onclick=guardarPaciente;}
     setPTipo('hospitalizado');
     document.getElementById('p-estado').value='seguimiento';
+    var _cnEl=document.getElementById('p-colega-nombre');if(_cnEl)_cnEl.value='';
+    if(typeof aplicarModoColega==='function')aplicarModoColega('seguimiento');
     // Scroll al inicio del modal
     setTimeout(function(){
       var body=document.querySelector('#modal-paciente .modal-body');
@@ -14206,7 +14208,7 @@ window.rdInit = async function(){
   if(!cont) return;
 
   var hoy = new Date().toISOString().split('T')[0];
-  var _estadosAlta=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga','transferido','de-colega','rechazado'];
+  var _estadosAlta=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga','transferido','de-colega'];
   var pacs = rdOrdenRonda(
     (window.pacientes||[]).filter(function(p){
       var tieneFichaHoy = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
@@ -14214,7 +14216,7 @@ window.rdInit = async function(){
       var estaSubido = !!(window._rdSubidosHoy && window._rdSubidosHoy[p.id]);
       var estaExcluido = !!(window._rdExcluidosHoy && window._rdExcluidosHoy[p.id]);
       // Transferido o de colega — nunca en mi ronda, aunque tenga ficha o próxima sesión
-      if(p.estado==='transferido' || p.estado==='de-colega' || p.estado==='rechazado') return false;
+      if(p.estado==='transferido' || p.estado==='de-colega') return false;
       // Reprogramado para otro día — excluir siempre
       if(estaExcluido) return false;
       // Ya subido — excluir
@@ -14303,9 +14305,10 @@ window.rdInit = async function(){
     if(p.estado==='nueva-interconsulta-pendiente') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#dbeafe;color:#1e40af;border-radius:4px;padding:1px 6px;margin-right:2px">IC</span>';
     else if(p.estado==='seguimiento') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#ede9fe;color:#6d28d9;border-radius:4px;padding:1px 6px;margin-right:2px">SEG</span>';
     else if(p.estado==='revaloracion') tipoBadge2='<span style="font-size:0.68rem;font-weight:700;background:#fef3c7;color:#b45309;border-radius:4px;padding:1px 6px;margin-right:2px">REVAL</span>';
-    // 3 estados + rechazada
+    // 3 estados + rechazada (rechazo del día de HOY, distinto del estado permanente del paciente)
     var subido=!!(window._rdSubidosHoy&&window._rdSubidosHoy[p.id]);
     var rechazada=!!(window._rdRechazadasHoy&&window._rdRechazadasHoy[p.id]);
+    var esRechazadoGlobal=p.estado==='rechazado';
     var checkVisto2;
     if(subido){
       checkVisto2='<span style="font-size:0.72rem;font-weight:700;color:#16a34a;background:#dcfce7;border:1.5px solid #16a34a;border-radius:6px;padding:4px 10px;white-space:nowrap">🟢 Subido</span>';
@@ -14319,12 +14322,13 @@ window.rdInit = async function(){
         +'<input type="checkbox" onchange="rdMarcarVista(\''+p.id+'\',this)" style="accent-color:#16a34a;width:15px;height:15px;cursor:pointer">'
         +'☐ Visto</label>';
     }
-    var bgColor2=rechazada?'#fff5f5':subido?'#f0fdf4':visto?'#fffbeb':prioUp2==='URGENTE'?'#fff5f5':'var(--surface2)';
-    var borderColor2=rechazada?'#fca5a5':subido?'#86efac':visto?'#fbbf24':prioUp2==='URGENTE'?'#fca5a5':'var(--border)';
-    return separador+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:'+bgColor2+';border:1.5px solid '+borderColor2+';border-radius:9px;flex-wrap:wrap">'
+    var bgColor2=esRechazadoGlobal?'#fff7ed':rechazada?'#fff5f5':subido?'#f0fdf4':visto?'#fffbeb':prioUp2==='URGENTE'?'#fff5f5':'var(--surface2)';
+    var borderColor2=esRechazadoGlobal?'#fdba74':rechazada?'#fca5a5':subido?'#86efac':visto?'#fbbf24':prioUp2==='URGENTE'?'#fca5a5':'var(--border)';
+    var badgeRechazoGlobal=esRechazadoGlobal?'<span style="font-size:0.68rem;font-weight:800;background:#fed7aa;color:#9a3412;border-radius:4px;padding:1px 7px;margin-left:5px;white-space:nowrap">🚫 PACIENTE RECHAZADO</span>':'';
+    return separador+'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:'+bgColor2+';border:1.5px solid '+borderColor2+';border-radius:9px;flex-wrap:wrap'+(esRechazadoGlobal?';opacity:0.85':'')+'">'
       +'<div style="flex:1;min-width:0;cursor:pointer" onclick="if(typeof abrirPacSheet===\'function\')abrirPacSheet(\''+p.id+'\')" title="Ver ficha del paciente">'
         +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+prioBadge2+hab+tipoBadge2
-          +'<span style="font-size:0.88rem;font-weight:700;color:var(--accent);text-decoration:underline;text-underline-offset:2px">'+(p.nombre||'Sin nombre')+'</span>'+estadoBadge
+          +'<span style="font-size:0.88rem;font-weight:700;color:var(--accent);text-decoration:underline;text-underline-offset:2px">'+(p.nombre||'Sin nombre')+'</span>'+estadoBadge+badgeRechazoGlobal
         +'</div>'
         +(p.motivo?'<div style="font-size:0.75rem;color:var(--text3);margin-top:2px">'+p.motivo.slice(0,60)+'</div>':'')
         +fichaInfo
@@ -14712,14 +14716,14 @@ function rdRefrescarTablero(){
   if(typeof window.rdInit==='function'){ window.rdInit(); return; }
   if(typeof window.actualizarContadorPendientes==='function') window.actualizarContadorPendientes();
   var hoy2 = new Date().toISOString().split('T')[0];
-  var _estadosAlta2=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga','transferido','de-colega','rechazado'];
+  var _estadosAlta2=['alta','fallecido','alta-voluntaria','alta-hospitalaria','fuga','transferido','de-colega'];
   var pacs = rdOrdenRonda(
     (window.pacientes||[]).filter(function(p){
       var tieneFichaHoy2 = !!(window._rdFichasHoy && window._rdFichasHoy[p.id]);
       var estaVisto2 = !!(window._rdVistosHoy && window._rdVistosHoy[p.id]);
       var estaSubido2 = !!(window._rdSubidosHoy && window._rdSubidosHoy[p.id]);
       var estaExcluido2 = !!(window._rdExcluidosHoy && window._rdExcluidosHoy[p.id]);
-      if(p.estado==='transferido' || p.estado==='de-colega' || p.estado==='rechazado') return false;
+      if(p.estado==='transferido' || p.estado==='de-colega') return false;
       if(estaExcluido2) return false;
       if(estaSubido2) return false;
       if(tieneFichaHoy2 || estaVisto2) return true;
