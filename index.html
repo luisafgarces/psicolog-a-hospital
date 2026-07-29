@@ -9032,7 +9032,7 @@ window.psCargarRondaHoy = async function(pacId){
   if(ficha.dias) html += '<div style="font-size:0.78rem;font-weight:600;color:#166534;margin-bottom:6px">'+ficha.dias+' días hospitalizados</div>';
 
   // Info clave de contexto médico
-  if(ficha.notaMedico)     html += '<div style="font-size:0.78rem;background:#fff;border-left:3px solid #86efac;padding:4px 8px;margin-bottom:4px;border-radius:0 6px 6px 0"><span style="font-size:0.68rem;font-weight:700;color:#15803d">📋 MÉDICO</span><br>'+ficha.notaMedico+'</div>';
+  if(ficha.notaMedica)     html += '<div style="font-size:0.78rem;background:#fff;border-left:3px solid #86efac;padding:4px 8px;margin-bottom:4px;border-radius:0 6px 6px 0"><span style="font-size:0.68rem;font-weight:700;color:#15803d">📋 MÉDICO</span><br>'+ficha.notaMedica+'</div>';
   if(ficha.notaEnfermeria) html += '<div style="font-size:0.78rem;background:#fff;border-left:3px solid #6ee7b7;padding:4px 8px;margin-bottom:4px;border-radius:0 6px 6px 0"><span style="font-size:0.68rem;font-weight:700;color:#15803d">🩺 ENFERMERÍA</span><br>'+ficha.notaEnfermeria+'</div>';
 
   // Alertas clínicas — solo las que se desvían de lo normal
@@ -14836,7 +14836,7 @@ window.rdImprimir = function(){
     +'<div class="c"><div class="lb">Dolor EVA</div><div class="vl">'+(datos.dolor||'0')+' / 10</div></div>'
     +'<div class="c"><div class="lb">Alerta metabólica</div><div class="vl">'+datos.laboratorio+(datos.labDetalle?' — '+datos.labDetalle:'')+'</div></div>'
     +'<div class="c"><div class="lb">Fármacos conductuales</div><div class="vl">'+farmacosStr+(datos.farmNotas?' — '+datos.farmNotas:'')+'</div></div>'
-    +(datos.notaMedico?'<div class="c" style="grid-column:1/-1"><div class="lb">Nota médico tratante</div><div class="vl hl">'+datos.notaMedico+'</div></div>':'')
+    +(datos.notaMedica?'<div class="c" style="grid-column:1/-1"><div class="lb">Nota médico tratante</div><div class="vl hl">'+datos.notaMedica+'</div></div>':'')
     +(datos.notaEnfermeria?'<div class="c" style="grid-column:1/-1"><div class="lb">Reporte enfermería 24h</div><div class="vl hl">'+datos.notaEnfermeria+'</div></div>':'')
     +'</div></div>'
     +'<div class="s"><div class="sh">3. Monitoreo Conductual</div><div class="sb">'
