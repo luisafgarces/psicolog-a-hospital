@@ -436,6 +436,7 @@ input.toggle-cb{display:none}
   <div class="sidebar-nav">
     <div class="nav-section">General</div>
     <div class="nav-item" onclick="goTo('ronda-diaria')"><span class="icon">🏥</span>Ronda Diaria<span id="rd-pendientes-badge" style="display:none;margin-left:auto;background:#d97706;color:#fff;border-radius:10px;padding:1px 7px;font-size:0.7rem;font-weight:700;min-width:18px;text-align:center">0</span></div>
+    <div class="nav-item" onclick="fichajeAbrirModal()"><span class="icon">⏱</span>Registrar entrada/salida</div>
     <div class="nav-item active" onclick="goTo('dashboard')"><span class="icon">🏠</span>Inicio</div>
     <div class="nav-item" onclick="goTo('pacientes')"><span class="icon">👥</span>Pacientes<span class="nav-badge" id="badge-pac">0</span></div>
     <div class="nav-item" onclick="goTo('consulta-externa')"><span class="icon">🚶</span>Consulta Externa<span class="nav-badge" id="badge-ce">0</span></div>
@@ -16254,6 +16255,7 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     <button class="fj-btn fj-btn-salida" id="fj-btn-salida" onclick="fichajeSalida()" style="display:none">🔴 Registrar salida</button>
     <br>
     <button class="fj-btn-skip" onclick="fichajeSkip()">Ahora no</button>
+    <div style="margin-top:10px"><button onclick="fichajeReiniciarHoy()" style="background:none;border:none;color:var(--text3);font-size:0.68rem;text-decoration:underline;cursor:pointer;padding:2px">¿No aparece bien? Reiniciar registro de hoy</button></div>
   </div>
 </div>
 
@@ -16365,7 +16367,7 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
   }
 
   // ── UTILIDADES ─────────────────────────────
-  function hoyStr(){return new Date().toISOString().split('T')[0];}
+  function hoyStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
   function horaStr(d){d=d||new Date();return d.toTimeString().slice(0,5);}
   function fechaLegible(d){
     d=d||new Date();
@@ -16576,6 +16578,19 @@ body.fj-banner-on .content{padding-top:calc(36px + var(--topbar-h,56px)) !import
     }
     ov.classList.add('visible');
   }
+
+  // Reinicia el registro del día si quedó en un estado inconsistente (ej. desfase de fecha)
+  window.fichajeReiniciarHoy=function(){
+    if(!confirm('¿Reiniciar el registro de entrada/salida de hoy? Esto no borra tu historial de días anteriores.'))return;
+    localStorage.removeItem('fj_hoy');
+    try{
+      if(window.db&&window._setDoc&&window._doc)
+        window._setDoc(window._doc(window.db,'fichaje_jornadas','luisa_hoy'),{fecha:null,ts:new Date().toISOString()}).catch(function(){});
+    }catch(e){}
+    ocultarFAB();
+    mostrarModal('entrada');
+    if(typeof toast==='function')toast('🔄 Registro de hoy reiniciado');
+  };
 
   window.fichajeAbrirModal=function(){
     var est=getEstadoHoy();
