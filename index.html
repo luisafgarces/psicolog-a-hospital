@@ -598,6 +598,22 @@ input.toggle-cb{display:none}
           <button class="ic-mode-btn" id="ic-btn-fam" onclick="setICMode('fam')">👨‍👩‍👧 Intervención Familiar</button>
           <button class="ic-mode-btn" id="ic-btn-esp" onclick="setICMode('esp')">⚠️ Nota Especial</button>
         </div>
+        <div style="margin-bottom:14px">
+          <button class="btn btn-primary" id="btn-grabar-sesion" style="background:#dc2626;border-color:#dc2626" onclick="toggleGrabacionSesion()" title="Graba la sesión y genera una transcripción con IA. El audio se transcribe y se borra al instante, nunca se guarda.">🎙️ Grabar sesión</button>
+          <div id="transcripcion-wrap" style="display:none;margin-top:10px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <span id="transc-status" style="font-size:0.8rem;font-weight:700;color:#991b1b">🔴 Grabando…</span>
+              <span id="transc-timer" style="font-size:0.78rem;color:#7f1d1d;font-variant-numeric:tabular-nums">00:00</span>
+            </div>
+            <textarea id="transc-texto" rows="6" placeholder="La transcripción aparecerá aquí…" style="width:100%;padding:8px;border:1px solid #fecaca;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.55;background:#fff;resize:vertical"></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+              <button class="btn btn-sm btn-secondary" onclick="copiarTranscripcion()">📋 Copiar</button>
+              <button class="btn btn-sm btn-primary" style="background:#7c3aed;border-color:#7c3aed" onclick="usarTranscripcionEnIA()">✨ Usar esta transcripción para generar la nota</button>
+              <button class="btn btn-sm btn-secondary" onclick="descartarTranscripcion()">🗑️ Descartar</button>
+            </div>
+            <div style="font-size:0.68rem;color:#7f1d1d;margin-top:6px">🔒 El audio nunca se guarda — se transcribe y se elimina de inmediato. Solo el texto queda visible aquí hasta que cierres o generes la nota.</div>
+          </div>
+        </div>
         <div class="ic-patient-bar">
           <div class="ic-pat-field"><label>Hab.</label><input type="text" id="ic-hab" placeholder="304B"></div>
           <div class="ic-pat-field"><label>Nombre del paciente</label><input type="text" id="ic-pnombre" placeholder="Nombre completo"></div>
@@ -1593,26 +1609,12 @@ input.toggle-cb{display:none}
           </button>
           <button class="btn btn-primary" onclick="generarNotaIC()">📝 Generar nota</button>
           <button class="btn btn-primary" style="background:#7c3aed;border-color:#7c3aed" onclick="generarNotaIC_IA()" title="Genera la nota con IA (revaloración usa formato interconsulta; familiar y especial, formato seguimiento)">✨ Generar con IA</button>
-          <button class="btn btn-primary" id="btn-grabar-sesion" style="background:#dc2626;border-color:#dc2626" onclick="toggleGrabacionSesion()" title="Graba la sesión y genera una transcripción con IA. El audio se transcribe y se borra al instante, nunca se guarda.">🎙️ Grabar sesión</button>
         <button class="btn btn-secondary" onclick="guardarBorradorFirebase('ic')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Guarda en la nube — disponible en todos tus dispositivos">
             📋 Borrador local
           </button>
           <button class="btn btn-secondary" onclick="mostrarBorradoresFirebase('ic')" style="color:#92400e" title="Ver borradores guardados (nube + este dispositivo)">
             📂 Ver borradores
           </button>
-        </div>
-        <div id="transcripcion-wrap" style="display:none;margin-top:10px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 14px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-            <span id="transc-status" style="font-size:0.8rem;font-weight:700;color:#991b1b">🔴 Grabando…</span>
-            <span id="transc-timer" style="font-size:0.78rem;color:#7f1d1d;font-variant-numeric:tabular-nums">00:00</span>
-          </div>
-          <textarea id="transc-texto" rows="6" placeholder="La transcripción aparecerá aquí…" style="width:100%;padding:8px;border:1px solid #fecaca;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.55;background:#fff;resize:vertical"></textarea>
-          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-            <button class="btn btn-sm btn-secondary" onclick="copiarTranscripcion()">📋 Copiar</button>
-            <button class="btn btn-sm btn-primary" style="background:#7c3aed;border-color:#7c3aed" onclick="usarTranscripcionEnIA()">✨ Usar esta transcripción para generar la nota</button>
-            <button class="btn btn-sm btn-secondary" onclick="descartarTranscripcion()">🗑️ Descartar</button>
-          </div>
-          <div style="font-size:0.68rem;color:#7f1d1d;margin-top:6px">🔒 El audio nunca se guarda — se transcribe y se elimina de inmediato. Solo el texto queda visible aquí hasta que cierres o generes la nota.</div>
         </div>
         <!-- BARRA DE FORMULARIOS GUARDADOS IC -->
         <div id="ic-saved-bar" style="display:none;margin-top:10px;background:#fffbeb;border:1.5px solid #d97706;border-radius:10px;padding:10px 14px">
@@ -4490,6 +4492,7 @@ window.guardarICFirebase=async()=>{
       ...(_aiFormSnap?{_aiFormSnap}:{}),
       ...(formulario?{formulario}:{}),
       ...(getCapInlineData('ic')||{}),
+      ...(window._ultimaTranscripcionParaAnexo?{transcripcionSesion:window._ultimaTranscripcionParaAnexo}:{}),
       creado:serverTimestamp()
     });
     if(!navigator.onLine){
@@ -15335,6 +15338,7 @@ window.revGuardar = async function(){
     altaCriterio:gv('rev-alta-criterio'),
     timestamp:new Date().toISOString()
   };
+  if(window._ultimaTranscripcionParaAnexo) datos.transcripcionSesion=window._ultimaTranscripcionParaAnexo;
   try{
     await window._addDoc(window._collection(window.db,'notas_pacientes'),datos);
     if(typeof rdMarcarVistaPorNota==='function') rdMarcarVistaPorNota(pacId);
