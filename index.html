@@ -2864,6 +2864,13 @@ input.toggle-cb{display:none}
             </div>
             <div id="ps-ultima-nota-contenido" style="font-size:0.82rem;color:var(--text2);line-height:1.7;white-space:pre-wrap"></div>
             <button id="ps-ultima-nota-btn-copiar" onclick="psUltimaNotaCopiar()" style="display:none;margin-top:8px;font-size:0.72rem;padding:3px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;font-weight:600">📋 Copiar nota</button>
+            <div id="ps-ultima-nota-anexo" style="display:none;margin-top:10px;background:#faf5ff;border:1.5px dashed #c4b5fd;border-radius:8px;padding:10px 12px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+                <span style="font-size:0.68rem;font-weight:700;color:#6d28d9">📎 ANEXO — Transcripción de la sesión</span>
+                <button class="btn btn-sm btn-secondary" style="padding:2px 8px;font-size:0.68rem" onclick="psUltimaNotaAnexoCopiar()">📋 Copiar</button>
+              </div>
+              <div id="ps-ultima-nota-anexo-texto" style="font-size:0.74rem;line-height:1.55;color:var(--text2);white-space:pre-wrap;max-height:200px;overflow-y:auto;background:#fff;border:1px solid #e9d5ff;border-radius:6px;padding:8px"></div>
+            </div>
           </div>
 
           <!-- Historial de reinterconsultas -->
@@ -8420,11 +8427,22 @@ function mhicRender(){
       }
       camposHtml='<div style="margin-top:10px">'+cHtml+'</div>';
     }
+    // Anexo: transcripción de la sesión guardada junto a esta nota (si existe)
+    var transcHtml='';
+    if(e.transcripcionSesion){
+      transcHtml='<div style="margin-top:8px;background:#faf5ff;border:1.5px dashed #c4b5fd;border-radius:8px;padding:10px 12px">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
+        +'<span style="font-size:0.68rem;font-weight:700;color:#6d28d9">📎 ANEXO — Transcripción de la sesión</span>'
+        +'<button class="btn btn-sm btn-secondary" style="padding:2px 8px;font-size:0.68rem" onclick="navigator.clipboard.writeText(this.closest(\'div\').parentElement.querySelector(\'.mhic-transc-texto\').textContent);if(typeof toast===\'function\')toast(\'✅ Transcripción copiada\')">📋 Copiar</button>'
+        +'</div>'
+        +'<div class="mhic-transc-texto" style="font-size:0.74rem;line-height:1.55;color:var(--text2);white-space:pre-wrap;max-height:200px;overflow-y:auto;background:#fff;border:1px solid #e9d5ff;border-radius:6px;padding:8px">'+e.transcripcionSesion+'</div>'
+        +'</div>';
+    }
     partes.push('<div style="background:var(--surface2);border:1px solid var(--border);border-left:4px solid '+col+';border-radius:10px;padding:14px 16px;margin-bottom:12px">'
       +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">'
       +'<div><div style="font-weight:700;font-size:0.88rem">'+(e.modo||'Nota')+' - '+'<span style="color:'+col+'">'+(e.fecha||'Sin fecha')+'</span>'+(e.fechaGuardado?'<span style="font-size:0.68rem;color:var(--text3);margin-left:6px">· guardado '+e.fechaGuardado+'</span>':'')+(e.fechaEditado?'<span style="font-size:0.68rem;color:var(--warning);margin-left:6px">· editado '+e.fechaEditado+'</span>':'')+'</div>'+subInfo+'</div>'
       +'<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">'+rBadgeHtml+respondidaBtn+regenBtn+formBtn+editarBtn+'</div>'
-      +'</div>'+camposHtml+'</div>');
+      +'</div>'+camposHtml+transcHtml+'</div>');
   }
   body.innerHTML=partes.join('');
 }
@@ -8848,6 +8866,17 @@ window.hpacRenderNotas=()=>{
             +'</details>';
         }
       }
+      // Anexo: transcripción de la sesión guardada junto a esta nota (si existe)
+      var transcHtml2='';
+      if(e.transcripcionSesion){
+        transcHtml2='<div style="margin-top:10px;background:#faf5ff;border:1.5px dashed #c4b5fd;border-radius:8px;padding:10px 12px">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
+          +'<span style="font-size:0.68rem;font-weight:700;color:#6d28d9">📎 ANEXO — Transcripción de la sesión</span>'
+          +'<button class="btn btn-sm btn-secondary" style="padding:2px 8px;font-size:0.68rem" onclick="event.stopPropagation();navigator.clipboard.writeText(this.closest(\'div\').parentElement.querySelector(\'.hpac-transc-texto\').textContent);if(typeof toast===\'function\')toast(\'✅ Transcripción copiada\')">📋 Copiar</button>'
+          +'</div>'
+          +'<div class="hpac-transc-texto" style="font-size:0.74rem;line-height:1.55;color:var(--text2);white-space:pre-wrap;max-height:200px;overflow-y:auto;background:#fff;border:1px solid #e9d5ff;border-radius:6px;padding:8px">'+e.transcripcionSesion+'</div>'
+          +'</div>';
+      }
       notasParts.push(
         '<div class="hpac-nota">'
         +'<div class="hpac-nota-head '+cls+'">'
@@ -8868,7 +8897,7 @@ window.hpacRenderNotas=()=>{
         +(e._col==='notas_pacientes'?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;color:#dc2626;border-color:#dc2626" onclick="hpacEliminarNotaPac(\'' + e.id + '\')" title="Eliminar revaloración">🗑 Eliminar</button>':'')
         +(_hpacPacId?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;background:#f0fdf4;border:1px solid #86efac;color:#166534" onclick="editarPaciente(\'' + _hpacPacId + '\')" title="Editar ficha del paciente">\u270F\uFE0F Editar ficha</button>':'')
         +'</div></div>'
-        +'<div class="hpac-nota-body">'+camposHtml+formHtml+'</div>'
+        +'<div class="hpac-nota-body">'+camposHtml+formHtml+transcHtml2+'</div>'
         +'</div>'
       );
     }
@@ -16155,6 +16184,9 @@ window.psCargarUltimaNota = async function(pacId){
   if(!bloque||!cont) return;
   bloque.style.display='none';
   window._psUltimaNotaTexto='';
+  window._psUltimaNotaTranscripcion='';
+  var _anexoInit=document.getElementById('ps-ultima-nota-anexo');
+  if(_anexoInit)_anexoInit.style.display='none';
   if(!window.db||!window._getDocs||!window._query||!window._collection||!window._where||!window._orderBy||!window._limit) return;
   try{
     // Buscar en interconsultas
@@ -16212,8 +16244,30 @@ window.psCargarUltimaNota = async function(pacId){
     if(meta) meta.textContent=tipo+' · '+fecha;
     if(cont) cont.textContent=textoCompleto;
     if(btnCopiar) btnCopiar.style.display='';
+    // Anexo: transcripción de la sesión guardada junto a esta nota (si existe)
+    var anexoDiv=document.getElementById('ps-ultima-nota-anexo');
+    var anexoTexto=document.getElementById('ps-ultima-nota-anexo-texto');
+    window._psUltimaNotaTranscripcion=nota.transcripcionSesion||'';
+    if(anexoDiv&&anexoTexto){
+      if(nota.transcripcionSesion){
+        anexoTexto.textContent=nota.transcripcionSesion;
+        anexoDiv.style.display='';
+      }else{
+        anexoTexto.textContent='';
+        anexoDiv.style.display='none';
+      }
+    }
     bloque.style.display='';
   }catch(e){console.warn('psCargarUltimaNota:',e);}
+};
+
+window.psUltimaNotaAnexoCopiar=function(){
+  if(!window._psUltimaNotaTranscripcion) return;
+  navigator.clipboard.writeText(window._psUltimaNotaTranscripcion).then(function(){
+    if(typeof toast==='function') toast('✅ Transcripción copiada');
+  }).catch(function(){
+    if(typeof toast==='function') toast('❌ No se pudo copiar');
+  });
 };
 
 window.psUltimaNotaCopiar = function(){
