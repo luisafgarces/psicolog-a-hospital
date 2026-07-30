@@ -1593,12 +1593,26 @@ input.toggle-cb{display:none}
           </button>
           <button class="btn btn-primary" onclick="generarNotaIC()">📝 Generar nota</button>
           <button class="btn btn-primary" style="background:#7c3aed;border-color:#7c3aed" onclick="generarNotaIC_IA()" title="Genera la nota con IA (revaloración usa formato interconsulta; familiar y especial, formato seguimiento)">✨ Generar con IA</button>
-          <button class="btn btn-secondary" onclick="guardarBorradorFirebase('ic')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Guarda en la nube — disponible en todos tus dispositivos">
+          <button class="btn btn-primary" id="btn-grabar-sesion" style="background:#dc2626;border-color:#dc2626" onclick="toggleGrabacionSesion()" title="Graba la sesión y genera una transcripción con IA. El audio se transcribe y se borra al instante, nunca se guarda.">🎙️ Grabar sesión</button>
+        <button class="btn btn-secondary" onclick="guardarBorradorFirebase('ic')" style="border:1.5px solid #d97706;color:#92400e;background:#fffbeb" title="Guarda en la nube — disponible en todos tus dispositivos">
             📋 Borrador local
           </button>
           <button class="btn btn-secondary" onclick="mostrarBorradoresFirebase('ic')" style="color:#92400e" title="Ver borradores guardados (nube + este dispositivo)">
             📂 Ver borradores
           </button>
+        </div>
+        <div id="transcripcion-wrap" style="display:none;margin-top:10px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span id="transc-status" style="font-size:0.8rem;font-weight:700;color:#991b1b">🔴 Grabando…</span>
+            <span id="transc-timer" style="font-size:0.78rem;color:#7f1d1d;font-variant-numeric:tabular-nums">00:00</span>
+          </div>
+          <textarea id="transc-texto" rows="6" placeholder="La transcripción aparecerá aquí…" style="width:100%;padding:8px;border:1px solid #fecaca;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.55;background:#fff;resize:vertical"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <button class="btn btn-sm btn-secondary" onclick="copiarTranscripcion()">📋 Copiar</button>
+            <button class="btn btn-sm btn-primary" style="background:#7c3aed;border-color:#7c3aed" onclick="usarTranscripcionEnIA()">✨ Usar esta transcripción para generar la nota</button>
+            <button class="btn btn-sm btn-secondary" onclick="descartarTranscripcion()">🗑️ Descartar</button>
+          </div>
+          <div style="font-size:0.68rem;color:#7f1d1d;margin-top:6px">🔒 El audio nunca se guarda — se transcribe y se elimina de inmediato. Solo el texto queda visible aquí hasta que cierres o generes la nota.</div>
         </div>
         <!-- BARRA DE FORMULARIOS GUARDADOS IC -->
         <div id="ic-saved-bar" style="display:none;margin-top:10px;background:#fffbeb;border:1.5px solid #d97706;border-radius:10px;padding:10px 14px">
@@ -1625,6 +1639,14 @@ input.toggle-cb{display:none}
               </div>
             </div>
             <div id="ic-out-seg" style="display:none"><div class="out-seg-wrap"><button class="copy-field-btn-ic" onclick="copiarCampoIC('ic-out-seg-texto',this)">Copiar</button><div class="out-field-label-ic">Nota de seguimiento</div><div class="out-text-ic ph" id="ic-out-seg-texto" style="width:100%;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.65;color:var(--text3);font-style:italic;resize:none;min-height:80px;outline:none;cursor:text;white-space:pre-wrap">Genera la nota para ver el contenido…</div></div></div>
+          </div>
+          <div id="ic-anexo-transcripcion" style="display:none;margin-top:14px;background:#faf5ff;border:1.5px dashed #c4b5fd;border-radius:10px;padding:12px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+              <span style="font-size:0.76rem;font-weight:700;color:#6d28d9">📎 ANEXO — Transcripción literal de la sesión</span>
+              <button class="btn btn-secondary btn-sm" onclick="copiarAnexoTranscripcion()">📋 Copiar anexo</button>
+            </div>
+            <div style="font-size:0.68rem;color:#7c3aed;margin-bottom:8px">Esto NO forma parte de la nota oficial y no se incluye en "Copiar todo" — es solo respaldo de la fuente usada para redactarla.</div>
+            <div id="ic-anexo-transcripcion-texto" style="white-space:pre-wrap;font-size:0.78rem;line-height:1.6;color:var(--text2);max-height:260px;overflow-y:auto;background:#fff;border:1px solid #e9d5ff;border-radius:8px;padding:10px"></div>
           </div>
         </div>
         <!-- BARRA DE NAVEGACIÓN RÁPIDA AL FINAL -->
@@ -8047,6 +8069,240 @@ window.geminiCall = async function(apiKey, prompt, maxTokens){
 
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
+// ── GRABACIÓN DE SESIÓN Y TRANSCRIPCIÓN CON IA ────────────────────────
+// El audio NUNCA se guarda: se graba en memoria, se envía a Gemini para
+// transcribir, y se descarta de inmediato (variable liberada + micrófono
+// apagado). Solo el texto de la transcripción queda visible en pantalla.
+var _grabMediaRecorder=null;
+var _grabStream=null;
+var _grabChunks=[];
+var _grabTimerInterval=null;
+var _grabSegundos=0;
+var _grabMimeType='';
+
+window.toggleGrabacionSesion=function(){
+  if(_grabMediaRecorder&&_grabMediaRecorder.state==='recording'){
+    detenerGrabacionSesion();
+  }else{
+    iniciarGrabacionSesion();
+  }
+};
+
+async function iniciarGrabacionSesion(){
+  var apiKey=(typeof getGeminiKey==='function')?getGeminiKey():'';
+  if(!apiKey){
+    toast('🔑 Configura tu API key de Gemini primero (arriba en el panel de IA)');
+    return;
+  }
+  var confirmado=confirm('Confirma que el paciente fue informado y autorizó la grabación de esta sesión, exclusivamente para generar una transcripción de apoyo clínico.\n\nEl audio NO se guarda — se transcribe y se elimina de inmediato.\n\n¿Continuar?');
+  if(!confirmado)return;
+
+  try{
+    _grabStream=await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(e){
+    toast('❌ No se pudo acceder al micrófono: '+e.message);
+    return;
+  }
+
+  // Elegir el formato soportado — Safari/iOS no soporta webm, prefiere mp4/aac
+  var candidatos=['audio/mp4','audio/aac','audio/webm;codecs=opus','audio/webm'];
+  _grabMimeType='';
+  for(var i=0;i<candidatos.length;i++){
+    if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(candidatos[i])){
+      _grabMimeType=candidatos[i];break;
+    }
+  }
+  try{
+    _grabMediaRecorder=_grabMimeType?new MediaRecorder(_grabStream,{mimeType:_grabMimeType}):new MediaRecorder(_grabStream);
+  }catch(e){
+    toast('❌ Tu navegador no soporta grabación de audio: '+e.message);
+    _grabStream.getTracks().forEach(function(t){t.stop();});
+    _grabStream=null;
+    return;
+  }
+  _grabChunks=[];
+  _grabMediaRecorder.ondataavailable=function(ev){if(ev.data&&ev.data.size>0)_grabChunks.push(ev.data);};
+  _grabMediaRecorder.onstop=function(){ procesarGrabacionSesion(apiKey); };
+  _grabMediaRecorder.start();
+
+  _grabSegundos=0;
+  var anexoViejo=document.getElementById('ic-anexo-transcripcion');
+  if(anexoViejo)anexoViejo.style.display='none';
+  var wrap=document.getElementById('transcripcion-wrap');
+  if(wrap)wrap.style.display='';
+  var status=document.getElementById('transc-status');
+  if(status){status.textContent='🔴 Grabando…';status.style.color='#991b1b';}
+  var txt=document.getElementById('transc-texto');
+  if(txt){txt.value='';txt.placeholder='La transcripción aparecerá aquí…';}
+  var btn=document.getElementById('btn-grabar-sesion');
+  if(btn){btn.textContent='⏹ Detener y transcribir';btn.style.background='#7f1d1d';btn.style.borderColor='#7f1d1d';}
+
+  if(_grabTimerInterval)clearInterval(_grabTimerInterval);
+  _grabTimerInterval=setInterval(function(){
+    _grabSegundos++;
+    var m=String(Math.floor(_grabSegundos/60)).padStart(2,'0');
+    var s=String(_grabSegundos%60).padStart(2,'0');
+    var timerEl=document.getElementById('transc-timer');
+    if(timerEl)timerEl.textContent=m+':'+s;
+  },1000);
+}
+
+function detenerGrabacionSesion(){
+  if(_grabMediaRecorder&&_grabMediaRecorder.state==='recording'){
+    _grabMediaRecorder.stop();
+  }
+  if(_grabTimerInterval){clearInterval(_grabTimerInterval);_grabTimerInterval=null;}
+  var btn=document.getElementById('btn-grabar-sesion');
+  if(btn){btn.textContent='🎙️ Grabar sesión';btn.style.background='#dc2626';btn.style.borderColor='#dc2626';}
+  var status=document.getElementById('transc-status');
+  if(status){status.textContent='⏳ Transcribiendo…';status.style.color='#92400e';}
+}
+
+async function procesarGrabacionSesion(apiKey){
+  // Apagar el micrófono de inmediato — ya no se necesita el stream
+  if(_grabStream){_grabStream.getTracks().forEach(function(t){t.stop();});_grabStream=null;}
+  var blob=new Blob(_grabChunks,{type:_grabMimeType||'audio/webm'});
+  _grabChunks=[]; // liberar de inmediato, ya no se necesita tras crear el blob
+  _grabMediaRecorder=null;
+
+  if(blob.size<500){
+    toast('⚠️ La grabación fue muy corta o vacía');
+    var st=document.getElementById('transc-status');if(st)st.textContent='';
+    return;
+  }
+
+  try{
+    var base64=await new Promise(function(resolve,reject){
+      var reader=new FileReader();
+      reader.onloadend=function(){resolve(reader.result.split(',')[1]);};
+      reader.onerror=reject;
+      reader.readAsDataURL(blob);
+    });
+    // El blob ya cumplió su propósito (convertido a base64) — se descarta la referencia
+    blob=null;
+
+    var texto=await geminiTranscribirAudio(apiKey,base64,_grabMimeType||'audio/webm');
+    base64=null; // el audio en base64 también se descarta tras enviarlo
+
+    var txt=document.getElementById('transc-texto');
+    if(txt)txt.value=texto||'';
+    var status=document.getElementById('transc-status');
+    if(status){status.textContent=texto?'✅ Transcripción lista':'⚠️ No se obtuvo texto';status.style.color=texto?'#15803d':'#92400e';}
+    var timerEl=document.getElementById('transc-timer');
+    if(timerEl)timerEl.textContent='';
+  }catch(e){
+    console.error('Error transcribiendo:',e);
+    var status2=document.getElementById('transc-status');
+    if(status2){status2.textContent='❌ Error: '+e.message;status2.style.color='#dc2626';}
+    toast('❌ Error al transcribir: '+e.message);
+  }
+}
+
+window.geminiTranscribirAudio=async function(apiKey,base64Audio,mimeType){
+  var instruccion='Transcribe este audio de una sesión clínica de psicología al español de la forma MÁS FIEL posible a lo hablado, sin resumir ni interpretar. '+
+    'Si logras distinguir quién habla, marca cada intervención con "Psicóloga:" o "Paciente:" (u otro interlocutor si aplica, ej. "Familiar:"). '+
+    'Conserva el contenido clínico relevante tal como se dijo. Puedes omitir muletillas sin valor clínico (eh, este, o sea repetido) pero NUNCA omitas contenido con relevancia clínica. '+
+    'Si una parte es inaudible o inentendible, escribe [inaudible] en ese punto y continúa. No agregues comentarios, análisis ni resumen — solo la transcripción.';
+  var models=['gemini-2.0-flash-lite','gemini-2.5-flash'];
+  var lastErr=null;
+  for(var i=0;i<models.length;i++){
+    var model=models[i];
+    try{
+      var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+apiKey,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          contents:[{parts:[
+            {inline_data:{mime_type:mimeType,data:base64Audio}},
+            {text:instruccion}
+          ]}],
+          generationConfig:{temperature:0.15,maxOutputTokens:8000}
+        })
+      });
+      var d=await r.json();
+      if(!r.ok||d.error){
+        var msg=(d.error&&d.error.message)||'Error API';
+        var msgLow=msg.toLowerCase();
+        if(msgLow.includes('demand')||msgLow.includes('overload')||msgLow.includes('no longer available')||msgLow.includes('deprecated')||r.status===503||r.status===429||r.status===404){
+          lastErr=new Error(msg);continue;
+        }
+        throw new Error(msg);
+      }
+      var texto=(d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts&&d.candidates[0].content.parts[0]&&d.candidates[0].content.parts[0].text)||'';
+      return texto.trim();
+    }catch(e){
+      var eLow=(e.message||'').toLowerCase();
+      if(eLow.includes('demand')||eLow.includes('overload')||eLow.includes('no longer available')||eLow.includes('deprecated')){lastErr=e;continue;}
+      throw e;
+    }
+  }
+  throw lastErr||new Error('Gemini no disponible para transcribir audio');
+};
+
+window.copiarTranscripcion=function(){
+  var txt=document.getElementById('transc-texto');
+  if(!txt||!txt.value){toast('⚠️ No hay transcripción para copiar');return;}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt.value).then(function(){toast('✅ Transcripción copiada');});
+  }else{
+    txt.select();document.execCommand('copy');toast('✅ Transcripción copiada');
+  }
+};
+
+window.descartarTranscripcion=function(){
+  if(!confirm('¿Descartar esta transcripción? No se podrá recuperar.'))return;
+  var txt=document.getElementById('transc-texto');if(txt)txt.value='';
+  window._transcripcionSesion='';
+  var wrap=document.getElementById('transcripcion-wrap');if(wrap)wrap.style.display='none';
+  toast('🗑️ Transcripción descartada');
+};
+
+// Guarda la transcripción como contexto global y dispara la generación con IA
+window.usarTranscripcionEnIA=function(){
+  var txt=document.getElementById('transc-texto');
+  var val=txt?txt.value.trim():'';
+  if(!val){toast('⚠️ No hay transcripción para usar');return;}
+  window._transcripcionSesion=val;
+  window._ultimaTranscripcionParaAnexo=val; // copia persistente solo para mostrar el anexo (no se envía a la IA desde aquí)
+  window._notaConTranscripcion=true;
+  toast('✨ Generando nota a partir de la transcripción…');
+  if(typeof generarNotaIC_IA==='function')generarNotaIC_IA();
+};
+
+// Muestra u oculta el anexo de transcripción junto a la nota generada
+window.mostrarAnexoTranscripcion=function(){
+  var anexo=document.getElementById('ic-anexo-transcripcion');
+  var cont=document.getElementById('ic-anexo-transcripcion-texto');
+  if(!anexo||!cont)return;
+  var texto=window._ultimaTranscripcionParaAnexo||'';
+  if(texto){
+    cont.textContent=texto;
+    anexo.style.display='';
+  }else{
+    anexo.style.display='none';
+    cont.textContent='';
+  }
+};
+
+window.copiarAnexoTranscripcion=function(){
+  var texto=window._ultimaTranscripcionParaAnexo||'';
+  if(!texto){toast('⚠️ No hay transcripción en el anexo');return;}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(function(){toast('✅ Anexo copiado');});
+  }else{
+    toast('⚠️ No se pudo copiar automáticamente');
+  }
+};
+
+// Helper: texto de la transcripción (si existe) para inyectar en cualquier prompt.
+// Se consume UNA sola vez (se borra tras leerse) para que nunca se filtre
+// por error hacia la nota de un paciente distinto más adelante.
+window.getTranscripcionParaPrompt=function(){
+  var t=window._transcripcionSesion;
+  if(!t)return '';
+  window._transcripcionSesion='';
+  return '\n\nTRANSCRIPCIÓN LITERAL DE LA SESIÓN (fuente principal — prioriza esta información sobre los datos de formulario si hay conflicto):\n'+t+'\n';
+};
+
 // ── HISTORIAL IC POR PACIENTE ──
 
 
@@ -9245,6 +9501,12 @@ window.generarNotaIC=function(){
 
 // ── GENERACIÓN CON IA (formato institucional DGW) — botón ✨ ─────────
 window.generarNotaIC_IA=function(){
+  // Si esta generación NO viene de "usar transcripción", limpiar el anexo de una nota anterior
+  if(!window._notaConTranscripcion){
+    window._ultimaTranscripcionParaAnexo='';
+    if(typeof mostrarAnexoTranscripcion==='function')mostrarAnexoTranscripcion();
+  }
+  window._notaConTranscripcion=false;
   var modo=icCurrentMode||'nueva';
   var apiKey=getGeminiKey();
   if(!apiKey){
@@ -9314,6 +9576,7 @@ window.recolectarFormularioIC=function(modoContainerId){
 window.generarNotaGenericaIA=async function(apiKey,modo,formato){
   var contId={rev:'ic-mode-rev',fam:'ic-mode-fam',esp:'ic-mode-esp'}[modo];
   var datos=recolectarFormularioIC(contId);
+  datos+=(typeof getTranscripcionParaPrompt==='function'?getTranscripcionParaPrompt():'');
   if(!datos||datos.length<10){toast('⚠️ Llena el formulario antes de generar con IA');return;}
   var nombre=(document.getElementById('ic-pnombre')||{}).value||'el paciente';
   var edad=(document.getElementById('ic-edad')||{}).value||'';
@@ -9362,6 +9625,7 @@ window.generarNotaGenericaIA=async function(apiKey,modo,formato){
       if(!/ADVERTENCIA LEGAL|NOTA ACLARATORIA/i.test(texto))texto+=ADV;
     }
     setIcOut('ic-out-seg-texto',texto);
+    if(typeof mostrarAnexoTranscripcion==='function')mostrarAnexoTranscripcion();
   }catch(e){
     console.error('IA '+modo+' error:',e);
     var el=document.getElementById('ic-out-seg-texto');
@@ -9465,7 +9729,7 @@ async function generarNotaIcConGemini(apiKey){
   var _urgencia=icv('ic-urgencia-val')||icv('ic-urgencia')||'';
   var _medSol=icv('ic-medico-sol')||'';
   var _preguntaIC=chips('Pregunta específica a responder')||'';
-  var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}. Dx médico: ${dx}. Días internado: ${_diasInternacion||'no registrado'}. Riesgo suicida: ${sev}.${_urgencia?' Urgencia IC: '+_urgencia+'.':''}${_medSol?' Médico solicitante: '+_medSol+'.':''}${_motivoMedico?' Pedido médico: '+_motivoMedico+'.':''}${_preguntaIC?' Pregunta IC: '+_preguntaIC+'.':''}${_tratMedico?' Tratamiento médico: '+_tratMedico+'.':''}${_inicioEvolucion?' Inicio/evolución: '+_inicioEvolucion+'.':''}`;
+  var ctx=`Paciente: ${edad?edad+' años':'edad no registrada'}${sexo?' | '+sexo:''}. Dx médico: ${dx}. Días internado: ${_diasInternacion||'no registrado'}. Riesgo suicida: ${sev}.${_urgencia?' Urgencia IC: '+_urgencia+'.':''}${_medSol?' Médico solicitante: '+_medSol+'.':''}${_motivoMedico?' Pedido médico: '+_motivoMedico+'.':''}${_preguntaIC?' Pregunta IC: '+_preguntaIC+'.':''}${_tratMedico?' Tratamiento médico: '+_tratMedico+'.':''}${_inicioEvolucion?' Inicio/evolución: '+_inicioEvolucion+'.':''}`+(typeof getTranscripcionParaPrompt==='function'?getTranscripcionParaPrompt():'');
   if(_testsResumen)ctx+=`\n\n${_testsResumen}`;
   // Incluir valoración de capacidad si se llenó
   var _capTextoIC=getCapInlineTexto('ic');
@@ -9572,6 +9836,7 @@ async function generarNotaIcConGemini(apiKey){
     var ADVERTENCIA_LEGAL_IC='ADVERTENCIA LEGAL: Las presentes observaciones tienen carácter consultivo y no sustituyen las decisiones diagnósticas ni terapéuticas del equipo médico tratante. La presente nota fue generada con apoyo de inteligencia artificial y revisada por la psicóloga tratante, quien asume la responsabilidad legal de su contenido. Esta nota no debe ser interpretada como una orden médica ni como indicación de tratamiento farmacológico.';
     if(tra&&!/ADVERTENCIA LEGAL|NOTA ACLARATORIA/i.test(tra))tra=tra.trim()+'\n\n'+ADVERTENCIA_LEGAL_IC;
     setIcOut('ic-out-trat',tra);
+    if(typeof mostrarAnexoTranscripcion==='function')mostrarAnexoTranscripcion();
   }catch(e){
     console.error('Gemini IC error:',e);
     ['ic-out-sub','ic-out-obj','ic-out-resp','ic-out-trat'].forEach(function(id){
@@ -9831,6 +10096,7 @@ INTERVENCIÓN Y PLAN:
 ${tratNotas?'- Notas de tratamiento: '+tratNotas:''}
 ${_segTestsResumen?'\n'+_segTestsResumen:''}
 ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
+${(typeof getTranscripcionParaPrompt==='function'?getTranscripcionParaPrompt():'')}
 `.trim();
 
   var prompt='Eres psicóloga clínica hospitalaria de la ESE Hospital La María. Redacta una NOTA DE EVOLUCIÓN (SEGUIMIENTO) para el sistema DGW, jurídicamente sólida, clínicamente rigurosa y útil para el equipo tratante. '+
@@ -9906,6 +10172,7 @@ ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
     }
     if(_nota){
       setIcOut('ic-out-seg-texto',_nota);
+      if(typeof mostrarAnexoTranscripcion==='function')mostrarAnexoTranscripcion();
     }else{
       var _outTrunc=document.getElementById('ic-out-seg-texto');
       if(_outTrunc){_outTrunc.classList.remove('ph');_outTrunc.textContent='⚠️ La respuesta de la IA llegó incompleta (la nota se cortó). Presiona ✨ Generar con IA de nuevo.';}
