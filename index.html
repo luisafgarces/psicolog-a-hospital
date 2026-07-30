@@ -2994,6 +2994,8 @@ input.toggle-cb{display:none}
           <select id="reingreso-estado" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
             <option value="nueva-interconsulta-pendiente">IC Nueva</option>
             <option value="seguimiento">Seguimiento</option>
+            <option value="de-colega">👥 De mi colega</option>
+            <option value="transferido">➡️ Transferido a colega</option>
           </select>
         </div>
         <div class="form-group">
@@ -3057,6 +3059,16 @@ input.toggle-cb{display:none}
       <div class="form-group">
         <label>Justificación <span style="font-weight:400;color:var(--text3)">(opcional)</span></label>
         <textarea id="reinterc-justif" rows="2" placeholder="Justificación de la pertinencia o no pertinencia..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Estado actual</label>
+        <select id="reinterc-estado" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif">
+          <option value="">Sin cambio (automático según pertinencia)</option>
+          <option value="nueva-interconsulta-pendiente">IC Nueva</option>
+          <option value="seguimiento">Seguimiento</option>
+          <option value="de-colega">👥 De mi colega</option>
+          <option value="transferido">➡️ Transferido a colega</option>
+        </select>
       </div>
       <div class="form-group">
         <label>Próxima sesión <span style="font-weight:400;font-size:0.72rem;color:var(--text3)">(aparecerá en ronda ese día)</span></label>
@@ -15347,6 +15359,7 @@ window.abrirReinterconsulta=function(pacId){
   var qp=document.getElementById('reinterc-que-pide'); if(qp) qp.value='';
   var rm=document.getElementById('reinterc-medico'); if(rm) rm.value='';
   document.getElementById('reinterc-prox-sesion').value='';
+  var reEst=document.getElementById('reinterc-estado'); if(reEst) reEst.value='';
   document.querySelectorAll('input[name="reinterc-pertinente"]').forEach(function(r){r.checked=false;});
   if(typeof openModal==='function') openModal('modal-reinterc');
   else document.getElementById('modal-reinterc').style.display='flex';
@@ -15383,7 +15396,16 @@ window.guardarReinterconsulta=async function(){
       if(typeof window.calRender==='function') window.calRender();
     }
     // Actualizar motivo IC del paciente si es pertinente
-    if(pertinente==='si'&&pac){
+    var reintercEstadoSel=document.getElementById('reinterc-estado')?.value||'';
+    if(reintercEstadoSel){
+      // El usuario eligió explícitamente un estado (incluye De mi colega / Transferido a colega)
+      var reintercUpdEstado={estado:reintercEstadoSel};
+      if(pertinente==='si'){reintercUpdEstado.motivoIC=motivo;reintercUpdEstado.fechaIC=fecha;reintercUpdEstado.quePide=reintercQuePide;}
+      await window._updateDoc(window._doc(window.db,'pacientes',pacId),reintercUpdEstado);
+      if(pac) Object.assign(pac,reintercUpdEstado);
+      if(typeof rdRefrescarTablero==='function') rdRefrescarTablero();
+      if(typeof window.renderDashboard==='function') window.renderDashboard();
+    }else if(pertinente==='si'&&pac){
       await window._updateDoc(window._doc(window.db,'pacientes',pacId),{
         motivoIC:motivo, fechaIC:fecha, quePide:reintercQuePide,
         estado:'nueva-interconsulta-pendiente'
