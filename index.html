@@ -2867,7 +2867,10 @@ input.toggle-cb{display:none}
             <div id="ps-ultima-nota-anexo" style="display:none;margin-top:10px;background:#faf5ff;border:1.5px dashed #c4b5fd;border-radius:8px;padding:10px 12px">
               <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">
                 <span style="font-size:0.68rem;font-weight:700;color:#6d28d9">📎 ANEXO — Transcripción de la sesión</span>
-                <button class="btn btn-sm btn-secondary" style="padding:2px 8px;font-size:0.68rem" onclick="psUltimaNotaAnexoCopiar()">📋 Copiar</button>
+                <span style="display:flex;gap:6px">
+                  <button class="btn btn-sm btn-secondary" style="padding:2px 8px;font-size:0.68rem" onclick="psUltimaNotaAnexoCopiar()">📋 Copiar</button>
+                  <button class="btn btn-sm btn-secondary" style="padding:2px 8px;font-size:0.68rem;color:#dc2626;border-color:#dc2626" onclick="psUltimaNotaAnexoQuitar()">🗑️ Quitar</button>
+                </span>
               </div>
               <div id="ps-ultima-nota-anexo-texto" style="font-size:0.74rem;line-height:1.55;color:var(--text2);white-space:pre-wrap;max-height:200px;overflow-y:auto;background:#fff;border:1px solid #e9d5ff;border-radius:6px;padding:8px"></div>
             </div>
@@ -8089,6 +8092,22 @@ window.geminiCall = async function(apiKey, prompt, maxTokens){
 
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
 
+// Quita el anexo de transcripción de una nota YA GUARDADA (por si quedó pegado por error
+// de una nota anterior antes de que se corrigiera ese comportamiento).
+window.quitarAnexoDeNota=async function(id,col){
+  if(!confirm('¿Quitar la transcripción anexada a esta nota? Esto no borra la nota, solo el anexo.'))return;
+  try{
+    await window._updateDoc(window._doc(window.db,col,id),{transcripcionSesion:''});
+    toast('✅ Anexo eliminado de esta nota');
+    if(typeof mhicRender==='function')mhicRender();
+    if(typeof hpacRenderNotas==='function')hpacRenderNotas();
+    if(window._psPacId&&typeof psCargarUltimaNota==='function')psCargarUltimaNota(window._psPacId);
+  }catch(e){
+    console.error('Error quitando anexo:',e);
+    toast('❌ Error: '+e.message);
+  }
+};
+
 // ── GRABACIÓN DE SESIÓN Y TRANSCRIPCIÓN CON IA ────────────────────────
 // El audio NUNCA se guarda: se graba en memoria, se envía a Gemini para
 // transcribir, y se descarta de inmediato (variable liberada + micrófono
@@ -8443,7 +8462,10 @@ function mhicRender(){
       transcHtml='<div style="margin-top:8px;background:#faf5ff;border:1.5px dashed #c4b5fd;border-radius:8px;padding:10px 12px">'
         +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
         +'<span style="font-size:0.68rem;font-weight:700;color:#6d28d9">📎 ANEXO — Transcripción de la sesión</span>'
+        +'<span style="display:flex;gap:6px">'
         +'<button class="btn btn-sm btn-secondary" style="padding:2px 8px;font-size:0.68rem" onclick="navigator.clipboard.writeText(this.closest(\'div\').parentElement.querySelector(\'.mhic-transc-texto\').textContent);if(typeof toast===\'function\')toast(\'✅ Transcripción copiada\')">📋 Copiar</button>'
+        +'<button class="btn btn-sm btn-secondary" style="padding:2px 8px;font-size:0.68rem;color:#dc2626;border-color:#dc2626" onclick="quitarAnexoDeNota(\''+e.id+'\',\''+e._col+'\')">🗑️ Quitar</button>'
+        +'</span>'
         +'</div>'
         +'<div class="mhic-transc-texto" style="font-size:0.74rem;line-height:1.55;color:var(--text2);white-space:pre-wrap;max-height:200px;overflow-y:auto;background:#fff;border:1px solid #e9d5ff;border-radius:6px;padding:8px">'+e.transcripcionSesion+'</div>'
         +'</div>';
@@ -8882,7 +8904,10 @@ window.hpacRenderNotas=()=>{
         transcHtml2='<div style="margin-top:10px;background:#faf5ff;border:1.5px dashed #c4b5fd;border-radius:8px;padding:10px 12px">'
           +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
           +'<span style="font-size:0.68rem;font-weight:700;color:#6d28d9">📎 ANEXO — Transcripción de la sesión</span>'
+          +'<span style="display:flex;gap:6px">'
           +'<button class="btn btn-sm btn-secondary" style="padding:2px 8px;font-size:0.68rem" onclick="event.stopPropagation();navigator.clipboard.writeText(this.closest(\'div\').parentElement.querySelector(\'.hpac-transc-texto\').textContent);if(typeof toast===\'function\')toast(\'✅ Transcripción copiada\')">📋 Copiar</button>'
+          +'<button class="btn btn-sm btn-secondary" style="padding:2px 8px;font-size:0.68rem;color:#dc2626;border-color:#dc2626" onclick="event.stopPropagation();quitarAnexoDeNota(\''+e.id+'\',\''+e._col+'\')">🗑️ Quitar</button>'
+          +'</span>'
           +'</div>'
           +'<div class="hpac-transc-texto" style="font-size:0.74rem;line-height:1.55;color:var(--text2);white-space:pre-wrap;max-height:200px;overflow-y:auto;background:#fff;border:1px solid #e9d5ff;border-radius:6px;padding:8px">'+e.transcripcionSesion+'</div>'
           +'</div>';
@@ -16266,6 +16291,8 @@ window.psCargarUltimaNota = async function(pacId){
     var anexoDiv=document.getElementById('ps-ultima-nota-anexo');
     var anexoTexto=document.getElementById('ps-ultima-nota-anexo-texto');
     window._psUltimaNotaTranscripcion=nota.transcripcionSesion||'';
+    window._psUltimaNotaId=nota.id||'';
+    window._psUltimaNotaCol=nota._col||'';
     if(anexoDiv&&anexoTexto){
       if(nota.transcripcionSesion){
         anexoTexto.textContent=nota.transcripcionSesion;
@@ -16286,6 +16313,14 @@ window.psUltimaNotaAnexoCopiar=function(){
   }).catch(function(){
     if(typeof toast==='function') toast('❌ No se pudo copiar');
   });
+};
+
+window.psUltimaNotaAnexoQuitar=function(){
+  if(!window._psUltimaNotaId||!window._psUltimaNotaCol){
+    if(typeof toast==='function') toast('⚠️ No se pudo identificar la nota');
+    return;
+  }
+  if(typeof quitarAnexoDeNota==='function') quitarAnexoDeNota(window._psUltimaNotaId,window._psUltimaNotaCol);
 };
 
 window.psUltimaNotaCopiar = function(){
