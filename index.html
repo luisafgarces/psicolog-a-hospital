@@ -5912,6 +5912,16 @@ window.goTo = function(page){
       window.setICMode('nueva');
     }
   }
+  // Si ENTRAMOS a interconsultas, siempre empezar con la transcripción en blanco.
+  // Evita que quede pegado el texto de un paciente anterior (grabado o pegado a mano).
+  if(page==='interconsultas'){
+    var _tt=document.getElementById('transc-texto'); if(_tt)_tt.value='';
+    var _tw=document.getElementById('transcripcion-wrap'); if(_tw)_tw.style.display='none';
+    var _ta=document.getElementById('ic-anexo-transcripcion'); if(_ta)_ta.style.display='none';
+    window._transcripcionSesion='';
+    window._ultimaTranscripcionParaAnexo='';
+    window._notaConTranscripcion=false;
+  }
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
     'psicoeducacion','metricas','ronda-diaria','calendario'];
@@ -9533,9 +9543,11 @@ window.generarNotaIC=function(){
 
 // ── GENERACIÓN CON IA (formato institucional DGW) — botón ✨ ─────────
 window.generarNotaIC_IA=function(){
-  // Si esta generación NO viene de "usar transcripción", limpiar el anexo de una nota anterior
+  // Si esta generación NO viene de "usar transcripción", limpiar cualquier transcripción
+  // pendiente de una nota anterior — evita que se filtre por accidente a una nota normal
   if(!window._notaConTranscripcion){
     window._ultimaTranscripcionParaAnexo='';
+    window._transcripcionSesion='';
     if(typeof mostrarAnexoTranscripcion==='function')mostrarAnexoTranscripcion();
   }
   window._notaConTranscripcion=false;
@@ -10688,6 +10700,12 @@ window.limpiarFormIC=function(confirm_=true){
   var ra=document.getElementById('ic-risk-alert');if(ra)ra.classList.remove('show');
   // Resetear notas generadas
   var wrap=document.getElementById('ic-output-wrap');if(wrap)wrap.style.display='none';
+  // Resetear transcripción de sesión — nunca dejar pegado el texto de un paciente anterior
+  var _twClr=document.getElementById('transcripcion-wrap'); if(_twClr)_twClr.style.display='none';
+  var _taClr=document.getElementById('ic-anexo-transcripcion'); if(_taClr)_taClr.style.display='none';
+  window._transcripcionSesion='';
+  window._ultimaTranscripcionParaAnexo='';
+  window._notaConTranscripcion=false;
   // Resetear orientación IA
   var orientOut=document.getElementById('ic-orientacion-out');
   if(orientOut){orientOut.style.display='none';orientOut.textContent='';}
