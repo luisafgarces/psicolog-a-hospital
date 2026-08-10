@@ -5924,6 +5924,9 @@ window.goTo = function(page){
     window._transcripcionSesion='';
     window._ultimaTranscripcionParaAnexo='';
     window._notaConTranscripcion=false;
+    if(typeof _grabEsContinuacion!=='undefined')_grabEsContinuacion=false;
+    var _btnG=document.getElementById('btn-grabar-sesion');
+    if(_btnG){_btnG.textContent='🎙️ Grabar sesión';_btnG.style.background='#dc2626';_btnG.style.borderColor='#dc2626';}
   }
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
@@ -8127,6 +8130,10 @@ var _grabChunks=[];
 var _grabTimerInterval=null;
 var _grabSegundos=0;
 var _grabMimeType='';
+var _grabWakeLock=null;
+var _grabInterrumpidaPorSistema=false;
+var _grabVisibilityHandler=null;
+var _grabEsContinuacion=false;
 
 window.toggleGrabacionSesion=function(){
   if(_grabMediaRecorder&&_grabMediaRecorder.state==='recording'){
@@ -8136,13 +8143,40 @@ window.toggleGrabacionSesion=function(){
   }
 };
 
+// Mantiene la pantalla encendida mientras se graba, para que el iPad no se
+// bloquee y corte el micrófono a mitad de la sesión. No funciona si presionas
+// el botón físico de bloqueo (eso es un límite del sistema, no se puede evitar).
+async function activarWakeLock(){
+  try{
+    if('wakeLock' in navigator){
+      _grabWakeLock=await navigator.wakeLock.request('screen');
+      _grabWakeLock.addEventListener('release',function(){
+        // Si se liberó SOLO porque cambiamos de pestaña/app (no porque detuvimos
+        // la grabación a propósito), es probable que la grabación se haya cortado.
+        if(_grabMediaRecorder&&_grabMediaRecorder.state==='recording'){
+          console.warn('Wake lock liberado durante grabación activa');
+        }
+      });
+    }
+  }catch(e){
+    console.warn('No se pudo activar wake lock:',e);
+    // No es crítico — seguimos grabando igual, solo sin la protección extra
+  }
+}
+function liberarWakeLock(){
+  if(_grabWakeLock){
+    try{_grabWakeLock.release();}catch(e){}
+    _grabWakeLock=null;
+  }
+}
+
 async function iniciarGrabacionSesion(){
   var apiKey=(typeof getGeminiKey==='function')?getGeminiKey():'';
   if(!apiKey){
     toast('🔑 Configura tu API key de Gemini primero (arriba en el panel de IA)');
     return;
   }
-  var confirmado=confirm('Confirma que el paciente fue informado y autorizó la grabación de esta sesión, exclusivamente para generar una transcripción de apoyo clínico.\n\nEl audio NO se guarda — se transcribe y se elimina de inmediato.\n\n¿Continuar?');
+  var confirmado=_grabEsContinuacion||confirm('Confirma que el paciente fue informado y autorizó la grabación de esta sesión, exclusivamente para generar una transcripción de apoyo clínico.\n\nEl audio NO se guarda — se transcribe y se elimina de inmediato.\n\n¿Continuar?');
   if(!confirmado)return;
 
   try{
@@ -8150,6 +8184,18 @@ async function iniciarGrabacionSesion(){
   }catch(e){
     toast('❌ No se pudo acceder al micrófono: '+e.message);
     return;
+  }
+
+  // Si el sistema corta el micrófono a la fuerza (pantalla bloqueada, etc.),
+  // detenemos el grabador manualmente para que procese lo que alcanzó a capturar.
+  var _pista=_grabStream.getAudioTracks()[0];
+  if(_pista){
+    _pista.addEventListener('ended',function(){
+      if(_grabMediaRecorder&&_grabMediaRecorder.state==='recording'){
+        _grabInterrumpidaPorSistema=true;
+        _grabMediaRecorder.stop();
+      }
+    });
   }
 
   // Elegir el formato soportado — Safari/iOS no soporta webm, prefiere mp4/aac
@@ -8171,7 +8217,8 @@ async function iniciarGrabacionSesion(){
   _grabChunks=[];
   _grabMediaRecorder.ondataavailable=function(ev){if(ev.data&&ev.data.size>0)_grabChunks.push(ev.data);};
   _grabMediaRecorder.onstop=function(){ procesarGrabacionSesion(apiKey); };
-  _grabMediaRecorder.start();
+  _grabMediaRecorder.start(3000); // guarda en pedacitos cada 3s — si algo interrumpe, se pierde menos
+  activarWakeLock(); // evita que la pantalla se bloquee mientras se graba
 
   _grabSegundos=0;
   var anexoViejo=document.getElementById('ic-anexo-transcripcion');
@@ -8181,7 +8228,7 @@ async function iniciarGrabacionSesion(){
   var status=document.getElementById('transc-status');
   if(status){status.textContent='🔴 Grabando…';status.style.color='#991b1b';}
   var txt=document.getElementById('transc-texto');
-  if(txt){txt.value='';txt.placeholder='La transcripción aparecerá aquí…';}
+  if(txt&&!_grabEsContinuacion){txt.value='';txt.placeholder='La transcripción aparecerá aquí…';}
   var btn=document.getElementById('btn-grabar-sesion');
   if(btn){btn.textContent='⏹ Detener y transcribir';btn.style.background='#7f1d1d';btn.style.borderColor='#7f1d1d';}
 
@@ -8199,23 +8246,36 @@ function detenerGrabacionSesion(){
   if(_grabMediaRecorder&&_grabMediaRecorder.state==='recording'){
     _grabMediaRecorder.stop();
   }
-  if(_grabTimerInterval){clearInterval(_grabTimerInterval);_grabTimerInterval=null;}
-  var btn=document.getElementById('btn-grabar-sesion');
-  if(btn){btn.textContent='🎙️ Grabar sesión';btn.style.background='#dc2626';btn.style.borderColor='#dc2626';}
   var status=document.getElementById('transc-status');
   if(status){status.textContent='⏳ Transcribiendo…';status.style.color='#92400e';}
 }
 
 async function procesarGrabacionSesion(apiKey){
+  // Limpieza que SIEMPRE debe pasar al terminar, sea parada manual o interrupción del sistema
+  liberarWakeLock();
+  if(_grabTimerInterval){clearInterval(_grabTimerInterval);_grabTimerInterval=null;}
+  var btnLimpio=document.getElementById('btn-grabar-sesion');
+  if(btnLimpio&&!_grabInterrumpidaPorSistema){btnLimpio.textContent='🎙️ Grabar sesión';btnLimpio.style.background='#dc2626';btnLimpio.style.borderColor='#dc2626';}
+
   // Apagar el micrófono de inmediato — ya no se necesita el stream
   if(_grabStream){_grabStream.getTracks().forEach(function(t){t.stop();});_grabStream=null;}
   var blob=new Blob(_grabChunks,{type:_grabMimeType||'audio/webm'});
+  var huboAudioParcial=_grabChunks.length>0;
   _grabChunks=[]; // liberar de inmediato, ya no se necesita tras crear el blob
   _grabMediaRecorder=null;
 
+  var fueInterrupcion=_grabInterrumpidaPorSistema;
+  _grabInterrumpidaPorSistema=false;
+
   if(blob.size<500){
-    toast('⚠️ La grabación fue muy corta o vacía');
-    var st=document.getElementById('transc-status');if(st)st.textContent='';
+    if(fueInterrupcion){
+      toast('⚠️ La grabación se interrumpió (pantalla bloqueada) antes de capturar audio suficiente');
+      var st0=document.getElementById('transc-status');
+      if(st0){st0.textContent='⚠️ Interrumpida — presiona grabar de nuevo para reintentar';st0.style.color='#dc2626';}
+    }else{
+      toast('⚠️ La grabación fue muy corta o vacía');
+      var st=document.getElementById('transc-status');if(st)st.textContent='';
+    }
     return;
   }
 
@@ -8233,9 +8293,27 @@ async function procesarGrabacionSesion(apiKey){
     base64=null; // el audio en base64 también se descarta tras enviarlo
 
     var txt=document.getElementById('transc-texto');
-    if(txt)txt.value=texto||'';
+    if(txt){
+      if(_grabEsContinuacion&&txt.value.trim()){
+        // Es una continuación de una grabación anterior — se une el texto, no se reemplaza
+        txt.value=txt.value.trim()+'\n\n[— continuación —]\n\n'+(texto||'');
+      }else{
+        txt.value=texto||'';
+      }
+    }
+    _grabEsContinuacion=false;
+
     var status=document.getElementById('transc-status');
-    if(status){status.textContent=texto?'✅ Transcripción lista':'⚠️ No se obtuvo texto';status.style.color=texto?'#15803d':'#92400e';}
+    var btn=document.getElementById('btn-grabar-sesion');
+    if(fueInterrupcion){
+      // Se cortó por el sistema — invitar a continuar en vez de dar por terminado
+      if(status){status.textContent='⚠️ Se interrumpió la grabación — lo capturado hasta el momento ya está transcrito arriba';status.style.color='#c2410c';}
+      _grabEsContinuacion=true;
+      if(btn){btn.textContent='🎙️ Continuar grabando (parte 2)';btn.style.background='#c2410c';btn.style.borderColor='#c2410c';}
+      toast('⚠️ La grabación se interrumpió — puedes continuar sin perder lo ya capturado');
+    }else{
+      if(status){status.textContent=texto?'✅ Transcripción lista':'⚠️ No se obtuvo texto';status.style.color=texto?'#15803d':'#92400e';}
+    }
     var timerEl=document.getElementById('transc-timer');
     if(timerEl)timerEl.textContent='';
   }catch(e){
@@ -8243,6 +8321,12 @@ async function procesarGrabacionSesion(apiKey){
     var status2=document.getElementById('transc-status');
     if(status2){status2.textContent='❌ Error: '+e.message;status2.style.color='#dc2626';}
     toast('❌ Error al transcribir: '+e.message);
+    if(fueInterrupcion){
+      // Aunque falle la transcripción, dejamos abierta la posibilidad de continuar
+      _grabEsContinuacion=true;
+      var btn2=document.getElementById('btn-grabar-sesion');
+      if(btn2){btn2.textContent='🎙️ Continuar grabando (parte 2)';btn2.style.background='#c2410c';btn2.style.borderColor='#c2410c';}
+    }
   }
 }
 
@@ -10740,6 +10824,9 @@ window.limpiarFormIC=function(confirm_=true){
   window._transcripcionSesion='';
   window._ultimaTranscripcionParaAnexo='';
   window._notaConTranscripcion=false;
+  if(typeof _grabEsContinuacion!=='undefined')_grabEsContinuacion=false;
+  var _btnGClr=document.getElementById('btn-grabar-sesion');
+  if(_btnGClr){_btnGClr.textContent='🎙️ Grabar sesión';_btnGClr.style.background='#dc2626';_btnGClr.style.borderColor='#dc2626';}
   // Resetear orientación IA
   var orientOut=document.getElementById('ic-orientacion-out');
   if(orientOut){orientOut.style.display='none';orientOut.textContent='';}
