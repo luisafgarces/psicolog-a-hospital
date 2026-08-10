@@ -4502,7 +4502,7 @@ window.guardarICFirebase=async()=>{
       ...(_aiFormSnap?{_aiFormSnap}:{}),
       ...(formulario?{formulario}:{}),
       ...(getCapInlineData('ic')||{}),
-      ...(window._ultimaTranscripcionParaAnexo?{transcripcionSesion:window._ultimaTranscripcionParaAnexo}:{}),
+      ...(getTranscripcionActualParaGuardar()?{transcripcionSesion:getTranscripcionActualParaGuardar()}:{}),
       creado:serverTimestamp()
     });
     if(!navigator.onLine){
@@ -8091,6 +8091,15 @@ window.geminiCall = async function(apiKey, prompt, maxTokens){
 };
 
 window.toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200);};
+
+// Lee lo que esté en el cuadro de transcripción AHORA MISMO, para guardarlo junto
+// con la nota sin importar cómo se redactó (con IA o a mano). Es la fuente de verdad
+// al momento de guardar — no depende de haber usado el botón "usar transcripción".
+window.getTranscripcionActualParaGuardar=function(){
+  var t=document.getElementById('transc-texto');
+  var val=t?t.value.trim():'';
+  return val||window._ultimaTranscripcionParaAnexo||'';
+};
 
 // Quita el anexo de transcripción de una nota YA GUARDADA (por si quedó pegado por error
 // de una nota anterior antes de que se corrigiera ese comportamiento).
@@ -15410,7 +15419,7 @@ window.revGuardar = async function(){
     altaCriterio:gv('rev-alta-criterio'),
     timestamp:new Date().toISOString()
   };
-  if(window._ultimaTranscripcionParaAnexo) datos.transcripcionSesion=window._ultimaTranscripcionParaAnexo;
+  if(getTranscripcionActualParaGuardar()) datos.transcripcionSesion=getTranscripcionActualParaGuardar();
   try{
     await window._addDoc(window._collection(window.db,'notas_pacientes'),datos);
     if(typeof rdMarcarVistaPorNota==='function') rdMarcarVistaPorNota(pacId);
