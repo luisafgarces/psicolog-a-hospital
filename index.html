@@ -600,6 +600,7 @@ input.toggle-cb{display:none}
         </div>
         <div style="margin-bottom:14px">
           <button class="btn btn-primary" id="btn-grabar-sesion" style="background:#dc2626;border-color:#dc2626" onclick="toggleGrabacionSesion()" title="Graba la sesión y genera una transcripción con IA. El audio se transcribe y se borra al instante, nunca se guarda.">🎙️ Grabar sesión</button>
+          <button class="btn btn-secondary" onclick="abrirCuadroPegarTranscripcion()" style="margin-left:6px" title="Abre el cuadro de texto para pegar una transcripción hecha con otro programa, sin grabar audio aquí">📋 Pegar transcripción</button>
           <div id="transcripcion-wrap" style="display:none;margin-top:10px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 14px">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
               <span id="transc-status" style="font-size:0.8rem;font-weight:700;color:#991b1b">🔴 Grabando…</span>
@@ -8134,6 +8135,33 @@ var _grabWakeLock=null;
 var _grabInterrumpidaPorSistema=false;
 var _grabVisibilityHandler=null;
 var _grabEsContinuacion=false;
+// Arquitectura por segmentos: en vez de grabar todo y transcribir al final,
+// se corta la grabación cada 60s y cada pedazo se transcribe EN PARALELO
+// mientras sigue grabando lo siguiente. Así, al terminar una sesión larga,
+// casi todo ya está transcrito y solo falta el último pedacito.
+var SEGMENTO_DURACION_MS=60000;
+var _grabSegmentos=[]; // [{texto, procesando, vacio, error}] en orden
+var _grabSegmentoIndex=0;
+var _grabSegmentoChunksActual=[];
+var _grabRotacionInterval=null;
+var _grabApiKeyActual='';
+var _grabSesionActiva=false;
+
+// Abre el cuadro de transcripción SOLO para pegar texto de otro programa,
+// sin grabar audio ni pedir permiso de micrófono.
+window.abrirCuadroPegarTranscripcion=function(){
+  var wrap=document.getElementById('transcripcion-wrap');
+  if(wrap)wrap.style.display='';
+  var status=document.getElementById('transc-status');
+  if(status){status.textContent='📋 Pega aquí la transcripción';status.style.color='#7f1d1d';}
+  var timerEl=document.getElementById('transc-timer');
+  if(timerEl)timerEl.textContent='';
+  var txt=document.getElementById('transc-texto');
+  if(txt){
+    txt.placeholder='Pega aquí la transcripción de tu otro programa…';
+    txt.focus();
+  }
+};
 
 window.toggleGrabacionSesion=function(){
   if(_grabMediaRecorder&&_grabMediaRecorder.state==='recording'){
@@ -8180,20 +8208,29 @@ async function iniciarGrabacionSesion(){
   if(!confirmado)return;
 
   try{
-    _grabStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    // Se desactiva el filtro de "voz única cercana" (pensado para llamadas) para
+    // captar mejor una conversación de consultorio, con dos voces a distinta distancia.
+    _grabStream=await navigator.mediaDevices.getUserMedia({
+      audio:{
+        echoCancellation:false,
+        noiseSuppression:false,
+        autoGainControl:true
+      }
+    });
   }catch(e){
     toast('❌ No se pudo acceder al micrófono: '+e.message);
     return;
   }
 
   // Si el sistema corta el micrófono a la fuerza (pantalla bloqueada, etc.),
-  // detenemos el grabador manualmente para que procese lo que alcanzó a capturar.
+  // cerramos el segmento actual para que se procese lo que alcanzó a capturar.
   var _pista=_grabStream.getAudioTracks()[0];
   if(_pista){
     _pista.addEventListener('ended',function(){
-      if(_grabMediaRecorder&&_grabMediaRecorder.state==='recording'){
+      if(_grabSesionActiva){
         _grabInterrumpidaPorSistema=true;
-        _grabMediaRecorder.stop();
+        if(_grabRotacionInterval){clearInterval(_grabRotacionInterval);_grabRotacionInterval=null;}
+        if(_grabMediaRecorder&&_grabMediaRecorder.state==='recording')_grabMediaRecorder.stop();
       }
     });
   }
@@ -8206,18 +8243,21 @@ async function iniciarGrabacionSesion(){
       _grabMimeType=candidatos[i];break;
     }
   }
+
+  _grabApiKeyActual=apiKey;
+  _grabSesionActiva=true;
+  if(!_grabEsContinuacion)_grabSegmentos=[];
+  _grabSegmentoIndex=_grabSegmentos.length;
+
   try{
-    _grabMediaRecorder=_grabMimeType?new MediaRecorder(_grabStream,{mimeType:_grabMimeType}):new MediaRecorder(_grabStream);
+    iniciarNuevoSegmento();
   }catch(e){
     toast('❌ Tu navegador no soporta grabación de audio: '+e.message);
     _grabStream.getTracks().forEach(function(t){t.stop();});
     _grabStream=null;
+    _grabSesionActiva=false;
     return;
   }
-  _grabChunks=[];
-  _grabMediaRecorder.ondataavailable=function(ev){if(ev.data&&ev.data.size>0)_grabChunks.push(ev.data);};
-  _grabMediaRecorder.onstop=function(){ procesarGrabacionSesion(apiKey); };
-  _grabMediaRecorder.start(3000); // guarda en pedacitos cada 3s — si algo interrumpe, se pierde menos
   activarWakeLock(); // evita que la pantalla se bloquee mientras se graba
 
   _grabSegundos=0;
@@ -8226,11 +8266,9 @@ async function iniciarGrabacionSesion(){
   var wrap=document.getElementById('transcripcion-wrap');
   if(wrap)wrap.style.display='';
   var status=document.getElementById('transc-status');
-  if(status){status.textContent='🔴 Grabando…';status.style.color='#991b1b';}
+  if(status){status.textContent='🔴 Grabando… (se transcribe en partes, no esperes al final)';status.style.color='#991b1b';}
   var txt=document.getElementById('transc-texto');
-  if(txt&&!_grabEsContinuacion){txt.value='';txt.placeholder='La transcripción aparecerá aquí…';}
-  var btn=document.getElementById('btn-grabar-sesion');
-  if(btn){btn.textContent='⏹ Detener y transcribir';btn.style.background='#7f1d1d';btn.style.borderColor='#7f1d1d';}
+  if(txt&&!_grabEsContinuacion){txt.value='';txt.placeholder='La transcripción aparecerá aquí, en partes, mientras grabas…';}
 
   if(_grabTimerInterval)clearInterval(_grabTimerInterval);
   _grabTimerInterval=setInterval(function(){
@@ -8240,45 +8278,40 @@ async function iniciarGrabacionSesion(){
     var timerEl=document.getElementById('transc-timer');
     if(timerEl)timerEl.textContent=m+':'+s;
   },1000);
+
+  // Cada SEGMENTO_DURACION_MS, cerrar el pedazo actual (se transcribe en paralelo,
+  // en segundo plano) y arrancar el siguiente sin cortar la grabación.
+  if(_grabRotacionInterval)clearInterval(_grabRotacionInterval);
+  _grabRotacionInterval=setInterval(function(){
+    if(!_grabMediaRecorder||_grabMediaRecorder.state!=='recording')return;
+    _grabMediaRecorder.stop(); // dispara onstop -> finalizarSegmento (transcribe en paralelo)
+    _grabSegmentoIndex++;
+    try{ iniciarNuevoSegmento(); }catch(e){ console.warn('No se pudo iniciar el siguiente segmento:',e); }
+  },SEGMENTO_DURACION_MS);
 }
 
-function detenerGrabacionSesion(){
-  if(_grabMediaRecorder&&_grabMediaRecorder.state==='recording'){
-    _grabMediaRecorder.stop();
-  }
-  var status=document.getElementById('transc-status');
-  if(status){status.textContent='⏳ Transcribiendo…';status.style.color='#92400e';}
+function iniciarNuevoSegmento(){
+  _grabSegmentoChunksActual=[];
+  _grabMediaRecorder=_grabMimeType?new MediaRecorder(_grabStream,{mimeType:_grabMimeType}):new MediaRecorder(_grabStream);
+  var miIndice=_grabSegmentoIndex;
+  var misChunks=_grabSegmentoChunksActual;
+  _grabMediaRecorder.ondataavailable=function(ev){if(ev.data&&ev.data.size>0)misChunks.push(ev.data);};
+  _grabMediaRecorder.onstop=function(){ finalizarSegmento(miIndice,misChunks); };
+  _grabMediaRecorder.start();
+  var btn=document.getElementById('btn-grabar-sesion');
+  if(btn){btn.textContent='⏹ Detener y transcribir';btn.style.background='#7f1d1d';btn.style.borderColor='#7f1d1d';}
 }
 
-async function procesarGrabacionSesion(apiKey){
-  // Limpieza que SIEMPRE debe pasar al terminar, sea parada manual o interrupción del sistema
-  liberarWakeLock();
-  if(_grabTimerInterval){clearInterval(_grabTimerInterval);_grabTimerInterval=null;}
-  var btnLimpio=document.getElementById('btn-grabar-sesion');
-  if(btnLimpio&&!_grabInterrumpidaPorSistema){btnLimpio.textContent='🎙️ Grabar sesión';btnLimpio.style.background='#dc2626';btnLimpio.style.borderColor='#dc2626';}
-
-  // Apagar el micrófono de inmediato — ya no se necesita el stream
-  if(_grabStream){_grabStream.getTracks().forEach(function(t){t.stop();});_grabStream=null;}
-  var blob=new Blob(_grabChunks,{type:_grabMimeType||'audio/webm'});
-  var huboAudioParcial=_grabChunks.length>0;
-  _grabChunks=[]; // liberar de inmediato, ya no se necesita tras crear el blob
-  _grabMediaRecorder=null;
-
-  var fueInterrupcion=_grabInterrumpidaPorSistema;
-  _grabInterrumpidaPorSistema=false;
-
+// Transcribe un pedazo de la grabación EN SEGUNDO PLANO, sin frenar lo que sigue grabándose.
+async function finalizarSegmento(indice,chunks){
+  var blob=new Blob(chunks,{type:_grabMimeType||'audio/webm'});
   if(blob.size<500){
-    if(fueInterrupcion){
-      toast('⚠️ La grabación se interrumpió (pantalla bloqueada) antes de capturar audio suficiente');
-      var st0=document.getElementById('transc-status');
-      if(st0){st0.textContent='⚠️ Interrumpida — presiona grabar de nuevo para reintentar';st0.style.color='#dc2626';}
-    }else{
-      toast('⚠️ La grabación fue muy corta o vacía');
-      var st=document.getElementById('transc-status');if(st)st.textContent='';
-    }
+    _grabSegmentos[indice]={texto:'',vacio:true};
+    actualizarTranscripcionVisible();
     return;
   }
-
+  _grabSegmentos[indice]={texto:null,procesando:true};
+  actualizarTranscripcionVisible();
   try{
     var base64=await new Promise(function(resolve,reject){
       var reader=new FileReader();
@@ -8286,47 +8319,85 @@ async function procesarGrabacionSesion(apiKey){
       reader.onerror=reject;
       reader.readAsDataURL(blob);
     });
-    // El blob ya cumplió su propósito (convertido a base64) — se descarta la referencia
     blob=null;
-
-    var texto=await geminiTranscribirAudio(apiKey,base64,_grabMimeType||'audio/webm');
-    base64=null; // el audio en base64 también se descarta tras enviarlo
-
-    var txt=document.getElementById('transc-texto');
-    if(txt){
-      if(_grabEsContinuacion&&txt.value.trim()){
-        // Es una continuación de una grabación anterior — se une el texto, no se reemplaza
-        txt.value=txt.value.trim()+'\n\n[— continuación —]\n\n'+(texto||'');
-      }else{
-        txt.value=texto||'';
-      }
-    }
-    _grabEsContinuacion=false;
-
-    var status=document.getElementById('transc-status');
-    var btn=document.getElementById('btn-grabar-sesion');
-    if(fueInterrupcion){
-      // Se cortó por el sistema — invitar a continuar en vez de dar por terminado
-      if(status){status.textContent='⚠️ Se interrumpió la grabación — lo capturado hasta el momento ya está transcrito arriba';status.style.color='#c2410c';}
-      _grabEsContinuacion=true;
-      if(btn){btn.textContent='🎙️ Continuar grabando (parte 2)';btn.style.background='#c2410c';btn.style.borderColor='#c2410c';}
-      toast('⚠️ La grabación se interrumpió — puedes continuar sin perder lo ya capturado');
-    }else{
-      if(status){status.textContent=texto?'✅ Transcripción lista':'⚠️ No se obtuvo texto';status.style.color=texto?'#15803d':'#92400e';}
-    }
-    var timerEl=document.getElementById('transc-timer');
-    if(timerEl)timerEl.textContent='';
+    var texto=await geminiTranscribirAudio(_grabApiKeyActual,base64,_grabMimeType||'audio/webm');
+    base64=null;
+    _grabSegmentos[indice]={texto:texto||'',procesando:false};
   }catch(e){
-    console.error('Error transcribiendo:',e);
-    var status2=document.getElementById('transc-status');
-    if(status2){status2.textContent='❌ Error: '+e.message;status2.style.color='#dc2626';}
-    toast('❌ Error al transcribir: '+e.message);
-    if(fueInterrupcion){
-      // Aunque falle la transcripción, dejamos abierta la posibilidad de continuar
-      _grabEsContinuacion=true;
-      var btn2=document.getElementById('btn-grabar-sesion');
-      if(btn2){btn2.textContent='🎙️ Continuar grabando (parte 2)';btn2.style.background='#c2410c';btn2.style.borderColor='#c2410c';}
-    }
+    console.error('Error transcribiendo segmento '+indice+':',e);
+    _grabSegmentos[indice]={texto:'',procesando:false,error:true};
+  }
+  actualizarTranscripcionVisible();
+  actualizarEstadoSegmentos();
+}
+
+// Junta el texto de todos los segmentos, en orden, mostrando claramente
+// cuáles ya están listos y cuáles siguen en camino.
+function actualizarTranscripcionVisible(){
+  var txt=document.getElementById('transc-texto');
+  if(!txt)return;
+  var partes=_grabSegmentos.map(function(s,i){
+    if(!s)return null;
+    if(s.procesando)return '⏳ [Transcribiendo parte '+(i+1)+'…]';
+    if(s.error)return '⚠️ [No se pudo transcribir la parte '+(i+1)+']';
+    if(s.vacio)return null;
+    return s.texto;
+  }).filter(function(t){return t;});
+  txt.value=partes.join('\n\n');
+}
+
+function actualizarEstadoSegmentos(){
+  var pendientes=_grabSegmentos.filter(function(s){return s&&s.procesando;}).length;
+  var status=document.getElementById('transc-status');
+  if(!status)return;
+  if(_grabSesionActiva){
+    status.textContent='🔴 Grabando…'+(pendientes>0?' ('+pendientes+' parte(s) terminando de transcribir)':' (al día)');
+    status.style.color='#991b1b';
+  }
+}
+
+function detenerGrabacionSesion(){
+  _grabSesionActiva=false;
+  if(_grabRotacionInterval){clearInterval(_grabRotacionInterval);_grabRotacionInterval=null;}
+  if(_grabTimerInterval){clearInterval(_grabTimerInterval);_grabTimerInterval=null;}
+  if(_grabMediaRecorder&&_grabMediaRecorder.state==='recording'){
+    _grabMediaRecorder.stop(); // dispara onstop -> finalizarSegmento para el último pedazo
+  }
+  liberarWakeLock();
+  if(_grabStream){_grabStream.getTracks().forEach(function(t){t.stop();});_grabStream=null;}
+  var btn=document.getElementById('btn-grabar-sesion');
+  if(btn){btn.textContent='🎙️ Grabar sesión';btn.style.background='#dc2626';btn.style.borderColor='#dc2626';}
+  var status=document.getElementById('transc-status');
+  if(status){status.textContent='⏳ Terminando de transcribir la última parte…';status.style.color='#92400e';}
+  // Esperar a que terminen TODOS los segmentos pendientes (normalmente ya casi todos
+  // están listos, porque se fueron transcribiendo mientras grababas)
+  esperarSegmentosPendientes();
+}
+
+async function esperarSegmentosPendientes(){
+  var fueInterrupcion=_grabInterrumpidaPorSistema;
+  _grabInterrumpidaPorSistema=false;
+  // Esperar (con límite de seguridad) a que no queden segmentos "procesando"
+  var intentos=0;
+  while(_grabSegmentos.some(function(s){return s&&s.procesando;})&&intentos<200){
+    await new Promise(function(r){setTimeout(r,300);});
+    intentos++;
+  }
+  actualizarTranscripcionVisible();
+  var status=document.getElementById('transc-status');
+  var btn=document.getElementById('btn-grabar-sesion');
+  var timerEl=document.getElementById('transc-timer');
+  if(timerEl)timerEl.textContent='';
+  var hayTexto=_grabSegmentos.some(function(s){return s&&s.texto;});
+  if(fueInterrupcion){
+    if(status){status.textContent='⚠️ Se interrumpió la grabación — lo capturado hasta el momento ya está transcrito arriba';status.style.color='#c2410c';}
+    _grabEsContinuacion=true;
+    if(btn){btn.textContent='🎙️ Continuar grabando (parte 2)';btn.style.background='#c2410c';btn.style.borderColor='#c2410c';}
+    toast('⚠️ La grabación se interrumpió — puedes continuar sin perder lo ya capturado');
+  }else{
+    _grabEsContinuacion=false;
+    if(status){status.textContent=hayTexto?'✅ Transcripción lista':'⚠️ No se obtuvo texto';status.style.color=hayTexto?'#15803d':'#92400e';}
+    if(!hayTexto)toast('⚠️ No se pudo transcribir la grabación');
   }
 }
 
