@@ -1453,6 +1453,515 @@ input.toggle-cb{display:none}
             </div>
           </div>
 
+          <!-- S6c: CARACTERIZACIÓN OPCIONAL — EXPERIENCIA ALUCINATORIA -->
+          <div class="ic-form-section" id="ic-aluc-section">
+            <div class="ic-form-head amber" style="cursor:pointer" onclick="toggleExperienciaAlucinatoria()">
+              <span class="ft">👁️ ¿Experiencias alucinatorias (voces, visiones, etc.)? (opcional)</span>
+              <span id="ic-aluc-chev" style="margin-left:auto;font-size:1rem;transition:transform .2s;display:inline-block">▸</span>
+            </div>
+            <div id="ic-aluc-sugerencia" style="display:none;background:#fef9c3;border-bottom:1px solid #fde68a;padding:9px 16px;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-size:0.78rem;color:#78350f;flex:1;min-width:200px">💡 Marcaste hallazgos en sensopercepción — ¿quieres caracterizar la experiencia?</span>
+              <button class="btn btn-sm" style="background:#d97706;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-weight:700;font-size:0.74rem;cursor:pointer" onclick="abrirAlucinacionDesdeSugerencia()">Caracterizar</button>
+              <button style="background:none;border:none;color:#92400e;font-size:0.72rem;cursor:pointer;text-decoration:underline;padding:4px" onclick="descartarSugerenciaAlucinacion()">Ahora no</button>
+            </div>
+            <div id="ic-aluc-body" style="display:none">
+              <div class="ic-form-body">
+                <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;line-height:1.5">Tócalo solo si el paciente refiere una experiencia perceptiva. No diagnostiques por la modalidad — la modalidad sola no determina la etiología.</div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Modalidad sensorial (marca todas las que apliquen)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Auditiva</span>
+                    <span class="ic-chip" onclick="icTog(this)">Visual</span>
+                    <span class="ic-chip" onclick="icTog(this)">Táctil/háptica</span>
+                    <span class="ic-chip" onclick="icTog(this)">Olfativa</span>
+                    <span class="ic-chip" onclick="icTog(this)">Gustativa</span>
+                    <span class="ic-chip" onclick="icTog(this)">Somática/cenestésica</span>
+                    <span class="ic-chip" onclick="icTog(this)">Cinestésica/vestibular</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Descripción literal breve (qué refiere exactamente el paciente)</div>
+                  <textarea id="ic-al-descripcion" rows="2" placeholder="Ej: voz masculina desconocida, contenido amenazante, localizada en el pasillo…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem"></textarea>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Complejidad</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-complejidad')">Elemental</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-complejidad')">Intermedia</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-complejidad')">Compleja</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-complejidad')">Escenográfica</span>
+                    </div>
+                    <input type="hidden" id="ic-al-complejidad" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Localización</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-localizacion')">Interna</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-localizacion')">Externa</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-localizacion')">Mixta</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-localizacion')">No determinada</span>
+                    </div>
+                    <input type="hidden" id="ic-al-localizacion" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Contenido / tema</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Neutro</span>
+                    <span class="ic-chip" onclick="icTog(this)">Amenazante</span>
+                    <span class="ic-chip" onclick="icTog(this)">Persecutorio</span>
+                    <span class="ic-chip" onclick="icTog(this)">Crítico</span>
+                    <span class="ic-chip" onclick="icTog(this)">Consolador</span>
+                    <span class="ic-chip" onclick="icTog(this)">Protector</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sexual</span>
+                    <span class="ic-chip" onclick="icTog(this)">Religioso/espiritual</span>
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Frecuencia</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-frecuencia')">Aislada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-frecuencia')">Ocasional</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-frecuencia')">Frecuente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-frecuencia')">Continua</span>
+                    </div>
+                    <input type="hidden" id="ic-al-frecuencia" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Curso</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-curso')">Agudo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-curso')">Episódico</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-curso')">Fluctuante</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-curso')">Persistente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-curso')">Recurrente</span>
+                    </div>
+                    <input type="hidden" id="ic-al-curso" value="">
+                  </div>
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Duración aproximada (no inventar si no se sabe)</div>
+                  <input type="text" id="ic-al-duracion" placeholder="Ej: 1-2 minutos, no determinada…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Intensidad (0-4)</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-intensidad')">0 Mínima</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-intensidad')">1 Leve</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-intensidad')">2 Moderada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-intensidad')">3 Alta</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-intensidad')">4 Muy alta</span>
+                    </div>
+                    <input type="hidden" id="ic-al-intensidad" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Malestar (0-4, distinto de intensidad)</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-malestar')">0 Ninguno</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-malestar')">1 Leve</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-malestar')">2 Moderado</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-malestar')">3 Intenso</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-malestar')">4 Extremo</span>
+                    </div>
+                    <input type="hidden" id="ic-al-malestar" value="">
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Insight / juicio de realidad</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-insight')">Conservado</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-insight')">Parcial</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-insight')">Ausente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-insight')">No evaluable</span>
+                    </div>
+                    <input type="hidden" id="ic-al-insight" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Control percibido</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-control')">Conservado</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-control')">Parcial</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-control')">Bajo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-al-control')">Ausente</span>
+                    </div>
+                    <input type="hidden" id="ic-al-control" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Repercusión funcional</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sueño</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alimentación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Actividades</span>
+                    <span class="ic-chip" onclick="icTog(this)">Interacción social</span>
+                    <span class="ic-chip" onclick="icTog(this)">Autocuidado</span>
+                    <span class="ic-chip" onclick="icTog(this)">Seguridad</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Conducta asociada</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna</span>
+                    <span class="ic-chip" onclick="icTog(this)">Habla/responde a la experiencia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Se tapa oídos/ojos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Busca ayuda</span>
+                    <span class="ic-chip" onclick="icTog(this)">Evita lugares/personas</span>
+                    <span class="ic-chip" onclick="icTog(this)">Conducta defensiva</span>
+                    <span class="ic-chip" onclick="icTog(this)">Actúa siguiendo la experiencia</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Factores precipitantes / asociados</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Dolor</span>
+                    <span class="ic-chip" onclick="icTog(this)">Fiebre/infección</span>
+                    <span class="ic-chip" onclick="icTog(this)">Privación del sueño</span>
+                    <span class="ic-chip" onclick="icTog(this)">Medicación nueva/cambio</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sustancias</span>
+                    <span class="ic-chip" onclick="icTog(this)">Abstinencia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Procedimiento médico</span>
+                    <span class="ic-chip" onclick="icTog(this)">Estrés psicológico</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ansiedad intensa</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno identificado</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Contexto clínico breve</div>
+                  <div class="ic-g2">
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Estado de conciencia</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-al-conciencia')">Normal</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-al-conciencia')">Somnoliento</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-al-conciencia')">Hiperalerta/agitado</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-al-conciencia')">Fluctuante</span>
+                      </div>
+                      <input type="hidden" id="ic-al-conciencia" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Cambio respecto al estado basal</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-al-cambiobasal')">No</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-al-cambiobasal')">Sí</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-al-cambiobasal')">Desconocido</span>
+                      </div>
+                      <input type="hidden" id="ic-al-cambiobasal" value="">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 12px;margin-top:4px">
+                  <div class="ic-sublabel" style="color:#991b1b">⚠️ Contenido de mando — evaluación de riesgo inmediata</div>
+                  <div class="ic-chips" style="margin-top:6px">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-al-mando');toggleMandoDetalle(false)">No refiere mando</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-al-mando');toggleMandoDetalle(true)">Sí — hay contenido de mando</span>
+                  </div>
+                  <input type="hidden" id="ic-al-mando" value="">
+                  <div id="ic-al-mando-detalle" style="display:none;margin-top:8px">
+                    <input type="text" id="ic-al-mando-contenido" placeholder="¿Qué le ordena? (breve)" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;margin-bottom:6px">
+                    <div class="ic-g2">
+                      <div>
+                        <div class="ic-sublabel" style="font-size:0.68rem">Intención de obedecer</div>
+                        <div class="ic-chips">
+                          <span class="ic-chip" onclick="icTogSingle(this,'ic-al-mando-intencion')">No</span>
+                          <span class="ic-chip" onclick="icTogSingle(this,'ic-al-mando-intencion')">Sí</span>
+                          <span class="ic-chip" onclick="icTogSingle(this,'ic-al-mando-intencion')">Dudosa</span>
+                        </div>
+                        <input type="hidden" id="ic-al-mando-intencion" value="">
+                      </div>
+                      <div>
+                        <div class="ic-sublabel" style="font-size:0.68rem">Capacidad de resistirse</div>
+                        <div class="ic-chips">
+                          <span class="ic-chip" onclick="icTogSingle(this,'ic-al-mando-resistir')">Conservada</span>
+                          <span class="ic-chip" onclick="icTogSingle(this,'ic-al-mando-resistir')">Parcial</span>
+                          <span class="ic-chip" onclick="icTogSingle(this,'ic-al-mando-resistir')">Baja</span>
+                          <span class="ic-chip" onclick="icTogSingle(this,'ic-al-mando-resistir')">Ausente</span>
+                        </div>
+                        <input type="hidden" id="ic-al-mando-resistir" value="">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- S6d: CARACTERIZACIÓN OPCIONAL — ILUSIÓN (estímulo real mal interpretado) -->
+          <div class="ic-form-section" id="ic-il-section">
+            <div class="ic-form-head amber" style="cursor:pointer" onclick="toggleIlusion()">
+              <span class="ft">🌗 ¿Ilusión — interpretó mal un estímulo real? (opcional)</span>
+              <span id="ic-il-chev" style="margin-left:auto;font-size:1rem;transition:transform .2s;display:inline-block">▸</span>
+            </div>
+            <div id="ic-il-sugerencia" style="display:none;background:#fef9c3;border-bottom:1px solid #fde68a;padding:9px 16px;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-size:0.78rem;color:#78350f;flex:1;min-width:200px">💡 Marcaste "Ilusiones" en sensopercepción — ¿quieres caracterizarla?</span>
+              <button class="btn btn-sm" style="background:#d97706;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-weight:700;font-size:0.74rem;cursor:pointer" onclick="abrirIlusionDesdeSugerencia()">Caracterizar</button>
+              <button style="background:none;border:none;color:#92400e;font-size:0.72rem;cursor:pointer;text-decoration:underline;padding:4px" onclick="descartarSugerenciaIlusion()">Ahora no</button>
+            </div>
+            <div id="ic-il-body" style="display:none">
+              <div class="ic-form-body">
+                <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;line-height:1.5">Distinto de una alucinación: aquí SÍ había un estímulo real, pero se interpretó de forma distorsionada. No registres solo lo que "vio" — registra qué había, qué percibió y qué interpretó.</div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Modalidad sensorial</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Visual</span>
+                    <span class="ic-chip" onclick="icTog(this)">Auditiva</span>
+                    <span class="ic-chip" onclick="icTog(this)">Táctil</span>
+                    <span class="ic-chip" onclick="icTog(this)">Olfativa</span>
+                    <span class="ic-chip" onclick="icTog(this)">Gustativa</span>
+                    <span class="ic-chip" onclick="icTog(this)">Somática</span>
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:var(--surface2);border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel">La secuencia clave: estímulo real → percepción → interpretación</div>
+                  <input type="text" id="ic-il-estimulo" placeholder="¿Qué había realmente? Ej: cortina, alarma del monitor…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;margin-bottom:6px">
+                  <input type="text" id="ic-il-percepcion" placeholder="¿Qué percibió? Ej: una figura, una voz…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;margin-bottom:6px">
+                  <input type="text" id="ic-il-interpretacion" placeholder="¿Qué creyó que era? Ej: una persona, un intruso…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Complejidad</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-complejidad')">Simple</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-complejidad')">Compleja</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-complejidad')">Escenográfica</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-complejidad')">Pareidolia</span>
+                    </div>
+                    <input type="hidden" id="ic-il-complejidad" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Momento</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-momento')">Día</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-momento')">Tarde</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-momento')">Noche</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-momento')">Madrugada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-momento')">Transición sueño-vigilia</span>
+                    </div>
+                    <input type="hidden" id="ic-il-momento" value="">
+                  </div>
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Localización del estímulo (opcional)</div>
+                  <input type="text" id="ic-il-localizacion" placeholder="Ej: pared frente a la cama, pasillo…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Insight</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-insight')">Conservado</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-insight')">Parcial</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-insight')">Reducido</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-insight')">Ausente</span>
+                    </div>
+                    <input type="hidden" id="ic-il-insight" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Convicción (0-3)</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-conviccion')">0 Nula</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-conviccion')">1 Leve</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-conviccion')">2 Moderada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-conviccion')">3 Alta</span>
+                    </div>
+                    <input type="hidden" id="ic-il-conviccion" value="">
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Intensidad (0-4)</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-intensidad')">0 Mínima</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-intensidad')">1 Leve</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-intensidad')">2 Moderada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-intensidad')">3 Alta</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-intensidad')">4 Muy alta</span>
+                    </div>
+                    <input type="hidden" id="ic-il-intensidad" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Frecuencia</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-frecuencia')">Aislada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-frecuencia')">Ocasional</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-frecuencia')">Frecuente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-frecuencia')">Continua/intermitente</span>
+                    </div>
+                    <input type="hidden" id="ic-il-frecuencia" value="">
+                  </div>
+                </div>
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Duración (no inventar si no se sabe)</div>
+                    <input type="text" id="ic-il-duracion" placeholder="Ej: 1-2 minutos…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Curso</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-curso')">Episódica</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-curso')">Fluctuante</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-curso')">Persistente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-curso')">Recurrente</span>
+                    </div>
+                    <input type="hidden" id="ic-il-curso" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Estado emocional previo</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Tranquilo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ansioso</span>
+                    <span class="ic-chip" onclick="icTog(this)">Temor</span>
+                    <span class="ic-chip" onclick="icTog(this)">Irritable</span>
+                    <span class="ic-chip" onclick="icTog(this)">Triste</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hipervigilante</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Estado cognitivo breve</div>
+                  <div class="ic-g2">
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Alerta</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-il-alerta')">Normal</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-il-alerta')">Somnoliento</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-il-alerta')">Hiperalerta/agitado</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-il-alerta')">Fluctuante</span>
+                      </div>
+                      <input type="hidden" id="ic-il-alerta" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Cambio respecto al basal</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-il-cambiobasal')">No</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-il-cambiobasal')">Sí</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-il-cambiobasal')">Desconocido</span>
+                      </div>
+                      <input type="hidden" id="ic-il-cambiobasal" value="">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Conducta</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna</span>
+                    <span class="ic-chip" onclick="icTog(this)">Solicita ayuda</span>
+                    <span class="ic-chip" onclick="icTog(this)">Busca acompañamiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Se esconde</span>
+                    <span class="ic-chip" onclick="icTog(this)">Evita el estímulo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Grita</span>
+                    <span class="ic-chip" onclick="icTog(this)">Agrede</span>
+                    <span class="ic-chip" onclick="icTog(this)">Intenta escapar</span>
+                    <span class="ic-chip" onclick="icTog(this)">Retira dispositivos</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Repercusión funcional</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sueño</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alimentación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Tratamiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Movilidad</span>
+                    <span class="ic-chip" onclick="icTog(this)">Autocuidado</span>
+                    <span class="ic-chip" onclick="icTog(this)">Interacción</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Factores precipitantes / contexto</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Oscuridad / iluminación baja</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ruido / alarmas</span>
+                    <span class="ic-chip" onclick="icTog(this)">Equipos médicos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Aislamiento / entorno desconocido</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dolor</span>
+                    <span class="ic-chip" onclick="icTog(this)">Fiebre/infección</span>
+                    <span class="ic-chip" onclick="icTog(this)">Deshidratación/hipoxia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Privación de sueño</span>
+                    <span class="ic-chip" onclick="icTog(this)">Deterioro visual/auditivo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Medicación nueva/cambio/sedación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sustancias/abstinencia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ansiedad/estrés</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno identificado</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Factores atenuantes (qué mejora la ilusión)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Mayor iluminación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Explicación del estímulo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Acompañamiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Reorientación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Reducción de ruido</span>
+                    <span class="ic-chip" onclick="icTog(this)">Uso de gafas/audífonos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Descanso</span>
+                    <span class="ic-chip" onclick="icTog(this)">Disminución del dolor</span>
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">¿Corrige la interpretación?</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-corrige')">Sí</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-corrige')">Parcialmente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-corrige')">No</span>
+                    </div>
+                    <input type="hidden" id="ic-il-corrige" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">¿Retorna al basal?</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-retorna')">Sí</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-retorna')">Parcialmente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-il-retorna')">No</span>
+                    </div>
+                    <input type="hidden" id="ic-il-retorna" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#92400e">Gravedad (0-4) — acompañar siempre de descripción observable</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-il-gravedad')">0 Sin repercusión</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-il-gravedad')">1 Leve</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-il-gravedad')">2 Moderada</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-il-gravedad')">3 Severa</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-il-gravedad')">4 Crítica (riesgo)</span>
+                  </div>
+                  <input type="hidden" id="ic-il-gravedad" value="">
+                  <input type="text" id="ic-il-gravedad-desc" placeholder="Descripción observable breve (opcional)" style="margin-top:6px;width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- S7: IMPRESIÓN DIAGNÓSTICA PRELIMINAR -->
           <div class="ic-form-section" id="ic-dx-section">
             <div class="ic-form-head green"><span class="ft">🎯 Impresión diagnóstica preliminar</span><span class="ic-form-badge green">CIE-11 / DSM-5-TR</span></div>
@@ -6150,6 +6659,31 @@ window.goTo = function(page){
     var _epSugNav=document.getElementById('ic-episodio-sugerencia');
     if(_epSugNav)_epSugNav.style.display='none';
     if(typeof _episodioSugerenciaDescartada!=='undefined')_episodioSugerenciaDescartada=false;
+    // Resetear módulo de experiencia alucinatoria — mismo motivo, sin hidden inputs
+    // el borrado genérico no los toca
+    ['ic-al-complejidad','ic-al-localizacion','ic-al-frecuencia','ic-al-curso','ic-al-intensidad','ic-al-malestar','ic-al-insight','ic-al-control','ic-al-conciencia','ic-al-cambiobasal','ic-al-mando','ic-al-mando-intencion','ic-al-mando-resistir'].forEach(function(id){
+      var h=document.getElementById(id);if(h)h.value='';
+    });
+    var _alBodyNav=document.getElementById('ic-aluc-body');
+    var _alChevNav=document.getElementById('ic-aluc-chev');
+    if(_alBodyNav)_alBodyNav.style.display='none';
+    if(_alChevNav)_alChevNav.style.transform='';
+    var _alSugNav=document.getElementById('ic-aluc-sugerencia');
+    if(_alSugNav)_alSugNav.style.display='none';
+    var _alMandoDetNav=document.getElementById('ic-al-mando-detalle');
+    if(_alMandoDetNav)_alMandoDetNav.style.display='none';
+    if(typeof _alucSugerenciaDescartada!=='undefined')_alucSugerenciaDescartada=false;
+    // Resetear módulo de ilusión — mismo motivo, hidden inputs propios
+    ['ic-il-complejidad','ic-il-momento','ic-il-insight','ic-il-conviccion','ic-il-intensidad','ic-il-frecuencia','ic-il-curso','ic-il-alerta','ic-il-cambiobasal','ic-il-corrige','ic-il-retorna','ic-il-gravedad'].forEach(function(id){
+      var h=document.getElementById(id);if(h)h.value='';
+    });
+    var _ilBodyNav=document.getElementById('ic-il-body');
+    var _ilChevNav=document.getElementById('ic-il-chev');
+    if(_ilBodyNav)_ilBodyNav.style.display='none';
+    if(_ilChevNav)_ilChevNav.style.transform='';
+    var _ilSugNav=document.getElementById('ic-il-sugerencia');
+    if(_ilSugNav)_ilSugNav.style.display='none';
+    if(typeof _ilusionSugerenciaDescartada!=='undefined')_ilusionSugerenciaDescartada=false;
   }
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
@@ -9956,6 +10490,186 @@ window.recolectarEpisodioAlteracion=function(){
   return 'EPISODIO DE ALTERACIÓN MENTAL (caracterización — describe, NO diagnostica de entrada):\n'+lineas.join('\n');
 };
 
+// ── MÓDULO: EXPERIENCIA ALUCINATORIA (opcional) ──────────────────────
+var EXPERIENCIA_ALUC_CHIPS_DISPARADORES=[
+  'Alucinaciones visuales','Alucinaciones auditivas','Alucinaciones táctiles',
+  'Alucinaciones olfativas','Formicación (delirium)',
+  'Pseudoalucinaciones','Flashbacks'
+];
+var _alucSugerenciaDescartada=false;
+
+window.sugerirExperienciaAlucinatoria=function(){
+  if(_alucSugerenciaDescartada)return;
+  var body=document.getElementById('ic-aluc-body');
+  if(body&&body.style.display!=='none')return;
+  var banner=document.getElementById('ic-aluc-sugerencia');
+  if(banner)banner.style.display='flex';
+};
+
+window.abrirAlucinacionDesdeSugerencia=function(){
+  var banner=document.getElementById('ic-aluc-sugerencia');
+  if(banner)banner.style.display='none';
+  var body=document.getElementById('ic-aluc-body');
+  var chev=document.getElementById('ic-aluc-chev');
+  if(body)body.style.display='';
+  if(chev)chev.style.transform='rotate(90deg)';
+  var sec=document.getElementById('ic-aluc-section');
+  if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+window.descartarSugerenciaAlucinacion=function(){
+  var banner=document.getElementById('ic-aluc-sugerencia');
+  if(banner)banner.style.display='none';
+  _alucSugerenciaDescartada=true;
+};
+
+window.toggleExperienciaAlucinatoria=function(){
+  var body=document.getElementById('ic-aluc-body');
+  var chev=document.getElementById('ic-aluc-chev');
+  if(!body)return;
+  var abierto=body.style.display!=='none';
+  body.style.display=abierto?'none':'';
+  if(chev)chev.style.transform=abierto?'':'rotate(90deg)';
+};
+
+// Muestra/oculta el detalle de contenido de mando según lo marcado
+window.toggleMandoDetalle=function(mostrar){
+  var det=document.getElementById('ic-al-mando-detalle');
+  if(det)det.style.display=mostrar?'':'none';
+};
+
+window.recolectarExperienciaAlucinatoria=function(){
+  var sec=document.getElementById('ic-aluc-body');
+  if(!sec)return '';
+  var lineas=[];
+  var modal=icChipsBySubLabel('Modalidad sensorial (marca todas las que apliquen)');
+  if(modal.length)lineas.push('Modalidad: '+modal.join(', '));
+  var desc=(document.getElementById('ic-al-descripcion')||{}).value;
+  if(desc)lineas.push('Descripción literal: '+desc);
+  var complej=(document.getElementById('ic-al-complejidad')||{}).value;
+  if(complej)lineas.push('Complejidad: '+complej);
+  var local=(document.getElementById('ic-al-localizacion')||{}).value;
+  if(local)lineas.push('Localización: '+local);
+  var contenido=icChipsBySubLabel('Contenido / tema');
+  if(contenido.length)lineas.push('Contenido/tema: '+contenido.join(', '));
+  var frec=(document.getElementById('ic-al-frecuencia')||{}).value;
+  var curso=(document.getElementById('ic-al-curso')||{}).value;
+  if(frec||curso)lineas.push('Frecuencia: '+(frec||'no especificada')+' | Curso: '+(curso||'no especificado'));
+  var dur=(document.getElementById('ic-al-duracion')||{}).value;
+  if(dur)lineas.push('Duración: '+dur);
+  var intens=(document.getElementById('ic-al-intensidad')||{}).value;
+  var moles=(document.getElementById('ic-al-malestar')||{}).value;
+  if(intens||moles)lineas.push('Intensidad: '+(intens||'no especificada')+' | Malestar: '+(moles||'no especificado'));
+  var insight=(document.getElementById('ic-al-insight')||{}).value;
+  var control=(document.getElementById('ic-al-control')||{}).value;
+  if(insight||control)lineas.push('Insight: '+(insight||'no evaluado')+' | Control percibido: '+(control||'no evaluado'));
+  var repercusion=icChipsBySubLabel('Repercusión funcional');
+  if(repercusion.length)lineas.push('Repercusión funcional: '+repercusion.join(', '));
+  var conducta=icChipsBySubLabel('Conducta asociada');
+  if(conducta.length)lineas.push('Conducta asociada: '+conducta.join(', '));
+  var factores=icChipsBySubLabel('Factores precipitantes / asociados');
+  if(factores.length)lineas.push('Factores precipitantes: '+factores.join(', '));
+  var conciencia=(document.getElementById('ic-al-conciencia')||{}).value;
+  var cambioBasal=(document.getElementById('ic-al-cambiobasal')||{}).value;
+  if(conciencia||cambioBasal)lineas.push('Conciencia: '+(conciencia||'no especificada')+' | Cambio respecto al basal: '+(cambioBasal||'no especificado'));
+  var mando=(document.getElementById('ic-al-mando')||{}).value;
+  if(mando==='Sí — hay contenido de mando'){
+    var mandoContenido=(document.getElementById('ic-al-mando-contenido')||{}).value;
+    var mandoIntencion=(document.getElementById('ic-al-mando-intencion')||{}).value;
+    var mandoResistir=(document.getElementById('ic-al-mando-resistir')||{}).value;
+    lineas.push('⚠️ CONTENIDO DE MANDO PRESENTE: '+(mandoContenido||'no especificado')+' | Intención de obedecer: '+(mandoIntencion||'no evaluada')+' | Capacidad de resistirse: '+(mandoResistir||'no evaluada'));
+  }else if(mando){
+    lineas.push('Contenido de mando: '+mando);
+  }
+  if(!lineas.length)return '';
+  return 'EXPERIENCIA ALUCINATORIA (caracterización fenomenológica — describe, NO diagnostica de entrada):\n'+lineas.join('\n');
+};
+
+// ── MÓDULO: ILUSIÓN (estímulo real mal interpretado, opcional) ────────
+var ILUSION_CHIPS_DISPARADORES=['Ilusiones'];
+var _ilusionSugerenciaDescartada=false;
+
+window.sugerirIlusion=function(){
+  if(_ilusionSugerenciaDescartada)return;
+  var body=document.getElementById('ic-il-body');
+  if(body&&body.style.display!=='none')return;
+  var banner=document.getElementById('ic-il-sugerencia');
+  if(banner)banner.style.display='flex';
+};
+
+window.abrirIlusionDesdeSugerencia=function(){
+  var banner=document.getElementById('ic-il-sugerencia');
+  if(banner)banner.style.display='none';
+  var body=document.getElementById('ic-il-body');
+  var chev=document.getElementById('ic-il-chev');
+  if(body)body.style.display='';
+  if(chev)chev.style.transform='rotate(90deg)';
+  var sec=document.getElementById('ic-il-section');
+  if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+window.descartarSugerenciaIlusion=function(){
+  var banner=document.getElementById('ic-il-sugerencia');
+  if(banner)banner.style.display='none';
+  _ilusionSugerenciaDescartada=true;
+};
+
+window.toggleIlusion=function(){
+  var body=document.getElementById('ic-il-body');
+  var chev=document.getElementById('ic-il-chev');
+  if(!body)return;
+  var abierto=body.style.display!=='none';
+  body.style.display=abierto?'none':'';
+  if(chev)chev.style.transform=abierto?'':'rotate(90deg)';
+};
+
+window.recolectarIlusion=function(){
+  var sec=document.getElementById('ic-il-body');
+  if(!sec)return '';
+  var lineas=[];
+  var modal=icChipsBySubLabel('Modalidad sensorial');
+  if(modal.length)lineas.push('Modalidad: '+modal.join(', '));
+  var estimulo=(document.getElementById('ic-il-estimulo')||{}).value;
+  var percep=(document.getElementById('ic-il-percepcion')||{}).value;
+  var interp=(document.getElementById('ic-il-interpretacion')||{}).value;
+  if(estimulo||percep||interp)lineas.push('Estímulo real: '+(estimulo||'no especificado')+' → Percepción: '+(percep||'no especificada')+' → Interpretación: '+(interp||'no especificada'));
+  var complej=(document.getElementById('ic-il-complejidad')||{}).value;
+  var momento=(document.getElementById('ic-il-momento')||{}).value;
+  if(complej||momento)lineas.push('Complejidad: '+(complej||'no especificada')+' | Momento: '+(momento||'no especificado'));
+  var local=(document.getElementById('ic-il-localizacion')||{}).value;
+  if(local)lineas.push('Localización del estímulo: '+local);
+  var insight=(document.getElementById('ic-il-insight')||{}).value;
+  var convic=(document.getElementById('ic-il-conviccion')||{}).value;
+  if(insight||convic)lineas.push('Insight: '+(insight||'no evaluado')+' | Convicción: '+(convic||'no evaluada'));
+  var intens=(document.getElementById('ic-il-intensidad')||{}).value;
+  var frec=(document.getElementById('ic-il-frecuencia')||{}).value;
+  if(intens||frec)lineas.push('Intensidad: '+(intens||'no especificada')+' | Frecuencia: '+(frec||'no especificada'));
+  var dur=(document.getElementById('ic-il-duracion')||{}).value;
+  var curso=(document.getElementById('ic-il-curso')||{}).value;
+  if(dur||curso)lineas.push('Duración: '+(dur||'no determinada')+' | Curso: '+(curso||'no especificado'));
+  var emoc=icChipsBySubLabel('Estado emocional previo');
+  if(emoc.length)lineas.push('Estado emocional previo: '+emoc.join(', '));
+  var alerta=(document.getElementById('ic-il-alerta')||{}).value;
+  var cambioBasal=(document.getElementById('ic-il-cambiobasal')||{}).value;
+  if(alerta||cambioBasal)lineas.push('Alerta: '+(alerta||'no especificada')+' | Cambio respecto al basal: '+(cambioBasal||'no especificado'));
+  var conducta=icChipsBySubLabel('Conducta');
+  if(conducta.length)lineas.push('Conducta: '+conducta.join(', '));
+  var repercusion=icChipsBySubLabel('Repercusión funcional');
+  if(repercusion.length)lineas.push('Repercusión funcional: '+repercusion.join(', '));
+  var factoresP=icChipsBySubLabel('Factores precipitantes / contexto');
+  if(factoresP.length)lineas.push('Factores precipitantes: '+factoresP.join(', '));
+  var factoresA=icChipsBySubLabel('Factores atenuantes (qué mejora la ilusión)');
+  if(factoresA.length)lineas.push('Factores atenuantes: '+factoresA.join(', '));
+  var corrige=(document.getElementById('ic-il-corrige')||{}).value;
+  var retorna=(document.getElementById('ic-il-retorna')||{}).value;
+  if(corrige||retorna)lineas.push('Corrige la interpretación: '+(corrige||'no evaluado')+' | Retorna al basal: '+(retorna||'no evaluado'));
+  var gravedad=(document.getElementById('ic-il-gravedad')||{}).value;
+  var gravedadDesc=(document.getElementById('ic-il-gravedad-desc')||{}).value;
+  if(gravedad)lineas.push('Gravedad: '+gravedad+(gravedadDesc?' — '+gravedadDesc:''));
+  if(!lineas.length)return '';
+  return 'ILUSIÓN (estímulo real mal interpretado — describe, NO diagnostica de entrada):\n'+lineas.join('\n');
+};
+
 window.icTog=function(el){el.classList.toggle('on');};
 // Single-select chip group — deselects siblings, sets hidden input
 window.icTogSingle=function(el,hiddenId){
@@ -9996,7 +10710,8 @@ window.icTogA=function(el){el.classList.toggle('on-a');};
   };
 })();
 
-// Detecta chips de alerta del examen mental y sugiere caracterizar el episodio.
+// Detecta chips de alerta del examen mental y sugiere caracterizar el episodio
+// correspondiente (alteración mental y/o experiencia alucinatoria).
 (function(){
   var origIcTog=window.icTog, origIcTogA=window.icTogA, origIcTogR=window.icTogR;
   function _chequearDisparadorEpisodio(el){
@@ -10006,6 +10721,12 @@ window.icTogA=function(el){el.classList.toggle('on-a');};
     var txt=(el.textContent||'').trim();
     if(typeof EPISODIO_CHIPS_DISPARADORES!=='undefined'&&EPISODIO_CHIPS_DISPARADORES.indexOf(txt)!==-1){
       if(typeof sugerirEpisodioAlteracion==='function')sugerirEpisodioAlteracion();
+    }
+    if(typeof EXPERIENCIA_ALUC_CHIPS_DISPARADORES!=='undefined'&&EXPERIENCIA_ALUC_CHIPS_DISPARADORES.indexOf(txt)!==-1){
+      if(typeof sugerirExperienciaAlucinatoria==='function')sugerirExperienciaAlucinatoria();
+    }
+    if(typeof ILUSION_CHIPS_DISPARADORES!=='undefined'&&ILUSION_CHIPS_DISPARADORES.indexOf(txt)!==-1){
+      if(typeof sugerirIlusion==='function')sugerirIlusion();
     }
   }
   window.icTog=function(el){origIcTog(el);_chequearDisparadorEpisodio(el);};
@@ -10345,6 +11066,10 @@ async function generarNotaIcConGemini(apiKey){
   var dResp=`Tipo respuesta emocional: ${chips('Tipo de respuesta emocional')||'esperable'}. Impresión clínica: ${chips('Impresión clínica')||chips('Impresión diagnóstica (chips CIE-11)')||'respuesta adaptativa'}. Código CIE-11: ${icv('ic-cie')||'pendiente'}.${_obsDx?' Observaciones diagnósticas: '+_obsDx:''}.${_respObs?' Análisis libre: '+_respObs:''}.${_impresionIA?' Impresión diagnóstica (IA previa): '+_impresionIA:''}.`;
   var _episodioAlteracion=(typeof recolectarEpisodioAlteracion==='function')?recolectarEpisodioAlteracion():'';
   if(_episodioAlteracion)dResp+='\n\n'+_episodioAlteracion;
+  var _experienciaAluc=(typeof recolectarExperienciaAlucinatoria==='function')?recolectarExperienciaAlucinatoria():'';
+  if(_experienciaAluc)dResp+='\n\n'+_experienciaAluc;
+  var _ilusionDat=(typeof recolectarIlusion==='function')?recolectarIlusion():'';
+  if(_ilusionDat)dResp+='\n\n'+_ilusionDat;
 
   var dTrat=`Intervención: ${chips('Intervención realizada / sugerida')||chips('Intervención realizada hoy')||'valoración clínica'}. Respuesta al médico derivante: ${_respMedico||'ver análisis clínico'}. Seguimiento: ${chips('Seguimiento')||'según evolución'}${_seguimientoPlazo?' — plazo: '+_seguimientoPlazo:''}. Alertas al equipo: ${_notasEquipo||tratNotas||'ninguna'}.`;
   // Instrucción para incluir capacidad decisional literal al final de TRATAMIENTO
@@ -10417,6 +11142,12 @@ async function generarNotaIcConGemini(apiKey){
     (_episodioAlteracion?('\n\nADEMÁS, los datos incluyen la caracterización de un EPISODIO DE ALTERACIÓN MENTAL (incoherencia/irritabilidad/desorientación). '+
     'Al final de tu respuesta, agrega un PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — EPISODIO DE ALTERACIÓN MENTAL: " y responda, integradas en prosa, estas 5 preguntas: qué ocurrió, cuándo comenzó, cómo se manifestó, cuánto duró y cómo evolucionó, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico, solo hipótesis a correlacionar). '+
     'Si hay puntaje 4AT, menciónalo. REGLA ESTRICTA: nunca concluyas que incoherencia=psicosis, irritabilidad=trastorno bipolar, desorientación=demencia, o que un cambio agudo es de origen psiquiátrico primario sin descartar causas médicas — si el cuadro es agudo y/o fluctuante, recomienda explícitamente correlacionar con evolución médica, estado neurológico, medicación y posibles factores fisiológicos, sin asumir etiología psiquiátrica primaria. '):'')+
+    (_experienciaAluc?('\n\nADEMÁS, los datos incluyen la caracterización de una EXPERIENCIA ALUCINATORIA (percepción sin estímulo correspondiente). '+
+    'Al final de tu respuesta (después del párrafo de episodio de alteración mental si también existe), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — EXPERIENCIA ALUCINATORIA: " y describa en prosa: qué percibió (modalidad y contenido), cómo se presenta (intensidad, frecuencia, duración, localización), qué significa para el paciente (insight), qué le provoca (malestar emocional), qué hace (conducta y repercusión funcional), si cambió respecto al basal, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). '+
+    'REGLA ESTRICTA: la modalidad NO determina la etiología — nunca concluyas automáticamente que auditivas=psicosis o visuales/táctiles=causa orgánica; ambas modalidades pueden tener cualquier origen. Si hay contenido de mando presente, menciónalo explícitamente junto con la intención de obedecer y la capacidad de resistirse referidas — este hallazgo requiere atención prioritaria. Si el cuadro es de inicio agudo, fluctuante, o se acompaña de alteración de atención/alerta/orientación, recomienda explícitamente correlacionar con evolución médica y descartar delirium, sin asumir etiología psiquiátrica primaria. '):'')+
+    (_ilusionDat?('\n\nADEMÁS, los datos incluyen la caracterización de una ILUSIÓN (percepción distorsionada de un estímulo REAL — distinto de alucinación). '+
+    'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ILUSIÓN: " y describa en prosa, siguiendo la secuencia estímulo real → percepción → interpretación → convicción → emoción → conducta → recuperación: qué estímulo real estaba presente, cómo lo percibió e interpretó, qué tan convencido estuvo, qué emoción y conducta generó, si corrigió la interpretación y si retornó al estado basal, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). '+
+    'REGLA ESTRICTA: la pérdida de insight NO convierte automáticamente una ilusión en delirio — descríbelo como ilusión con el grado de insight que corresponda, sin escalar el término. Si la ilusión es nueva, fluctuante o se acompaña de alteración de atención/alerta/orientación/cambio respecto al basal, recomienda explícitamente correlacionar con evolución médica y descartar delirium, sin asumir causa psiquiátrica ni asumir simplemente "ansiedad". '):'')+
     'Datos:\n'+dResp;
 
   var promptTrat = estiloBase +
@@ -10641,6 +11372,8 @@ async function generarSegConGemini(apiKey){
   var edadSeg=icvl('ic-edad');
   var diasSeg=icvl('ic-dias-internacion');
   var _episodioAlteracionSeg=(typeof recolectarEpisodioAlteracion==='function')?recolectarEpisodioAlteracion():'';
+  var _experienciaAlucSeg=(typeof recolectarExperienciaAlucinatoria==='function')?recolectarExperienciaAlucinatoria():'';
+  var _ilusionSeg=(typeof recolectarIlusion==='function')?recolectarIlusion():'';
 
   var datos=`
 TIPO DE NOTA: Seguimiento psicológico hospitalario
@@ -10707,6 +11440,8 @@ ${_segTestsResumen?'\n'+_segTestsResumen:''}
 ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
 ${(typeof getTranscripcionParaPrompt==='function'?getTranscripcionParaPrompt():'')}
 ${_episodioAlteracionSeg?'\n'+_episodioAlteracionSeg:''}
+${_experienciaAlucSeg?'\n'+_experienciaAlucSeg:''}
+${_ilusionSeg?'\n'+_ilusionSeg:''}
 `.trim();
 
   var prompt='Eres psicóloga clínica hospitalaria de la ESE Hospital La María. Redacta una NOTA DE EVOLUCIÓN (SEGUIMIENTO) para el sistema DGW, jurídicamente sólida, clínicamente rigurosa y útil para el equipo tratante. '+
@@ -10719,6 +11454,8 @@ ${_episodioAlteracionSeg?'\n'+_episodioAlteracionSeg:''}
     '(6) plan de psicología: ALTA PSICOLÓGICA (decirlo explícitamente si cumple criterios), PRÓXIMA SESIÓN EN X DÍAS, REVALUAR EN X DÍAS o SUSPENDER HASTA COMPENSACIÓN — plan realista: única psicóloga en la institución, seguimiento cada 48-72 horas como mínimo salvo riesgo crítico.'+
     '\n\nLÍMITES DE COMPETENCIA: no emitas juicios sobre diagnósticos médicos, ajustes farmacológicos ni manejo de delirium (salvo sugerir derivación), ni sobre problemas sociales o dolor sin sufrimiento psicológico. HONESTIDAD CLÍNICA: no inventes nada que no esté en la ficha. NO incluyas nota aclaratoria ni advertencia legal de ningún tipo al final.'+
     (_episodioAlteracionSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO: los datos incluyen la caracterización de un EPISODIO DE ALTERACIÓN MENTAL (incoherencia/irritabilidad/desorientación). Después del párrafo principal de seguimiento, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — EPISODIO DE ALTERACIÓN MENTAL: " y responda, integradas en prosa, estas 5 preguntas: qué ocurrió, cuándo comenzó, cómo se manifestó, cuánto duró y cómo evolucionó, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico, solo hipótesis a correlacionar). Si hay puntaje 4AT, menciónalo. REGLA ESTRICTA: nunca concluyas que incoherencia=psicosis, irritabilidad=trastorno bipolar, desorientación=demencia, o que un cambio agudo es de origen psiquiátrico primario sin descartar causas médicas — si el cuadro es agudo y/o fluctuante, recomienda explícitamente correlacionar con evolución médica, estado neurológico, medicación y posibles factores fisiológicos, sin asumir etiología psiquiátrica primaria.'):'')+
+    (_experienciaAlucSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (2): los datos incluyen la caracterización de una EXPERIENCIA ALUCINATORIA. Después del párrafo principal (y después del párrafo de episodio de alteración mental si también existe), agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — EXPERIENCIA ALUCINATORIA: " y describa en prosa: qué percibió (modalidad y contenido), cómo se presenta (intensidad, frecuencia, duración, localización), qué significa para el paciente (insight), qué le provoca (malestar), qué hace (conducta y repercusión funcional), si cambió respecto al basal, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: la modalidad NO determina la etiología — nunca concluyas automáticamente que auditivas=psicosis o visuales/táctiles=causa orgánica. Si hay contenido de mando presente, menciónalo explícitamente con la intención de obedecer y la capacidad de resistirse — requiere atención prioritaria. Si el cuadro es agudo, fluctuante o se acompaña de alteración de atención/alerta/orientación, recomienda correlacionar con evolución médica y descartar delirium, sin asumir etiología psiquiátrica primaria.'):'')+
+    (_ilusionSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (3): los datos incluyen la caracterización de una ILUSIÓN (percepción distorsionada de un estímulo REAL). Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ILUSIÓN: " y describa en prosa, siguiendo estímulo real → percepción → interpretación → convicción → emoción → conducta → recuperación: qué estímulo real había, cómo lo percibió e interpretó, su convicción, la emoción y conducta generadas, si corrigió la interpretación y retornó al basal, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: la pérdida de insight NO convierte automáticamente una ilusión en delirio. Si es nueva, fluctuante o se acompaña de alteración de atención/alerta/orientación/cambio respecto al basal, recomienda correlacionar con evolución médica y descartar delirium, sin asumir causa psiquiátrica ni asumir simplemente "ansiedad".'):'')+
     '\n\nDETECCIÓN DE INCONGRUENCIAS (OBLIGATORIO): analiza la ficha buscando contradicciones entre lo que dice el paciente y lo observado, entre lo que refiere el familiar y lo observado, datos médicos que contradicen el reporte, información crítica faltante (ej. ideación suicida no explorada pese a expresiones de deseo de muerte) o riesgo legal (afirmar algo no evaluado). Redacta la nota de forma conservadora, sin afirmar lo no evaluado.'+
     '\n\nFORMATO EXACTO DE TU RESPUESTA: primero escribe en una línea sola ===NOTA=== y a continuación el párrafo completo de la nota. DESPUÉS, si detectaste incongruencias, escribe en una línea sola ===INCONGRUENCIAS=== seguido de máximo 5 hallazgos, UNA línea breve por hallazgo (qué contradice qué y qué verificar), estilo telegráfico. Si no hay incongruencias, termina después de la nota sin esa sección.'+
     '\n\nFICHA DE RONDA (POST-SESIÓN) — usa solo estos datos reales:\n\n'+datos
@@ -11280,6 +12017,31 @@ window.limpiarFormIC=function(confirm_=true){
   var _epSug=document.getElementById('ic-episodio-sugerencia');
   if(_epSug)_epSug.style.display='none';
   if(typeof _episodioSugerenciaDescartada!=='undefined')_episodioSugerenciaDescartada=false;
+  // Resetear módulo de experiencia alucinatoria — mismo motivo que el episodio,
+  // los hidden inputs no los toca el borrado genérico de arriba
+  ['ic-al-complejidad','ic-al-localizacion','ic-al-frecuencia','ic-al-curso','ic-al-intensidad','ic-al-malestar','ic-al-insight','ic-al-control','ic-al-conciencia','ic-al-cambiobasal','ic-al-mando','ic-al-mando-intencion','ic-al-mando-resistir'].forEach(function(id){
+    var h=document.getElementById(id);if(h)h.value='';
+  });
+  var _alBody=document.getElementById('ic-aluc-body');
+  var _alChev=document.getElementById('ic-aluc-chev');
+  if(_alBody)_alBody.style.display='none';
+  if(_alChev)_alChev.style.transform='';
+  var _alSug=document.getElementById('ic-aluc-sugerencia');
+  if(_alSug)_alSug.style.display='none';
+  var _alMandoDet=document.getElementById('ic-al-mando-detalle');
+  if(_alMandoDet)_alMandoDet.style.display='none';
+  if(typeof _alucSugerenciaDescartada!=='undefined')_alucSugerenciaDescartada=false;
+  // Resetear módulo de ilusión — mismo motivo que alucinación/episodio
+  ['ic-il-complejidad','ic-il-momento','ic-il-insight','ic-il-conviccion','ic-il-intensidad','ic-il-frecuencia','ic-il-curso','ic-il-alerta','ic-il-cambiobasal','ic-il-corrige','ic-il-retorna','ic-il-gravedad'].forEach(function(id){
+    var h=document.getElementById(id);if(h)h.value='';
+  });
+  var _ilBody=document.getElementById('ic-il-body');
+  var _ilChev=document.getElementById('ic-il-chev');
+  if(_ilBody)_ilBody.style.display='none';
+  if(_ilChev)_ilChev.style.transform='';
+  var _ilSug=document.getElementById('ic-il-sugerencia');
+  if(_ilSug)_ilSug.style.display='none';
+  if(typeof _ilusionSugerenciaDescartada!=='undefined')_ilusionSugerenciaDescartada=false;
   // Resetear notas generadas
   var wrap=document.getElementById('ic-output-wrap');if(wrap)wrap.style.display='none';
   // Resetear transcripción de sesión — nunca dejar pegado el texto de un paciente anterior
