@@ -1250,6 +1250,11 @@ input.toggle-cb{display:none}
               <span class="ft">🧠 ¿Incoherencia, irritabilidad o desorientación? (opcional)</span>
               <span id="ic-episodio-chev" style="margin-left:auto;font-size:1rem;transition:transform .2s;display:inline-block">▸</span>
             </div>
+            <div id="ic-episodio-sugerencia" style="display:none;background:#fef9c3;border-bottom:1px solid #fde68a;padding:9px 16px;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-size:0.78rem;color:#78350f;flex:1;min-width:200px">💡 Marcaste hallazgos en el examen mental compatibles con un episodio de este tipo — ¿quieres caracterizarlo?</span>
+              <button class="btn btn-sm" style="background:#d97706;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-weight:700;font-size:0.74rem;cursor:pointer" onclick="abrirEpisodioDesdeSugerencia()">Caracterizar</button>
+              <button style="background:none;border:none;color:#92400e;font-size:0.72rem;cursor:pointer;text-decoration:underline;padding:4px" onclick="descartarSugerenciaEpisodio()">Ahora no</button>
+            </div>
             <div id="ic-episodio-body" style="display:none">
               <div class="ic-form-body">
                 <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;line-height:1.5">Tócalo solo si el paciente presenta un episodio de este tipo. Sigue la estructura del manual de caracterización clínica — describe, no diagnostica automáticamente.</div>
@@ -6142,6 +6147,9 @@ window.goTo = function(page){
     var _epChevNav=document.getElementById('ic-episodio-chev');
     if(_epBodyNav)_epBodyNav.style.display='none';
     if(_epChevNav)_epChevNav.style.transform='';
+    var _epSugNav=document.getElementById('ic-episodio-sugerencia');
+    if(_epSugNav)_epSugNav.style.display='none';
+    if(typeof _episodioSugerenciaDescartada!=='undefined')_episodioSugerenciaDescartada=false;
   }
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
@@ -9834,6 +9842,43 @@ window.setICMode=function(m){
 
 window.toggleICView=function(){goTo('interconsultas');};
 
+// Chips del examen mental que, al marcarse, sugieren caracterizar un episodio
+// de alteración mental (tomados literalmente de los campos reales del formulario).
+var EPISODIO_CHIPS_DISPARADORES=[
+  'Agresivo/a','Paranoide','Inadecuado/a al contexto', // Actitud
+  'Hiperalerta','Obnubilado/a','Somnoliento/a','Estupor', // Conciencia
+  'Desorientado/a', // Orientación
+  'Hipoprosexia','Hiperprosexia','Pseudoaprosexia','Aprosexia', // Atención
+  'Taquipsiquia','Bradipsiquia','Alogia','Mente en blanco', // Pensamiento — curso
+  'Ensalada de palabras','Mutismo','Neologismos','Verbigeración' // Lenguaje
+];
+var _episodioSugerenciaDescartada=false;
+
+window.sugerirEpisodioAlteracion=function(){
+  if(_episodioSugerenciaDescartada)return;
+  var body=document.getElementById('ic-episodio-body');
+  if(body&&body.style.display!=='none')return; // ya está abierta, no hace falta sugerir
+  var banner=document.getElementById('ic-episodio-sugerencia');
+  if(banner)banner.style.display='flex';
+};
+
+window.abrirEpisodioDesdeSugerencia=function(){
+  var banner=document.getElementById('ic-episodio-sugerencia');
+  if(banner)banner.style.display='none';
+  var body=document.getElementById('ic-episodio-body');
+  var chev=document.getElementById('ic-episodio-chev');
+  if(body)body.style.display='';
+  if(chev)chev.style.transform='rotate(90deg)';
+  var sec=document.getElementById('ic-episodio-section');
+  if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+window.descartarSugerenciaEpisodio=function(){
+  var banner=document.getElementById('ic-episodio-sugerencia');
+  if(banner)banner.style.display='none';
+  _episodioSugerenciaDescartada=true; // no volver a insistir en esta nota
+};
+
 // Colapsar/expandir la sección opcional de episodio de alteración mental
 window.toggleEpisodioAlteracion=function(){
   var body=document.getElementById('ic-episodio-body');
@@ -9911,20 +9956,6 @@ window.recolectarEpisodioAlteracion=function(){
   return 'EPISODIO DE ALTERACIÓN MENTAL (caracterización — describe, NO diagnostica de entrada):\n'+lineas.join('\n');
 };
 
-// El valor de los chips single-select del 4AT y algunos otros usan data-pts
-// para guardar el puntaje en el hidden en vez del texto — override puntual.
-(function(){
-  var origIcTogSingle=window.icTogSingle;
-  window.icTogSingle=function(el,hiddenId){
-    origIcTogSingle(el,hiddenId);
-    if(el.hasAttribute('data-pts')){
-      var h=document.getElementById(hiddenId);
-      if(h)h.value=el.getAttribute('data-pts');
-    }
-    if(hiddenId&&hiddenId.indexOf('ic-4at-')===0&&typeof calcular4AT==='function')calcular4AT();
-  };
-})();
-
 window.icTog=function(el){el.classList.toggle('on');};
 // Single-select chip group — deselects siblings, sets hidden input
 window.icTogSingle=function(el,hiddenId){
@@ -9948,6 +9979,39 @@ window.icTogRiesgo=function(el){
 window.icTogR=function(el){el.classList.toggle('on-r');};
 window.icTogG=function(el){el.classList.toggle('on-g');};
 window.icTogA=function(el){el.classList.toggle('on-a');};
+
+// A partir de aquí, icTog/icTogA/icTogR/icTogSingle YA existen — es seguro
+// envolverlas sin que una definición posterior las vuelva a sobrescribir.
+
+// El 4AT usa data-pts para guardar el puntaje en el hidden en vez del texto.
+(function(){
+  var origIcTogSingle=window.icTogSingle;
+  window.icTogSingle=function(el,hiddenId){
+    origIcTogSingle(el,hiddenId);
+    if(el.hasAttribute('data-pts')){
+      var h=document.getElementById(hiddenId);
+      if(h)h.value=el.getAttribute('data-pts');
+    }
+    if(hiddenId&&hiddenId.indexOf('ic-4at-')===0&&typeof calcular4AT==='function')calcular4AT();
+  };
+})();
+
+// Detecta chips de alerta del examen mental y sugiere caracterizar el episodio.
+(function(){
+  var origIcTog=window.icTog, origIcTogA=window.icTogA, origIcTogR=window.icTogR;
+  function _chequearDisparadorEpisodio(el){
+    if(!el||!el.classList)return;
+    if(!el.classList.contains('on')&&!el.classList.contains('on-a')&&!el.classList.contains('on-r'))return;
+    if(!el.closest||!el.closest('#ic-form-view'))return;
+    var txt=(el.textContent||'').trim();
+    if(typeof EPISODIO_CHIPS_DISPARADORES!=='undefined'&&EPISODIO_CHIPS_DISPARADORES.indexOf(txt)!==-1){
+      if(typeof sugerirEpisodioAlteracion==='function')sugerirEpisodioAlteracion();
+    }
+  }
+  window.icTog=function(el){origIcTog(el);_chequearDisparadorEpisodio(el);};
+  window.icTogA=function(el){origIcTogA(el);_chequearDisparadorEpisodio(el);};
+  window.icTogR=function(el){origIcTogR(el);_chequearDisparadorEpisodio(el);};
+})();
 
 window.setICSev=function(el,nivel,isHigh){
   document.querySelectorAll('.sev-btn').forEach(function(s){s.classList.remove('on');});
@@ -11213,6 +11277,9 @@ window.limpiarFormIC=function(confirm_=true){
   var _epChev=document.getElementById('ic-episodio-chev');
   if(_epBody)_epBody.style.display='none';
   if(_epChev)_epChev.style.transform='';
+  var _epSug=document.getElementById('ic-episodio-sugerencia');
+  if(_epSug)_epSug.style.display='none';
+  if(typeof _episodioSugerenciaDescartada!=='undefined')_episodioSugerenciaDescartada=false;
   // Resetear notas generadas
   var wrap=document.getElementById('ic-output-wrap');if(wrap)wrap.style.display='none';
   // Resetear transcripción de sesión — nunca dejar pegado el texto de un paciente anterior
