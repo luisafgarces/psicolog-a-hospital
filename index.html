@@ -2564,6 +2564,352 @@ input.toggle-cb{display:none}
             </div>
           </div>
 
+          <!-- S6h: CARACTERIZACIÓN OPCIONAL — LABILIDAD EMOCIONAL -->
+          <div class="ic-form-section" id="ic-lab-section">
+            <div class="ic-form-head amber" style="cursor:pointer" onclick="toggleLabilidad()">
+              <span class="ft">🎭 ¿Labilidad emocional/afectiva? (opcional)</span>
+              <span id="ic-lab-chev" style="margin-left:auto;font-size:1rem;transition:transform .2s;display:inline-block">▸</span>
+            </div>
+            <div id="ic-lab-sugerencia" style="display:none;background:#fef9c3;border-bottom:1px solid #fde68a;padding:9px 16px;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-size:0.78rem;color:#78350f;flex:1;min-width:200px">💡 Marcaste afecto lábil — ¿quieres caracterizarlo?</span>
+              <button class="btn btn-sm" style="background:#d97706;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-weight:700;font-size:0.74rem;cursor:pointer" onclick="abrirLabilidadDesdeSugerencia()">Caracterizar</button>
+              <button style="background:none;border:none;color:#92400e;font-size:0.72rem;cursor:pointer;text-decoration:underline;padding:4px" onclick="descartarSugerenciaLabilidad()">Ahora no</button>
+            </div>
+            <div id="ic-lab-body" style="display:none">
+              <div class="ic-form-body">
+                <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;line-height:1.5">No es lo mismo un cambio de ánimo que labilidad — aquí lo clave es la rapidez, intensidad y dificultad para modular. "Cambia mucho de ánimo" no equivale a bipolaridad.</div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Emociones involucradas en el cambio</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Llanto</span>
+                    <span class="ic-chip" onclick="icTog(this)">Risa</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ira / irritabilidad</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ansiedad</span>
+                    <span class="ic-chip" onclick="icTog(this)">Tristeza</span>
+                    <span class="ic-chip" onclick="icTog(this)">Múltiples/alternantes en la misma entrevista</span>
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Velocidad del cambio</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-velocidad')">Muy rápida (segundos)</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-velocidad')">Rápida (minutos)</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-velocidad')">Moderada (dentro de la entrevista)</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-velocidad')">Horas</span>
+                    </div>
+                    <input type="hidden" id="ic-lab-velocidad" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Duración de cada episodio</div>
+                    <input type="text" id="ic-lab-duracion" placeholder="Ej: 2-3 minutos, no determinada…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Desencadenante</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Interpersonal / relacional</span>
+                    <span class="ic-chip" onclick="icTog(this)">Noticia médica</span>
+                    <span class="ic-chip" onclick="icTog(this)">Procedimiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sin desencadenante claro</span>
+                    <span class="ic-chip" onclick="icTog(this)">Estímulo neutro/incongruente con la reacción</span>
+                  </div>
+                  <input type="text" id="ic-lab-desencadenante-detalle" placeholder="Detalle breve (opcional)" style="margin-top:6px;width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Control percibido</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-control')">Conservado</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-control')">Parcial</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-control')">Muy reducido / involuntario</span>
+                    </div>
+                    <input type="hidden" id="ic-lab-control" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Recuperación tras el episodio</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-recuperacion')">Rápida al estado basal</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-recuperacion')">Parcial</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-recuperacion')">No recupera / persiste alterado</span>
+                    </div>
+                    <input type="hidden" id="ic-lab-recuperacion" value="">
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Congruencia con el contenido emocional</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-congruencia')">Congruente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-congruencia')">Incongruente (ej. llanto sin correlato subjetivo)</span>
+                    </div>
+                    <input type="hidden" id="ic-lab-congruencia" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Conciencia del cambio</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-conciencia-cambio')">Reconoce y puede explicarlo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-conciencia-cambio')">Reconoce pero no comprende por qué</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-conciencia-cambio')">No reconoce el cambio</span>
+                    </div>
+                    <input type="hidden" id="ic-lab-conciencia-cambio" value="">
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Intensidad</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-intensidad')">Leve</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-intensidad')">Moderada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-intensidad')">Marcada</span>
+                    </div>
+                    <input type="hidden" id="ic-lab-intensidad" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Curso</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-curso')">Aguda</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-curso')">Episódica</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-curso')">Persistente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-curso')">Reactiva</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-curso')">Involuntaria</span>
+                    </div>
+                    <input type="hidden" id="ic-lab-curso" value="">
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Contexto clínico probable</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-contexto')">Reactiva a hospitalización/estrés agudo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-contexto')">Posible daño neurológico (pseudobulbar)</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-contexto')">Asociada a rasgos/trastorno de personalidad</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-contexto')">Asociada a trastorno del ánimo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-contexto')">Asociada a ansiedad</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-contexto')">Asociada a deterioro cognitivo/adulto mayor</span>
+                    </div>
+                    <input type="hidden" id="ic-lab-contexto" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Antecedente neurológico reciente</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-antecedente-neuro')">No</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-antecedente-neuro')">Sí (ACV/TCE/otro)</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-lab-antecedente-neuro')">Desconocido</span>
+                    </div>
+                    <input type="hidden" id="ic-lab-antecedente-neuro" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Conductas asociadas (impulsividad)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna</span>
+                    <span class="ic-chip" onclick="icTog(this)">Respuestas verbales impulsivas</span>
+                    <span class="ic-chip" onclick="icTog(this)">Discusiones</span>
+                    <span class="ic-chip" onclick="icTog(this)">Abandono abrupto de situaciones</span>
+                    <span class="ic-chip" onclick="icTog(this)">Conductas de riesgo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Evitación de visitas/conversaciones</span>
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#991b1b">⚠️ Riesgo asociado</div>
+                  <div class="ic-chips" style="margin-top:6px">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno identificado</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Desesperanza</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Impulsividad marcada</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Autolesión</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Ideación suicida</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Agresividad</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- S6i: CARACTERIZACIÓN OPCIONAL — APATÍA -->
+          <div class="ic-form-section" id="ic-apa-section">
+            <div class="ic-form-head amber" style="cursor:pointer" onclick="toggleApatia()">
+              <span class="ft">😐 ¿Apatía / disminución de iniciativa? (opcional)</span>
+              <span id="ic-apa-chev" style="margin-left:auto;font-size:1rem;transition:transform .2s;display:inline-block">▸</span>
+            </div>
+            <div id="ic-apa-sugerencia" style="display:none;background:#fef9c3;border-bottom:1px solid #fde68a;padding:9px 16px;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-size:0.78rem;color:#78350f;flex:1;min-width:200px">💡 Marcaste hallazgos de apatía — ¿quieres caracterizarla?</span>
+              <button class="btn btn-sm" style="background:#d97706;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-weight:700;font-size:0.74rem;cursor:pointer" onclick="abrirApatiaDesdeSugerencia()">Caracterizar</button>
+              <button style="background:none;border:none;color:#92400e;font-size:0.72rem;cursor:pointer;text-decoration:underline;padding:4px" onclick="descartarSugerenciaApatia()">Ahora no</button>
+            </div>
+            <div id="ic-apa-body" style="display:none">
+              <div class="ic-form-body">
+                <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;line-height:1.5">"Sin ganas de hacer nada" NO es igual a apatía. Antes de cerrarlo, separa: ¿puede físicamente? → ¿quiere? → ¿puede iniciar solo? → ¿disfruta si lo hace? → ¿está triste? → ¿está cansado/somnoliento? → ¿está atento y orientado?</div>
+
+                <div class="ic-field" style="background:var(--surface2);border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel">Las 5 preguntas clave</div>
+                  <div class="ic-g2">
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">1. Iniciativa — ¿comienza por su cuenta?</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-iniciativa')">Conservada</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-iniciativa')">Requiere recordatorio</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-iniciativa')">Ausente sin indicación</span>
+                      </div>
+                      <input type="hidden" id="ic-apa-iniciativa" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">2. Interés — ¿quiere o simplemente no logra empezar?</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-interes')">Refiere interés, no logra iniciar</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-interes')">No le interesa</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-interes')">No evaluable</span>
+                      </div>
+                      <input type="hidden" id="ic-apa-interes" value="">
+                    </div>
+                  </div>
+                  <div class="ic-g2" style="margin-top:8px">
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">3. Placer — cuando lo hace, ¿lo disfruta?</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-placer')">Sí disfruta</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-placer')">No disfruta (sugiere anhedonia)</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-placer')">No evaluable</span>
+                      </div>
+                      <input type="hidden" id="ic-apa-placer" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">4. Estado emocional — ¿triste o le da igual?</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-emocional')">Indiferencia sin tristeza</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-emocional')">Refiere tristeza/desesperanza (sugiere depresión)</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-emocional')">No evaluable</span>
+                      </div>
+                      <input type="hidden" id="ic-apa-emocional" value="">
+                    </div>
+                  </div>
+                  <div style="margin-top:8px">
+                    <div class="ic-sublabel" style="font-size:0.68rem">5. Capacidad física — ¿podría hacerlo si quisiera?</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-capacidad-fisica')">Capacidad conservada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-capacidad-fisica')">Limitación física real</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-capacidad-fisica')">No evaluable</span>
+                    </div>
+                    <input type="hidden" id="ic-apa-capacidad-fisica" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones motivacionales/conductuales</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Dependencia de estímulos externos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Reducción de conductas dirigidas a objetivos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Reducción de participación social</span>
+                    <span class="ic-chip" onclick="icTog(this)">Abandono de actividades previas</span>
+                    <span class="ic-chip" onclick="icTog(this)">Menor participación en rehabilitación/autocuidado</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones cognitivas</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Disminución de actividad cognitiva autogenerada</span>
+                    <span class="ic-chip" onclick="icTog(this)">Poca curiosidad / no pregunta espontáneamente</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dificultad para iniciar decisiones</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dificultad para mantener una actividad iniciada</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones emocionales/afectivas</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Disminución de reactividad emocional</span>
+                    <span class="ic-chip" onclick="icTog(this)">Indiferencia aparente</span>
+                    <span class="ic-chip" onclick="icTog(this)">Menor entusiasmo</span>
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Intensidad</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-intensidad')">Leve</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-intensidad')">Moderada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-intensidad')">Marcada</span>
+                    </div>
+                    <input type="hidden" id="ic-apa-intensidad" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Curso</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-curso')">Aguda</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-curso')">Subaguda</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-curso')">Persistente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-curso')">Progresiva</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-curso')">Reactiva/contextual</span>
+                    </div>
+                    <input type="hidden" id="ic-apa-curso" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Duración aproximada / desde cuándo (no inventar si no se sabe)</div>
+                  <input type="text" id="ic-apa-duracion" placeholder="Ej: desde el ACV hace 2 semanas, no determinado…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Contexto clínico probable</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-contexto')">Asociada a deterioro cognitivo/demencia</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-contexto')">Asociada a depresión</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-contexto')">Asociada a enfermedad de Parkinson</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-contexto')">Posterior a ACV</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-contexto')">Otra enfermedad neurológica</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-contexto')">Asociada a medicamentos/sustancias</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-apa-contexto')">Reactiva a hospitalización</span>
+                  </div>
+                  <input type="hidden" id="ic-apa-contexto" value="">
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Antecedente neurológico / medicación reciente</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">ACV reciente</span>
+                    <span class="ic-chip" onclick="icTog(this)">TCE reciente</span>
+                    <span class="ic-chip" onclick="icTog(this)">Deterioro cognitivo previo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Enfermedad de Parkinson</span>
+                    <span class="ic-chip" onclick="icTog(this)">Medicación sedante/nueva</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno identificado</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Interferencia funcional</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna</span>
+                    <span class="ic-chip" onclick="icTog(this)">Rehabilitación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Autocuidado</span>
+                    <span class="ic-chip" onclick="icTog(this)">Interacción social/familiar</span>
+                    <span class="ic-chip" onclick="icTog(this)">Adherencia al tratamiento</span>
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#991b1b">⚠️ Verificar antes de cerrar como apatía</div>
+                  <div class="ic-chips" style="margin-top:6px">
+                    <span class="ic-chip" onclick="icTog(this)">Sin alteración de atención/conciencia/orientación</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Alteración de atención/conciencia/orientación (descartar delirium)</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Pensamientos de muerte/autolesión referidos</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- S7: IMPRESIÓN DIAGNÓSTICA PRELIMINAR -->
           <div class="ic-form-section" id="ic-dx-section">
             <div class="ic-form-head green"><span class="ft">🎯 Impresión diagnóstica preliminar</span><span class="ic-form-badge green">CIE-11 / DSM-5-TR</span></div>
@@ -7327,6 +7673,28 @@ window.goTo = function(page){
     var _depSugNav=document.getElementById('ic-dep-sugerencia');
     if(_depSugNav)_depSugNav.style.display='none';
     if(typeof _depresionSugerenciaDescartada!=='undefined')_depresionSugerenciaDescartada=false;
+    // Resetear módulo de labilidad emocional — mismo motivo
+    ['ic-lab-velocidad','ic-lab-control','ic-lab-recuperacion','ic-lab-congruencia','ic-lab-conciencia-cambio','ic-lab-intensidad','ic-lab-curso','ic-lab-contexto','ic-lab-antecedente-neuro'].forEach(function(id){
+      var h=document.getElementById(id);if(h)h.value='';
+    });
+    var _labBodyNav=document.getElementById('ic-lab-body');
+    var _labChevNav=document.getElementById('ic-lab-chev');
+    if(_labBodyNav)_labBodyNav.style.display='none';
+    if(_labChevNav)_labChevNav.style.transform='';
+    var _labSugNav=document.getElementById('ic-lab-sugerencia');
+    if(_labSugNav)_labSugNav.style.display='none';
+    if(typeof _labilidadSugerenciaDescartada!=='undefined')_labilidadSugerenciaDescartada=false;
+    // Resetear módulo de apatía — mismo motivo
+    ['ic-apa-iniciativa','ic-apa-interes','ic-apa-placer','ic-apa-emocional','ic-apa-capacidad-fisica','ic-apa-intensidad','ic-apa-curso','ic-apa-contexto'].forEach(function(id){
+      var h=document.getElementById(id);if(h)h.value='';
+    });
+    var _apaBodyNav=document.getElementById('ic-apa-body');
+    var _apaChevNav=document.getElementById('ic-apa-chev');
+    if(_apaBodyNav)_apaBodyNav.style.display='none';
+    if(_apaChevNav)_apaChevNav.style.transform='';
+    var _apaSugNav=document.getElementById('ic-apa-sugerencia');
+    if(_apaSugNav)_apaSugNav.style.display='none';
+    if(typeof _apatiaSugerenciaDescartada!=='undefined')_apatiaSugerenciaDescartada=false;
   }
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
@@ -11656,6 +12024,149 @@ window.recolectarAnimoDepresivo=function(){
   return 'ÁNIMO DEPRESIVO / SÍNTOMAS DEPRESIVOS (caracterización — describe, NO asume trastorno depresivo mayor de entrada):\n'+lineas.join('\n');
 };
 
+// ── MÓDULO: LABILIDAD EMOCIONAL (opcional) ─────────────────────────────
+var LABILIDAD_CHIPS_DISPARADORES=['Lábil'];
+var _labilidadSugerenciaDescartada=false;
+
+window.sugerirLabilidad=function(){
+  if(_labilidadSugerenciaDescartada)return;
+  var body=document.getElementById('ic-lab-body');
+  if(body&&body.style.display!=='none')return;
+  var banner=document.getElementById('ic-lab-sugerencia');
+  if(banner)banner.style.display='flex';
+};
+
+window.abrirLabilidadDesdeSugerencia=function(){
+  var banner=document.getElementById('ic-lab-sugerencia');
+  if(banner)banner.style.display='none';
+  var body=document.getElementById('ic-lab-body');
+  var chev=document.getElementById('ic-lab-chev');
+  if(body)body.style.display='';
+  if(chev)chev.style.transform='rotate(90deg)';
+  var sec=document.getElementById('ic-lab-section');
+  if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+window.descartarSugerenciaLabilidad=function(){
+  var banner=document.getElementById('ic-lab-sugerencia');
+  if(banner)banner.style.display='none';
+  _labilidadSugerenciaDescartada=true;
+};
+
+window.toggleLabilidad=function(){
+  var body=document.getElementById('ic-lab-body');
+  var chev=document.getElementById('ic-lab-chev');
+  if(!body)return;
+  var abierto=body.style.display!=='none';
+  body.style.display=abierto?'none':'';
+  if(chev)chev.style.transform=abierto?'':'rotate(90deg)';
+};
+
+window.recolectarLabilidad=function(){
+  var sec=document.getElementById('ic-lab-body');
+  if(!sec)return '';
+  var lineas=[];
+  var emoc=icChipsBySubLabel('Emociones involucradas en el cambio');
+  if(emoc.length)lineas.push('Emociones involucradas: '+emoc.join(', '));
+  var veloc=(document.getElementById('ic-lab-velocidad')||{}).value;
+  var dur=(document.getElementById('ic-lab-duracion')||{}).value;
+  if(veloc||dur)lineas.push('Velocidad del cambio: '+(veloc||'no especificada')+(dur?' | Duración por episodio: '+dur:''));
+  var desenc=icChipsBySubLabel('Desencadenante');
+  var desencDet=(document.getElementById('ic-lab-desencadenante-detalle')||{}).value;
+  if(desenc.length||desencDet)lineas.push('Desencadenante: '+(desenc.length?desenc.join(', '):'no especificado')+(desencDet?' — '+desencDet:''));
+  var control=(document.getElementById('ic-lab-control')||{}).value;
+  var recup=(document.getElementById('ic-lab-recuperacion')||{}).value;
+  if(control||recup)lineas.push('Control percibido: '+(control||'no evaluado')+' | Recuperación: '+(recup||'no evaluada'));
+  var congr=(document.getElementById('ic-lab-congruencia')||{}).value;
+  var concCambio=(document.getElementById('ic-lab-conciencia-cambio')||{}).value;
+  if(congr||concCambio)lineas.push('Congruencia: '+(congr||'no evaluada')+' | Conciencia del cambio: '+(concCambio||'no evaluada'));
+  var intens=(document.getElementById('ic-lab-intensidad')||{}).value;
+  var curso=(document.getElementById('ic-lab-curso')||{}).value;
+  if(intens||curso)lineas.push('Intensidad: '+(intens||'no especificada')+' | Curso: '+(curso||'no especificado'));
+  var contexto=(document.getElementById('ic-lab-contexto')||{}).value;
+  var antecNeuro=(document.getElementById('ic-lab-antecedente-neuro')||{}).value;
+  if(contexto||antecNeuro)lineas.push('Contexto clínico probable: '+(contexto||'no especificado')+' | Antecedente neurológico reciente: '+(antecNeuro||'no especificado'));
+  var conductas=icChipsBySubLabel('Conductas asociadas (impulsividad)');
+  if(conductas.length)lineas.push('Conductas asociadas: '+conductas.join(', '));
+  var riesgo=icChipsBySubLabel('⚠️ Riesgo asociado');
+  if(riesgo.length)lineas.push('⚠️ Riesgo: '+riesgo.join(', '));
+  if(!lineas.length)return '';
+  return 'LABILIDAD EMOCIONAL/AFECTIVA (caracterización — describe, NO asigna diagnóstico de entrada):\n'+lineas.join('\n');
+};
+
+// ── MÓDULO: APATÍA (opcional) ──────────────────────────────────────────
+var APATIA_CHIPS_DISPARADORES=['Síndrome amotivacional','Apatía'];
+var _apatiaSugerenciaDescartada=false;
+
+window.sugerirApatia=function(){
+  if(_apatiaSugerenciaDescartada)return;
+  var body=document.getElementById('ic-apa-body');
+  if(body&&body.style.display!=='none')return;
+  var banner=document.getElementById('ic-apa-sugerencia');
+  if(banner)banner.style.display='flex';
+};
+
+window.abrirApatiaDesdeSugerencia=function(){
+  var banner=document.getElementById('ic-apa-sugerencia');
+  if(banner)banner.style.display='none';
+  var body=document.getElementById('ic-apa-body');
+  var chev=document.getElementById('ic-apa-chev');
+  if(body)body.style.display='';
+  if(chev)chev.style.transform='rotate(90deg)';
+  var sec=document.getElementById('ic-apa-section');
+  if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+window.descartarSugerenciaApatia=function(){
+  var banner=document.getElementById('ic-apa-sugerencia');
+  if(banner)banner.style.display='none';
+  _apatiaSugerenciaDescartada=true;
+};
+
+window.toggleApatia=function(){
+  var body=document.getElementById('ic-apa-body');
+  var chev=document.getElementById('ic-apa-chev');
+  if(!body)return;
+  var abierto=body.style.display!=='none';
+  body.style.display=abierto?'none':'';
+  if(chev)chev.style.transform=abierto?'':'rotate(90deg)';
+};
+
+window.recolectarApatia=function(){
+  var sec=document.getElementById('ic-apa-body');
+  if(!sec)return '';
+  var lineas=[];
+  var iniciativa=(document.getElementById('ic-apa-iniciativa')||{}).value;
+  var interes=(document.getElementById('ic-apa-interes')||{}).value;
+  if(iniciativa||interes)lineas.push('Iniciativa: '+(iniciativa||'no evaluada')+' | Interés: '+(interes||'no evaluado'));
+  var placer=(document.getElementById('ic-apa-placer')||{}).value;
+  var emocional=(document.getElementById('ic-apa-emocional')||{}).value;
+  if(placer||emocional)lineas.push('Placer al realizar la actividad: '+(placer||'no evaluado')+' | Estado emocional: '+(emocional||'no evaluado'));
+  var capFisica=(document.getElementById('ic-apa-capacidad-fisica')||{}).value;
+  if(capFisica)lineas.push('Capacidad física: '+capFisica);
+  var motConduct=icChipsBySubLabel('Manifestaciones motivacionales/conductuales');
+  if(motConduct.length)lineas.push('Manifestaciones motivacionales/conductuales: '+motConduct.join(', '));
+  var cogn=icChipsBySubLabel('Manifestaciones cognitivas');
+  if(cogn.length)lineas.push('Manifestaciones cognitivas: '+cogn.join(', '));
+  var emoc=icChipsBySubLabel('Manifestaciones emocionales/afectivas');
+  if(emoc.length)lineas.push('Manifestaciones emocionales/afectivas: '+emoc.join(', '));
+  var intens=(document.getElementById('ic-apa-intensidad')||{}).value;
+  var curso=(document.getElementById('ic-apa-curso')||{}).value;
+  if(intens||curso)lineas.push('Intensidad: '+(intens||'no especificada')+' | Curso: '+(curso||'no especificado'));
+  var dur=(document.getElementById('ic-apa-duracion')||{}).value;
+  if(dur)lineas.push('Duración/inicio: '+dur);
+  var contexto=(document.getElementById('ic-apa-contexto')||{}).value;
+  if(contexto)lineas.push('Contexto clínico probable: '+contexto);
+  var antec=icChipsBySubLabel('Antecedente neurológico / medicación reciente');
+  if(antec.length)lineas.push('Antecedente neurológico/farmacológico: '+antec.join(', '));
+  var interf=icChipsBySubLabel('Interferencia funcional');
+  if(interf.length)lineas.push('Interferencia funcional: '+interf.join(', '));
+  var verificar=icChipsBySubLabel('⚠️ Verificar antes de cerrar como apatía');
+  if(verificar.length)lineas.push('⚠️ Verificación: '+verificar.join(', '));
+  if(!lineas.length)return '';
+  return 'APATÍA / DISMINUCIÓN DE INICIATIVA (caracterización — describe, NO asume causa de entrada; diferencia de depresión/anhedonia/fatiga/limitación física/delirium):\n'+lineas.join('\n');
+};
+
 window.icTog=function(el){el.classList.toggle('on');};
 // Single-select chip group — deselects siblings, sets hidden input
 window.icTogSingle=function(el,hiddenId){
@@ -11722,6 +12233,12 @@ window.icTogA=function(el){el.classList.toggle('on-a');};
     }
     if(typeof DEPRESION_CHIPS_DISPARADORES!=='undefined'&&DEPRESION_CHIPS_DISPARADORES.indexOf(txt)!==-1){
       if(typeof sugerirAnimoDepresivo==='function')sugerirAnimoDepresivo();
+    }
+    if(typeof LABILIDAD_CHIPS_DISPARADORES!=='undefined'&&LABILIDAD_CHIPS_DISPARADORES.indexOf(txt)!==-1){
+      if(typeof sugerirLabilidad==='function')sugerirLabilidad();
+    }
+    if(typeof APATIA_CHIPS_DISPARADORES!=='undefined'&&APATIA_CHIPS_DISPARADORES.indexOf(txt)!==-1){
+      if(typeof sugerirApatia==='function')sugerirApatia();
     }
   }
   window.icTog=function(el){origIcTog(el);_chequearDisparadorEpisodio(el);};
@@ -12071,6 +12588,10 @@ async function generarNotaIcConGemini(apiKey){
   if(_ansiedadDat)dResp+='\n\n'+_ansiedadDat;
   var _depresionDat=(typeof recolectarAnimoDepresivo==='function')?recolectarAnimoDepresivo():'';
   if(_depresionDat)dResp+='\n\n'+_depresionDat;
+  var _labilidadDat=(typeof recolectarLabilidad==='function')?recolectarLabilidad():'';
+  if(_labilidadDat)dResp+='\n\n'+_labilidadDat;
+  var _apatiaDat=(typeof recolectarApatia==='function')?recolectarApatia():'';
+  if(_apatiaDat)dResp+='\n\n'+_apatiaDat;
 
   var dTrat=`Intervención: ${chips('Intervención realizada / sugerida')||chips('Intervención realizada hoy')||'valoración clínica'}. Respuesta al médico derivante: ${_respMedico||'ver análisis clínico'}. Seguimiento: ${chips('Seguimiento')||'según evolución'}${_seguimientoPlazo?' — plazo: '+_seguimientoPlazo:''}. Alertas al equipo: ${_notasEquipo||tratNotas||'ninguna'}.`;
   // Instrucción para incluir capacidad decisional literal al final de TRATAMIENTO
@@ -12158,6 +12679,12 @@ async function generarNotaIcConGemini(apiKey){
     (_depresionDat?('\n\nADEMÁS, los datos incluyen la caracterización de ÁNIMO DEPRESIVO / síntomas depresivos. '+
     'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ÁNIMO DEPRESIVO: " y describa en prosa: las manifestaciones afectivas, cognitivas, físicas y conductuales presentes, si hay pensamientos de muerte (indicar explícitamente si los hay o no), la gravedad y curso, el contexto clínico probable (reactivo a hospitalización, síntomas persistentes, posible episodio depresivo mayor, asociado a enfermedad médica, o posible con síntomas psicóticos), la interferencia funcional, y posibles factores médicos/farmacológicos asociados. Termina con qué hipótesis clínicas o pasos deben considerarse (sin concluir diagnóstico). '+
     'REGLA ESTRICTA: la tristeza en contexto hospitalario no equivale automáticamente a trastorno depresivo — diferénciala de una respuesta emocional esperable y proporcional al contexto (diagnóstico, hospitalización, pérdida de autonomía). No atribuyas automáticamente síntomas somáticos (fatiga, cambios de apetito, alteraciones del sueño) a depresión sin considerar la enfermedad médica, medicamentos o la hospitalización misma como causa. Si aparecen pensamientos de muerte o ideación suicida, destácalo con máxima prioridad y aclara que este módulo no reemplaza la evaluación de riesgo suicida independiente — debe ampliarse por separado. Si hay elementos que sugieran síntomas psicóticos congruentes con el ánimo (culpa delirante, ruina, nihilismo), recomienda activar la caracterización de ideas delirantes por separado. '):'')+
+    (_labilidadDat?('\n\nADEMÁS, los datos incluyen la caracterización de LABILIDAD EMOCIONAL/AFECTIVA. '+
+    'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — LABILIDAD EMOCIONAL: " y describa en prosa, integrando estos 6 elementos: qué emoción(es) aparecen, la velocidad del cambio, la duración de cada episodio, el desencadenante identificado, el control percibido y la recuperación posterior al estado basal. Menciona la congruencia con el contenido emocional y si hay antecedente neurológico reciente. Termina con qué hipótesis clínicas o pasos deben considerarse (sin concluir diagnóstico). '+
+    'REGLA ESTRICTA: no confundas un cambio de ánimo simple con labilidad — lo distintivo es la rapidez, intensidad y dificultad para modular la respuesta, no solo que el ánimo varíe. Nunca concluyas automáticamente "labilidad = trastorno límite de personalidad" ni "cambia de ánimo = bipolaridad" — un episodio bipolar requiere síntomas maníacos/hipomaníacos sostenidos, no solo cambios rápidos en la entrevista. Si el llanto es congruente con tristeza sostenida y sin cambios rápidos, describe esto como posible ánimo depresivo en vez de labilidad. Si hay incongruencia marcada entre la expresión emocional y la experiencia subjetiva referida (ej. llanto sin correlato emocional, especialmente con antecedente neurológico), recomienda explícitamente valoración médica/neurológica para descartar afecto pseudobulbar. Si hay alteración de conciencia, atención u orientación fluctuante, recomienda descartar delirium antes de atribuir el cambio a labilidad. Si hay riesgo asociado (impulsividad marcada, autolesión, ideación suicida), destácalo con prioridad. '):'')+
+    (_apatiaDat?('\n\nADEMÁS, los datos incluyen la caracterización de APATÍA / disminución de iniciativa. '+
+    'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — APATÍA: " y describa en prosa, respondiendo estas 5 preguntas: si tiene iniciativa propia o requiere indicación, si refiere interés o simplemente no logra iniciar, si disfruta la actividad cuando finalmente la realiza, su estado emocional (indiferencia sin tristeza vs. tristeza/desesperanza), y su capacidad física real. Incluye manifestaciones motivacionales, cognitivas y emocionales presentes, intensidad, curso, contexto clínico probable e interferencia funcional. Termina con qué hipótesis clínicas o pasos deben considerarse (sin concluir diagnóstico). '+
+    'REGLA ESTRICTA: "sin ganas de hacer nada" NO equivale automáticamente a apatía — diferénciala explícitamente de: anhedonia (el paciente SÍ inicia pero no disfruta — problema de placer, no de iniciativa), depresión (predomina tristeza/desesperanza con sufrimiento subjetivo elevado), fatiga (el problema es energía, no motivación — "no puedo" vs. "no me interesa"), somnolencia (alteración del nivel de alerta), y limitación física real (el paciente quiere pero no puede). Si la apatía aparece de forma aguda junto con alteración de atención, conciencia u orientación, recomienda descartar delirium antes de asumir apatía. Si hay antecedente neurológico reciente (ACV, TCE) o inicio tras un medicamento nuevo, señálalo explícitamente como posible factor causal a correlacionar. No caracterices como apatía una conducta que se explica suficientemente por restricción médica (reposo indicado) o incapacidad física. '):'')+
     'Datos:\n'+dResp;
 
   var promptTrat = estiloBase +
@@ -12387,6 +12914,8 @@ async function generarSegConGemini(apiKey){
   var _delirioSeg=(typeof recolectarIdeaDelirante==='function')?recolectarIdeaDelirante():'';
   var _ansiedadSeg=(typeof recolectarAnsiedad==='function')?recolectarAnsiedad():'';
   var _depresionSeg=(typeof recolectarAnimoDepresivo==='function')?recolectarAnimoDepresivo():'';
+  var _labilidadSeg=(typeof recolectarLabilidad==='function')?recolectarLabilidad():'';
+  var _apatiaSeg=(typeof recolectarApatia==='function')?recolectarApatia():'';
 
   var datos=`
 TIPO DE NOTA: Seguimiento psicológico hospitalario
@@ -12458,6 +12987,8 @@ ${_ilusionSeg?'\n'+_ilusionSeg:''}
 ${_delirioSeg?'\n'+_delirioSeg:''}
 ${_ansiedadSeg?'\n'+_ansiedadSeg:''}
 ${_depresionSeg?'\n'+_depresionSeg:''}
+${_labilidadSeg?'\n'+_labilidadSeg:''}
+${_apatiaSeg?'\n'+_apatiaSeg:''}
 `.trim();
 
   var prompt='Eres psicóloga clínica hospitalaria de la ESE Hospital La María. Redacta una NOTA DE EVOLUCIÓN (SEGUIMIENTO) para el sistema DGW, jurídicamente sólida, clínicamente rigurosa y útil para el equipo tratante. '+
@@ -12475,6 +13006,8 @@ ${_depresionSeg?'\n'+_depresionSeg:''}
     (_delirioSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (4): los datos incluyen la caracterización de una IDEA DELIRANTE / creencia de alta convicción. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — IDEA DELIRANTE: " y describa en prosa: qué cree el paciente y a qué/quién lo atribuye, en qué evidencia subjetiva lo sustenta, su convicción y flexibilidad frente a explicaciones alternativas, la emoción y conducta/repercusión asociadas, el estado de atención/orientación/alerta y cambio respecto al basal, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: nunca concluyas automáticamente "delirio persecutorio = esquizofrenia" — los delirios pueden aparecer en trastornos del ánimo, delirium, trastornos neurocognitivos y por sustancias; considera también si podría ser creencia cultural/religiosa, preocupación somática con base real, o idea sobrevalorada. Si hay riesgo marcado, destácalo con prioridad. Si es nueva, fluctuante o con alteración cognitiva/atencional/de alerta, recomienda correlacionar con contexto médico y de sustancias antes de asumir causa psiquiátrica.'):'')+
     (_ansiedadSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (5): los datos incluyen la caracterización de ANSIEDAD. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ANSIEDAD: " y describa en prosa: qué le preocupa/teme, las manifestaciones cognitivas/fisiológicas/conductuales/emocionales presentes, intensidad y control percibido, contexto clínico probable, curso, interferencia funcional, y si hubo crisis de pánico. Termina con qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: no toda ansiedad hospitalaria es patológica — puede ser respuesta proporcional y esperable; no la caracterices como clínicamente significativa a menos que los datos lo sustenten. No atribuyas automáticamente síntomas físicos a ansiedad sin considerar causas médicas o farmacológicas — recomienda descartarlas si hay síntomas físicos marcados o de inicio agudo. Si hay riesgo asociado, destácalo con prioridad. Si hubo crisis de pánico, recomienda descartar causa orgánica antes de atribuirla exclusivamente a ansiedad.'):'')+
     (_depresionSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (6): los datos incluyen la caracterización de ÁNIMO DEPRESIVO / síntomas depresivos. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ÁNIMO DEPRESIVO: " y describa en prosa: manifestaciones afectivas, cognitivas, físicas y conductuales presentes, si hay pensamientos de muerte (indicar explícitamente si los hay o no), gravedad y curso, contexto clínico probable, interferencia funcional, y posibles factores médicos/farmacológicos asociados. Termina con qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: la tristeza hospitalaria no equivale automáticamente a trastorno depresivo — diferénciala de una respuesta emocional esperable. No atribuyas automáticamente síntomas somáticos a depresión sin considerar la enfermedad médica o los medicamentos. Si aparecen pensamientos de muerte o ideación suicida, destácalo con máxima prioridad y aclara que este módulo no reemplaza la evaluación de riesgo suicida independiente. Si hay elementos psicóticos congruentes con el ánimo (culpa delirante, ruina, nihilismo), recomienda activar la caracterización de ideas delirantes por separado.'):'')+
+    (_labilidadSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (7): los datos incluyen la caracterización de LABILIDAD EMOCIONAL/AFECTIVA. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — LABILIDAD EMOCIONAL: " y describa en prosa: qué emoción(es) aparecen, velocidad del cambio, duración de cada episodio, desencadenante, control percibido y recuperación al estado basal, congruencia con el contenido emocional, y antecedente neurológico reciente. Termina con qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: no confundas un cambio de ánimo simple con labilidad — lo distintivo es rapidez, intensidad y dificultad para modular. Nunca concluyas automáticamente "labilidad = TLP" ni "cambia de ánimo = bipolaridad". Si el llanto es congruente con tristeza sostenida sin cambios rápidos, descríbelo como posible ánimo depresivo, no labilidad. Si hay incongruencia marcada entre expresión emocional y experiencia subjetiva (especialmente con antecedente neurológico), recomienda descartar afecto pseudobulbar. Si hay alteración de conciencia/atención/orientación fluctuante, recomienda descartar delirium primero. Si hay riesgo asociado, destácalo con prioridad.'):'')+
+    (_apatiaSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (8): los datos incluyen la caracterización de APATÍA / disminución de iniciativa. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — APATÍA: " y describa en prosa: iniciativa propia vs. requiere indicación, interés vs. dificultad para iniciar, placer al realizar la actividad, estado emocional (indiferencia vs. tristeza), capacidad física real, manifestaciones motivacionales/cognitivas/emocionales, intensidad, curso, contexto clínico e interferencia funcional. Termina con qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: "sin ganas de hacer nada" no equivale automáticamente a apatía — diferénciala de anhedonia (inicia pero no disfruta), depresión (predomina tristeza/desesperanza), fatiga (falta de energía, no de motivación), somnolencia (alteración de alerta), y limitación física real (quiere pero no puede). Si aparece de forma aguda con alteración de atención/conciencia/orientación, recomienda descartar delirium primero. Si hay antecedente neurológico reciente o medicación nueva, señálalo como posible factor causal. No caracterices como apatía una conducta explicada por restricción médica indicada.'):'')+
     '\n\nDETECCIÓN DE INCONGRUENCIAS (OBLIGATORIO): analiza la ficha buscando contradicciones entre lo que dice el paciente y lo observado, entre lo que refiere el familiar y lo observado, datos médicos que contradicen el reporte, información crítica faltante (ej. ideación suicida no explorada pese a expresiones de deseo de muerte) o riesgo legal (afirmar algo no evaluado). Redacta la nota de forma conservadora, sin afirmar lo no evaluado.'+
     '\n\nFORMATO EXACTO DE TU RESPUESTA: primero escribe en una línea sola ===NOTA=== y a continuación el párrafo completo de la nota. DESPUÉS, si detectaste incongruencias, escribe en una línea sola ===INCONGRUENCIAS=== seguido de máximo 5 hallazgos, UNA línea breve por hallazgo (qué contradice qué y qué verificar), estilo telegráfico. Si no hay incongruencias, termina después de la nota sin esa sección.'+
     '\n\nFICHA DE RONDA (POST-SESIÓN) — usa solo estos datos reales:\n\n'+datos
@@ -13106,6 +13639,28 @@ window.limpiarFormIC=function(confirm_=true){
   var _depSug=document.getElementById('ic-dep-sugerencia');
   if(_depSug)_depSug.style.display='none';
   if(typeof _depresionSugerenciaDescartada!=='undefined')_depresionSugerenciaDescartada=false;
+  // Resetear módulo de labilidad emocional — mismo motivo
+  ['ic-lab-velocidad','ic-lab-control','ic-lab-recuperacion','ic-lab-congruencia','ic-lab-conciencia-cambio','ic-lab-intensidad','ic-lab-curso','ic-lab-contexto','ic-lab-antecedente-neuro'].forEach(function(id){
+    var h=document.getElementById(id);if(h)h.value='';
+  });
+  var _labBody=document.getElementById('ic-lab-body');
+  var _labChev=document.getElementById('ic-lab-chev');
+  if(_labBody)_labBody.style.display='none';
+  if(_labChev)_labChev.style.transform='';
+  var _labSug=document.getElementById('ic-lab-sugerencia');
+  if(_labSug)_labSug.style.display='none';
+  if(typeof _labilidadSugerenciaDescartada!=='undefined')_labilidadSugerenciaDescartada=false;
+  // Resetear módulo de apatía — mismo motivo
+  ['ic-apa-iniciativa','ic-apa-interes','ic-apa-placer','ic-apa-emocional','ic-apa-capacidad-fisica','ic-apa-intensidad','ic-apa-curso','ic-apa-contexto'].forEach(function(id){
+    var h=document.getElementById(id);if(h)h.value='';
+  });
+  var _apaBody=document.getElementById('ic-apa-body');
+  var _apaChev=document.getElementById('ic-apa-chev');
+  if(_apaBody)_apaBody.style.display='none';
+  if(_apaChev)_apaChev.style.transform='';
+  var _apaSug=document.getElementById('ic-apa-sugerencia');
+  if(_apaSug)_apaSug.style.display='none';
+  if(typeof _apatiaSugerenciaDescartada!=='undefined')_apatiaSugerenciaDescartada=false;
   // Resetear notas generadas
   var wrap=document.getElementById('ic-output-wrap');if(wrap)wrap.style.display='none';
   // Resetear transcripción de sesión — nunca dejar pegado el texto de un paciente anterior
