@@ -605,6 +605,7 @@ input.toggle-cb{display:none}
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
               <span id="transc-status" style="font-size:0.8rem;font-weight:700;color:#991b1b">🔴 Grabando…</span>
               <span id="transc-timer" style="font-size:0.78rem;color:#7f1d1d;font-variant-numeric:tabular-nums">00:00</span>
+              <span id="grab-pendientes-badge" style="display:none;font-size:0.72rem;font-weight:700;color:#0369a1;background:#e0f2fe;padding:2px 8px;border-radius:10px"></span>
             </div>
             <textarea id="transc-texto" rows="6" placeholder="La transcripción aparecerá aquí…" style="width:100%;padding:8px;border:1px solid #fecaca;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.8rem;line-height:1.55;background:#fff;resize:vertical"></textarea>
             <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
@@ -1957,6 +1958,236 @@ input.toggle-cb{display:none}
                   </div>
                   <input type="hidden" id="ic-il-gravedad" value="">
                   <input type="text" id="ic-il-gravedad-desc" placeholder="Descripción observable breve (opcional)" style="margin-top:6px;width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- S6e: CARACTERIZACIÓN OPCIONAL — IDEA DELIRANTE -->
+          <div class="ic-form-section" id="ic-del-section">
+            <div class="ic-form-head amber" style="cursor:pointer" onclick="toggleIdeaDelirante()">
+              <span class="ft">🧩 ¿Idea delirante o creencia de alta convicción? (opcional)</span>
+              <span id="ic-del-chev" style="margin-left:auto;font-size:1rem;transition:transform .2s;display:inline-block">▸</span>
+            </div>
+            <div id="ic-del-sugerencia" style="display:none;background:#fef9c3;border-bottom:1px solid #fde68a;padding:9px 16px;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-size:0.78rem;color:#78350f;flex:1;min-width:200px">💡 Marcaste hallazgos compatibles con idea delirante — ¿quieres caracterizarla?</span>
+              <button class="btn btn-sm" style="background:#d97706;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-weight:700;font-size:0.74rem;cursor:pointer" onclick="abrirDelirioDesdeSugerencia()">Caracterizar</button>
+              <button style="background:none;border:none;color:#92400e;font-size:0.72rem;cursor:pointer;text-decoration:underline;padding:4px" onclick="descartarSugerenciaDelirio()">Ahora no</button>
+            </div>
+            <div id="ic-del-body" style="display:none">
+              <div class="ic-form-body">
+                <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;line-height:1.5">No preguntes "¿tiene delirios?" — pregunta "¿qué cree que está ocurriendo?". No caracterices el delirio solo por su contenido: la convicción, flexibilidad y evidencia importan tanto como el tema.</div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Creencia principal (en palabras del paciente, breve)</div>
+                  <textarea id="ic-del-creencia" rows="2" placeholder="Ej: el personal está poniendo veneno en su medicación…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem"></textarea>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Tipo</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-tipo');actualizarSubtipoDelirio()">Persecutoria</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-tipo');actualizarSubtipoDelirio()">Somática</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-tipo');actualizarSubtipoDelirio()">Control/influencia</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-tipo');actualizarSubtipoDelirio()">Referencial</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-tipo');actualizarSubtipoDelirio()">Grandiosa</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-tipo');actualizarSubtipoDelirio()">Celotípica</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-tipo');actualizarSubtipoDelirio()">Religiosa/espiritual</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-tipo');actualizarSubtipoDelirio()">Culpa/ruina/nihilista</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-tipo');actualizarSubtipoDelirio()">Mixta</span>
+                  </div>
+                  <input type="hidden" id="ic-del-tipo" value="">
+                </div>
+
+                <!-- Subficha PERSECUTORIA (condicional) -->
+                <div id="ic-del-sub-persecutorio" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+                  <div class="ic-sublabel">Detalle — persecutorio</div>
+                  <input type="text" id="ic-del-perseguidor" placeholder="¿Quién cree que lo hace? Ej: la enfermera, el hospital…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;margin-bottom:6px">
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Daño físico</span>
+                    <span class="ic-chip" onclick="icTog(this)">Muerte</span>
+                    <span class="ic-chip" onclick="icTog(this)">Control</span>
+                    <span class="ic-chip" onclick="icTog(this)">Humillación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Robo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Castigo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Impedir tratamiento</span>
+                  </div>
+                </div>
+
+                <!-- Subficha SOMÁTICA (condicional) -->
+                <div id="ic-del-sub-somatico" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+                  <div class="ic-sublabel">Detalle — somático</div>
+                  <input type="text" id="ic-del-parte-corporal" placeholder="Parte/función corporal implicada" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;margin-bottom:6px">
+                  <input type="text" id="ic-del-sintomas-reales" placeholder="Síntomas físicos reales referidos (si hay)" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;margin-bottom:6px">
+                  <input type="text" id="ic-del-evidencia-medica" placeholder="Evidencia médica disponible (si se conoce)" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <!-- Subficha CONTROL (condicional) -->
+                <div id="ic-del-sub-control" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+                  <div>
+                    <div class="ic-sublabel">¿Qué está siendo controlado?</div>
+                    <div class="ic-chips" style="margin-bottom:6px">
+                      <span class="ic-chip" onclick="icTog(this)">Pensamientos</span>
+                      <span class="ic-chip" onclick="icTog(this)">Emociones</span>
+                      <span class="ic-chip" onclick="icTog(this)">Impulsos</span>
+                      <span class="ic-chip" onclick="icTog(this)">Movimientos</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Tipo de control</div>
+                    <div class="ic-chips" style="margin-bottom:6px">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-control-tipo')">Robo del pensamiento</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-control-tipo')">Inserción del pensamiento</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-control-tipo')">Difusión del pensamiento</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-control-tipo')">Pasividad/control corporal</span>
+                    </div>
+                  </div>
+                  <input type="hidden" id="ic-del-control-tipo" value="">
+                  <input type="text" id="ic-del-agente" placeholder="Agente al que atribuye el control" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Inicio</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-inicio')">Agudo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-inicio')">Subagudo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-inicio')">Crónico</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-inicio')">Desconocido</span>
+                    </div>
+                    <input type="hidden" id="ic-del-inicio" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Sistematización</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-sistematizacion')">Baja</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-sistematizacion')">Moderada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-sistematizacion')">Alta</span>
+                    </div>
+                    <input type="hidden" id="ic-del-sistematizacion" value="">
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Convicción (0-100)</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-conviccion')">0-25 duda marcada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-conviccion')">26-50 incertidumbre</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-conviccion')">51-75 moderada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-conviccion')">76-90 alta</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-conviccion')">91-100 casi absoluta</span>
+                    </div>
+                    <input type="hidden" id="ic-del-conviccion" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Flexibilidad / incorregibilidad</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-flexibilidad')">Alta</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-flexibilidad')">Parcial</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-flexibilidad')">Baja</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-del-flexibilidad')">Ausente</span>
+                    </div>
+                    <input type="hidden" id="ic-del-flexibilidad" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Evidencia subjetiva (qué usa para sostenerla)</div>
+                  <input type="text" id="ic-del-evidencia" placeholder="Ej: miradas del personal, conversaciones, coincidencias…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Preocupación / saliencia (0-4)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-preocupacion')">0 Casi no piensa en ello</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-preocupacion')">1 Ocasional</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-preocupacion')">2 Frecuente</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-preocupacion')">3 Predominante</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-del-preocupacion')">4 Ocupa casi toda su mente</span>
+                  </div>
+                  <input type="hidden" id="ic-del-preocupacion" value="">
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Emoción asociada</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Miedo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ansiedad</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ira</span>
+                    <span class="ic-chip" onclick="icTog(this)">Tristeza</span>
+                    <span class="ic-chip" onclick="icTog(this)">Vergüenza</span>
+                    <span class="ic-chip" onclick="icTog(this)">Impotencia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Desesperanza</span>
+                    <span class="ic-chip" onclick="icTog(this)">Indiferencia</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Conducta asociada</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna</span>
+                    <span class="ic-chip" onclick="icTog(this)">Rechaza medicación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Rechaza alimentos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Rechaza procedimientos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Exige alta</span>
+                    <span class="ic-chip" onclick="icTog(this)">Intenta escapar</span>
+                    <span class="ic-chip" onclick="icTog(this)">Confronta al personal</span>
+                    <span class="ic-chip" onclick="icTog(this)">Se esconde / se aísla</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hipervigilancia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Conductas de protección</span>
+                    <span class="ic-chip" onclick="icTog(this)">Búsqueda de evidencia</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Repercusión</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna</span>
+                    <span class="ic-chip" onclick="icTog(this)">Tratamiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alimentación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sueño</span>
+                    <span class="ic-chip" onclick="icTog(this)">Relaciones</span>
+                    <span class="ic-chip" onclick="icTog(this)">Autocuidado</span>
+                    <span class="ic-chip" onclick="icTog(this)">Permanencia hospitalaria</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Estado cognitivo breve</div>
+                  <div class="ic-g2">
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Alerta</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-del-alerta')">Normal</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-del-alerta')">Somnoliento</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-del-alerta')">Hiperalerta/agitado</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-del-alerta')">Fluctuante</span>
+                      </div>
+                      <input type="hidden" id="ic-del-alerta" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Cambio respecto al basal</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-del-cambiobasal')">No</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-del-cambiobasal')">Sí</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-del-cambiobasal')">Desconocido</span>
+                      </div>
+                      <input type="hidden" id="ic-del-cambiobasal" value="">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#991b1b">⚠️ Riesgo asociado a la creencia</div>
+                  <div class="ic-chips" style="margin-top:6px">
+                    <span class="ic-chip" onclick="icTog(this)">No identificado</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Autoagresión</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Heteroagresión</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Fuga</span>
+                    <span class="ic-chip" onclick="icTogA(this)">No adherencia al tratamiento</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Retiro de dispositivos</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -6644,6 +6875,9 @@ window.goTo = function(page){
     window._ultimaTranscripcionParaAnexo='';
     window._notaConTranscripcion=false;
     if(typeof _grabEsContinuacion!=='undefined')_grabEsContinuacion=false;
+    if(typeof _grabSegmentosPendientesRed!=='undefined')_grabSegmentosPendientesRed=[];
+    var _grabBadgeNav=document.getElementById('grab-pendientes-badge');
+    if(_grabBadgeNav)_grabBadgeNav.style.display='none';
     var _btnG=document.getElementById('btn-grabar-sesion');
     if(_btnG){_btnG.textContent='🎙️ Grabar sesión';_btnG.style.background='#dc2626';_btnG.style.borderColor='#dc2626';}
     // Resetear episodio de alteración mental — mismo motivo que la transcripción
@@ -6684,6 +6918,20 @@ window.goTo = function(page){
     var _ilSugNav=document.getElementById('ic-il-sugerencia');
     if(_ilSugNav)_ilSugNav.style.display='none';
     if(typeof _ilusionSugerenciaDescartada!=='undefined')_ilusionSugerenciaDescartada=false;
+    // Resetear módulo de idea delirante — mismo motivo, incluye subfichas condicionales
+    ['ic-del-tipo','ic-del-inicio','ic-del-sistematizacion','ic-del-conviccion','ic-del-flexibilidad','ic-del-preocupacion','ic-del-alerta','ic-del-cambiobasal','ic-del-control-tipo'].forEach(function(id){
+      var h=document.getElementById(id);if(h)h.value='';
+    });
+    var _delBodyNav=document.getElementById('ic-del-body');
+    var _delChevNav=document.getElementById('ic-del-chev');
+    if(_delBodyNav)_delBodyNav.style.display='none';
+    if(_delChevNav)_delChevNav.style.transform='';
+    var _delSugNav=document.getElementById('ic-del-sugerencia');
+    if(_delSugNav)_delSugNav.style.display='none';
+    ['ic-del-sub-persecutorio','ic-del-sub-somatico','ic-del-sub-control'].forEach(function(id){
+      var s=document.getElementById(id);if(s)s.style.display='none';
+    });
+    if(typeof _delirioSugerenciaDescartada!=='undefined')_delirioSugerenciaDescartada=false;
   }
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
@@ -8265,6 +8513,9 @@ window.clearAnamnesis = function(){
   // Limpiar output de nota
   const out=document.getElementById('nota-output');
   if(out) out.textContent='Completa los campos y presiona "Generar nota clínica"…';
+  // El badge de conclusión de Capacidad Decisional no lo toca el barrido de arriba
+  const _anCapBadge=document.getElementById('an-cap-conclusion-badge');
+  if(_anCapBadge){_anCapBadge.style.display='none';_anCapBadge.textContent='';}
   // Setear fecha de hoy
   const fecha=document.getElementById('an-fecha');
   if(fecha) fecha.value=new Date().toISOString().split('T')[0];
@@ -8902,6 +9153,10 @@ var _grabSegmentoChunksActual=[];
 var _grabRotacionInterval=null;
 var _grabApiKeyActual='';
 var _grabSesionActiva=false;
+// Cola de segmentos que no se pudieron transcribir por falta de señal —
+// se quedan en memoria (nunca en Firebase/disco) y se reintentan solos
+// cuando vuelve la conexión, igual que las notas.
+var _grabSegmentosPendientesRed=[];
 
 // Abre el cuadro de transcripción SOLO para pegar texto de otro programa,
 // sin grabar audio ni pedir permiso de micrófono.
@@ -9059,6 +9314,54 @@ function iniciarNuevoSegmento(){
 }
 
 // Transcribe un pedazo de la grabación EN SEGUNDO PLANO, sin frenar lo que sigue grabándose.
+// Guarda un segmento sin señal, en memoria, para reintentarlo cuando vuelva
+// la conexión — igual que las notas. Nunca se escribe a Firebase ni a disco.
+function encolarSegmentoPendienteRed(indice,base64){
+  _grabSegmentos[indice]={texto:null,pendienteRed:true};
+  _grabSegmentosPendientesRed.push({indice:indice,base64:base64,mime:_grabMimeType||'audio/webm'});
+  actualizarTranscripcionVisible();
+  actualizarEstadoSegmentos();
+  var badge=document.getElementById('grab-pendientes-badge');
+  if(badge){badge.style.display='';badge.textContent='⏳ '+_grabSegmentosPendientesRed.length+' parte(s) esperando señal';}
+}
+
+// Reintenta todos los segmentos en cola apenas vuelve la conexión.
+async function sincronizarSegmentosPendientesRed(){
+  if(!_grabSegmentosPendientesRed.length||!_grabApiKeyActual)return;
+  var cola=_grabSegmentosPendientesRed.slice();
+  _grabSegmentosPendientesRed=[];
+  for(var i=0;i<cola.length;i++){
+    var item=cola[i];
+    if(!navigator.onLine){ // se volvió a caer la señal a mitad de camino
+      _grabSegmentosPendientesRed.push(item);
+      continue;
+    }
+    _grabSegmentos[item.indice]={texto:null,procesando:true};
+    actualizarTranscripcionVisible();
+    try{
+      var texto=await geminiTranscribirAudio(_grabApiKeyActual,item.base64,item.mime);
+      _grabSegmentos[item.indice]={texto:texto||'',procesando:false};
+    }catch(e){
+      console.error('Error reintentando segmento '+item.indice+':',e);
+      if(!navigator.onLine){_grabSegmentosPendientesRed.push(item);}
+      else{_grabSegmentos[item.indice]={texto:'',procesando:false,error:true};}
+    }
+    actualizarTranscripcionVisible();
+  }
+  actualizarEstadoSegmentos();
+  var badge=document.getElementById('grab-pendientes-badge');
+  if(badge){
+    if(_grabSegmentosPendientesRed.length){badge.textContent='⏳ '+_grabSegmentosPendientesRed.length+' parte(s) esperando señal';}
+    else{badge.style.display='none';}
+  }
+  if(_grabSegmentosPendientesRed.length&&typeof toast==='function')toast('⚠️ Algunas partes siguen esperando señal');
+  else if(cola.length&&typeof toast==='function')toast('✅ Partes pendientes transcritas');
+}
+// Escucha propia, separada de la de las notas, para no arriesgar ese flujo
+window.addEventListener('online',function(){
+  if(_grabSegmentosPendientesRed.length)setTimeout(sincronizarSegmentosPendientesRed,1000);
+});
+
 async function finalizarSegmento(indice,chunks){
   var blob=new Blob(chunks,{type:_grabMimeType||'audio/webm'});
   if(blob.size<500){
@@ -9066,21 +9369,42 @@ async function finalizarSegmento(indice,chunks){
     actualizarTranscripcionVisible();
     return;
   }
-  _grabSegmentos[indice]={texto:null,procesando:true};
-  actualizarTranscripcionVisible();
+  var base64;
   try{
-    var base64=await new Promise(function(resolve,reject){
+    base64=await new Promise(function(resolve,reject){
       var reader=new FileReader();
       reader.onloadend=function(){resolve(reader.result.split(',')[1]);};
       reader.onerror=reject;
       reader.readAsDataURL(blob);
     });
     blob=null;
+  }catch(e){
+    console.error('Error leyendo el audio del segmento '+indice+':',e);
+    _grabSegmentos[indice]={texto:'',procesando:false,error:true};
+    actualizarTranscripcionVisible();
+    return;
+  }
+
+  // Sin señal — no intentar, encolar para cuando vuelva (igual que las notas)
+  if(!navigator.onLine){
+    encolarSegmentoPendienteRed(indice,base64);
+    return;
+  }
+
+  _grabSegmentos[indice]={texto:null,procesando:true};
+  actualizarTranscripcionVisible();
+  try{
     var texto=await geminiTranscribirAudio(_grabApiKeyActual,base64,_grabMimeType||'audio/webm');
     base64=null;
     _grabSegmentos[indice]={texto:texto||'',procesando:false};
   }catch(e){
     console.error('Error transcribiendo segmento '+indice+':',e);
+    // Si fue por conexión (aunque navigator.onLine dijera que sí había señal), encolar en vez de dar error
+    var msgErr=(e&&e.message||'').toLowerCase();
+    if(!navigator.onLine||msgErr.includes('fetch')||msgErr.includes('network')||msgErr.includes('conexión')){
+      encolarSegmentoPendienteRed(indice,base64);
+      return;
+    }
     _grabSegmentos[indice]={texto:'',procesando:false,error:true};
   }
   actualizarTranscripcionVisible();
@@ -9095,6 +9419,7 @@ function actualizarTranscripcionVisible(){
   var partes=_grabSegmentos.map(function(s,i){
     if(!s)return null;
     if(s.procesando)return '⏳ [Transcribiendo parte '+(i+1)+'…]';
+    if(s.pendienteRed)return '📶 [Parte '+(i+1)+' esperando señal — se completará sola]';
     if(s.error)return '⚠️ [No se pudo transcribir la parte '+(i+1)+']';
     if(s.vacio)return null;
     return s.texto;
@@ -9104,10 +9429,14 @@ function actualizarTranscripcionVisible(){
 
 function actualizarEstadoSegmentos(){
   var pendientes=_grabSegmentos.filter(function(s){return s&&s.procesando;}).length;
+  var sinSenal=_grabSegmentosPendientesRed.length;
   var status=document.getElementById('transc-status');
   if(!status)return;
   if(_grabSesionActiva){
-    status.textContent='🔴 Grabando…'+(pendientes>0?' ('+pendientes+' parte(s) terminando de transcribir)':' (al día)');
+    var extra=[];
+    if(pendientes>0)extra.push(pendientes+' terminando de transcribir');
+    if(sinSenal>0)extra.push(sinSenal+' esperando señal 📶');
+    status.textContent='🔴 Grabando…'+(extra.length?' ('+extra.join(', ')+')':' (al día)');
     status.style.color='#991b1b';
   }
 }
@@ -9152,8 +9481,17 @@ async function esperarSegmentosPendientes(){
     toast('⚠️ La grabación se interrumpió — puedes continuar sin perder lo ya capturado');
   }else{
     _grabEsContinuacion=false;
-    if(status){status.textContent=hayTexto?'✅ Transcripción lista':'⚠️ No se obtuvo texto';status.style.color=hayTexto?'#15803d':'#92400e';}
-    if(!hayTexto)toast('⚠️ No se pudo transcribir la grabación');
+    var sinSenalAlDetener=_grabSegmentosPendientesRed.length;
+    if(status){
+      if(sinSenalAlDetener>0){
+        status.textContent='📶 '+sinSenalAlDetener+' parte(s) esperando señal — se completarán solas cuando vuelva la conexión';
+        status.style.color='#0369a1';
+      }else{
+        status.textContent=hayTexto?'✅ Transcripción lista':'⚠️ No se obtuvo texto';
+        status.style.color=hayTexto?'#15803d':'#92400e';
+      }
+    }
+    if(!hayTexto&&!sinSenalAlDetener)toast('⚠️ No se pudo transcribir la grabación');
   }
 }
 
@@ -10670,6 +11008,103 @@ window.recolectarIlusion=function(){
   return 'ILUSIÓN (estímulo real mal interpretado — describe, NO diagnostica de entrada):\n'+lineas.join('\n');
 };
 
+// ── MÓDULO: IDEA DELIRANTE (opcional) ─────────────────────────────────
+var DELIRIO_CHIPS_DISPARADORES=['Ideación delirante','Delirante'];
+var _delirioSugerenciaDescartada=false;
+
+window.sugerirIdeaDelirante=function(){
+  if(_delirioSugerenciaDescartada)return;
+  var body=document.getElementById('ic-del-body');
+  if(body&&body.style.display!=='none')return;
+  var banner=document.getElementById('ic-del-sugerencia');
+  if(banner)banner.style.display='flex';
+};
+
+window.abrirDelirioDesdeSugerencia=function(){
+  var banner=document.getElementById('ic-del-sugerencia');
+  if(banner)banner.style.display='none';
+  var body=document.getElementById('ic-del-body');
+  var chev=document.getElementById('ic-del-chev');
+  if(body)body.style.display='';
+  if(chev)chev.style.transform='rotate(90deg)';
+  var sec=document.getElementById('ic-del-section');
+  if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+window.descartarSugerenciaDelirio=function(){
+  var banner=document.getElementById('ic-del-sugerencia');
+  if(banner)banner.style.display='none';
+  _delirioSugerenciaDescartada=true;
+};
+
+window.toggleIdeaDelirante=function(){
+  var body=document.getElementById('ic-del-body');
+  var chev=document.getElementById('ic-del-chev');
+  if(!body)return;
+  var abierto=body.style.display!=='none';
+  body.style.display=abierto?'none':'';
+  if(chev)chev.style.transform=abierto?'':'rotate(90deg)';
+};
+
+// Muestra la subficha correspondiente al tipo de delirio elegido (persecutorio/somático/control)
+window.actualizarSubtipoDelirio=function(){
+  var tipo=(document.getElementById('ic-del-tipo')||{}).value||'';
+  var persec=document.getElementById('ic-del-sub-persecutorio');
+  var somat=document.getElementById('ic-del-sub-somatico');
+  var ctrl=document.getElementById('ic-del-sub-control');
+  if(persec)persec.style.display=(tipo==='Persecutoria')?'':'none';
+  if(somat)somat.style.display=(tipo==='Somática')?'':'none';
+  if(ctrl)ctrl.style.display=(tipo==='Control/influencia')?'':'none';
+};
+
+window.recolectarIdeaDelirante=function(){
+  var sec=document.getElementById('ic-del-body');
+  if(!sec)return '';
+  var lineas=[];
+  var creencia=(document.getElementById('ic-del-creencia')||{}).value;
+  if(creencia)lineas.push('Creencia principal: '+creencia);
+  var tipo=(document.getElementById('ic-del-tipo')||{}).value;
+  if(tipo)lineas.push('Tipo: '+tipo);
+  if(tipo==='Persecutoria'){
+    var perseguidor=(document.getElementById('ic-del-perseguidor')||{}).value;
+    var intenciones=icChipsBySubLabel('Detalle — persecutorio');
+    if(perseguidor||intenciones.length)lineas.push('Perseguidor/agente: '+(perseguidor||'no especificado')+(intenciones.length?' | Intención atribuida: '+intenciones.join(', '):''));
+  }else if(tipo==='Somática'){
+    var parteCorp=(document.getElementById('ic-del-parte-corporal')||{}).value;
+    var sintReal=(document.getElementById('ic-del-sintomas-reales')||{}).value;
+    var evidMed=(document.getElementById('ic-del-evidencia-medica')||{}).value;
+    if(parteCorp||sintReal||evidMed)lineas.push('Parte/función corporal: '+(parteCorp||'no especificada')+' | Síntomas reales: '+(sintReal||'ninguno referido')+' | Evidencia médica: '+(evidMed||'no disponible/no evaluada'));
+  }else if(tipo==='Control/influencia'){
+    var queControlado=icChipsBySubLabel('¿Qué está siendo controlado?');
+    var controlTipo=(document.getElementById('ic-del-control-tipo')||{}).value;
+    var agente=(document.getElementById('ic-del-agente')||{}).value;
+    if(queControlado.length||controlTipo||agente)lineas.push('Qué se controla: '+(queControlado.length?queControlado.join(', '):'no especificado')+' | Tipo: '+(controlTipo||'no especificado')+' | Agente atribuido: '+(agente||'no especificado'));
+  }
+  var inicio=(document.getElementById('ic-del-inicio')||{}).value;
+  var sistem=(document.getElementById('ic-del-sistematizacion')||{}).value;
+  if(inicio||sistem)lineas.push('Inicio: '+(inicio||'no especificado')+' | Sistematización: '+(sistem||'no especificada'));
+  var convic=(document.getElementById('ic-del-conviccion')||{}).value;
+  var flex=(document.getElementById('ic-del-flexibilidad')||{}).value;
+  if(convic||flex)lineas.push('Convicción: '+(convic||'no evaluada')+' | Flexibilidad: '+(flex||'no evaluada'));
+  var evid=(document.getElementById('ic-del-evidencia')||{}).value;
+  if(evid)lineas.push('Evidencia subjetiva: '+evid);
+  var preoc=(document.getElementById('ic-del-preocupacion')||{}).value;
+  if(preoc)lineas.push('Preocupación/saliencia: '+preoc);
+  var emoc=icChipsBySubLabel('Emoción asociada');
+  if(emoc.length)lineas.push('Emoción asociada: '+emoc.join(', '));
+  var conducta=icChipsBySubLabel('Conducta asociada');
+  if(conducta.length)lineas.push('Conducta asociada: '+conducta.join(', '));
+  var repercusion=icChipsBySubLabel('Repercusión');
+  if(repercusion.length)lineas.push('Repercusión: '+repercusion.join(', '));
+  var alerta=(document.getElementById('ic-del-alerta')||{}).value;
+  var cambioBasal=(document.getElementById('ic-del-cambiobasal')||{}).value;
+  if(alerta||cambioBasal)lineas.push('Alerta: '+(alerta||'no especificada')+' | Cambio respecto al basal: '+(cambioBasal||'no especificado'));
+  var riesgo=icChipsBySubLabel('⚠️ Riesgo asociado a la creencia');
+  if(riesgo.length)lineas.push('⚠️ Riesgo: '+riesgo.join(', '));
+  if(!lineas.length)return '';
+  return 'IDEA DELIRANTE / CREENCIA DE ALTA CONVICCIÓN (caracterización — describe, NO diagnostica de entrada):\n'+lineas.join('\n');
+};
+
 window.icTog=function(el){el.classList.toggle('on');};
 // Single-select chip group — deselects siblings, sets hidden input
 window.icTogSingle=function(el,hiddenId){
@@ -10727,6 +11162,9 @@ window.icTogA=function(el){el.classList.toggle('on-a');};
     }
     if(typeof ILUSION_CHIPS_DISPARADORES!=='undefined'&&ILUSION_CHIPS_DISPARADORES.indexOf(txt)!==-1){
       if(typeof sugerirIlusion==='function')sugerirIlusion();
+    }
+    if(typeof DELIRIO_CHIPS_DISPARADORES!=='undefined'&&DELIRIO_CHIPS_DISPARADORES.indexOf(txt)!==-1){
+      if(typeof sugerirIdeaDelirante==='function')sugerirIdeaDelirante();
     }
   }
   window.icTog=function(el){origIcTog(el);_chequearDisparadorEpisodio(el);};
@@ -11070,6 +11508,8 @@ async function generarNotaIcConGemini(apiKey){
   if(_experienciaAluc)dResp+='\n\n'+_experienciaAluc;
   var _ilusionDat=(typeof recolectarIlusion==='function')?recolectarIlusion():'';
   if(_ilusionDat)dResp+='\n\n'+_ilusionDat;
+  var _delirioDat=(typeof recolectarIdeaDelirante==='function')?recolectarIdeaDelirante():'';
+  if(_delirioDat)dResp+='\n\n'+_delirioDat;
 
   var dTrat=`Intervención: ${chips('Intervención realizada / sugerida')||chips('Intervención realizada hoy')||'valoración clínica'}. Respuesta al médico derivante: ${_respMedico||'ver análisis clínico'}. Seguimiento: ${chips('Seguimiento')||'según evolución'}${_seguimientoPlazo?' — plazo: '+_seguimientoPlazo:''}. Alertas al equipo: ${_notasEquipo||tratNotas||'ninguna'}.`;
   // Instrucción para incluir capacidad decisional literal al final de TRATAMIENTO
@@ -11148,6 +11588,9 @@ async function generarNotaIcConGemini(apiKey){
     (_ilusionDat?('\n\nADEMÁS, los datos incluyen la caracterización de una ILUSIÓN (percepción distorsionada de un estímulo REAL — distinto de alucinación). '+
     'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ILUSIÓN: " y describa en prosa, siguiendo la secuencia estímulo real → percepción → interpretación → convicción → emoción → conducta → recuperación: qué estímulo real estaba presente, cómo lo percibió e interpretó, qué tan convencido estuvo, qué emoción y conducta generó, si corrigió la interpretación y si retornó al estado basal, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). '+
     'REGLA ESTRICTA: la pérdida de insight NO convierte automáticamente una ilusión en delirio — descríbelo como ilusión con el grado de insight que corresponda, sin escalar el término. Si la ilusión es nueva, fluctuante o se acompaña de alteración de atención/alerta/orientación/cambio respecto al basal, recomienda explícitamente correlacionar con evolución médica y descartar delirium, sin asumir causa psiquiátrica ni asumir simplemente "ansiedad". '):'')+
+    (_delirioDat?('\n\nADEMÁS, los datos incluyen la caracterización de una IDEA DELIRANTE / creencia de alta convicción. '+
+    'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — IDEA DELIRANTE: " usando esta fórmula adaptada a prosa: qué cree el paciente y a qué/quién lo atribuye, en qué evidencia subjetiva lo sustenta, su nivel de convicción y de flexibilidad frente a explicaciones alternativas, la emoción y conducta/repercusión asociadas, el estado de atención/orientación/alerta y si hay cambio respecto al basal, y qué hipótesis clínicas o pasos deben considerarse (sin concluir diagnóstico). '+
+    'REGLA ESTRICTA: nunca concluyas automáticamente "delirio persecutorio = esquizofrenia" ni asumas etiología psiquiátrica primaria — los delirios pueden aparecer en trastornos del ánimo, delirium, trastornos neurocognitivos y por sustancias. Antes de concluir que una creencia es delirante, considera si podría ser una creencia cultural/religiosa compartida por el contexto del paciente, una preocupación somática con base real, o una idea sobrevalorada. Si hay riesgo marcado (autoagresión, heteroagresión, fuga, no adherencia), destácalo con prioridad. Si la idea es nueva, fluctuante o se acompaña de alteración cognitiva/atencional/de alerta, recomienda explícitamente correlacionar con contexto médico, farmacológico y de sustancias antes de asumir causa psiquiátrica. '):'')+
     'Datos:\n'+dResp;
 
   var promptTrat = estiloBase +
@@ -11374,6 +11817,7 @@ async function generarSegConGemini(apiKey){
   var _episodioAlteracionSeg=(typeof recolectarEpisodioAlteracion==='function')?recolectarEpisodioAlteracion():'';
   var _experienciaAlucSeg=(typeof recolectarExperienciaAlucinatoria==='function')?recolectarExperienciaAlucinatoria():'';
   var _ilusionSeg=(typeof recolectarIlusion==='function')?recolectarIlusion():'';
+  var _delirioSeg=(typeof recolectarIdeaDelirante==='function')?recolectarIdeaDelirante():'';
 
   var datos=`
 TIPO DE NOTA: Seguimiento psicológico hospitalario
@@ -11442,6 +11886,7 @@ ${(typeof getTranscripcionParaPrompt==='function'?getTranscripcionParaPrompt():'
 ${_episodioAlteracionSeg?'\n'+_episodioAlteracionSeg:''}
 ${_experienciaAlucSeg?'\n'+_experienciaAlucSeg:''}
 ${_ilusionSeg?'\n'+_ilusionSeg:''}
+${_delirioSeg?'\n'+_delirioSeg:''}
 `.trim();
 
   var prompt='Eres psicóloga clínica hospitalaria de la ESE Hospital La María. Redacta una NOTA DE EVOLUCIÓN (SEGUIMIENTO) para el sistema DGW, jurídicamente sólida, clínicamente rigurosa y útil para el equipo tratante. '+
@@ -11456,6 +11901,7 @@ ${_ilusionSeg?'\n'+_ilusionSeg:''}
     (_episodioAlteracionSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO: los datos incluyen la caracterización de un EPISODIO DE ALTERACIÓN MENTAL (incoherencia/irritabilidad/desorientación). Después del párrafo principal de seguimiento, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — EPISODIO DE ALTERACIÓN MENTAL: " y responda, integradas en prosa, estas 5 preguntas: qué ocurrió, cuándo comenzó, cómo se manifestó, cuánto duró y cómo evolucionó, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico, solo hipótesis a correlacionar). Si hay puntaje 4AT, menciónalo. REGLA ESTRICTA: nunca concluyas que incoherencia=psicosis, irritabilidad=trastorno bipolar, desorientación=demencia, o que un cambio agudo es de origen psiquiátrico primario sin descartar causas médicas — si el cuadro es agudo y/o fluctuante, recomienda explícitamente correlacionar con evolución médica, estado neurológico, medicación y posibles factores fisiológicos, sin asumir etiología psiquiátrica primaria.'):'')+
     (_experienciaAlucSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (2): los datos incluyen la caracterización de una EXPERIENCIA ALUCINATORIA. Después del párrafo principal (y después del párrafo de episodio de alteración mental si también existe), agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — EXPERIENCIA ALUCINATORIA: " y describa en prosa: qué percibió (modalidad y contenido), cómo se presenta (intensidad, frecuencia, duración, localización), qué significa para el paciente (insight), qué le provoca (malestar), qué hace (conducta y repercusión funcional), si cambió respecto al basal, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: la modalidad NO determina la etiología — nunca concluyas automáticamente que auditivas=psicosis o visuales/táctiles=causa orgánica. Si hay contenido de mando presente, menciónalo explícitamente con la intención de obedecer y la capacidad de resistirse — requiere atención prioritaria. Si el cuadro es agudo, fluctuante o se acompaña de alteración de atención/alerta/orientación, recomienda correlacionar con evolución médica y descartar delirium, sin asumir etiología psiquiátrica primaria.'):'')+
     (_ilusionSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (3): los datos incluyen la caracterización de una ILUSIÓN (percepción distorsionada de un estímulo REAL). Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ILUSIÓN: " y describa en prosa, siguiendo estímulo real → percepción → interpretación → convicción → emoción → conducta → recuperación: qué estímulo real había, cómo lo percibió e interpretó, su convicción, la emoción y conducta generadas, si corrigió la interpretación y retornó al basal, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: la pérdida de insight NO convierte automáticamente una ilusión en delirio. Si es nueva, fluctuante o se acompaña de alteración de atención/alerta/orientación/cambio respecto al basal, recomienda correlacionar con evolución médica y descartar delirium, sin asumir causa psiquiátrica ni asumir simplemente "ansiedad".'):'')+
+    (_delirioSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (4): los datos incluyen la caracterización de una IDEA DELIRANTE / creencia de alta convicción. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — IDEA DELIRANTE: " y describa en prosa: qué cree el paciente y a qué/quién lo atribuye, en qué evidencia subjetiva lo sustenta, su convicción y flexibilidad frente a explicaciones alternativas, la emoción y conducta/repercusión asociadas, el estado de atención/orientación/alerta y cambio respecto al basal, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: nunca concluyas automáticamente "delirio persecutorio = esquizofrenia" — los delirios pueden aparecer en trastornos del ánimo, delirium, trastornos neurocognitivos y por sustancias; considera también si podría ser creencia cultural/religiosa, preocupación somática con base real, o idea sobrevalorada. Si hay riesgo marcado, destácalo con prioridad. Si es nueva, fluctuante o con alteración cognitiva/atencional/de alerta, recomienda correlacionar con contexto médico y de sustancias antes de asumir causa psiquiátrica.'):'')+
     '\n\nDETECCIÓN DE INCONGRUENCIAS (OBLIGATORIO): analiza la ficha buscando contradicciones entre lo que dice el paciente y lo observado, entre lo que refiere el familiar y lo observado, datos médicos que contradicen el reporte, información crítica faltante (ej. ideación suicida no explorada pese a expresiones de deseo de muerte) o riesgo legal (afirmar algo no evaluado). Redacta la nota de forma conservadora, sin afirmar lo no evaluado.'+
     '\n\nFORMATO EXACTO DE TU RESPUESTA: primero escribe en una línea sola ===NOTA=== y a continuación el párrafo completo de la nota. DESPUÉS, si detectaste incongruencias, escribe en una línea sola ===INCONGRUENCIAS=== seguido de máximo 5 hallazgos, UNA línea breve por hallazgo (qué contradice qué y qué verificar), estilo telegráfico. Si no hay incongruencias, termina después de la nota sin esa sección.'+
     '\n\nFICHA DE RONDA (POST-SESIÓN) — usa solo estos datos reales:\n\n'+datos
@@ -11984,6 +12430,13 @@ window.limpiarFormIC=function(confirm_=true){
   if(confirm_!==false&&!confirm('¿Limpiar el formulario?'))return;
   // Limpiar inputs de texto y textareas
   document.querySelectorAll('#ic-form-view input[type=text], #ic-form-view input[type=number], #ic-form-view textarea').forEach(function(i){i.value='';});
+  // Los <select> de Capacidad Decisional NO los toca el barrido de arriba
+  // (solo cubre inputs de texto/número y textareas) — se limpian aparte.
+  ['ic-cap-c1','ic-cap-c2','ic-cap-c3','ic-cap-c4','ic-cap-conclusion'].forEach(function(id){
+    var s=document.getElementById(id);if(s)s.value='';
+  });
+  var _capBadge=document.getElementById('ic-cap-conclusion-badge');
+  if(_capBadge){_capBadge.style.display='none';_capBadge.textContent='';}
   // Limpiar chips de interconsulta
   document.querySelectorAll('#ic-form-view .ic-chip').forEach(function(c){c.classList.remove('on','on-r','on-g','on-a');});
   // Limpiar checkboxes (formulario de seguimiento y otros)
@@ -12042,6 +12495,20 @@ window.limpiarFormIC=function(confirm_=true){
   var _ilSug=document.getElementById('ic-il-sugerencia');
   if(_ilSug)_ilSug.style.display='none';
   if(typeof _ilusionSugerenciaDescartada!=='undefined')_ilusionSugerenciaDescartada=false;
+  // Resetear módulo de idea delirante — mismo motivo, incluye subfichas condicionales
+  ['ic-del-tipo','ic-del-inicio','ic-del-sistematizacion','ic-del-conviccion','ic-del-flexibilidad','ic-del-preocupacion','ic-del-alerta','ic-del-cambiobasal','ic-del-control-tipo'].forEach(function(id){
+    var h=document.getElementById(id);if(h)h.value='';
+  });
+  var _delBody=document.getElementById('ic-del-body');
+  var _delChev=document.getElementById('ic-del-chev');
+  if(_delBody)_delBody.style.display='none';
+  if(_delChev)_delChev.style.transform='';
+  var _delSug=document.getElementById('ic-del-sugerencia');
+  if(_delSug)_delSug.style.display='none';
+  ['ic-del-sub-persecutorio','ic-del-sub-somatico','ic-del-sub-control'].forEach(function(id){
+    var s=document.getElementById(id);if(s)s.style.display='none';
+  });
+  if(typeof _delirioSugerenciaDescartada!=='undefined')_delirioSugerenciaDescartada=false;
   // Resetear notas generadas
   var wrap=document.getElementById('ic-output-wrap');if(wrap)wrap.style.display='none';
   // Resetear transcripción de sesión — nunca dejar pegado el texto de un paciente anterior
@@ -12051,6 +12518,9 @@ window.limpiarFormIC=function(confirm_=true){
   window._ultimaTranscripcionParaAnexo='';
   window._notaConTranscripcion=false;
   if(typeof _grabEsContinuacion!=='undefined')_grabEsContinuacion=false;
+  if(typeof _grabSegmentosPendientesRed!=='undefined')_grabSegmentosPendientesRed=[];
+  var _grabBadgeClr=document.getElementById('grab-pendientes-badge');
+  if(_grabBadgeClr)_grabBadgeClr.style.display='none';
   var _btnGClr=document.getElementById('btn-grabar-sesion');
   if(_btnGClr){_btnGClr.textContent='🎙️ Grabar sesión';_btnGClr.style.background='#dc2626';_btnGClr.style.borderColor='#dc2626';}
   // Resetear orientación IA
