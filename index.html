@@ -1055,6 +1055,7 @@ input.toggle-cb{display:none}
                     <span class="ic-chip" onclick="icTogR(this)">Alucinaciones olfativas</span>
                     <span class="ic-chip" onclick="icTogR(this)">Formicación (delirium)</span>
                     <span class="ic-chip" onclick="icTogA(this)">Ilusiones</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Pareidolia</span>
                     <span class="ic-chip" onclick="icTogA(this)">Pseudoalucinaciones</span>
                     <span class="ic-chip" onclick="icTogA(this)">Flashbacks</span>
                   </div>
@@ -2187,6 +2188,376 @@ input.toggle-cb{display:none}
                     <span class="ic-chip" onclick="icTogR(this)">Fuga</span>
                     <span class="ic-chip" onclick="icTogA(this)">No adherencia al tratamiento</span>
                     <span class="ic-chip" onclick="icTogA(this)">Retiro de dispositivos</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- S6f: CARACTERIZACIÓN OPCIONAL — ANSIEDAD -->
+          <div class="ic-form-section" id="ic-ans-section">
+            <div class="ic-form-head amber" style="cursor:pointer" onclick="toggleAnsiedad()">
+              <span class="ft">😰 ¿Ansiedad clínicamente relevante? (opcional)</span>
+              <span id="ic-ans-chev" style="margin-left:auto;font-size:1rem;transition:transform .2s;display:inline-block">▸</span>
+            </div>
+            <div id="ic-ans-sugerencia" style="display:none;background:#fef9c3;border-bottom:1px solid #fde68a;padding:9px 16px;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-size:0.78rem;color:#78350f;flex:1;min-width:200px">💡 Marcaste hallazgos de ansiedad — ¿quieres caracterizarla?</span>
+              <button class="btn btn-sm" style="background:#d97706;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-weight:700;font-size:0.74rem;cursor:pointer" onclick="abrirAnsiedadDesdeSugerencia()">Caracterizar</button>
+              <button style="background:none;border:none;color:#92400e;font-size:0.72rem;cursor:pointer;text-decoration:underline;padding:4px" onclick="descartarSugerenciaAnsiedad()">Ahora no</button>
+            </div>
+            <div id="ic-ans-body" style="display:none">
+              <div class="ic-form-body">
+                <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;line-height:1.5">No toda ansiedad hospitalaria es patológica — puede ser una respuesta esperable al contexto. Caracteriza antes de concluir si es proporcional o clínicamente relevante.</div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">¿Qué le preocupa o le genera más miedo? (breve)</div>
+                  <input type="text" id="ic-ans-preocupacion" placeholder="Ej: resultado de la cirugía, no saber qué tiene…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones cognitivas</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Preocupación persistente</span>
+                    <span class="ic-chip" onclick="icTog(this)">Anticipación catastrófica</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dificultad para controlar la preocupación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hipervigilancia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dificultad de concentración</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones fisiológicas/somáticas</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Taquicardia/palpitaciones</span>
+                    <span class="ic-chip" onclick="icTog(this)">Opresión torácica</span>
+                    <span class="ic-chip" onclick="icTog(this)">Falta de aire/disnea</span>
+                    <span class="ic-chip" onclick="icTog(this)">Tensión muscular</span>
+                    <span class="ic-chip" onclick="icTog(this)">Temblor</span>
+                    <span class="ic-chip" onclick="icTog(this)">Cefalea tensional</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sudoración</span>
+                    <span class="ic-chip" onclick="icTog(this)">Mareo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Náuseas/malestar gastrointestinal</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alteración del sueño</span>
+                  </div>
+                  <div style="font-size:0.68rem;color:#92400e;margin-top:4px">⚠️ No atribuir automáticamente a ansiedad — pueden tener causa médica.</div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones conductuales</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Inquietud psicomotora</span>
+                    <span class="ic-chip" onclick="icTog(this)">Búsqueda de reaseguramiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Evitación de procedimientos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Búsqueda excesiva de información</span>
+                    <span class="ic-chip" onclick="icTog(this)">Solicitud frecuente de atención</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones emocionales</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Miedo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Nerviosismo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Angustia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sensación de pérdida de control</span>
+                    <span class="ic-chip" onclick="icTog(this)">Irritabilidad secundaria</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sensación de estar "al límite"</span>
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Intensidad</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-gravedad')">Leve</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-gravedad')">Moderada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-gravedad')">Grave</span>
+                    </div>
+                    <input type="hidden" id="ic-ans-gravedad" value="">
+                    <input type="text" id="ic-ans-intensidad-num" placeholder="0-10 autorreportado (opcional)" style="margin-top:6px;width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Control percibido</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-control')">Conservado</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-control')">Parcial</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-control')">Bajo / difícil de controlar</span>
+                    </div>
+                    <input type="hidden" id="ic-ans-control" value="">
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Contexto clínico</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-contexto')">Reactiva a hospitalización/enfermedad</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-contexto')">Persistente/desproporcionada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-contexto')">Posible TAG</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-contexto')">Relacionada con procedimientos</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-contexto')">Asociada a enfermedad médica</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-contexto')">Posible inducida por sustancias/medicamentos</span>
+                    </div>
+                    <input type="hidden" id="ic-ans-contexto" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Curso</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-curso')">Aguda</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-curso')">Episódica</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-curso')">Persistente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-curso')">Crónica</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-curso')">Reactiva</span>
+                    </div>
+                    <input type="hidden" id="ic-ans-curso" value="">
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Antecedente previo a esta hospitalización</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-antecedente')">No</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-antecedente')">Sí</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-antecedente')">Desconocido</span>
+                    </div>
+                    <input type="hidden" id="ic-ans-antecedente" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Relación con sustancias/medicamentos</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-sustancias')">Sin relación identificada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-sustancias')">Consumo reciente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-sustancias')">Abstinencia</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-sustancias')">Medicación nueva/cambio</span>
+                    </div>
+                    <input type="hidden" id="ic-ans-sustancias" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Interferencia funcional</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sueño</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alimentación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Concentración/comprensión de información</span>
+                    <span class="ic-chip" onclick="icTog(this)">Adherencia al tratamiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Evitación de procedimientos</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">¿Hubo una crisis de pánico?</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-panico');toggleSubfichaPanico()">No</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-panico');toggleSubfichaPanico()">Sí</span>
+                  </div>
+                  <input type="hidden" id="ic-ans-panico" value="">
+                </div>
+
+                <!-- Subficha CRISIS DE PÁNICO (condicional) -->
+                <div id="ic-ans-sub-panico" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+                  <div>
+                    <div class="ic-sublabel">Características de la crisis</div>
+                    <div class="ic-chips" style="margin-bottom:6px">
+                      <span class="ic-chip" onclick="icTog(this)">Inicio brusco</span>
+                      <span class="ic-chip" onclick="icTog(this)">Palpitaciones</span>
+                      <span class="ic-chip" onclick="icTog(this)">Sudoración</span>
+                      <span class="ic-chip" onclick="icTog(this)">Temblor</span>
+                      <span class="ic-chip" onclick="icTog(this)">Disnea</span>
+                      <span class="ic-chip" onclick="icTog(this)">Mareo</span>
+                      <span class="ic-chip" onclick="icTog(this)">Náuseas</span>
+                      <span class="ic-chip" onclick="icTog(this)">Parestesias</span>
+                      <span class="ic-chip" onclick="icTog(this)">Desrealización/despersonalización</span>
+                      <span class="ic-chip" onclick="icTog(this)">Miedo a morir</span>
+                      <span class="ic-chip" onclick="icTog(this)">Miedo a perder el control</span>
+                    </div>
+                  </div>
+                  <input type="text" id="ic-ans-panico-duracion" placeholder="Duración aproximada" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;margin-bottom:6px">
+                  <div>
+                    <div class="ic-sublabel">Recurrencia</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-panico-recurrencia')">Primera vez</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ans-panico-recurrencia')">Recurrente</span>
+                    </div>
+                    <input type="hidden" id="ic-ans-panico-recurrencia" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#991b1b">⚠️ Riesgo asociado</div>
+                  <div class="ic-chips" style="margin-top:6px">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno identificado</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Ideación suicida</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Autoagresión</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Consumo problemático de sustancias</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Agitación</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- S6g: CARACTERIZACIÓN OPCIONAL — ÁNIMO DEPRESIVO -->
+          <div class="ic-form-section" id="ic-dep-section">
+            <div class="ic-form-head amber" style="cursor:pointer" onclick="toggleAnimoDepresivo()">
+              <span class="ft">😔 ¿Ánimo depresivo / síntomas depresivos? (opcional)</span>
+              <span id="ic-dep-chev" style="margin-left:auto;font-size:1rem;transition:transform .2s;display:inline-block">▸</span>
+            </div>
+            <div id="ic-dep-sugerencia" style="display:none;background:#fef9c3;border-bottom:1px solid #fde68a;padding:9px 16px;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-size:0.78rem;color:#78350f;flex:1;min-width:200px">💡 Marcaste hallazgos de ánimo depresivo — ¿quieres caracterizarlo?</span>
+              <button class="btn btn-sm" style="background:#d97706;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-weight:700;font-size:0.74rem;cursor:pointer" onclick="abrirAnimoDepresivoDesdeSugerencia()">Caracterizar</button>
+              <button style="background:none;border:none;color:#92400e;font-size:0.72rem;cursor:pointer;text-decoration:underline;padding:4px" onclick="descartarSugerenciaAnimoDepresivo()">Ahora no</button>
+            </div>
+            <div id="ic-dep-body" style="display:none">
+              <div class="ic-form-body">
+                <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;line-height:1.5">Tristeza en hospitalización no equivale automáticamente a trastorno depresivo. No atribuyas síntomas somáticos (fatiga, apetito, sueño) a depresión sin considerar la enfermedad médica.</div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones afectivas/emocionales</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Tristeza / ánimo deprimido</span>
+                    <span class="ic-chip" onclick="icTog(this)">Llanto frecuente</span>
+                    <span class="ic-chip" onclick="icTog(this)">Anhedonia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Desesperanza</span>
+                    <span class="ic-chip" onclick="icTog(this)">Apatía</span>
+                    <span class="ic-chip" onclick="icTog(this)">Irritabilidad</span>
+                    <span class="ic-chip" onclick="icTog(this)">Culpa / sentirse una carga</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sentimientos de inutilidad</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones cognitivas</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Pensamiento negativo (sí mismo/situación/futuro)</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dificultad de concentración</span>
+                    <span class="ic-chip" onclick="icTog(this)">Indecisión</span>
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#991b1b">⚠️ Pensamientos de muerte (explorar siempre que aparezca desesperanza)</div>
+                  <div class="ic-chips" style="margin-top:6px">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno referido</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Deseo de morir / no despertar</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Indiferencia ante la propia muerte</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Pensamientos suicidas</span>
+                  </div>
+                  <div style="font-size:0.68rem;color:#991b1b;margin-top:4px">Si hay pensamientos suicidas, amplía la evaluación de riesgo — este módulo no la reemplaza.</div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones físicas/somáticas (correlacionar con causa médica antes de atribuir)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Fatiga / pérdida de energía</span>
+                    <span class="ic-chip" onclick="icTog(this)">Insomnio</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sueño excesivo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Disminución del apetito</span>
+                    <span class="ic-chip" onclick="icTog(this)">Aumento del apetito</span>
+                    <span class="ic-chip" onclick="icTog(this)">Retardo psicomotor</span>
+                    <span class="ic-chip" onclick="icTog(this)">Agitación psicomotora</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones conductuales</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Aislamiento / retraimiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Disminución de actividad</span>
+                    <span class="ic-chip" onclick="icTog(this)">Permanece en cama sin explicación médica</span>
+                    <span class="ic-chip" onclick="icTog(this)">Descuido del autocuidado</span>
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Gravedad</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-gravedad')">Leve</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-gravedad')">Moderada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-gravedad')">Grave</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-gravedad')">Grave con síntomas psicóticos</span>
+                    </div>
+                    <input type="hidden" id="ic-dep-gravedad" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Curso</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-curso')">Agudo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-curso')">Episódico</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-curso')">Persistente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-curso')">Recurrente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-curso')">Reactivo</span>
+                    </div>
+                    <input type="hidden" id="ic-dep-curso" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Duración aproximada (no inventar si no se sabe)</div>
+                  <input type="text" id="ic-dep-duracion" placeholder="Ej: desde el diagnóstico hace 3 días, varias semanas…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Contexto clínico</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-contexto')">Reactivo a hospitalización/enfermedad</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-contexto')">Síntomas persistentes</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-contexto')">Posible episodio depresivo mayor</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-contexto')">Asociado a enfermedad médica</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-contexto')">Posible con síntomas psicóticos</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-contexto')">Adulto mayor — posible coexistencia con deterioro cognitivo</span>
+                    </div>
+                    <input type="hidden" id="ic-dep-contexto" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Antecedente previo a esta hospitalización</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-antecedente')">No</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-antecedente')">Sí</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-dep-antecedente')">Desconocido</span>
+                    </div>
+                    <input type="hidden" id="ic-dep-antecedente" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Interferencia funcional</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sueño</span>
+                    <span class="ic-chip" onclick="icTog(this)">Apetito</span>
+                    <span class="ic-chip" onclick="icTog(this)">Autocuidado</span>
+                    <span class="ic-chip" onclick="icTog(this)">Participación en tratamiento/rehabilitación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Interacción social/familiar</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Posibles factores médicos/farmacológicos asociados</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Infección</span>
+                    <span class="ic-chip" onclick="icTog(this)">Anemia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dolor</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alteraciones metabólicas</span>
+                    <span class="ic-chip" onclick="icTog(this)">Medicación nueva/cambio</span>
+                    <span class="ic-chip" onclick="icTog(this)">Enfermedad crónica</span>
+                    <span class="ic-chip" onclick="icTog(this)">Privación de sueño</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno identificado</span>
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#991b1b">⚠️ Conductas autolesivas o de riesgo asociadas</div>
+                  <div class="ic-chips" style="margin-top:6px">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna identificada</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Autolesión</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Conductas de despedida</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Entrega de pertenencias</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Rechazo deliberado de cuidados</span>
                   </div>
                 </div>
               </div>
@@ -6932,6 +7303,30 @@ window.goTo = function(page){
       var s=document.getElementById(id);if(s)s.style.display='none';
     });
     if(typeof _delirioSugerenciaDescartada!=='undefined')_delirioSugerenciaDescartada=false;
+    // Resetear módulo de ansiedad — mismo motivo, incluye subficha de pánico
+    ['ic-ans-gravedad','ic-ans-control','ic-ans-contexto','ic-ans-curso','ic-ans-antecedente','ic-ans-sustancias','ic-ans-panico','ic-ans-panico-recurrencia'].forEach(function(id){
+      var h=document.getElementById(id);if(h)h.value='';
+    });
+    var _ansBodyNav=document.getElementById('ic-ans-body');
+    var _ansChevNav=document.getElementById('ic-ans-chev');
+    if(_ansBodyNav)_ansBodyNav.style.display='none';
+    if(_ansChevNav)_ansChevNav.style.transform='';
+    var _ansSugNav=document.getElementById('ic-ans-sugerencia');
+    if(_ansSugNav)_ansSugNav.style.display='none';
+    var _ansPanicoNav=document.getElementById('ic-ans-sub-panico');
+    if(_ansPanicoNav)_ansPanicoNav.style.display='none';
+    if(typeof _ansiedadSugerenciaDescartada!=='undefined')_ansiedadSugerenciaDescartada=false;
+    // Resetear módulo de ánimo depresivo — mismo motivo
+    ['ic-dep-gravedad','ic-dep-curso','ic-dep-contexto','ic-dep-antecedente'].forEach(function(id){
+      var h=document.getElementById(id);if(h)h.value='';
+    });
+    var _depBodyNav=document.getElementById('ic-dep-body');
+    var _depChevNav=document.getElementById('ic-dep-chev');
+    if(_depBodyNav)_depBodyNav.style.display='none';
+    if(_depChevNav)_depChevNav.style.transform='';
+    var _depSugNav=document.getElementById('ic-dep-sugerencia');
+    if(_depSugNav)_depSugNav.style.display='none';
+    if(typeof _depresionSugerenciaDescartada!=='undefined')_depresionSugerenciaDescartada=false;
   }
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
@@ -10924,7 +11319,7 @@ window.recolectarExperienciaAlucinatoria=function(){
 };
 
 // ── MÓDULO: ILUSIÓN (estímulo real mal interpretado, opcional) ────────
-var ILUSION_CHIPS_DISPARADORES=['Ilusiones'];
+var ILUSION_CHIPS_DISPARADORES=['Ilusiones','Pareidolia'];
 var _ilusionSugerenciaDescartada=false;
 
 window.sugerirIlusion=function(){
@@ -11009,7 +11404,7 @@ window.recolectarIlusion=function(){
 };
 
 // ── MÓDULO: IDEA DELIRANTE (opcional) ─────────────────────────────────
-var DELIRIO_CHIPS_DISPARADORES=['Ideación delirante','Delirante'];
+var DELIRIO_CHIPS_DISPARADORES=['Ideación delirante','Delirante','Paranoide'];
 var _delirioSugerenciaDescartada=false;
 
 window.sugerirIdeaDelirante=function(){
@@ -11105,6 +11500,162 @@ window.recolectarIdeaDelirante=function(){
   return 'IDEA DELIRANTE / CREENCIA DE ALTA CONVICCIÓN (caracterización — describe, NO diagnostica de entrada):\n'+lineas.join('\n');
 };
 
+// ── MÓDULO: ANSIEDAD (opcional) ────────────────────────────────────────
+var ANSIEDAD_CHIPS_DISPARADORES=['Aprehensivo/a','Ansioso / aprehensivo','Ansiedad desbordada','Ansioso/a'];
+var _ansiedadSugerenciaDescartada=false;
+
+window.sugerirAnsiedad=function(){
+  if(_ansiedadSugerenciaDescartada)return;
+  var body=document.getElementById('ic-ans-body');
+  if(body&&body.style.display!=='none')return;
+  var banner=document.getElementById('ic-ans-sugerencia');
+  if(banner)banner.style.display='flex';
+};
+
+window.abrirAnsiedadDesdeSugerencia=function(){
+  var banner=document.getElementById('ic-ans-sugerencia');
+  if(banner)banner.style.display='none';
+  var body=document.getElementById('ic-ans-body');
+  var chev=document.getElementById('ic-ans-chev');
+  if(body)body.style.display='';
+  if(chev)chev.style.transform='rotate(90deg)';
+  var sec=document.getElementById('ic-ans-section');
+  if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+window.descartarSugerenciaAnsiedad=function(){
+  var banner=document.getElementById('ic-ans-sugerencia');
+  if(banner)banner.style.display='none';
+  _ansiedadSugerenciaDescartada=true;
+};
+
+window.toggleAnsiedad=function(){
+  var body=document.getElementById('ic-ans-body');
+  var chev=document.getElementById('ic-ans-chev');
+  if(!body)return;
+  var abierto=body.style.display!=='none';
+  body.style.display=abierto?'none':'';
+  if(chev)chev.style.transform=abierto?'':'rotate(90deg)';
+};
+
+window.toggleSubfichaPanico=function(){
+  var val=(document.getElementById('ic-ans-panico')||{}).value||'';
+  var sub=document.getElementById('ic-ans-sub-panico');
+  if(sub)sub.style.display=(val==='Sí')?'':'none';
+};
+
+window.recolectarAnsiedad=function(){
+  var sec=document.getElementById('ic-ans-body');
+  if(!sec)return '';
+  var lineas=[];
+  var preocup=(document.getElementById('ic-ans-preocupacion')||{}).value;
+  if(preocup)lineas.push('Principal preocupación/miedo: '+preocup);
+  var cogn=icChipsBySubLabel('Manifestaciones cognitivas');
+  if(cogn.length)lineas.push('Manifestaciones cognitivas: '+cogn.join(', '));
+  var fisio=icChipsBySubLabel('Manifestaciones fisiológicas/somáticas');
+  if(fisio.length)lineas.push('Manifestaciones fisiológicas: '+fisio.join(', '));
+  var conduct=icChipsBySubLabel('Manifestaciones conductuales');
+  if(conduct.length)lineas.push('Manifestaciones conductuales: '+conduct.join(', '));
+  var emoc=icChipsBySubLabel('Manifestaciones emocionales');
+  if(emoc.length)lineas.push('Manifestaciones emocionales: '+emoc.join(', '));
+  var grav=(document.getElementById('ic-ans-gravedad')||{}).value;
+  var intNum=(document.getElementById('ic-ans-intensidad-num')||{}).value;
+  if(grav||intNum)lineas.push('Intensidad: '+(grav||'no especificada')+(intNum?' ('+intNum+'/10 autorreportado)':''));
+  var control=(document.getElementById('ic-ans-control')||{}).value;
+  if(control)lineas.push('Control percibido: '+control);
+  var contexto=(document.getElementById('ic-ans-contexto')||{}).value;
+  var curso=(document.getElementById('ic-ans-curso')||{}).value;
+  if(contexto||curso)lineas.push('Contexto clínico: '+(contexto||'no especificado')+' | Curso: '+(curso||'no especificado'));
+  var antec=(document.getElementById('ic-ans-antecedente')||{}).value;
+  var sust=(document.getElementById('ic-ans-sustancias')||{}).value;
+  if(antec||sust)lineas.push('Antecedente previo: '+(antec||'no especificado')+' | Relación con sustancias/medicamentos: '+(sust||'no especificada'));
+  var interf=icChipsBySubLabel('Interferencia funcional');
+  if(interf.length)lineas.push('Interferencia funcional: '+interf.join(', '));
+  var panico=(document.getElementById('ic-ans-panico')||{}).value;
+  if(panico==='Sí'){
+    var caract=icChipsBySubLabel('Características de la crisis');
+    var dur=(document.getElementById('ic-ans-panico-duracion')||{}).value;
+    var recur=(document.getElementById('ic-ans-panico-recurrencia')||{}).value;
+    lineas.push('⚠️ CRISIS DE PÁNICO: '+(caract.length?caract.join(', '):'sin detalle')+(dur?' | Duración: '+dur:'')+(recur?' | '+recur:''));
+  }else if(panico){
+    lineas.push('Crisis de pánico: '+panico);
+  }
+  var riesgo=icChipsBySubLabel('⚠️ Riesgo asociado');
+  if(riesgo.length)lineas.push('⚠️ Riesgo: '+riesgo.join(', '));
+  if(!lineas.length)return '';
+  return 'ANSIEDAD (caracterización — describe, NO asume patología de entrada):\n'+lineas.join('\n');
+};
+
+// ── MÓDULO: ÁNIMO DEPRESIVO (opcional) ────────────────────────────────
+var DEPRESION_CHIPS_DISPARADORES=['Depresivo','Triste','Desesperanzado/a'];
+var _depresionSugerenciaDescartada=false;
+
+window.sugerirAnimoDepresivo=function(){
+  if(_depresionSugerenciaDescartada)return;
+  var body=document.getElementById('ic-dep-body');
+  if(body&&body.style.display!=='none')return;
+  var banner=document.getElementById('ic-dep-sugerencia');
+  if(banner)banner.style.display='flex';
+};
+
+window.abrirAnimoDepresivoDesdeSugerencia=function(){
+  var banner=document.getElementById('ic-dep-sugerencia');
+  if(banner)banner.style.display='none';
+  var body=document.getElementById('ic-dep-body');
+  var chev=document.getElementById('ic-dep-chev');
+  if(body)body.style.display='';
+  if(chev)chev.style.transform='rotate(90deg)';
+  var sec=document.getElementById('ic-dep-section');
+  if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+window.descartarSugerenciaAnimoDepresivo=function(){
+  var banner=document.getElementById('ic-dep-sugerencia');
+  if(banner)banner.style.display='none';
+  _depresionSugerenciaDescartada=true;
+};
+
+window.toggleAnimoDepresivo=function(){
+  var body=document.getElementById('ic-dep-body');
+  var chev=document.getElementById('ic-dep-chev');
+  if(!body)return;
+  var abierto=body.style.display!=='none';
+  body.style.display=abierto?'none':'';
+  if(chev)chev.style.transform=abierto?'':'rotate(90deg)';
+};
+
+window.recolectarAnimoDepresivo=function(){
+  var sec=document.getElementById('ic-dep-body');
+  if(!sec)return '';
+  var lineas=[];
+  var afect=icChipsBySubLabel('Manifestaciones afectivas/emocionales');
+  if(afect.length)lineas.push('Manifestaciones afectivas: '+afect.join(', '));
+  var cogn=icChipsBySubLabel('Manifestaciones cognitivas');
+  if(cogn.length)lineas.push('Manifestaciones cognitivas: '+cogn.join(', '));
+  var muerte=icChipsBySubLabel('⚠️ Pensamientos de muerte (explorar siempre que aparezca desesperanza)');
+  if(muerte.length)lineas.push('⚠️ Pensamientos de muerte: '+muerte.join(', '));
+  var somat=icChipsBySubLabel('Manifestaciones físicas/somáticas (correlacionar con causa médica antes de atribuir)');
+  if(somat.length)lineas.push('Manifestaciones físicas: '+somat.join(', '));
+  var conduct=icChipsBySubLabel('Manifestaciones conductuales');
+  if(conduct.length)lineas.push('Manifestaciones conductuales: '+conduct.join(', '));
+  var grav=(document.getElementById('ic-dep-gravedad')||{}).value;
+  var curso=(document.getElementById('ic-dep-curso')||{}).value;
+  if(grav||curso)lineas.push('Gravedad: '+(grav||'no especificada')+' | Curso: '+(curso||'no especificado'));
+  var dur=(document.getElementById('ic-dep-duracion')||{}).value;
+  if(dur)lineas.push('Duración: '+dur);
+  var contexto=(document.getElementById('ic-dep-contexto')||{}).value;
+  var antec=(document.getElementById('ic-dep-antecedente')||{}).value;
+  if(contexto||antec)lineas.push('Contexto clínico: '+(contexto||'no especificado')+' | Antecedente previo: '+(antec||'no especificado'));
+  var interf=icChipsBySubLabel('Interferencia funcional');
+  if(interf.length)lineas.push('Interferencia funcional: '+interf.join(', '));
+  var factores=icChipsBySubLabel('Posibles factores médicos/farmacológicos asociados');
+  if(factores.length)lineas.push('Posibles factores médicos/farmacológicos: '+factores.join(', '));
+  var riesgo=icChipsBySubLabel('⚠️ Conductas autolesivas o de riesgo asociadas');
+  if(riesgo.length)lineas.push('⚠️ Conductas de riesgo asociadas: '+riesgo.join(', '));
+  if(!lineas.length)return '';
+  return 'ÁNIMO DEPRESIVO / SÍNTOMAS DEPRESIVOS (caracterización — describe, NO asume trastorno depresivo mayor de entrada):\n'+lineas.join('\n');
+};
+
 window.icTog=function(el){el.classList.toggle('on');};
 // Single-select chip group — deselects siblings, sets hidden input
 window.icTogSingle=function(el,hiddenId){
@@ -11165,6 +11716,12 @@ window.icTogA=function(el){el.classList.toggle('on-a');};
     }
     if(typeof DELIRIO_CHIPS_DISPARADORES!=='undefined'&&DELIRIO_CHIPS_DISPARADORES.indexOf(txt)!==-1){
       if(typeof sugerirIdeaDelirante==='function')sugerirIdeaDelirante();
+    }
+    if(typeof ANSIEDAD_CHIPS_DISPARADORES!=='undefined'&&ANSIEDAD_CHIPS_DISPARADORES.indexOf(txt)!==-1){
+      if(typeof sugerirAnsiedad==='function')sugerirAnsiedad();
+    }
+    if(typeof DEPRESION_CHIPS_DISPARADORES!=='undefined'&&DEPRESION_CHIPS_DISPARADORES.indexOf(txt)!==-1){
+      if(typeof sugerirAnimoDepresivo==='function')sugerirAnimoDepresivo();
     }
   }
   window.icTog=function(el){origIcTog(el);_chequearDisparadorEpisodio(el);};
@@ -11510,6 +12067,10 @@ async function generarNotaIcConGemini(apiKey){
   if(_ilusionDat)dResp+='\n\n'+_ilusionDat;
   var _delirioDat=(typeof recolectarIdeaDelirante==='function')?recolectarIdeaDelirante():'';
   if(_delirioDat)dResp+='\n\n'+_delirioDat;
+  var _ansiedadDat=(typeof recolectarAnsiedad==='function')?recolectarAnsiedad():'';
+  if(_ansiedadDat)dResp+='\n\n'+_ansiedadDat;
+  var _depresionDat=(typeof recolectarAnimoDepresivo==='function')?recolectarAnimoDepresivo():'';
+  if(_depresionDat)dResp+='\n\n'+_depresionDat;
 
   var dTrat=`Intervención: ${chips('Intervención realizada / sugerida')||chips('Intervención realizada hoy')||'valoración clínica'}. Respuesta al médico derivante: ${_respMedico||'ver análisis clínico'}. Seguimiento: ${chips('Seguimiento')||'según evolución'}${_seguimientoPlazo?' — plazo: '+_seguimientoPlazo:''}. Alertas al equipo: ${_notasEquipo||tratNotas||'ninguna'}.`;
   // Instrucción para incluir capacidad decisional literal al final de TRATAMIENTO
@@ -11591,6 +12152,12 @@ async function generarNotaIcConGemini(apiKey){
     (_delirioDat?('\n\nADEMÁS, los datos incluyen la caracterización de una IDEA DELIRANTE / creencia de alta convicción. '+
     'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — IDEA DELIRANTE: " usando esta fórmula adaptada a prosa: qué cree el paciente y a qué/quién lo atribuye, en qué evidencia subjetiva lo sustenta, su nivel de convicción y de flexibilidad frente a explicaciones alternativas, la emoción y conducta/repercusión asociadas, el estado de atención/orientación/alerta y si hay cambio respecto al basal, y qué hipótesis clínicas o pasos deben considerarse (sin concluir diagnóstico). '+
     'REGLA ESTRICTA: nunca concluyas automáticamente "delirio persecutorio = esquizofrenia" ni asumas etiología psiquiátrica primaria — los delirios pueden aparecer en trastornos del ánimo, delirium, trastornos neurocognitivos y por sustancias. Antes de concluir que una creencia es delirante, considera si podría ser una creencia cultural/religiosa compartida por el contexto del paciente, una preocupación somática con base real, o una idea sobrevalorada. Si hay riesgo marcado (autoagresión, heteroagresión, fuga, no adherencia), destácalo con prioridad. Si la idea es nueva, fluctuante o se acompaña de alteración cognitiva/atencional/de alerta, recomienda explícitamente correlacionar con contexto médico, farmacológico y de sustancias antes de asumir causa psiquiátrica. '):'')+
+    (_ansiedadDat?('\n\nADEMÁS, los datos incluyen la caracterización de ANSIEDAD. '+
+    'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ANSIEDAD: " y describa en prosa: qué le preocupa/teme, las manifestaciones cognitivas, fisiológicas, conductuales y emocionales presentes, su intensidad y control percibido, el contexto clínico probable (reactiva, persistente/desproporcionada, posible TAG, relacionada con procedimientos, asociada a enfermedad médica, o posible inducida por sustancias/medicamentos), el curso, la interferencia funcional, y si hubo crisis de pánico. Termina con qué hipótesis clínicas o pasos deben considerarse (sin concluir diagnóstico). '+
+    'REGLA ESTRICTA: no toda ansiedad hospitalaria es patológica — puede ser una respuesta proporcional y esperable al contexto (diagnóstico, procedimientos, incertidumbre); no la caracterices como clínicamente significativa a menos que los datos lo sustenten (intensa, persistente, difícil de controlar, desproporcionada, o con interferencia marcada). No atribuyas automáticamente síntomas físicos (taquicardia, disnea, etc.) a ansiedad sin considerar causas médicas, farmacológicas o de sustancias — recomienda descartarlas explícitamente si hay síntomas físicos marcados o de inicio agudo. Si hay riesgo asociado (ideación suicida, autoagresión, consumo problemático), destácalo con prioridad. Si se describe una crisis de pánico, recomienda descartar causa orgánica antes de atribuirla exclusivamente a ansiedad. '):'')+
+    (_depresionDat?('\n\nADEMÁS, los datos incluyen la caracterización de ÁNIMO DEPRESIVO / síntomas depresivos. '+
+    'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ÁNIMO DEPRESIVO: " y describa en prosa: las manifestaciones afectivas, cognitivas, físicas y conductuales presentes, si hay pensamientos de muerte (indicar explícitamente si los hay o no), la gravedad y curso, el contexto clínico probable (reactivo a hospitalización, síntomas persistentes, posible episodio depresivo mayor, asociado a enfermedad médica, o posible con síntomas psicóticos), la interferencia funcional, y posibles factores médicos/farmacológicos asociados. Termina con qué hipótesis clínicas o pasos deben considerarse (sin concluir diagnóstico). '+
+    'REGLA ESTRICTA: la tristeza en contexto hospitalario no equivale automáticamente a trastorno depresivo — diferénciala de una respuesta emocional esperable y proporcional al contexto (diagnóstico, hospitalización, pérdida de autonomía). No atribuyas automáticamente síntomas somáticos (fatiga, cambios de apetito, alteraciones del sueño) a depresión sin considerar la enfermedad médica, medicamentos o la hospitalización misma como causa. Si aparecen pensamientos de muerte o ideación suicida, destácalo con máxima prioridad y aclara que este módulo no reemplaza la evaluación de riesgo suicida independiente — debe ampliarse por separado. Si hay elementos que sugieran síntomas psicóticos congruentes con el ánimo (culpa delirante, ruina, nihilismo), recomienda activar la caracterización de ideas delirantes por separado. '):'')+
     'Datos:\n'+dResp;
 
   var promptTrat = estiloBase +
@@ -11818,6 +12385,8 @@ async function generarSegConGemini(apiKey){
   var _experienciaAlucSeg=(typeof recolectarExperienciaAlucinatoria==='function')?recolectarExperienciaAlucinatoria():'';
   var _ilusionSeg=(typeof recolectarIlusion==='function')?recolectarIlusion():'';
   var _delirioSeg=(typeof recolectarIdeaDelirante==='function')?recolectarIdeaDelirante():'';
+  var _ansiedadSeg=(typeof recolectarAnsiedad==='function')?recolectarAnsiedad():'';
+  var _depresionSeg=(typeof recolectarAnimoDepresivo==='function')?recolectarAnimoDepresivo():'';
 
   var datos=`
 TIPO DE NOTA: Seguimiento psicológico hospitalario
@@ -11887,6 +12456,8 @@ ${_episodioAlteracionSeg?'\n'+_episodioAlteracionSeg:''}
 ${_experienciaAlucSeg?'\n'+_experienciaAlucSeg:''}
 ${_ilusionSeg?'\n'+_ilusionSeg:''}
 ${_delirioSeg?'\n'+_delirioSeg:''}
+${_ansiedadSeg?'\n'+_ansiedadSeg:''}
+${_depresionSeg?'\n'+_depresionSeg:''}
 `.trim();
 
   var prompt='Eres psicóloga clínica hospitalaria de la ESE Hospital La María. Redacta una NOTA DE EVOLUCIÓN (SEGUIMIENTO) para el sistema DGW, jurídicamente sólida, clínicamente rigurosa y útil para el equipo tratante. '+
@@ -11902,6 +12473,8 @@ ${_delirioSeg?'\n'+_delirioSeg:''}
     (_experienciaAlucSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (2): los datos incluyen la caracterización de una EXPERIENCIA ALUCINATORIA. Después del párrafo principal (y después del párrafo de episodio de alteración mental si también existe), agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — EXPERIENCIA ALUCINATORIA: " y describa en prosa: qué percibió (modalidad y contenido), cómo se presenta (intensidad, frecuencia, duración, localización), qué significa para el paciente (insight), qué le provoca (malestar), qué hace (conducta y repercusión funcional), si cambió respecto al basal, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: la modalidad NO determina la etiología — nunca concluyas automáticamente que auditivas=psicosis o visuales/táctiles=causa orgánica. Si hay contenido de mando presente, menciónalo explícitamente con la intención de obedecer y la capacidad de resistirse — requiere atención prioritaria. Si el cuadro es agudo, fluctuante o se acompaña de alteración de atención/alerta/orientación, recomienda correlacionar con evolución médica y descartar delirium, sin asumir etiología psiquiátrica primaria.'):'')+
     (_ilusionSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (3): los datos incluyen la caracterización de una ILUSIÓN (percepción distorsionada de un estímulo REAL). Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ILUSIÓN: " y describa en prosa, siguiendo estímulo real → percepción → interpretación → convicción → emoción → conducta → recuperación: qué estímulo real había, cómo lo percibió e interpretó, su convicción, la emoción y conducta generadas, si corrigió la interpretación y retornó al basal, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: la pérdida de insight NO convierte automáticamente una ilusión en delirio. Si es nueva, fluctuante o se acompaña de alteración de atención/alerta/orientación/cambio respecto al basal, recomienda correlacionar con evolución médica y descartar delirium, sin asumir causa psiquiátrica ni asumir simplemente "ansiedad".'):'')+
     (_delirioSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (4): los datos incluyen la caracterización de una IDEA DELIRANTE / creencia de alta convicción. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — IDEA DELIRANTE: " y describa en prosa: qué cree el paciente y a qué/quién lo atribuye, en qué evidencia subjetiva lo sustenta, su convicción y flexibilidad frente a explicaciones alternativas, la emoción y conducta/repercusión asociadas, el estado de atención/orientación/alerta y cambio respecto al basal, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: nunca concluyas automáticamente "delirio persecutorio = esquizofrenia" — los delirios pueden aparecer en trastornos del ánimo, delirium, trastornos neurocognitivos y por sustancias; considera también si podría ser creencia cultural/religiosa, preocupación somática con base real, o idea sobrevalorada. Si hay riesgo marcado, destácalo con prioridad. Si es nueva, fluctuante o con alteración cognitiva/atencional/de alerta, recomienda correlacionar con contexto médico y de sustancias antes de asumir causa psiquiátrica.'):'')+
+    (_ansiedadSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (5): los datos incluyen la caracterización de ANSIEDAD. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ANSIEDAD: " y describa en prosa: qué le preocupa/teme, las manifestaciones cognitivas/fisiológicas/conductuales/emocionales presentes, intensidad y control percibido, contexto clínico probable, curso, interferencia funcional, y si hubo crisis de pánico. Termina con qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: no toda ansiedad hospitalaria es patológica — puede ser respuesta proporcional y esperable; no la caracterices como clínicamente significativa a menos que los datos lo sustenten. No atribuyas automáticamente síntomas físicos a ansiedad sin considerar causas médicas o farmacológicas — recomienda descartarlas si hay síntomas físicos marcados o de inicio agudo. Si hay riesgo asociado, destácalo con prioridad. Si hubo crisis de pánico, recomienda descartar causa orgánica antes de atribuirla exclusivamente a ansiedad.'):'')+
+    (_depresionSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (6): los datos incluyen la caracterización de ÁNIMO DEPRESIVO / síntomas depresivos. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ÁNIMO DEPRESIVO: " y describa en prosa: manifestaciones afectivas, cognitivas, físicas y conductuales presentes, si hay pensamientos de muerte (indicar explícitamente si los hay o no), gravedad y curso, contexto clínico probable, interferencia funcional, y posibles factores médicos/farmacológicos asociados. Termina con qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: la tristeza hospitalaria no equivale automáticamente a trastorno depresivo — diferénciala de una respuesta emocional esperable. No atribuyas automáticamente síntomas somáticos a depresión sin considerar la enfermedad médica o los medicamentos. Si aparecen pensamientos de muerte o ideación suicida, destácalo con máxima prioridad y aclara que este módulo no reemplaza la evaluación de riesgo suicida independiente. Si hay elementos psicóticos congruentes con el ánimo (culpa delirante, ruina, nihilismo), recomienda activar la caracterización de ideas delirantes por separado.'):'')+
     '\n\nDETECCIÓN DE INCONGRUENCIAS (OBLIGATORIO): analiza la ficha buscando contradicciones entre lo que dice el paciente y lo observado, entre lo que refiere el familiar y lo observado, datos médicos que contradicen el reporte, información crítica faltante (ej. ideación suicida no explorada pese a expresiones de deseo de muerte) o riesgo legal (afirmar algo no evaluado). Redacta la nota de forma conservadora, sin afirmar lo no evaluado.'+
     '\n\nFORMATO EXACTO DE TU RESPUESTA: primero escribe en una línea sola ===NOTA=== y a continuación el párrafo completo de la nota. DESPUÉS, si detectaste incongruencias, escribe en una línea sola ===INCONGRUENCIAS=== seguido de máximo 5 hallazgos, UNA línea breve por hallazgo (qué contradice qué y qué verificar), estilo telegráfico. Si no hay incongruencias, termina después de la nota sin esa sección.'+
     '\n\nFICHA DE RONDA (POST-SESIÓN) — usa solo estos datos reales:\n\n'+datos
@@ -12509,6 +13082,30 @@ window.limpiarFormIC=function(confirm_=true){
     var s=document.getElementById(id);if(s)s.style.display='none';
   });
   if(typeof _delirioSugerenciaDescartada!=='undefined')_delirioSugerenciaDescartada=false;
+  // Resetear módulo de ansiedad — mismo motivo, incluye subficha de pánico
+  ['ic-ans-gravedad','ic-ans-control','ic-ans-contexto','ic-ans-curso','ic-ans-antecedente','ic-ans-sustancias','ic-ans-panico','ic-ans-panico-recurrencia'].forEach(function(id){
+    var h=document.getElementById(id);if(h)h.value='';
+  });
+  var _ansBody=document.getElementById('ic-ans-body');
+  var _ansChev=document.getElementById('ic-ans-chev');
+  if(_ansBody)_ansBody.style.display='none';
+  if(_ansChev)_ansChev.style.transform='';
+  var _ansSug=document.getElementById('ic-ans-sugerencia');
+  if(_ansSug)_ansSug.style.display='none';
+  var _ansPanico=document.getElementById('ic-ans-sub-panico');
+  if(_ansPanico)_ansPanico.style.display='none';
+  if(typeof _ansiedadSugerenciaDescartada!=='undefined')_ansiedadSugerenciaDescartada=false;
+  // Resetear módulo de ánimo depresivo — mismo motivo
+  ['ic-dep-gravedad','ic-dep-curso','ic-dep-contexto','ic-dep-antecedente'].forEach(function(id){
+    var h=document.getElementById(id);if(h)h.value='';
+  });
+  var _depBody=document.getElementById('ic-dep-body');
+  var _depChev=document.getElementById('ic-dep-chev');
+  if(_depBody)_depBody.style.display='none';
+  if(_depChev)_depChev.style.transform='';
+  var _depSug=document.getElementById('ic-dep-sugerencia');
+  if(_depSug)_depSug.style.display='none';
+  if(typeof _depresionSugerenciaDescartada!=='undefined')_depresionSugerenciaDescartada=false;
   // Resetear notas generadas
   var wrap=document.getElementById('ic-output-wrap');if(wrap)wrap.style.display='none';
   // Resetear transcripción de sesión — nunca dejar pegado el texto de un paciente anterior
