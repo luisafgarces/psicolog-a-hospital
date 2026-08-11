@@ -1244,6 +1244,210 @@ input.toggle-cb{display:none}
             </div>
           </div>
 
+          <!-- S6b: CARACTERIZACIÓN OPCIONAL — EPISODIO DE ALTERACIÓN MENTAL -->
+          <div class="ic-form-section" id="ic-episodio-section">
+            <div class="ic-form-head amber" style="cursor:pointer" onclick="toggleEpisodioAlteracion()">
+              <span class="ft">🧠 ¿Incoherencia, irritabilidad o desorientación? (opcional)</span>
+              <span id="ic-episodio-chev" style="margin-left:auto;font-size:1rem;transition:transform .2s;display:inline-block">▸</span>
+            </div>
+            <div id="ic-episodio-body" style="display:none">
+              <div class="ic-form-body">
+                <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;line-height:1.5">Tócalo solo si el paciente presenta un episodio de este tipo. Sigue la estructura del manual de caracterización clínica — describe, no diagnostica automáticamente.</div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Estado basal (referencia previa)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Orientación previa conservada</span>
+                    <span class="ic-chip" onclick="icTog(this)">Deterioro cognitivo previo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dx neurológico previo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dx psiquiátrico previo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Episodios similares previos</span>
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Inicio</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-inicio')">Súbito</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-inicio')">Progresivo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-inicio')">Desconocido</span>
+                    </div>
+                    <input type="hidden" id="ic-ep-inicio" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Curso</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-curso')">Continuo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-curso')">Episódico</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-curso')">Fluctuante</span>
+                    </div>
+                    <input type="hidden" id="ic-ep-curso" value="">
+                  </div>
+                </div>
+                <div class="ic-field">
+                  <div class="ic-sublabel">Duración aproximada / desencadenante inmediato</div>
+                  <input type="text" id="ic-ep-duracion" placeholder="Ej: 15 minutos, tras procedimiento…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Nivel de alerta</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-alerta')">Normal</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-alerta')">Somnoliento</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-alerta')">Hipoalerta</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-alerta')">Hiperalerta/agitado</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-alerta')">Fluctuante</span>
+                    </div>
+                    <input type="hidden" id="ic-ep-alerta" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Atención</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-atencion')">Conservada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-atencion')">Disminuida</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-atencion')">Marcadamente alterada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-atencion')">No evaluable</span>
+                    </div>
+                    <input type="hidden" id="ic-ep-atencion" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Orientación — marca solo lo que esté alterado (lo demás se asume conservado)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Persona alterada</span>
+                    <span class="ic-chip" onclick="icTog(this)">Tiempo alterado</span>
+                    <span class="ic-chip" onclick="icTog(this)">Espacio alterado</span>
+                    <span class="ic-chip" onclick="icTog(this)">Situación alterada</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Discurso</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-discurso')">Coherente</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-discurso')">Tangencial</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-discurso')">Circunstancial</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-discurso')">Perseverativo</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-discurso')">Bloqueado</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-discurso')">Fuga de ideas</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-discurso')">Desorganizado</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-discurso')">Incomprensible</span>
+                  </div>
+                  <input type="hidden" id="ic-ep-discurso" value="">
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Irritabilidad (escala 0-3 del manual)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-irritabilidad')">0 — Ausente</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-irritabilidad')">1 — Leve</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-irritabilidad')">2 — Moderada</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-irritabilidad')">3 — Severa</span>
+                  </div>
+                  <input type="hidden" id="ic-ep-irritabilidad" value="">
+                  <input type="text" id="ic-ep-irritabilidad-manif" placeholder="Manifestación concreta (opcional): ej. tono elevado, oposición…" style="margin-top:6px;width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Conducta observada</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Adecuada</span>
+                    <span class="ic-chip" onclick="icTog(this)">Inquietud</span>
+                    <span class="ic-chip" onclick="icTog(this)">Agitación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Oposición</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hostilidad</span>
+                    <span class="ic-chip" onclick="icTog(this)">Amenazas</span>
+                    <span class="ic-chip" onclick="icTog(this)">Agresión verbal</span>
+                    <span class="ic-chip" onclick="icTog(this)">Agresión física</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Percepción</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Sin alteraciones referidas/observadas</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alteración visual</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alteración auditiva</span>
+                    <span class="ic-chip" onclick="icTog(this)">Otras</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Desencadenante identificado</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Procedimiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dolor</span>
+                    <span class="ic-chip" onclick="icTog(this)">Frustración</span>
+                    <span class="ic-chip" onclick="icTog(this)">Visita familiar</span>
+                    <span class="ic-chip" onclick="icTog(this)">Restricción</span>
+                    <span class="ic-chip" onclick="icTog(this)">Cambio ambiental / ruido</span>
+                    <span class="ic-chip" onclick="icTog(this)">Despertar</span>
+                    <span class="ic-chip" onclick="icTog(this)">Privación de sueño</span>
+                    <span class="ic-chip" onclick="icTog(this)">Interacción con personal</span>
+                    <span class="ic-chip" onclick="icTog(this)">Consumo/abstinencia de sustancias</span>
+                    <span class="ic-chip" onclick="icTog(this)">Medicación nueva o cambio de dosis</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno identificable</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Recuperación</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-recuperacion')">Completa</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-recuperacion')">Parcial</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ep-recuperacion')">No retorna al basal</span>
+                  </div>
+                  <input type="hidden" id="ic-ep-recuperacion" value="">
+                </div>
+
+                <div class="ic-field" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:10px 12px;margin-top:4px">
+                  <div class="ic-sublabel" style="color:#92400e">4AT — Detección rápida de delirium</div>
+                  <div style="font-size:0.7rem;color:#92400e;margin-bottom:8px">Marca cada dominio. El puntaje se calcula solo.</div>
+                  <div class="ic-g2">
+                    <div>
+                      <div class="ic-sublabel">1. Alerta</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-4at-alerta')" data-pts="0">Normal (0)</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-4at-alerta')" data-pts="4">Claramente anormal (4)</span>
+                      </div>
+                      <input type="hidden" id="ic-4at-alerta" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel">2. AMT4 (edad, fecha nac., lugar, año)</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-4at-amt4')" data-pts="0">0 errores (0)</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-4at-amt4')" data-pts="1">1 error (1)</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-4at-amt4')" data-pts="2">≥2 errores (2)</span>
+                      </div>
+                      <input type="hidden" id="ic-4at-amt4" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel">3. Atención (meses hacia atrás desde diciembre)</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-4at-atencion')" data-pts="0">7+ meses correctos (0)</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-4at-atencion')" data-pts="1">Empieza pero <7 (1)</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-4at-atencion')" data-pts="2">No puede empezar / rehúsa (2)</span>
+                      </div>
+                      <input type="hidden" id="ic-4at-atencion" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel">4. Cambio agudo o curso fluctuante</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-4at-cambio')" data-pts="0">No (0)</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-4at-cambio')" data-pts="4">Sí (4)</span>
+                      </div>
+                      <input type="hidden" id="ic-4at-cambio" value="">
+                    </div>
+                  </div>
+                  <div id="ic-4at-resultado" style="margin-top:10px;padding:8px 10px;border-radius:7px;font-size:0.8rem;font-weight:700;display:none"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- S7: IMPRESIÓN DIAGNÓSTICA PRELIMINAR -->
           <div class="ic-form-section" id="ic-dx-section">
             <div class="ic-form-head green"><span class="ft">🎯 Impresión diagnóstica preliminar</span><span class="ic-form-badge green">CIE-11 / DSM-5-TR</span></div>
@@ -5928,6 +6132,16 @@ window.goTo = function(page){
     if(typeof _grabEsContinuacion!=='undefined')_grabEsContinuacion=false;
     var _btnG=document.getElementById('btn-grabar-sesion');
     if(_btnG){_btnG.textContent='🎙️ Grabar sesión';_btnG.style.background='#dc2626';_btnG.style.borderColor='#dc2626';}
+    // Resetear episodio de alteración mental — mismo motivo que la transcripción
+    ['ic-ep-inicio','ic-ep-curso','ic-ep-alerta','ic-ep-atencion','ic-ep-discurso','ic-ep-irritabilidad','ic-ep-recuperacion','ic-4at-alerta','ic-4at-amt4','ic-4at-atencion','ic-4at-cambio'].forEach(function(id){
+      var h=document.getElementById(id);if(h)h.value='';
+    });
+    var _4atResNav=document.getElementById('ic-4at-resultado');
+    if(_4atResNav){_4atResNav.style.display='none';_4atResNav.textContent='';}
+    var _epBodyNav=document.getElementById('ic-episodio-body');
+    var _epChevNav=document.getElementById('ic-episodio-chev');
+    if(_epBodyNav)_epBodyNav.style.display='none';
+    if(_epChevNav)_epChevNav.style.transform='';
   }
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
@@ -9620,6 +9834,97 @@ window.setICMode=function(m){
 
 window.toggleICView=function(){goTo('interconsultas');};
 
+// Colapsar/expandir la sección opcional de episodio de alteración mental
+window.toggleEpisodioAlteracion=function(){
+  var body=document.getElementById('ic-episodio-body');
+  var chev=document.getElementById('ic-episodio-chev');
+  if(!body)return;
+  var abierto=body.style.display!=='none';
+  body.style.display=abierto?'none':'';
+  if(chev)chev.style.transform=abierto?'':'rotate(90deg)';
+};
+
+// Calcula el puntaje 4AT en vivo cada vez que se marca un chip de esa sección
+window.calcular4AT=function(){
+  var ids=['ic-4at-alerta','ic-4at-amt4','ic-4at-atencion','ic-4at-cambio'];
+  var total=0,marcados=0;
+  ids.forEach(function(id){
+    var h=document.getElementById(id);
+    if(h&&h.value!==''){total+=parseInt(h.value,10)||0;marcados++;}
+  });
+  var res=document.getElementById('ic-4at-resultado');
+  if(!res)return;
+  if(marcados===0){res.style.display='none';return;}
+  var interpretacion,color,bg;
+  if(total===0){interpretacion='Delirium menos probable';color='#166534';bg='#dcfce7';}
+  else if(total<=3){interpretacion='Posible deterioro cognitivo';color='#92400e';bg='#fef3c7';}
+  else{interpretacion='⚠️ Posible delirium — correlacionar con equipo médico';color='#991b1b';bg='#fee2e2';}
+  res.style.display='';
+  res.style.color=color;
+  res.style.background=bg;
+  res.textContent='Puntaje 4AT: '+total+'/12 ('+marcados+'/4 dominios) — '+interpretacion+(marcados<4?' · faltan dominios por marcar':'');
+};
+
+// Recolecta todos los datos del episodio en un texto estructurado, listo para
+// alimentar la IA. Devuelve '' si la sección no se llenó (no aparece en la nota).
+window.recolectarEpisodioAlteracion=function(){
+  var sec=document.getElementById('ic-episodio-body');
+  if(!sec)return '';
+  var lineas=[];
+  var basal=icChipsBySubLabel('Estado basal (referencia previa)');
+  if(basal.length)lineas.push('Estado basal: '+basal.join(', '));
+  var inicio=(document.getElementById('ic-ep-inicio')||{}).value;
+  var curso=(document.getElementById('ic-ep-curso')||{}).value;
+  if(inicio||curso)lineas.push('Inicio: '+(inicio||'no especificado')+' | Curso: '+(curso||'no especificado'));
+  var dur=(document.getElementById('ic-ep-duracion')||{}).value;
+  if(dur)lineas.push('Duración/contexto: '+dur);
+  var alerta=(document.getElementById('ic-ep-alerta')||{}).value;
+  if(alerta)lineas.push('Nivel de alerta: '+alerta);
+  var atencion=(document.getElementById('ic-ep-atencion')||{}).value;
+  if(atencion)lineas.push('Atención: '+atencion);
+  var orient=icChipsBySubLabel('Orientación — marca solo lo que esté alterado (lo demás se asume conservado)');
+  lineas.push('Orientación: '+(orient.length?orient.join(', '):'sin alteraciones marcadas (asumir conservada en las 4 áreas)'));
+  var discurso=(document.getElementById('ic-ep-discurso')||{}).value;
+  if(discurso)lineas.push('Discurso: '+discurso);
+  var irrit=(document.getElementById('ic-ep-irritabilidad')||{}).value;
+  var irritManif=(document.getElementById('ic-ep-irritabilidad-manif')||{}).value;
+  if(irrit)lineas.push('Irritabilidad: '+irrit+(irritManif?' — '+irritManif:''));
+  var conducta=icChipsBySubLabel('Conducta observada');
+  if(conducta.length)lineas.push('Conducta: '+conducta.join(', '));
+  var percep=icChipsBySubLabel('Percepción');
+  if(percep.length)lineas.push('Percepción: '+percep.join(', '));
+  var desenc=icChipsBySubLabel('Desencadenante identificado');
+  if(desenc.length)lineas.push('Desencadenante: '+desenc.join(', '));
+  var recup=(document.getElementById('ic-ep-recuperacion')||{}).value;
+  if(recup)lineas.push('Recuperación: '+recup);
+  // 4AT
+  var pAlerta=(document.getElementById('ic-4at-alerta')||{}).value;
+  var pAmt4=(document.getElementById('ic-4at-amt4')||{}).value;
+  var pAtencion4at=(document.getElementById('ic-4at-atencion')||{}).value;
+  var pCambio=(document.getElementById('ic-4at-cambio')||{}).value;
+  if(pAlerta||pAmt4||pAtencion4at||pCambio){
+    var total=(parseInt(pAlerta,10)||0)+(parseInt(pAmt4,10)||0)+(parseInt(pAtencion4at,10)||0)+(parseInt(pCambio,10)||0);
+    var interp=total===0?'delirium menos probable':total<=3?'posible deterioro cognitivo':'posible delirium';
+    lineas.push('4AT: '+total+'/12 ('+interp+')');
+  }
+  if(!lineas.length)return '';
+  return 'EPISODIO DE ALTERACIÓN MENTAL (caracterización — describe, NO diagnostica de entrada):\n'+lineas.join('\n');
+};
+
+// El valor de los chips single-select del 4AT y algunos otros usan data-pts
+// para guardar el puntaje en el hidden en vez del texto — override puntual.
+(function(){
+  var origIcTogSingle=window.icTogSingle;
+  window.icTogSingle=function(el,hiddenId){
+    origIcTogSingle(el,hiddenId);
+    if(el.hasAttribute('data-pts')){
+      var h=document.getElementById(hiddenId);
+      if(h)h.value=el.getAttribute('data-pts');
+    }
+    if(hiddenId&&hiddenId.indexOf('ic-4at-')===0&&typeof calcular4AT==='function')calcular4AT();
+  };
+})();
+
 window.icTog=function(el){el.classList.toggle('on');};
 // Single-select chip group — deselects siblings, sets hidden input
 window.icTogSingle=function(el,hiddenId){
@@ -9974,6 +10279,8 @@ async function generarNotaIcConGemini(apiKey){
   var dObj=`Orientación: ${chips('Orientación')||'conservada'}. Conciencia: ${chips('Conciencia / Colaboración')||'consciente'}. Conducta: ${chips('Conducta')||'adecuada'}. Afecto: ${chips('Afecto')||'observable'}. Pensamiento: ${chips('Pensamiento')||'organizado'}. Insight: ${chips('Insight')||chips('Lenguaje / Insight')||'conservado'}. Regulación emocional: ${chips('Regulación emocional')||'no explorada'}. Comprensión Dx: ${chips('Comprensión del Dx')||chips('Comprensión del Dx / pronóstico')||'no evaluada'}. Ideación: ${_ideacionActual||'niega ideación'}. Riesgo suicida: ${_clasifRiesgo||sev}. Factores protectores: ${chips('Factores protectores')||'no explorados'}. Análisis CC: ${analisisLibre||_respObs||'no registrado'}.${riesgoNotas?' Notas riesgo: '+riesgoNotas:''}.`;
 
   var dResp=`Tipo respuesta emocional: ${chips('Tipo de respuesta emocional')||'esperable'}. Impresión clínica: ${chips('Impresión clínica')||chips('Impresión diagnóstica (chips CIE-11)')||'respuesta adaptativa'}. Código CIE-11: ${icv('ic-cie')||'pendiente'}.${_obsDx?' Observaciones diagnósticas: '+_obsDx:''}.${_respObs?' Análisis libre: '+_respObs:''}.${_impresionIA?' Impresión diagnóstica (IA previa): '+_impresionIA:''}.`;
+  var _episodioAlteracion=(typeof recolectarEpisodioAlteracion==='function')?recolectarEpisodioAlteracion():'';
+  if(_episodioAlteracion)dResp+='\n\n'+_episodioAlteracion;
 
   var dTrat=`Intervención: ${chips('Intervención realizada / sugerida')||chips('Intervención realizada hoy')||'valoración clínica'}. Respuesta al médico derivante: ${_respMedico||'ver análisis clínico'}. Seguimiento: ${chips('Seguimiento')||'según evolución'}${_seguimientoPlazo?' — plazo: '+_seguimientoPlazo:''}. Alertas al equipo: ${_notasEquipo||tratNotas||'ninguna'}.`;
   // Instrucción para incluir capacidad decisional literal al final de TRATAMIENTO
@@ -10042,7 +10349,11 @@ async function generarNotaIcConGemini(apiKey){
     'Incluye diagnóstico CIE-10 si corresponde y diagnósticos diferenciales si es pertinente. '+
     'Si no hay elementos suficientes, escribe "Valoración no concluyente". '+
     'Si hay elementos orgánicos que expliquen el estado mental, menciónalos y sugiere derivación a la especialidad correspondiente. '+
-    'Si el caso NO corresponde a psicología, indícalo claramente con fundamento. Datos:\n'+dResp;
+    'Si el caso NO corresponde a psicología, indícalo claramente con fundamento. '+
+    (_episodioAlteracion?('\n\nADEMÁS, los datos incluyen la caracterización de un EPISODIO DE ALTERACIÓN MENTAL (incoherencia/irritabilidad/desorientación). '+
+    'Al final de tu respuesta, agrega un PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — EPISODIO DE ALTERACIÓN MENTAL: " y responda, integradas en prosa, estas 5 preguntas: qué ocurrió, cuándo comenzó, cómo se manifestó, cuánto duró y cómo evolucionó, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico, solo hipótesis a correlacionar). '+
+    'Si hay puntaje 4AT, menciónalo. REGLA ESTRICTA: nunca concluyas que incoherencia=psicosis, irritabilidad=trastorno bipolar, desorientación=demencia, o que un cambio agudo es de origen psiquiátrico primario sin descartar causas médicas — si el cuadro es agudo y/o fluctuante, recomienda explícitamente correlacionar con evolución médica, estado neurológico, medicación y posibles factores fisiológicos, sin asumir etiología psiquiátrica primaria. '):'')+
+    'Datos:\n'+dResp;
 
   var promptTrat = estiloBase +
     '\n\nEJEMPLO DE ESTILO para el TRATAMIENTO:\n'+
@@ -10265,6 +10576,7 @@ async function generarSegConGemini(apiKey){
   var _segTestsResumen=getTestsResumenPaciente(_segPacId,_segNombreExacto);
   var edadSeg=icvl('ic-edad');
   var diasSeg=icvl('ic-dias-internacion');
+  var _episodioAlteracionSeg=(typeof recolectarEpisodioAlteracion==='function')?recolectarEpisodioAlteracion():'';
 
   var datos=`
 TIPO DE NOTA: Seguimiento psicológico hospitalario
@@ -10330,6 +10642,7 @@ ${tratNotas?'- Notas de tratamiento: '+tratNotas:''}
 ${_segTestsResumen?'\n'+_segTestsResumen:''}
 ${(()=>{var _ct=getCapInlineTexto('ic');return _ct?'\n'+_ct:'';})()}
 ${(typeof getTranscripcionParaPrompt==='function'?getTranscripcionParaPrompt():'')}
+${_episodioAlteracionSeg?'\n'+_episodioAlteracionSeg:''}
 `.trim();
 
   var prompt='Eres psicóloga clínica hospitalaria de la ESE Hospital La María. Redacta una NOTA DE EVOLUCIÓN (SEGUIMIENTO) para el sistema DGW, jurídicamente sólida, clínicamente rigurosa y útil para el equipo tratante. '+
@@ -10341,6 +10654,7 @@ ${(typeof getTranscripcionParaPrompt==='function'?getTranscripcionParaPrompt():'
     '(5) derivación y compensación: elegir UNA opción según los datos — A) "No requiere derivación a otra especialidad. Seguimiento exclusivo por psicología hospitalaria." B) "Requiere valoración por [especialidad] de forma independiente. Se suspende seguimiento por psicología hasta que el paciente sea valorado y compensado por dicha especialidad." C) "Paciente con patología de base [especificar] que requiere manejo por [especialidad]. Una vez compensado, se retomará seguimiento por psicología para [especificar]." D) "El caso corresponde exclusivamente a [especialidad]. No se requiere intervención por psicología hospitalaria."; '+
     '(6) plan de psicología: ALTA PSICOLÓGICA (decirlo explícitamente si cumple criterios), PRÓXIMA SESIÓN EN X DÍAS, REVALUAR EN X DÍAS o SUSPENDER HASTA COMPENSACIÓN — plan realista: única psicóloga en la institución, seguimiento cada 48-72 horas como mínimo salvo riesgo crítico.'+
     '\n\nLÍMITES DE COMPETENCIA: no emitas juicios sobre diagnósticos médicos, ajustes farmacológicos ni manejo de delirium (salvo sugerir derivación), ni sobre problemas sociales o dolor sin sufrimiento psicológico. HONESTIDAD CLÍNICA: no inventes nada que no esté en la ficha. NO incluyas nota aclaratoria ni advertencia legal de ningún tipo al final.'+
+    (_episodioAlteracionSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO: los datos incluyen la caracterización de un EPISODIO DE ALTERACIÓN MENTAL (incoherencia/irritabilidad/desorientación). Después del párrafo principal de seguimiento, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — EPISODIO DE ALTERACIÓN MENTAL: " y responda, integradas en prosa, estas 5 preguntas: qué ocurrió, cuándo comenzó, cómo se manifestó, cuánto duró y cómo evolucionó, y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico, solo hipótesis a correlacionar). Si hay puntaje 4AT, menciónalo. REGLA ESTRICTA: nunca concluyas que incoherencia=psicosis, irritabilidad=trastorno bipolar, desorientación=demencia, o que un cambio agudo es de origen psiquiátrico primario sin descartar causas médicas — si el cuadro es agudo y/o fluctuante, recomienda explícitamente correlacionar con evolución médica, estado neurológico, medicación y posibles factores fisiológicos, sin asumir etiología psiquiátrica primaria.'):'')+
     '\n\nDETECCIÓN DE INCONGRUENCIAS (OBLIGATORIO): analiza la ficha buscando contradicciones entre lo que dice el paciente y lo observado, entre lo que refiere el familiar y lo observado, datos médicos que contradicen el reporte, información crítica faltante (ej. ideación suicida no explorada pese a expresiones de deseo de muerte) o riesgo legal (afirmar algo no evaluado). Redacta la nota de forma conservadora, sin afirmar lo no evaluado.'+
     '\n\nFORMATO EXACTO DE TU RESPUESTA: primero escribe en una línea sola ===NOTA=== y a continuación el párrafo completo de la nota. DESPUÉS, si detectaste incongruencias, escribe en una línea sola ===INCONGRUENCIAS=== seguido de máximo 5 hallazgos, UNA línea breve por hallazgo (qué contradice qué y qué verificar), estilo telegráfico. Si no hay incongruencias, termina después de la nota sin esa sección.'+
     '\n\nFICHA DE RONDA (POST-SESIÓN) — usa solo estos datos reales:\n\n'+datos
@@ -10887,6 +11201,18 @@ window.limpiarFormIC=function(confirm_=true){
   document.querySelectorAll('.sev-btn').forEach(function(s){s.classList.remove('on');});
   var rn=document.getElementById('ic-riesgo-nivel');if(rn)rn.value='';
   var ra=document.getElementById('ic-risk-alert');if(ra)ra.classList.remove('show');
+  // Resetear episodio de alteración mental — los hidden inputs no los toca el
+  // borrado genérico de arriba, hay que limpiarlos aparte para que nunca se
+  // filtre el dato de un paciente al formulario de otro
+  ['ic-ep-inicio','ic-ep-curso','ic-ep-alerta','ic-ep-atencion','ic-ep-discurso','ic-ep-irritabilidad','ic-ep-recuperacion','ic-4at-alerta','ic-4at-amt4','ic-4at-atencion','ic-4at-cambio'].forEach(function(id){
+    var h=document.getElementById(id);if(h)h.value='';
+  });
+  var _4atRes=document.getElementById('ic-4at-resultado');
+  if(_4atRes){_4atRes.style.display='none';_4atRes.textContent='';}
+  var _epBody=document.getElementById('ic-episodio-body');
+  var _epChev=document.getElementById('ic-episodio-chev');
+  if(_epBody)_epBody.style.display='none';
+  if(_epChev)_epChev.style.transform='';
   // Resetear notas generadas
   var wrap=document.getElementById('ic-output-wrap');if(wrap)wrap.style.display='none';
   // Resetear transcripción de sesión — nunca dejar pegado el texto de un paciente anterior
