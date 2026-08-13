@@ -1208,10 +1208,56 @@ input.toggle-cb{display:none}
             <div class="ic-form-body">
               <div class="ic-g2">
                 <div><div class="ic-sublabel">Ideación autolítica actual</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguna</span><span class="ic-chip" onclick="icTogRiesgo(this)">Pasiva — deseo de que termine</span><span class="ic-chip" onclick="icTogRiesgo(this)">Activa</span><span class="ic-chip" onclick="icTogRiesgo(this)">Con plan estructurado</span></div></div>
-                <div class="ic-only-nueva"><div class="ic-sublabel">Intentos previos</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguno</span><span class="ic-chip" onclick="icTogR(this)">Sí — relevantes</span></div></div>
+                <div>
+                  <div class="ic-sublabel">Autolesión no suicida (sin intención de morir)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna referida</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Presente — regulación emocional/otra función</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ic-g2">
+                <div class="ic-only-nueva">
+                  <div class="ic-sublabel">Intentos previos</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this);toggleIntentosPreviosDetalle()">Ninguno</span>
+                    <span class="ic-chip" onclick="icTogR(this);toggleIntentosPreviosDetalle()">Sí — relevantes</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="ic-sublabel">¿Riesgo inmediato?</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-riesgo-inmediato')">No</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-riesgo-inmediato')">Sí</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-riesgo-inmediato')">Requiere valoración médica-psiquiátrica</span>
+                  </div>
+                  <input type="hidden" id="ic-riesgo-inmediato" value="">
+                </div>
+              </div>
+              <div id="ic-intentos-previos-detalle" class="ic-field ic-only-nueva" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 12px">
+                <div class="ic-sublabel">Detalle de intentos previos (no reducir a sí/no)</div>
+                <input type="text" id="ic-intentos-numero" placeholder="Número de intentos" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;margin-bottom:6px">
+                <input type="text" id="ic-intentos-fecha" placeholder="Fecha aproximada del más reciente" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem;margin-bottom:6px">
+                <textarea id="ic-intentos-circunstancias" rows="2" placeholder="Circunstancias, qué esperaba que ocurriera, qué pasó después…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem"></textarea>
               </div>
               <div id="ic-plan-riesgo-wrap" style="display:none">
                 <div class="ic-field"><div class="ic-sublabel">⚠️ Describir: ideación, plan, medios disponibles</div><textarea id="ic-riesgo-notas" rows="2" placeholder="Deseo de morir vs. deseo de que termine el sufrimiento. Plan. Medios disponibles. Intención…"></textarea></div>
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Instrumento de tamizaje utilizado</div>
+                    <input type="text" id="ic-riesgo-instrumento" placeholder="Ej: Escala de Plutchik, SAD PERSONS, C-SSRS…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Ruta activada</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTog(this)">Código Dorado</span>
+                      <span class="ic-chip" onclick="icTog(this)">Valoración psiquiátrica</span>
+                      <span class="ic-chip" onclick="icTog(this)">Valoración médica</span>
+                      <span class="ic-chip" onclick="icTog(this)">Medidas de seguridad institucionales</span>
+                      <span class="ic-chip" onclick="icTog(this)">Ninguna requerida por ahora</span>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="ic-field ic-only-nueva">
                 <div class="ic-sublabel">Red de apoyo funcional</div>
@@ -1231,6 +1277,9 @@ input.toggle-cb{display:none}
                   <span class="ic-chip" onclick="icTog(this)">Fe / espiritualidad</span>
                   <span class="ic-chip" onclick="icTog(this)">Insight conservado</span>
                   <span class="ic-chip" onclick="icTog(this)">Red de apoyo activa</span>
+                  <span class="ic-chip" onclick="icTog(this)">Proyectos futuros</span>
+                  <span class="ic-chip" onclick="icTog(this)">Capacidad de pedir ayuda</span>
+                  <span class="ic-chip" onclick="icTog(this)">Disposición a aceptar medidas de protección</span>
                 </div>
               </div>
               <div class="ic-field">
@@ -8325,6 +8374,7 @@ window.goTo = function(page){
     window._notaConTranscripcion=false;
     if(typeof _grabEsContinuacion!=='undefined')_grabEsContinuacion=false;
     if(typeof _grabSegmentosPendientesRed!=='undefined')_grabSegmentosPendientesRed=[];
+    if(typeof _grabRetryTimer!=='undefined'&&_grabRetryTimer){clearInterval(_grabRetryTimer);_grabRetryTimer=null;}
     var _grabBadgeNav=document.getElementById('grab-pendientes-badge');
     if(_grabBadgeNav)_grabBadgeNav.style.display='none';
     var _btnG=document.getElementById('btn-grabar-sesion');
@@ -10685,6 +10735,7 @@ var _grabSesionActiva=false;
 // se quedan en memoria (nunca en Firebase/disco) y se reintentan solos
 // cuando vuelve la conexión, igual que las notas.
 var _grabSegmentosPendientesRed=[];
+var _grabRetryTimer=null;
 
 // Abre el cuadro de transcripción SOLO para pegar texto de otro programa,
 // sin grabar audio ni pedir permiso de micrófono.
@@ -10844,23 +10895,32 @@ function iniciarNuevoSegmento(){
 // Transcribe un pedazo de la grabación EN SEGUNDO PLANO, sin frenar lo que sigue grabándose.
 // Guarda un segmento sin señal, en memoria, para reintentarlo cuando vuelva
 // la conexión — igual que las notas. Nunca se escribe a Firebase ni a disco.
-function encolarSegmentoPendienteRed(indice,base64){
-  _grabSegmentos[indice]={texto:null,pendienteRed:true};
-  _grabSegmentosPendientesRed.push({indice:indice,base64:base64,mime:_grabMimeType||'audio/webm'});
+function encolarSegmentoPendienteRed(indice,base64,motivo){
+  motivo=motivo||'red';
+  _grabSegmentos[indice]={texto:null,pendienteRed:true,motivoPendiente:motivo};
+  _grabSegmentosPendientesRed.push({indice:indice,base64:base64,mime:_grabMimeType||'audio/webm',motivo:motivo});
   actualizarTranscripcionVisible();
   actualizarEstadoSegmentos();
   var badge=document.getElementById('grab-pendientes-badge');
-  if(badge){badge.style.display='';badge.textContent='⏳ '+_grabSegmentosPendientesRed.length+' parte(s) esperando señal';}
+  if(badge){badge.style.display='';badge.textContent='⏳ '+_grabSegmentosPendientesRed.length+' parte(s) esperando';}
+  // Reintento por tiempo — necesario para saturación de Gemini, que no se
+  // resuelve con el evento 'online' (la señal nunca se cayó, solo hay que esperar).
+  if(!_grabRetryTimer){
+    _grabRetryTimer=setInterval(function(){
+      if(_grabSegmentosPendientesRed.length)sincronizarSegmentosPendientesRed();
+      else{clearInterval(_grabRetryTimer);_grabRetryTimer=null;}
+    },20000);
+  }
 }
 
-// Reintenta todos los segmentos en cola apenas vuelve la conexión.
+// Reintenta todos los segmentos en cola — por señal o por saturación de Gemini.
 async function sincronizarSegmentosPendientesRed(){
   if(!_grabSegmentosPendientesRed.length||!_grabApiKeyActual)return;
   var cola=_grabSegmentosPendientesRed.slice();
   _grabSegmentosPendientesRed=[];
   for(var i=0;i<cola.length;i++){
     var item=cola[i];
-    if(!navigator.onLine){ // se volvió a caer la señal a mitad de camino
+    if(item.motivo==='red'&&!navigator.onLine){ // sigue sin señal
       _grabSegmentosPendientesRed.push(item);
       continue;
     }
@@ -10871,7 +10931,10 @@ async function sincronizarSegmentosPendientesRed(){
       _grabSegmentos[item.indice]={texto:texto||'',procesando:false};
     }catch(e){
       console.error('Error reintentando segmento '+item.indice+':',e);
-      if(!navigator.onLine){_grabSegmentosPendientesRed.push(item);}
+      var msgErrRetry=(e&&e.message||'').toLowerCase();
+      var esSaturacion=msgErrRetry.includes('quota')||msgErrRetry.includes('resource_exhausted')||msgErrRetry.includes('rate limit')||msgErrRetry.includes('429')||msgErrRetry.includes('too many requests');
+      if(!navigator.onLine){item.motivo='red';_grabSegmentosPendientesRed.push(item);}
+      else if(esSaturacion){item.motivo='saturacion';_grabSegmentosPendientesRed.push(item);}
       else{_grabSegmentos[item.indice]={texto:'',procesando:false,error:true};}
     }
     actualizarTranscripcionVisible();
@@ -10879,10 +10942,10 @@ async function sincronizarSegmentosPendientesRed(){
   actualizarEstadoSegmentos();
   var badge=document.getElementById('grab-pendientes-badge');
   if(badge){
-    if(_grabSegmentosPendientesRed.length){badge.textContent='⏳ '+_grabSegmentosPendientesRed.length+' parte(s) esperando señal';}
+    if(_grabSegmentosPendientesRed.length){badge.textContent='⏳ '+_grabSegmentosPendientesRed.length+' parte(s) esperando';}
     else{badge.style.display='none';}
   }
-  if(_grabSegmentosPendientesRed.length&&typeof toast==='function')toast('⚠️ Algunas partes siguen esperando señal');
+  if(_grabSegmentosPendientesRed.length&&typeof toast==='function')toast('⚠️ Algunas partes siguen esperando (señal o Gemini ocupado)');
   else if(cola.length&&typeof toast==='function')toast('✅ Partes pendientes transcritas');
 }
 // Escucha propia, separada de la de las notas, para no arriesgar ese flujo
@@ -10927,10 +10990,13 @@ async function finalizarSegmento(indice,chunks){
     _grabSegmentos[indice]={texto:texto||'',procesando:false};
   }catch(e){
     console.error('Error transcribiendo segmento '+indice+':',e);
-    // Si fue por conexión (aunque navigator.onLine dijera que sí había señal), encolar en vez de dar error
+    // Si fue por conexión, o porque Gemini está saturado (cuota/rate limit),
+    // encolar para reintentar en vez de dar error definitivo.
     var msgErr=(e&&e.message||'').toLowerCase();
-    if(!navigator.onLine||msgErr.includes('fetch')||msgErr.includes('network')||msgErr.includes('conexión')){
-      encolarSegmentoPendienteRed(indice,base64);
+    var esProblemaRed=!navigator.onLine||msgErr.includes('fetch')||msgErr.includes('network')||msgErr.includes('conexión');
+    var esSaturacionGemini=msgErr.includes('quota')||msgErr.includes('resource_exhausted')||msgErr.includes('rate limit')||msgErr.includes('429')||msgErr.includes('too many requests')||msgErr.includes('overload')||msgErr.includes('demand');
+    if(esProblemaRed||esSaturacionGemini){
+      encolarSegmentoPendienteRed(indice,base64,esProblemaRed?'red':'saturacion');
       return;
     }
     _grabSegmentos[indice]={texto:'',procesando:false,error:true};
@@ -10947,7 +11013,7 @@ function actualizarTranscripcionVisible(){
   var partes=_grabSegmentos.map(function(s,i){
     if(!s)return null;
     if(s.procesando)return '⏳ [Transcribiendo parte '+(i+1)+'…]';
-    if(s.pendienteRed)return '📶 [Parte '+(i+1)+' esperando señal — se completará sola]';
+    if(s.pendienteRed)return (s.motivoPendiente==='saturacion'?'⏳ [Parte '+(i+1)+' esperando — Gemini ocupado, se completará sola]':'📶 [Parte '+(i+1)+' esperando señal — se completará sola]');
     if(s.error)return '⚠️ [No se pudo transcribir la parte '+(i+1)+']';
     if(s.vacio)return null;
     return s.texto;
@@ -13217,6 +13283,19 @@ window.icTogSingle=function(el,hiddenId){
   if(h)h.value=el.textContent.replace(/[🔴🟡🟢]/g,'').trim();
 };
 // Auto-show riesgo notes when ideación activa selected
+// Muestra/oculta el detalle de intentos previos (número/fecha/circunstancias)
+// según si el chip "Sí — relevantes" está marcado.
+window.toggleIntentosPreviosDetalle=function(){
+  var det=document.getElementById('ic-intentos-previos-detalle');
+  if(!det)return;
+  var chips=document.querySelectorAll('[onclick*="toggleIntentosPreviosDetalle"]');
+  var siMarcado=false;
+  chips.forEach(function(c){
+    if(c.textContent.trim()==='Sí — relevantes'&&(c.classList.contains('on')||c.classList.contains('on-r')))siMarcado=true;
+  });
+  det.style.display=siMarcado?'':'none';
+};
+
 window.icTogRiesgo=function(el){
   icTogR(el);
   const wrap=document.getElementById('ic-plan-riesgo-wrap');
@@ -13588,10 +13667,13 @@ async function generarNotaIcConGemini(apiKey){
   function chips(label){return icChipsBySubLabel(label).join(', ');}
 
   // Variables que en otras funciones se leen de scope externo — aquí las leemos del DOM
-  var _ideacionActual = icChipsBySubLabel('Ideación actual').join(', ') || icv('ic-riesgo-notas') && '' || '';
-  // Leer ideación de chips
-  var _ideacionChips = icChipsBySubLabel('Ideación actual');
-  _ideacionActual = _ideacionChips.length ? _ideacionChips.join(', ') : 'niega';
+  var _ideacionChips = icChipsBySubLabel('Ideación autolítica actual');
+  if(!_ideacionChips.length)_ideacionChips = icChipsBySubLabel('Ideación actual');
+  var _ideacionActual = _ideacionChips.length ? _ideacionChips.join(', ') : 'niega';
+  var _autolesionNSIA = icChipsBySubLabel('Autolesión no suicida (sin intención de morir)').join(', ')||'ninguna referida';
+  var _riesgoInmediatoIA = icv('ic-riesgo-inmediato')||'no especificado';
+  var _riesgoInstrumentoIA = icv('ic-riesgo-instrumento')||'';
+  var _riesgoRutaIA = icChipsBySubLabel('Ruta activada').join(', ')||'';
   // Clasificación riesgo = nivel del select
   var _clasifRiesgo = icv('ic-riesgo-nivel') || sev || 'No clasificado';
   // Observaciones diagnósticas
@@ -13620,7 +13702,7 @@ async function generarNotaIcConGemini(apiKey){
   if(_capTextoIC)ctx+='\n\n'+_capTextoIC;
 
   // Datos por sección
-  var dSub=`Estado emocional: ${chips('Estado emocional referido')||'no especificado'}. Pensamientos automáticos: ${chips('Pensamientos automáticos sobre enfermedad/internación/procedimiento')||chips('Pensamientos automáticos (CC)')||'no identificados'}${_tccPensamientos?' — '+_tccPensamientos:''}. Conductas de evitación: ${chips('Conductas de evitación / seguridad')||'no exploradas'}${_tccEvitacion?' — '+_tccEvitacion:''}. Activación conductual: ${chips('Activación conductual — nivel de actividad en hospital')||chips('Activación conductual')||'no evaluada'}${_tccActivacion?' — '+_tccActivacion:''}. Adherencia: ${chips('Adherencia al tratamiento médico')||'no evaluada'}${_tccAdherencia?' — '+_tccAdherencia:''}. Intensidad malestar: ${intensidad||'no cuantificada'}. Cita textual: ${cita||'ninguna'}. Ideación autolítica actual: ${_ideacionActual||'niega'}. Riesgo previo: ${chips('Intentos previos')||'ninguno'}. Clasificación riesgo: ${_clasifRiesgo||sev}. Red de apoyo: ${chips('Red de apoyo funcional')||'no explorada'}${_redApoyoDetalle?' — '+_redApoyoDetalle:''}.${sustNotas?' Notas sustancias: '+sustNotas:''}.`;
+  var dSub=`Estado emocional: ${chips('Estado emocional referido')||'no especificado'}. Pensamientos automáticos: ${chips('Pensamientos automáticos sobre enfermedad/internación/procedimiento')||chips('Pensamientos automáticos (CC)')||'no identificados'}${_tccPensamientos?' — '+_tccPensamientos:''}. Conductas de evitación: ${chips('Conductas de evitación / seguridad')||'no exploradas'}${_tccEvitacion?' — '+_tccEvitacion:''}. Activación conductual: ${chips('Activación conductual — nivel de actividad en hospital')||chips('Activación conductual')||'no evaluada'}${_tccActivacion?' — '+_tccActivacion:''}. Adherencia: ${chips('Adherencia al tratamiento médico')||'no evaluada'}${_tccAdherencia?' — '+_tccAdherencia:''}. Intensidad malestar: ${intensidad||'no cuantificada'}. Cita textual: ${cita||'ninguna'}. Ideación autolítica actual: ${_ideacionActual||'niega'}. Autolesión no suicida: ${_autolesionNSIA}. ¿Riesgo inmediato?: ${_riesgoInmediatoIA}. Riesgo previo: ${chips('Intentos previos')||'ninguno'}.${(document.getElementById('ic-intentos-numero')&&document.getElementById('ic-intentos-numero').value)?' Detalle intentos: N° '+document.getElementById('ic-intentos-numero').value+(document.getElementById('ic-intentos-fecha').value?', fecha aprox. '+document.getElementById('ic-intentos-fecha').value:'')+(document.getElementById('ic-intentos-circunstancias').value?'. '+document.getElementById('ic-intentos-circunstancias').value:'')+'.':''} Clasificación riesgo: ${_clasifRiesgo||sev}.${(_riesgoInstrumentoIA||_riesgoRutaIA)?' Tamizaje: '+(_riesgoInstrumentoIA||'no especificado')+(_riesgoRutaIA?' | Ruta activada: '+_riesgoRutaIA:'')+'.':''} Red de apoyo: ${chips('Red de apoyo funcional')||'no explorada'}${_redApoyoDetalle?' — '+_redApoyoDetalle:''}.${sustNotas?' Notas sustancias: '+sustNotas:''}.`;
 
   var dObj=`Orientación: ${chips('Orientación')||'conservada'}. Conciencia: ${chips('Conciencia / Colaboración')||'consciente'}. Conducta: ${chips('Conducta')||'adecuada'}. Afecto: ${chips('Afecto')||'observable'}. Pensamiento: ${chips('Pensamiento')||'organizado'}. Insight: ${chips('Insight')||chips('Lenguaje / Insight')||'conservado'}. Regulación emocional: ${chips('Regulación emocional')||'no explorada'}. Comprensión Dx: ${chips('Comprensión del Dx')||chips('Comprensión del Dx / pronóstico')||'no evaluada'}. Ideación: ${_ideacionActual||'niega ideación'}. Riesgo suicida: ${_clasifRiesgo||sev}. Factores protectores: ${chips('Factores protectores')||'no explorados'}. Análisis CC: ${analisisLibre||_respObs||'no registrado'}.${riesgoNotas?' Notas riesgo: '+riesgoNotas:''}.`;
 
@@ -13945,6 +14027,10 @@ async function generarSegConGemini(apiKey){
   var protectores=icChipsBySubLabel('Factores protectores');
   var sev=icvl('ic-riesgo-nivel')||'No clasificado';
   var riesgoNotas=icvl('ic-riesgo-notas');
+  var _autolesionNSSegIA=icChipsBySubLabel('Autolesión no suicida (sin intención de morir)').join(', ')||'ninguna referida';
+  var _riesgoInmediatoSegIA=icvl('ic-riesgo-inmediato')||'no especificado';
+  var _riesgoInstrumentoSegIA=icvl('ic-riesgo-instrumento')||'';
+  var _riesgoRutaSegIA=icChipsBySubLabel('Ruta activada').join(', ')||'';
 
   // Respuesta e impresión clínica
   var tipoResp=icChipsBySubLabel('Tipo de respuesta emocional');
@@ -14028,10 +14114,13 @@ EXAMEN MENTAL (OBJETIVO):
 
 EVALUACIÓN DE RIESGO:
 - Ideación suicida/autolesiva: ${ideacion.join(', ')||'No evaluada'}
+- Autolesión no suicida: ${_autolesionNSSegIA}
+- ¿Riesgo inmediato?: ${_riesgoInmediatoSegIA}
 - Intentos previos: ${intentosPrevios.length?intentosPrevios.join(', '):'No registrados'}
 - Nivel de riesgo: ${sev}
 - Factores protectores: ${protectores.length?protectores.join(', '):'No identificados'}
 ${riesgoNotas?'- Notas de riesgo: '+riesgoNotas:''}
+${(_riesgoInstrumentoSegIA||_riesgoRutaSegIA)?'- Tamizaje: '+(_riesgoInstrumentoSegIA||'no especificado')+(_riesgoRutaSegIA?' | Ruta activada: '+_riesgoRutaSegIA:''):''}
 
 IMPRESIÓN CLÍNICA:
 - Tipo de respuesta emocional: ${tipoResp.length?tipoResp.join(', '):'No especificada'}
@@ -14261,8 +14350,16 @@ function generarNotaIcNuevaLocal(){
   var intensidad=icvl('ic-sub-intensidad')||'';
   var analisisLibre=icvl('ic-resp-analisis')||'';
   var tratNotas=icvl('ic-trat-notas')||'';
-  var _ideacionChips=icChipsBySubLabel('Ideación actual');
+  var _ideacionChips=icChipsBySubLabel('Ideación autolítica actual');
+  if(!_ideacionChips.length)_ideacionChips=icChipsBySubLabel('Ideación actual');
   var _ideacion=_ideacionChips.length?_ideacionChips.join(', '):'niega ideación autolítica';
+  var _autolesionNS=icChipsBySubLabel('Autolesión no suicida (sin intención de morir)').join(', ')||'ninguna referida';
+  var _riesgoInmediato=icvl('ic-riesgo-inmediato')||'no especificado';
+  var _intentosNum=icvl('ic-intentos-numero')||'';
+  var _intentosFecha=icvl('ic-intentos-fecha')||'';
+  var _intentosCirc=icvl('ic-intentos-circunstancias')||'';
+  var _riesgoInstrumento=icvl('ic-riesgo-instrumento')||'';
+  var _riesgoRuta=icChipsBySubLabel('Ruta activada').join(', ')||'';
   var _cie=icvl('ic-cie')||'';
   var _plazo=icvl('ic-seguimiento-plazo')||'';
   var _medSol=icvl('ic-medico-sol')||'';
@@ -14315,6 +14412,10 @@ function generarNotaIcNuevaLocal(){
     +(_inicioEvol?'Inicio y evolución del malestar: '+_inicioEvol+'. ':'')
     +'Intensidad malestar: '+(intensidad||'no cuantificada')+'.'+(cita?' Cita textual: "'+cita+'"':'')+'. '
     +'Ideación autolítica: '+_ideacion+'. '
+    +'Autolesión no suicida: '+_autolesionNS+'. '
+    +'¿Riesgo inmediato?: '+_riesgoInmediato+'. '
+    +(_intentosNum||_intentosFecha||_intentosCirc?'Detalle intentos previos: '+(_intentosNum?'N° '+_intentosNum+'. ':'')+(_intentosFecha?'Fecha aprox.: '+_intentosFecha+'. ':'')+(_intentosCirc?_intentosCirc+'. ':''):'')
+    +(_riesgoInstrumento||_riesgoRuta?'Tamizaje: '+(_riesgoInstrumento||'no especificado')+(_riesgoRuta?' | Ruta activada: '+_riesgoRuta:'')+'. ':'')
     +'Red de apoyo: '+(chips('Red de apoyo funcional')||'no explorada')+(_redDetalle?' — '+_redDetalle:'')+'. '
     +'Factores protectores: '+(chips('Factores protectores')||'no explorados')+'.'
     +(_sustNotas?'\nDetalles antecedentes/sustancias: '+_sustNotas+'.':'');
@@ -14386,6 +14487,10 @@ function generarNotaIcSegLocal(){
   var analisisCC=icvl('ic-resp-analisis');
   var ideacion=chips('Ideación autolítica actual')||chips('Ideación actual')||'niega ideación autolítica';
   var sev=icvl('ic-riesgo-nivel')||'No clasificado';
+  var _autolesionNSSeg=chips('Autolesión no suicida (sin intención de morir)')||'ninguna referida';
+  var _riesgoInmediatoSeg=icvl('ic-riesgo-inmediato')||'no especificado';
+  var _riesgoInstrumentoSeg=icvl('ic-riesgo-instrumento')||'';
+  var _riesgoRutaSeg=chips('Ruta activada')||'';
   var protectores=chips('Factores protectores')||'no identificados';
   var red=chips('Red de apoyo funcional')||'no evaluada';
   var riesgoNotas=icvl('ic-riesgo-notas');
@@ -14417,6 +14522,8 @@ function generarNotaIcSegLocal(){
     +', regulación emocional '+regulacion+', comprensión del Dx '+comprension+'. '
     +(analisisCC?'Análisis clínico: '+analisisCC+'. ':'')
     +'Ideación suicida/autolesiva: '+ideacion+'. Nivel de riesgo: '+sev+(_segRiesgoOtro?' ('+_segRiesgoOtro+')':'')+'. '
+    +'Autolesión no suicida: '+_autolesionNSSeg+'. ¿Riesgo inmediato?: '+_riesgoInmediatoSeg+'. '
+    +(_riesgoInstrumentoSeg||_riesgoRutaSeg?'Tamizaje: '+(_riesgoInstrumentoSeg||'no especificado')+(_riesgoRutaSeg?' | Ruta activada: '+_riesgoRutaSeg:'')+'. ':'')
     +'Factores protectores: '+protectores+'. Red de apoyo: '+red+'. '
     +(riesgoNotas?'Notas riesgo: '+riesgoNotas+'. ':'')
     +'Respuesta emocional: '+tipoResp+'. Impresión diagnóstica: '+impresion
@@ -14621,6 +14728,11 @@ window.limpiarFormIC=function(confirm_=true){
   });
   var _capBadge=document.getElementById('ic-cap-conclusion-badge');
   if(_capBadge){_capBadge.style.display='none';_capBadge.textContent='';}
+  // El hidden input ic-riesgo-inmediato tampoco lo toca el barrido genérico
+  var _riesgoInmediatoClr=document.getElementById('ic-riesgo-inmediato');
+  if(_riesgoInmediatoClr)_riesgoInmediatoClr.value='';
+  var _intentosDetalleClr=document.getElementById('ic-intentos-previos-detalle');
+  if(_intentosDetalleClr)_intentosDetalleClr.style.display='none';
   // Limpiar chips de interconsulta
   document.querySelectorAll('#ic-form-view .ic-chip').forEach(function(c){c.classList.remove('on','on-r','on-g','on-a');});
   // Limpiar checkboxes (formulario de seguimiento y otros)
@@ -14782,6 +14894,7 @@ window.limpiarFormIC=function(confirm_=true){
   window._notaConTranscripcion=false;
   if(typeof _grabEsContinuacion!=='undefined')_grabEsContinuacion=false;
   if(typeof _grabSegmentosPendientesRed!=='undefined')_grabSegmentosPendientesRed=[];
+  if(typeof _grabRetryTimer!=='undefined'&&_grabRetryTimer){clearInterval(_grabRetryTimer);_grabRetryTimer=null;}
   var _grabBadgeClr=document.getElementById('grab-pendientes-badge');
   if(_grabBadgeClr)_grabBadgeClr.style.display='none';
   var _btnGClr=document.getElementById('btn-grabar-sesion');
