@@ -10283,7 +10283,8 @@ window.geminiTranscribirAudio=async function(apiKey,base64Audio,mimeType){
   var instruccion='Transcribe este audio de una sesión clínica de psicología al español de la forma MÁS FIEL posible a lo hablado, sin resumir ni interpretar. '+
     'Si logras distinguir quién habla, marca cada intervención con "Psicóloga:" o "Paciente:" (u otro interlocutor si aplica, ej. "Familiar:"). '+
     'Conserva el contenido clínico relevante tal como se dijo. Puedes omitir muletillas sin valor clínico (eh, este, o sea repetido) pero NUNCA omitas contenido con relevancia clínica. '+
-    'Si una parte es inaudible o inentendible, escribe [inaudible] en ese punto y continúa. No agregues comentarios, análisis ni resumen — solo la transcripción.';
+    'Si una parte es inaudible o inentendible, escribe [inaudible] en ese punto y continúa. No agregues comentarios, análisis ni resumen — solo la transcripción. '+
+    'REGLA CRÍTICA CONTRA REPETICIONES: si en algún tramo del audio hay silencio, ruido de fondo sin habla, o una frase corta seguida de una pausa larga, NUNCA repitas la misma frase o palabra varias veces seguidas para "rellenar" ese tramo. Eso es un error grave. En vez de repetir, escribe [silencio] o [pausa] UNA sola vez y continúa con lo siguiente que sí se distinga. Cada frase debe transcribirse UNA sola vez, salvo que la persona verdaderamente la haya dicho más de una vez de forma audible y clara.';
   var models=['gemini-2.0-flash-lite','gemini-2.5-flash'];
   var lastErr=null;
   for(var i=0;i<models.length;i++){
@@ -10309,7 +10310,7 @@ window.geminiTranscribirAudio=async function(apiKey,base64Audio,mimeType){
         throw new Error(msg);
       }
       var texto=(d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts&&d.candidates[0].content.parts[0]&&d.candidates[0].content.parts[0].text)||'';
-      return texto.trim();
+      return limpiarRepeticionesTranscripcion(texto.trim());
     }catch(e){
       var eLow=(e.message||'').toLowerCase();
       if(eLow.includes('demand')||eLow.includes('overload')||eLow.includes('no longer available')||eLow.includes('deprecated')){lastErr=e;continue;}
@@ -10317,6 +10318,37 @@ window.geminiTranscribirAudio=async function(apiKey,base64Audio,mimeType){
     }
   }
   throw lastErr||new Error('Gemini no disponible para transcribir audio');
+};
+
+// Red de seguridad: si el modelo igual se traba y repite la misma frase varias
+// veces seguidas (típico cuando hay silencio o audio de baja calidad), esto la
+// colapsa a una sola aparición en vez de dejar 15-20 líneas iguales.
+window.limpiarRepeticionesTranscripcion=function(texto){
+  if(!texto)return texto;
+  var lineas=texto.split('\n');
+  var resultado=[];
+  var i=0;
+  function normaliza(l){
+    return l.replace(/^(Psicóloga|Paciente|Familiar):\s*/i,'').trim().toLowerCase();
+  }
+  while(i<lineas.length){
+    var actual=lineas[i];
+    var actualNorm=normaliza(actual);
+    if(!actualNorm){resultado.push(actual);i++;continue;}
+    var repeticiones=1;
+    var j=i+1;
+    while(j<lineas.length&&normaliza(lineas[j])===actualNorm){
+      repeticiones++;j++;
+    }
+    if(repeticiones>=3){
+      resultado.push(actual);
+      resultado.push('[la frase anterior se repitió '+repeticiones+' veces seguidas en el audio original — probable silencio o audio poco claro; se muestra una sola vez]');
+      i=j;
+    }else{
+      resultado.push(actual);i++;
+    }
+  }
+  return resultado.join('\n');
 };
 
 window.copiarTranscripcion=function(){
