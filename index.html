@@ -6856,6 +6856,27 @@ function getCapInlineData(prefix){
   };
 }
 
+// Junta el texto de los 8 módulos de caracterización opcional (episodio, alucinación,
+// ilusión, delirio, ansiedad, ánimo depresivo, labilidad, apatía) — SOLO los que
+// tengan datos. Se usa tanto en la nota local (sin IA) como está disponible para IA.
+function getCaracterizacionesInlineTexto(){
+  var partes=[];
+  var recolectores=[
+    'recolectarEpisodioAlteracion','recolectarExperienciaAlucinatoria','recolectarIlusion',
+    'recolectarIdeaDelirante','recolectarAnsiedad','recolectarAnimoDepresivo',
+    'recolectarLabilidad','recolectarApatia'
+  ];
+  recolectores.forEach(function(fn){
+    if(typeof window[fn]==='function'){
+      var t=window[fn]();
+      if(t)partes.push(t);
+    }
+  });
+  if(!partes.length)return '';
+  return 'CARACTERIZACIÓN CLÍNICA ADICIONAL\n\n'+partes.join('\n\n');
+}
+window.getCaracterizacionesInlineTexto=getCaracterizacionesInlineTexto;
+
 function getCapInlineTexto(prefix){
   var d=getCapInlineData(prefix);
   if(!d||!d.capConclusion)return'';
@@ -13254,6 +13275,9 @@ function generarNotaIcNuevaLocal(){
 
   // Capacidad decisional si aplica
   var _cap=getCapInlineTexto('ic');
+  // Caracterización de los 8 módulos opcionales (episodio, alucinación, ilusión,
+  // delirio, ansiedad, ánimo depresivo, labilidad, apatía) — si aplica
+  var _caract=getCaracterizacionesInlineTexto();
 
   // Notas libres de sesión
   var _notasLibres=(document.getElementById('ic-notas-libres')||{value:''}).value.trim();
@@ -13261,7 +13285,7 @@ function generarNotaIcNuevaLocal(){
   setIcOut('ic-out-sub',sub);
   setIcOut('ic-out-obj',obj);
   setIcOut('ic-out-resp',resp);
-  setIcOut('ic-out-trat',trat+(_cap?'\n\nVALORACIÓN DE CAPACIDAD DECISIONAL\n'+_cap:'')+(_notasLibres?'\n\nNOTAS LIBRES DE SESIÓN\n'+_notasLibres:''));
+  setIcOut('ic-out-trat',trat+(_cap?'\n\nVALORACIÓN DE CAPACIDAD DECISIONAL\n'+_cap:'')+(_caract?'\n\n'+_caract:'')+(_notasLibres?'\n\nNOTAS LIBRES DE SESIÓN\n'+_notasLibres:''));
   var f4=document.getElementById('ic-out-4campos');
   var seg=document.getElementById('ic-out-seg');
   if(f4)f4.style.display='';
@@ -13323,6 +13347,7 @@ function generarNotaIcSegLocal(){
   var dx=icvl('ic-pdx');
   var _cie=icvl('ic-cie');
   var _cap=getCapInlineTexto('ic');
+  var _caractSeg=getCaracterizacionesInlineTexto();
 
   var texto='Paciente en seguimiento psicológico hospitalario'+(dx?', Dx médico: '+dx:'')+'. '
     +'Estado emocional referido: '+estadoEmoc+'. Preocupaciones: '+preocupaciones+'. '
@@ -13351,7 +13376,8 @@ function generarNotaIcSegLocal(){
     +(_segPacto?'Pacto/acuerdo con el paciente: '+_segPacto+'. ':'')
     +'Seguimiento: '+seguimiento+(plazo?' — plazo: '+plazo:'')+'. '
     +(tratNotas?'Notas al equipo: '+tratNotas+'.':'')
-    +(_cap?'\n\nVALORACIÓN DE CAPACIDAD DECISIONAL\n'+_cap:'');
+    +(_cap?'\n\nVALORACIÓN DE CAPACIDAD DECISIONAL\n'+_cap:'')
+    +(_caractSeg?'\n\n'+_caractSeg:'');
 
   // Notas libres de sesión
   var _notasLibresSeg=(document.getElementById('ic-notas-libres')||{value:''}).value.trim();
