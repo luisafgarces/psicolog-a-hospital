@@ -2910,6 +2910,717 @@ input.toggle-cb{display:none}
             </div>
           </div>
 
+          <!-- S6j: CARACTERIZACIÓN OPCIONAL — AGITACIÓN PSICOMOTORA -->
+          <div class="ic-form-section" id="ic-agi-section">
+            <div class="ic-form-head amber" style="cursor:pointer" onclick="toggleAgitacion()">
+              <span class="ft">🌀 ¿Agitación psicomotora? (opcional)</span>
+              <span id="ic-agi-chev" style="margin-left:auto;font-size:1rem;transition:transform .2s;display:inline-block">▸</span>
+            </div>
+            <div id="ic-agi-sugerencia" style="display:none;background:#fef9c3;border-bottom:1px solid #fde68a;padding:9px 16px;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-size:0.78rem;color:#78350f;flex:1;min-width:200px">💡 Marcaste hallazgos de agitación — ¿quieres caracterizarla?</span>
+              <button class="btn btn-sm" style="background:#d97706;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-weight:700;font-size:0.74rem;cursor:pointer" onclick="abrirAgitacionDesdeSugerencia()">Caracterizar</button>
+              <button style="background:none;border:none;color:#92400e;font-size:0.72rem;cursor:pointer;text-decoration:underline;padding:4px" onclick="descartarSugerenciaAgitacion()">Ahora no</button>
+            </div>
+            <div id="ic-agi-body" style="display:none">
+              <div class="ic-form-body">
+                <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;line-height:1.5">AGITACIÓN NUEVA O DE INICIO AGUDO = descartar causa médica/delirium ANTES de atribuirla a un trastorno psiquiátrico. Aquí la seguridad va primero, no la experiencia subjetiva.</div>
+
+                <div class="ic-field" style="background:#fee2e2;border:2px solid #ef4444;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#991b1b">🚨 Paso 1 — Seguridad inmediata</div>
+                  <div class="ic-chips" style="margin-top:6px">
+                    <span class="ic-chip" onclick="icTog(this)">Sin riesgo evidente</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Riesgo de autolesión</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Riesgo de agresión</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Intentando escapar / fuga</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Retirando dispositivos médicos</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Objetos peligrosos alrededor</span>
+                  </div>
+                  <div class="ic-g2" style="margin-top:8px">
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">¿Se puede mantener distancia segura?</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-distancia')">Sí</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-distancia')">No</span>
+                      </div>
+                      <input type="hidden" id="ic-agi-distancia" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">¿Responde a instrucciones simples?</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-instrucciones')">Sí</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-instrucciones')">Parcialmente</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-instrucciones')">No</span>
+                      </div>
+                      <input type="hidden" id="ic-agi-instrucciones" value="">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Experiencia subjetiva / desencadenante (breve)</div>
+                  <input type="text" id="ic-agi-desencadenante" placeholder="Ej: refiere sentir que 'va a explotar', tras procedimiento…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Inicio</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-inicio')">Súbita/aguda</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-inicio')">Subaguda</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-inicio')">Episódica</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-inicio')">Persistente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-inicio')">Fluctuante</span>
+                    </div>
+                    <input type="hidden" id="ic-agi-inicio" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Control percibido</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-control')">Conservado</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-control')">Parcial</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-control')">Muy reducido</span>
+                    </div>
+                    <input type="hidden" id="ic-agi-control" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Emoción predominante</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Miedo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Rabia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ansiedad</span>
+                    <span class="ic-chip" onclick="icTog(this)">Exceso de energía</span>
+                    <span class="ic-chip" onclick="icTog(this)">Irritabilidad</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hipervigilancia</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones motoras</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Inquietud / deambulación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Levantarse repetidamente</span>
+                    <span class="ic-chip" onclick="icTog(this)">Manipulación de objetos/dispositivos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Movimientos repetitivos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Intento de retirar dispositivos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Intento de fuga</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones verbales</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Habla acelerada</span>
+                    <span class="ic-chip" onclick="icTog(this)">Aumento de volumen / gritos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Repetición de preguntas</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Hostilidad verbal / insultos / amenazas</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones cognitivas/perceptivas</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Desorganización del pensamiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ideas persecutorias</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alteración perceptiva</span>
+                    <span class="ic-chip" onclick="icTog(this)">Confusión</span>
+                    <span class="ic-chip" onclick="icTog(this)">Desorientación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dificultad para comprender instrucciones</span>
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#92400e">Estado cognitivo breve — clave para sospechar delirium</div>
+                  <div class="ic-g2">
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Conciencia</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-conciencia')">Conservada</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-conciencia')">Alterada</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-conciencia')">Fluctuante</span>
+                      </div>
+                      <input type="hidden" id="ic-agi-conciencia" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Atención</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-atencion')">Conservada</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-atencion')">Disminuida</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-atencion')">Marcadamente alterada</span>
+                      </div>
+                      <input type="hidden" id="ic-agi-atencion" value="">
+                    </div>
+                  </div>
+                  <div class="ic-g2" style="margin-top:8px">
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Orientación</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-orientacion')">Conservada</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-orientacion')">Alterada</span>
+                      </div>
+                      <input type="hidden" id="ic-agi-orientacion" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Cambio respecto al basal</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-cambiobasal')">No</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-cambiobasal')">Sí</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-cambiobasal')">Desconocido</span>
+                      </div>
+                      <input type="hidden" id="ic-agi-cambiobasal" value="">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manifestaciones fisiológicas (no específicas — interpretar en contexto)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Taquicardia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hipertensión</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sudoración</span>
+                    <span class="ic-chip" onclick="icTog(this)">Temblor</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hipertermia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna identificada</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Contexto clínico probable</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-contexto')">Posible delirium</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-contexto')">Asociada a psicosis</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-contexto')">Asociada a episodio maníaco</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-contexto')">Asociada a ansiedad/pánico</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-contexto')">Asociada a depresión agitada</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-contexto')">Asociada a demencia</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-contexto')">Relacionada con sustancias (intoxicación/abstinencia)</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-contexto')">Secundaria a causa médica/neurológica</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-contexto')">Relacionada con el entorno hospitalario</span>
+                  </div>
+                  <input type="hidden" id="ic-agi-contexto" value="">
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Posibles causas médicas a descartar</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Hipoglucemia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hipoxia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Infección/fiebre</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alteración electrolítica/metabólica</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dolor intenso</span>
+                    <span class="ic-chip" onclick="icTog(this)">Retención urinaria/estreñimiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">TCE/ACV</span>
+                    <span class="ic-chip" onclick="icTog(this)">Medicación nueva/cambio</span>
+                    <span class="ic-chip" onclick="icTog(this)">Intoxicación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Abstinencia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna identificada</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Intensidad (por control y riesgo, no solo por cuánto se mueve)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-intensidad')">Leve</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-intensidad')">Moderada</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agi-intensidad')">Grave</span>
+                  </div>
+                  <input type="hidden" id="ic-agi-intensidad" value="">
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Manejo inicial no farmacológico aplicado</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Reducción de estímulos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Comunicación calmada / frases cortas</span>
+                    <span class="ic-chip" onclick="icTog(this)">Validación emocional (sin validar contenido delirante)</span>
+                    <span class="ic-chip" onclick="icTog(this)">Se evitó confrontación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Se mantuvo distancia de seguridad</span>
+                    <span class="ic-chip" onclick="icTog(this)">Se solicitó apoyo</span>
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#991b1b">⚠️ Riesgo asociado (resumen)</div>
+                  <div class="ic-chips" style="margin-top:6px">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno identificado</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Autolesión</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Agresión / heteroagresión</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Fuga</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Caída</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Retiro peligroso de dispositivos</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- S6k: CARACTERIZACIÓN OPCIONAL — RETARDO PSICOMOTOR -->
+          <div class="ic-form-section" id="ic-ret-section">
+            <div class="ic-form-head amber" style="cursor:pointer" onclick="toggleRetardo()">
+              <span class="ft">🐌 ¿Retardo psicomotor / enlentecimiento? (opcional)</span>
+              <span id="ic-ret-chev" style="margin-left:auto;font-size:1rem;transition:transform .2s;display:inline-block">▸</span>
+            </div>
+            <div id="ic-ret-sugerencia" style="display:none;background:#fef9c3;border-bottom:1px solid #fde68a;padding:9px 16px;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-size:0.78rem;color:#78350f;flex:1;min-width:200px">💡 Marcaste hallazgos de enlentecimiento — ¿quieres caracterizarlo?</span>
+              <button class="btn btn-sm" style="background:#d97706;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-weight:700;font-size:0.74rem;cursor:pointer" onclick="abrirRetardoDesdeSugerencia()">Caracterizar</button>
+              <button style="background:none;border:none;color:#92400e;font-size:0.72rem;cursor:pointer;text-decoration:underline;padding:4px" onclick="descartarSugerenciaRetardo()">Ahora no</button>
+            </div>
+            <div id="ic-ret-body" style="display:none">
+              <div class="ic-form-body">
+                <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;line-height:1.5">"Paciente tranquilo y lento" NO equivale a "paciente estable" — puede ser delirium hipoactivo, la presentación más fácil de pasar por alto. Compara siempre con el funcionamiento basal antes de atribuirlo a depresión.</div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Comparación con funcionamiento basal (¿cómo se movía/hablaba/respondía normalmente?)</div>
+                  <input type="text" id="ic-ret-basal" placeholder="Ej: según familiar, previamente independiente y conversador…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-field" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#92400e">Estado cognitivo breve — clave para descartar delirium hipoactivo</div>
+                  <div class="ic-g2">
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Conciencia</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-conciencia')">Conservada</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-conciencia')">Alterada</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-conciencia')">Fluctuante</span>
+                      </div>
+                      <input type="hidden" id="ic-ret-conciencia" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Atención</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-atencion')">Conservada</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-atencion')">Disminuida</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-atencion')">Marcadamente alterada</span>
+                      </div>
+                      <input type="hidden" id="ic-ret-atencion" value="">
+                    </div>
+                  </div>
+                  <div class="ic-g2" style="margin-top:8px">
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Orientación</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-orientacion')">Conservada</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-orientacion')">Alterada</span>
+                      </div>
+                      <input type="hidden" id="ic-ret-orientacion" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Cambio respecto al basal</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-cambiobasal')">No</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-cambiobasal')">Sí</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-cambiobasal')">Desconocido</span>
+                      </div>
+                      <input type="hidden" id="ic-ret-cambiobasal" value="">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Componente motor</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Movimientos lentos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Mayor tiempo para levantarse/caminar</span>
+                    <span class="ic-chip" onclick="icTog(this)">Pausas prolongadas antes de iniciar una acción</span>
+                    <span class="ic-chip" onclick="icTog(this)">Disminución de actividad espontánea</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dificultad para iniciar acciones</span>
+                    <span class="ic-chip" onclick="icTog(this)">Permanece inmóvil por períodos prolongados</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Signos neurológicos/motores específicos (si predominan, valorar parkinsonismo aparte)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Rigidez</span>
+                    <span class="ic-chip" onclick="icTog(this)">Temblor de reposo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alteración de la marcha</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hipomimia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno identificado</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Componente cognitivo</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Procesamiento lento referido</span>
+                    <span class="ic-chip" onclick="icTog(this)">Respuestas demoradas</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dificultad para comprender instrucciones</span>
+                    <span class="ic-chip" onclick="icTog(this)">Necesita repetir preguntas</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dificultad para organizar la respuesta</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Componente verbal</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Habla lenta / bradilalia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Pausas prolongadas</span>
+                    <span class="ic-chip" onclick="icTog(this)">Bajo volumen / tono monótono</span>
+                    <span class="ic-chip" onclick="icTog(this)">Respuestas breves</span>
+                    <span class="ic-chip" onclick="icTog(this)">Menor espontaneidad verbal</span>
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Afecto asociado (registrar aparte — no implica depresión)</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTog(this)">Tristeza</span>
+                      <span class="ic-chip" onclick="icTog(this)">Ansiedad</span>
+                      <span class="ic-chip" onclick="icTog(this)">Apatía</span>
+                      <span class="ic-chip" onclick="icTog(this)">Indiferencia</span>
+                      <span class="ic-chip" onclick="icTog(this)">Afecto restringido</span>
+                      <span class="ic-chip" onclick="icTog(this)">Sin alteración afectiva evidente</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Manifestaciones físicas asociadas</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTog(this)">Fatiga</span>
+                      <span class="ic-chip" onclick="icTog(this)">Debilidad</span>
+                      <span class="ic-chip" onclick="icTog(this)">Somnolencia</span>
+                      <span class="ic-chip" onclick="icTog(this)">Alteración del sueño</span>
+                      <span class="ic-chip" onclick="icTog(this)">Disminución del apetito</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">¿No lo hace porque no quiere o porque siente que no puede?</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-quiere-puede')">No puede / le cuesta (retardo predominante)</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-quiere-puede')">No quiere / sin impulso (apatía predominante)</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-quiere-puede')">Mixto</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-quiere-puede')">No evaluable</span>
+                    </div>
+                    <input type="hidden" id="ic-ret-quiere-puede" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">¿Se siente triste o solo siente que todo va más lento?</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-tristeza')">Refiere tristeza (posible depresión)</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-tristeza')">Solo lentitud, sin tristeza referida</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-tristeza')">No evaluable</span>
+                    </div>
+                    <input type="hidden" id="ic-ret-tristeza" value="">
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Intensidad (estupor NO es "retardo grave" — requiere valoración médica urgente aparte)</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-intensidad')">Leve</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-intensidad')">Moderado</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-intensidad')">Grave</span>
+                    </div>
+                    <input type="hidden" id="ic-ret-intensidad" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Curso</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-curso')">Agudo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-curso')">Subagudo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-curso')">Episódico</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-curso')">Persistente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-curso')">Progresivo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-curso')">Fluctuante</span>
+                    </div>
+                    <input type="hidden" id="ic-ret-curso" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Contexto clínico probable</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-contexto')">Posible componente de depresión</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-contexto')">Posible delirium hipoactivo</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-contexto')">Asociado a Parkinson/parkinsonismo</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-contexto')">Asociado a demencia</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-contexto')">Asociado a medicación/sustancias</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-contexto')">Asociado a condición médica/neurológica</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-ret-contexto')">Observado durante hospitalización — etiología por determinar</span>
+                  </div>
+                  <input type="hidden" id="ic-ret-contexto" value="">
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Posibles factores médicos/farmacológicos a revisar</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Sedantes</span>
+                    <span class="ic-chip" onclick="icTog(this)">Analgésicos opioides</span>
+                    <span class="ic-chip" onclick="icTog(this)">Antipsicóticos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Anticonvulsivantes</span>
+                    <span class="ic-chip" onclick="icTog(this)">Intoxicación/abstinencia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Infección</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alteración metabólica</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hipoxia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dolor</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno identificado</span>
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#991b1b">⚠️ Riesgo / prioridad clínica</div>
+                  <div class="ic-chips" style="margin-top:6px">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguno identificado</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Ideación suicida (si coexiste con depresión)</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Deterioro funcional significativo</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Requiere valoración médica urgente (sospecha delirium/causa aguda)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- S6l: CARACTERIZACIÓN OPCIONAL — AGRESIVIDAD -->
+          <div class="ic-form-section" id="ic-agr-section">
+            <div class="ic-form-head amber" style="cursor:pointer" onclick="toggleAgresividad()">
+              <span class="ft">⚡ ¿Agresividad? (opcional)</span>
+              <span id="ic-agr-chev" style="margin-left:auto;font-size:1rem;transition:transform .2s;display:inline-block">▸</span>
+            </div>
+            <div id="ic-agr-sugerencia" style="display:none;background:#fef9c3;border-bottom:1px solid #fde68a;padding:9px 16px;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-size:0.78rem;color:#78350f;flex:1;min-width:200px">💡 Marcaste hallazgos de agresividad — ¿quieres caracterizarla?</span>
+              <button class="btn btn-sm" style="background:#d97706;color:#fff;border:none;padding:4px 12px;border-radius:6px;font-weight:700;font-size:0.74rem;cursor:pointer" onclick="abrirAgresividadDesdeSugerencia()">Caracterizar</button>
+              <button style="background:none;border:none;color:#92400e;font-size:0.72rem;cursor:pointer;text-decoration:underline;padding:4px" onclick="descartarSugerenciaAgresividad()">Ahora no</button>
+            </div>
+            <div id="ic-agr-body" style="display:none">
+              <div class="ic-form-body">
+                <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;line-height:1.5">No documentes "paciente agresivo" como conclusión — documenta qué hizo, qué dijo, ante qué ocurrió, contra quién, y qué riesgo generó. Negarse a un procedimiento, cuestionar una indicación o pedir el alta NO es agresividad por sí solo.</div>
+
+                <div class="ic-field" style="background:#fee2e2;border:2px solid #ef4444;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#991b1b">🚨 Paso 1 — Seguridad inmediata</div>
+                  <div class="ic-chips" style="margin-top:6px">
+                    <span class="ic-chip" onclick="icTog(this)">Sin riesgo actual</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Persona amenazada actualmente</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Objeto potencialmente peligroso</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Lesión ya producida</span>
+                    <span class="ic-chip" onclick="icTogA(this)">Riesgo de autoagresión asociado</span>
+                  </div>
+                  <div class="ic-g2" style="margin-top:8px">
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">¿Puede retirarse del estímulo?</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-retirar')">Sí</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-retirar')">No</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-retirar')">No aplica</span>
+                      </div>
+                      <input type="hidden" id="ic-agr-retirar" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">¿Se requirió apoyo inmediato del equipo?</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-apoyo')">Sí</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-apoyo')">No</span>
+                      </div>
+                      <input type="hidden" id="ic-agr-apoyo" value="">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Descripción de la conducta específica (qué hizo/dijo exactamente — evitar "paciente agresivo")</div>
+                  <textarea id="ic-agr-descripcion" rows="2" placeholder="Ej: eleva el tono, insulta al personal y amenaza con golpear al auxiliar al aproximarse…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem"></textarea>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Tipo</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Agresión verbal (insultos/amenazas)</span>
+                    <span class="ic-chip" onclick="icTog(this)">Física de menor intensidad (empujar/lanzar sin lesión)</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Física de mayor intensidad (golpes/patadas/mordeduras)</span>
+                    <span class="ic-chip" onclick="icTog(this)">Contra objetos/mobiliario</span>
+                    <span class="ic-chip" onclick="icTogR(this)">Autoagresión</span>
+                    <span class="ic-chip" onclick="icTog(this)">Corresponde a oposición/rechazo legítimo, no agresión</span>
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Destinatario</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-destinatario')">Personal de salud</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-destinatario')">Familiar</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-destinatario')">Otro paciente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-destinatario')">Objeto/mobiliario</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-destinatario')">Sí mismo</span>
+                    </div>
+                    <input type="hidden" id="ic-agr-destinatario" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Lesión producida</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-lesion')">No</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-lesion')">Sí — leve</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-lesion')">Sí — requiere atención</span>
+                    </div>
+                    <input type="hidden" id="ic-agr-lesion" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Amenaza textual (registrar literal si es posible)</div>
+                  <input type="text" id="ic-agr-amenaza" placeholder="Ej: 'voy a golpear al auxiliar si vuelve a tocarme'" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Desencadenante</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Dolor</span>
+                    <span class="ic-chip" onclick="icTog(this)">Espera prolongada</span>
+                    <span class="ic-chip" onclick="icTog(this)">Procedimiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Información recibida</span>
+                    <span class="ic-chip" onclick="icTog(this)">Negativa a una solicitud</span>
+                    <span class="ic-chip" onclick="icTog(this)">Restricción/límite establecido</span>
+                    <span class="ic-chip" onclick="icTog(this)">Conflicto interpersonal</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sin desencadenante claro</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Experiencia subjetiva referida (breve)</div>
+                  <input type="text" id="ic-agr-experiencia" placeholder="Ej: refiere sentir que querían hacerle daño…" style="width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.82rem">
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Intencionalidad</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-intencion')">Con intención de daño aparente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-intencion')">Reacción impulsiva sin intención clara</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-intencion')">No evaluable</span>
+                    </div>
+                    <input type="hidden" id="ic-agr-intencion" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Control percibido</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-control')">Conservado</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-control')">Parcial</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-control')">Muy reducido</span>
+                    </div>
+                    <input type="hidden" id="ic-agr-control" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Antecedentes</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Sin antecedentes conocidos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Episodios previos similares</span>
+                    <span class="ic-chip" onclick="icTog(this)">Lesionó a alguien previamente</span>
+                    <span class="ic-chip" onclick="icTog(this)">Uso de objetos previamente</span>
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Relación con sustancias/medicamentos</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-sustancias')">Sin relación identificada</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-sustancias')">Intoxicación</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-sustancias')">Abstinencia</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-sustancias')">Medicación nueva/cambio</span>
+                  </div>
+                  <input type="hidden" id="ic-agr-sustancias" value="">
+                </div>
+
+                <div class="ic-field" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#92400e">Estado cognitivo breve — clave para descartar delirium</div>
+                  <div class="ic-g2">
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Conciencia</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-conciencia')">Conservada</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-conciencia')">Alterada</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-conciencia')">Fluctuante</span>
+                      </div>
+                      <input type="hidden" id="ic-agr-conciencia" value="">
+                    </div>
+                    <div>
+                      <div class="ic-sublabel" style="font-size:0.68rem">Atención/Orientación</div>
+                      <div class="ic-chips">
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-atencion')">Conservadas</span>
+                        <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-atencion')">Alteradas</span>
+                      </div>
+                      <input type="hidden" id="ic-agr-atencion" value="">
+                    </div>
+                  </div>
+                  <div style="margin-top:8px">
+                    <div class="ic-sublabel" style="font-size:0.68rem">Cambio respecto al basal</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-cambiobasal')">No</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-cambiobasal')">Sí</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-cambiobasal')">Desconocido</span>
+                    </div>
+                    <input type="hidden" id="ic-agr-cambiobasal" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Posibles causas médicas a descartar</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Dolor intenso</span>
+                    <span class="ic-chip" onclick="icTog(this)">Fiebre/infección</span>
+                    <span class="ic-chip" onclick="icTog(this)">Hipoxia</span>
+                    <span class="ic-chip" onclick="icTog(this)">Alteración metabólica</span>
+                    <span class="ic-chip" onclick="icTog(this)">TCE/ACV</span>
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna identificada</span>
+                  </div>
+                </div>
+
+                <div class="ic-g2">
+                  <div>
+                    <div class="ic-sublabel">Gravedad</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-gravedad')">Sin agresión actual / riesgo bajo</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-gravedad')">Leve</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-gravedad')">Moderada</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-gravedad')">Grave</span>
+                    </div>
+                    <input type="hidden" id="ic-agr-gravedad" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Curso</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-curso')">Aguda</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-curso')">Episódica</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-curso')">Persistente</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-curso')">Fluctuante</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-curso')">Situacional/reactiva</span>
+                    </div>
+                    <input type="hidden" id="ic-agr-curso" value="">
+                  </div>
+                </div>
+
+                <div class="ic-field">
+                  <div class="ic-sublabel">Desescalamiento aplicado</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Reducción de estímulos</span>
+                    <span class="ic-chip" onclick="icTog(this)">Distancia física apropiada</span>
+                    <span class="ic-chip" onclick="icTog(this)">Validación emocional (sin validar la conducta)</span>
+                    <span class="ic-chip" onclick="icTog(this)">Comunicación no confrontativa</span>
+                    <span class="ic-chip" onclick="icTog(this)">Se ofrecieron opciones</span>
+                    <span class="ic-chip" onclick="icTog(this)">Se estableció límite claro y respetuoso</span>
+                  </div>
+                </div>
+
+                <div class="ic-field" style="background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 12px">
+                  <div class="ic-sublabel" style="color:#991b1b">⚠️ Riesgo de repetición/escalamiento</div>
+                  <div class="ic-chips" style="margin-top:6px">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-riesgo-repeticion')">Bajo</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-riesgo-repeticion')">Moderado</span>
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-agr-riesgo-repeticion')">Alto</span>
+                  </div>
+                  <input type="hidden" id="ic-agr-riesgo-repeticion" value="">
+                  <div style="font-size:0.68rem;color:#991b1b;margin-top:4px">Si hay amenaza o conducta autolesiva, esto NO reemplaza la evaluación de riesgo suicida independiente — debe ampliarse aparte.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- S7: IMPRESIÓN DIAGNÓSTICA PRELIMINAR -->
           <div class="ic-form-section" id="ic-dx-section">
             <div class="ic-form-head green"><span class="ft">🎯 Impresión diagnóstica preliminar</span><span class="ic-form-badge green">CIE-11 / DSM-5-TR</span></div>
@@ -6864,7 +7575,7 @@ function getCaracterizacionesInlineTexto(){
   var recolectores=[
     'recolectarEpisodioAlteracion','recolectarExperienciaAlucinatoria','recolectarIlusion',
     'recolectarIdeaDelirante','recolectarAnsiedad','recolectarAnimoDepresivo',
-    'recolectarLabilidad','recolectarApatia'
+    'recolectarLabilidad','recolectarApatia','recolectarAgitacion','recolectarRetardo','recolectarAgresividad'
   ];
   recolectores.forEach(function(fn){
     if(typeof window[fn]==='function'){
@@ -7716,6 +8427,39 @@ window.goTo = function(page){
     var _apaSugNav=document.getElementById('ic-apa-sugerencia');
     if(_apaSugNav)_apaSugNav.style.display='none';
     if(typeof _apatiaSugerenciaDescartada!=='undefined')_apatiaSugerenciaDescartada=false;
+    // Resetear módulo de agitación psicomotora — mismo motivo
+    ['ic-agi-distancia','ic-agi-instrucciones','ic-agi-inicio','ic-agi-control','ic-agi-conciencia','ic-agi-atencion','ic-agi-orientacion','ic-agi-cambiobasal','ic-agi-contexto','ic-agi-intensidad'].forEach(function(id){
+      var h=document.getElementById(id);if(h)h.value='';
+    });
+    var _agiBodyNav=document.getElementById('ic-agi-body');
+    var _agiChevNav=document.getElementById('ic-agi-chev');
+    if(_agiBodyNav)_agiBodyNav.style.display='none';
+    if(_agiChevNav)_agiChevNav.style.transform='';
+    var _agiSugNav=document.getElementById('ic-agi-sugerencia');
+    if(_agiSugNav)_agiSugNav.style.display='none';
+    if(typeof _agitacionSugerenciaDescartada!=='undefined')_agitacionSugerenciaDescartada=false;
+    // Resetear módulo de retardo psicomotor — mismo motivo
+    ['ic-ret-conciencia','ic-ret-atencion','ic-ret-orientacion','ic-ret-cambiobasal','ic-ret-quiere-puede','ic-ret-tristeza','ic-ret-intensidad','ic-ret-curso','ic-ret-contexto'].forEach(function(id){
+      var h=document.getElementById(id);if(h)h.value='';
+    });
+    var _retBodyNav=document.getElementById('ic-ret-body');
+    var _retChevNav=document.getElementById('ic-ret-chev');
+    if(_retBodyNav)_retBodyNav.style.display='none';
+    if(_retChevNav)_retChevNav.style.transform='';
+    var _retSugNav=document.getElementById('ic-ret-sugerencia');
+    if(_retSugNav)_retSugNav.style.display='none';
+    if(typeof _retardoSugerenciaDescartada!=='undefined')_retardoSugerenciaDescartada=false;
+    // Resetear módulo de agresividad — mismo motivo
+    ['ic-agr-retirar','ic-agr-apoyo','ic-agr-destinatario','ic-agr-lesion','ic-agr-intencion','ic-agr-control','ic-agr-sustancias','ic-agr-conciencia','ic-agr-atencion','ic-agr-cambiobasal','ic-agr-gravedad','ic-agr-curso','ic-agr-riesgo-repeticion'].forEach(function(id){
+      var h=document.getElementById(id);if(h)h.value='';
+    });
+    var _agrBodyNav=document.getElementById('ic-agr-body');
+    var _agrChevNav=document.getElementById('ic-agr-chev');
+    if(_agrBodyNav)_agrBodyNav.style.display='none';
+    if(_agrChevNav)_agrChevNav.style.transform='';
+    var _agrSugNav=document.getElementById('ic-agr-sugerencia');
+    if(_agrSugNav)_agrSugNav.style.display='none';
+    if(typeof _agresividadSugerenciaDescartada!=='undefined')_agresividadSugerenciaDescartada=false;
   }
   const pages = ['dashboard','pacientes','consulta-externa','interconsultas',
     'anamnesis','tests','historial-pac',
@@ -12220,6 +12964,249 @@ window.recolectarApatia=function(){
   return 'APATÍA / DISMINUCIÓN DE INICIATIVA (caracterización — describe, NO asume causa de entrada; diferencia de depresión/anhedonia/fatiga/limitación física/delirium):\n'+lineas.join('\n');
 };
 
+// ── MÓDULO: AGITACIÓN PSICOMOTORA (opcional) ──────────────────────────
+var AGITACION_CHIPS_DISPARADORES=['Hiperalerta','Agitación','Agitación psicomotora'];
+var _agitacionSugerenciaDescartada=false;
+
+window.sugerirAgitacion=function(){
+  if(_agitacionSugerenciaDescartada)return;
+  var body=document.getElementById('ic-agi-body');
+  if(body&&body.style.display!=='none')return;
+  var banner=document.getElementById('ic-agi-sugerencia');
+  if(banner)banner.style.display='flex';
+};
+
+window.abrirAgitacionDesdeSugerencia=function(){
+  var banner=document.getElementById('ic-agi-sugerencia');
+  if(banner)banner.style.display='none';
+  var body=document.getElementById('ic-agi-body');
+  var chev=document.getElementById('ic-agi-chev');
+  if(body)body.style.display='';
+  if(chev)chev.style.transform='rotate(90deg)';
+  var sec=document.getElementById('ic-agi-section');
+  if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+window.descartarSugerenciaAgitacion=function(){
+  var banner=document.getElementById('ic-agi-sugerencia');
+  if(banner)banner.style.display='none';
+  _agitacionSugerenciaDescartada=true;
+};
+
+window.toggleAgitacion=function(){
+  var body=document.getElementById('ic-agi-body');
+  var chev=document.getElementById('ic-agi-chev');
+  if(!body)return;
+  var abierto=body.style.display!=='none';
+  body.style.display=abierto?'none':'';
+  if(chev)chev.style.transform=abierto?'':'rotate(90deg)';
+};
+
+window.recolectarAgitacion=function(){
+  var sec=document.getElementById('ic-agi-body');
+  if(!sec)return '';
+  var lineas=[];
+  var seguridad=icChipsBySubLabel('🚨 Paso 1 — Seguridad inmediata');
+  if(seguridad.length)lineas.push('⚠️ SEGURIDAD INMEDIATA: '+seguridad.join(', '));
+  var distancia=(document.getElementById('ic-agi-distancia')||{}).value;
+  var instrucciones=(document.getElementById('ic-agi-instrucciones')||{}).value;
+  if(distancia||instrucciones)lineas.push('Distancia segura posible: '+(distancia||'no evaluado')+' | Responde a instrucciones simples: '+(instrucciones||'no evaluado'));
+  var desenc=(document.getElementById('ic-agi-desencadenante')||{}).value;
+  if(desenc)lineas.push('Experiencia subjetiva/desencadenante: '+desenc);
+  var inicio=(document.getElementById('ic-agi-inicio')||{}).value;
+  var control=(document.getElementById('ic-agi-control')||{}).value;
+  if(inicio||control)lineas.push('Inicio: '+(inicio||'no especificado')+' | Control percibido: '+(control||'no evaluado'));
+  var emoc=icChipsBySubLabel('Emoción predominante');
+  if(emoc.length)lineas.push('Emoción predominante: '+emoc.join(', '));
+  var motoras=icChipsBySubLabel('Manifestaciones motoras');
+  if(motoras.length)lineas.push('Manifestaciones motoras: '+motoras.join(', '));
+  var verbales=icChipsBySubLabel('Manifestaciones verbales');
+  if(verbales.length)lineas.push('Manifestaciones verbales: '+verbales.join(', '));
+  var cognitivas=icChipsBySubLabel('Manifestaciones cognitivas/perceptivas');
+  if(cognitivas.length)lineas.push('Manifestaciones cognitivas/perceptivas: '+cognitivas.join(', '));
+  var conciencia=(document.getElementById('ic-agi-conciencia')||{}).value;
+  var atencion=(document.getElementById('ic-agi-atencion')||{}).value;
+  var orientacion=(document.getElementById('ic-agi-orientacion')||{}).value;
+  var cambioBasal=(document.getElementById('ic-agi-cambiobasal')||{}).value;
+  if(conciencia||atencion||orientacion||cambioBasal)lineas.push('Estado cognitivo: conciencia '+(conciencia||'no evaluada')+', atención '+(atencion||'no evaluada')+', orientación '+(orientacion||'no evaluada')+', cambio respecto al basal: '+(cambioBasal||'no especificado'));
+  var fisio=icChipsBySubLabel('Manifestaciones fisiológicas (no específicas — interpretar en contexto)');
+  if(fisio.length)lineas.push('Manifestaciones fisiológicas: '+fisio.join(', '));
+  var contexto=(document.getElementById('ic-agi-contexto')||{}).value;
+  if(contexto)lineas.push('Contexto clínico probable: '+contexto);
+  var causas=icChipsBySubLabel('Posibles causas médicas a descartar');
+  if(causas.length)lineas.push('Posibles causas médicas a descartar: '+causas.join(', '));
+  var intensidad=(document.getElementById('ic-agi-intensidad')||{}).value;
+  if(intensidad)lineas.push('Intensidad: '+intensidad);
+  var manejo=icChipsBySubLabel('Manejo inicial no farmacológico aplicado');
+  if(manejo.length)lineas.push('Manejo no farmacológico aplicado: '+manejo.join(', '));
+  var riesgo=icChipsBySubLabel('⚠️ Riesgo asociado (resumen)');
+  if(riesgo.length)lineas.push('⚠️ Riesgo: '+riesgo.join(', '));
+  if(!lineas.length)return '';
+  return 'AGITACIÓN PSICOMOTORA (señal clínica — describe causa/gravedad/riesgo, NO es diagnóstico por sí sola; agitación nueva o aguda = descartar causa médica/delirium primero):\n'+lineas.join('\n');
+};
+
+// ── MÓDULO: RETARDO PSICOMOTOR (opcional) ──────────────────────────────
+var RETARDO_CHIPS_DISPARADORES=['Bradilalia','Bradipsiquia','Retardo psicomotor'];
+var _retardoSugerenciaDescartada=false;
+
+window.sugerirRetardo=function(){
+  if(_retardoSugerenciaDescartada)return;
+  var body=document.getElementById('ic-ret-body');
+  if(body&&body.style.display!=='none')return;
+  var banner=document.getElementById('ic-ret-sugerencia');
+  if(banner)banner.style.display='flex';
+};
+
+window.abrirRetardoDesdeSugerencia=function(){
+  var banner=document.getElementById('ic-ret-sugerencia');
+  if(banner)banner.style.display='none';
+  var body=document.getElementById('ic-ret-body');
+  var chev=document.getElementById('ic-ret-chev');
+  if(body)body.style.display='';
+  if(chev)chev.style.transform='rotate(90deg)';
+  var sec=document.getElementById('ic-ret-section');
+  if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+window.descartarSugerenciaRetardo=function(){
+  var banner=document.getElementById('ic-ret-sugerencia');
+  if(banner)banner.style.display='none';
+  _retardoSugerenciaDescartada=true;
+};
+
+window.toggleRetardo=function(){
+  var body=document.getElementById('ic-ret-body');
+  var chev=document.getElementById('ic-ret-chev');
+  if(!body)return;
+  var abierto=body.style.display!=='none';
+  body.style.display=abierto?'none':'';
+  if(chev)chev.style.transform=abierto?'':'rotate(90deg)';
+};
+
+window.recolectarRetardo=function(){
+  var sec=document.getElementById('ic-ret-body');
+  if(!sec)return '';
+  var lineas=[];
+  var basal=(document.getElementById('ic-ret-basal')||{}).value;
+  if(basal)lineas.push('Funcionamiento basal referido: '+basal);
+  var conciencia=(document.getElementById('ic-ret-conciencia')||{}).value;
+  var atencion=(document.getElementById('ic-ret-atencion')||{}).value;
+  var orientacion=(document.getElementById('ic-ret-orientacion')||{}).value;
+  var cambioBasal=(document.getElementById('ic-ret-cambiobasal')||{}).value;
+  if(conciencia||atencion||orientacion||cambioBasal)lineas.push('Estado cognitivo: conciencia '+(conciencia||'no evaluada')+', atención '+(atencion||'no evaluada')+', orientación '+(orientacion||'no evaluada')+', cambio respecto al basal: '+(cambioBasal||'no especificado'));
+  var motor=icChipsBySubLabel('Componente motor');
+  if(motor.length)lineas.push('Componente motor: '+motor.join(', '));
+  var neuro=icChipsBySubLabel('Signos neurológicos/motores específicos (si predominan, valorar parkinsonismo aparte)');
+  if(neuro.length)lineas.push('Signos neurológicos/motores específicos: '+neuro.join(', '));
+  var cognitivo=icChipsBySubLabel('Componente cognitivo');
+  if(cognitivo.length)lineas.push('Componente cognitivo: '+cognitivo.join(', '));
+  var verbal=icChipsBySubLabel('Componente verbal');
+  if(verbal.length)lineas.push('Componente verbal: '+verbal.join(', '));
+  var afecto=icChipsBySubLabel('Afecto asociado (registrar aparte — no implica depresión)');
+  if(afecto.length)lineas.push('Afecto asociado: '+afecto.join(', '));
+  var fisicas=icChipsBySubLabel('Manifestaciones físicas asociadas');
+  if(fisicas.length)lineas.push('Manifestaciones físicas asociadas: '+fisicas.join(', '));
+  var quierePuede=(document.getElementById('ic-ret-quiere-puede')||{}).value;
+  if(quierePuede)lineas.push('¿No quiere o no puede?: '+quierePuede);
+  var tristeza=(document.getElementById('ic-ret-tristeza')||{}).value;
+  if(tristeza)lineas.push('¿Triste o solo lento?: '+tristeza);
+  var intensidad=(document.getElementById('ic-ret-intensidad')||{}).value;
+  var curso=(document.getElementById('ic-ret-curso')||{}).value;
+  if(intensidad||curso)lineas.push('Intensidad: '+(intensidad||'no especificada')+' | Curso: '+(curso||'no especificado'));
+  var contexto=(document.getElementById('ic-ret-contexto')||{}).value;
+  if(contexto)lineas.push('Contexto clínico probable: '+contexto);
+  var factores=icChipsBySubLabel('Posibles factores médicos/farmacológicos a revisar');
+  if(factores.length)lineas.push('Posibles factores médicos/farmacológicos a revisar: '+factores.join(', '));
+  var riesgo=icChipsBySubLabel('⚠️ Riesgo / prioridad clínica');
+  if(riesgo.length)lineas.push('⚠️ Riesgo/prioridad: '+riesgo.join(', '));
+  if(!lineas.length)return '';
+  return 'RETARDO PSICOMOTOR / ENLENTECIMIENTO (caracterización — describe, NO asume depresión de entrada; comparar siempre con funcionamiento basal y descartar delirium hipoactivo primero):\n'+lineas.join('\n');
+};
+
+// ── MÓDULO: AGRESIVIDAD (opcional) ─────────────────────────────────────
+var AGRESIVIDAD_CHIPS_DISPARADORES=['Agresivo/a','Heteroagresión','Agresión física','Agresión verbal'];
+var _agresividadSugerenciaDescartada=false;
+
+window.sugerirAgresividad=function(){
+  if(_agresividadSugerenciaDescartada)return;
+  var body=document.getElementById('ic-agr-body');
+  if(body&&body.style.display!=='none')return;
+  var banner=document.getElementById('ic-agr-sugerencia');
+  if(banner)banner.style.display='flex';
+};
+
+window.abrirAgresividadDesdeSugerencia=function(){
+  var banner=document.getElementById('ic-agr-sugerencia');
+  if(banner)banner.style.display='none';
+  var body=document.getElementById('ic-agr-body');
+  var chev=document.getElementById('ic-agr-chev');
+  if(body)body.style.display='';
+  if(chev)chev.style.transform='rotate(90deg)';
+  var sec=document.getElementById('ic-agr-section');
+  if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+window.descartarSugerenciaAgresividad=function(){
+  var banner=document.getElementById('ic-agr-sugerencia');
+  if(banner)banner.style.display='none';
+  _agresividadSugerenciaDescartada=true;
+};
+
+window.toggleAgresividad=function(){
+  var body=document.getElementById('ic-agr-body');
+  var chev=document.getElementById('ic-agr-chev');
+  if(!body)return;
+  var abierto=body.style.display!=='none';
+  body.style.display=abierto?'none':'';
+  if(chev)chev.style.transform=abierto?'':'rotate(90deg)';
+};
+
+window.recolectarAgresividad=function(){
+  var sec=document.getElementById('ic-agr-body');
+  if(!sec)return '';
+  var lineas=[];
+  var seguridad=icChipsBySubLabel('🚨 Paso 1 — Seguridad inmediata');
+  if(seguridad.length)lineas.push('⚠️ SEGURIDAD INMEDIATA: '+seguridad.join(', '));
+  var retirar=(document.getElementById('ic-agr-retirar')||{}).value;
+  var apoyo=(document.getElementById('ic-agr-apoyo')||{}).value;
+  if(retirar||apoyo)lineas.push('¿Puede retirarse del estímulo?: '+(retirar||'no evaluado')+' | ¿Requirió apoyo inmediato?: '+(apoyo||'no evaluado'));
+  var descripcion=(document.getElementById('ic-agr-descripcion')||{}).value;
+  if(descripcion)lineas.push('Conducta específica: '+descripcion);
+  var tipo=icChipsBySubLabel('Tipo');
+  if(tipo.length)lineas.push('Tipo: '+tipo.join(', '));
+  var destinatario=(document.getElementById('ic-agr-destinatario')||{}).value;
+  var lesion=(document.getElementById('ic-agr-lesion')||{}).value;
+  if(destinatario||lesion)lineas.push('Destinatario: '+(destinatario||'no especificado')+' | Lesión producida: '+(lesion||'no evaluada'));
+  var amenaza=(document.getElementById('ic-agr-amenaza')||{}).value;
+  if(amenaza)lineas.push('Amenaza textual: "'+amenaza+'"');
+  var desenc=icChipsBySubLabel('Desencadenante');
+  if(desenc.length)lineas.push('Desencadenante: '+desenc.join(', '));
+  var experiencia=(document.getElementById('ic-agr-experiencia')||{}).value;
+  if(experiencia)lineas.push('Experiencia subjetiva referida: '+experiencia);
+  var intencion=(document.getElementById('ic-agr-intencion')||{}).value;
+  var control=(document.getElementById('ic-agr-control')||{}).value;
+  if(intencion||control)lineas.push('Intencionalidad: '+(intencion||'no evaluada')+' | Control percibido: '+(control||'no evaluado'));
+  var antecedentes=icChipsBySubLabel('Antecedentes');
+  if(antecedentes.length)lineas.push('Antecedentes: '+antecedentes.join(', '));
+  var sustancias=(document.getElementById('ic-agr-sustancias')||{}).value;
+  if(sustancias)lineas.push('Relación con sustancias/medicamentos: '+sustancias);
+  var conciencia=(document.getElementById('ic-agr-conciencia')||{}).value;
+  var atencion=(document.getElementById('ic-agr-atencion')||{}).value;
+  var cambioBasal=(document.getElementById('ic-agr-cambiobasal')||{}).value;
+  if(conciencia||atencion||cambioBasal)lineas.push('Estado cognitivo: conciencia '+(conciencia||'no evaluada')+', atención/orientación '+(atencion||'no evaluadas')+', cambio respecto al basal: '+(cambioBasal||'no especificado'));
+  var causas=icChipsBySubLabel('Posibles causas médicas a descartar');
+  if(causas.length)lineas.push('Posibles causas médicas a descartar: '+causas.join(', '));
+  var gravedad=(document.getElementById('ic-agr-gravedad')||{}).value;
+  var curso=(document.getElementById('ic-agr-curso')||{}).value;
+  if(gravedad||curso)lineas.push('Gravedad: '+(gravedad||'no especificada')+' | Curso: '+(curso||'no especificado'));
+  var desescalamiento=icChipsBySubLabel('Desescalamiento aplicado');
+  if(desescalamiento.length)lineas.push('Desescalamiento aplicado: '+desescalamiento.join(', '));
+  var riesgoRep=(document.getElementById('ic-agr-riesgo-repeticion')||{}).value;
+  if(riesgoRep)lineas.push('⚠️ Riesgo de repetición/escalamiento: '+riesgoRep);
+  if(!lineas.length)return '';
+  return 'AGRESIVIDAD (describe conducta observable, NO es diagnóstico por sí sola — agresividad ≠ enfermedad mental; describir qué hizo/dijo, contra quién, y qué riesgo generó):\n'+lineas.join('\n');
+};
+
 window.icTog=function(el){el.classList.toggle('on');};
 // Single-select chip group — deselects siblings, sets hidden input
 window.icTogSingle=function(el,hiddenId){
@@ -12292,6 +13279,15 @@ window.icTogA=function(el){el.classList.toggle('on-a');};
     }
     if(typeof APATIA_CHIPS_DISPARADORES!=='undefined'&&APATIA_CHIPS_DISPARADORES.indexOf(txt)!==-1){
       if(typeof sugerirApatia==='function')sugerirApatia();
+    }
+    if(typeof AGITACION_CHIPS_DISPARADORES!=='undefined'&&AGITACION_CHIPS_DISPARADORES.indexOf(txt)!==-1){
+      if(typeof sugerirAgitacion==='function')sugerirAgitacion();
+    }
+    if(typeof RETARDO_CHIPS_DISPARADORES!=='undefined'&&RETARDO_CHIPS_DISPARADORES.indexOf(txt)!==-1){
+      if(typeof sugerirRetardo==='function')sugerirRetardo();
+    }
+    if(typeof AGRESIVIDAD_CHIPS_DISPARADORES!=='undefined'&&AGRESIVIDAD_CHIPS_DISPARADORES.indexOf(txt)!==-1){
+      if(typeof sugerirAgresividad==='function')sugerirAgresividad();
     }
   }
   window.icTog=function(el){origIcTog(el);_chequearDisparadorEpisodio(el);};
@@ -12645,6 +13641,12 @@ async function generarNotaIcConGemini(apiKey){
   if(_labilidadDat)dResp+='\n\n'+_labilidadDat;
   var _apatiaDat=(typeof recolectarApatia==='function')?recolectarApatia():'';
   if(_apatiaDat)dResp+='\n\n'+_apatiaDat;
+  var _agitacionDat=(typeof recolectarAgitacion==='function')?recolectarAgitacion():'';
+  if(_agitacionDat)dResp+='\n\n'+_agitacionDat;
+  var _retardoDat=(typeof recolectarRetardo==='function')?recolectarRetardo():'';
+  if(_retardoDat)dResp+='\n\n'+_retardoDat;
+  var _agresividadDat=(typeof recolectarAgresividad==='function')?recolectarAgresividad():'';
+  if(_agresividadDat)dResp+='\n\n'+_agresividadDat;
 
   var dTrat=`Intervención: ${chips('Intervención realizada / sugerida')||chips('Intervención realizada hoy')||'valoración clínica'}. Respuesta al médico derivante: ${_respMedico||'ver análisis clínico'}. Seguimiento: ${chips('Seguimiento')||'según evolución'}${_seguimientoPlazo?' — plazo: '+_seguimientoPlazo:''}. Alertas al equipo: ${_notasEquipo||tratNotas||'ninguna'}.`;
   // Instrucción para incluir capacidad decisional literal al final de TRATAMIENTO
@@ -12738,6 +13740,15 @@ async function generarNotaIcConGemini(apiKey){
     (_apatiaDat?('\n\nADEMÁS, los datos incluyen la caracterización de APATÍA / disminución de iniciativa. '+
     'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — APATÍA: " y describa en prosa, respondiendo estas 5 preguntas: si tiene iniciativa propia o requiere indicación, si refiere interés o simplemente no logra iniciar, si disfruta la actividad cuando finalmente la realiza, su estado emocional (indiferencia sin tristeza vs. tristeza/desesperanza), y su capacidad física real. Incluye manifestaciones motivacionales, cognitivas y emocionales presentes, intensidad, curso, contexto clínico probable e interferencia funcional. Termina con qué hipótesis clínicas o pasos deben considerarse (sin concluir diagnóstico). '+
     'REGLA ESTRICTA: "sin ganas de hacer nada" NO equivale automáticamente a apatía — diferénciala explícitamente de: anhedonia (el paciente SÍ inicia pero no disfruta — problema de placer, no de iniciativa), depresión (predomina tristeza/desesperanza con sufrimiento subjetivo elevado), fatiga (el problema es energía, no motivación — "no puedo" vs. "no me interesa"), somnolencia (alteración del nivel de alerta), y limitación física real (el paciente quiere pero no puede). Si la apatía aparece de forma aguda junto con alteración de atención, conciencia u orientación, recomienda descartar delirium antes de asumir apatía. Si hay antecedente neurológico reciente (ACV, TCE) o inicio tras un medicamento nuevo, señálalo explícitamente como posible factor causal a correlacionar. No caracterices como apatía una conducta que se explica suficientemente por restricción médica (reposo indicado) o incapacidad física. '):'')+
+    (_agitacionDat?('\n\nADEMÁS, los datos incluyen la caracterización de AGITACIÓN PSICOMOTORA. '+
+    'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — AGITACIÓN PSICOMOTORA: " y describa en prosa: hallazgos de seguridad inmediata (si los hay), inicio y control percibido, emoción predominante, manifestaciones motoras/verbales/cognitivas presentes, el estado cognitivo (conciencia/atención/orientación/cambio respecto al basal — esto es CRÍTICO), contexto clínico probable, causas médicas a descartar, intensidad, y manejo no farmacológico aplicado. Termina con qué hipótesis clínicas o pasos deben considerarse (sin concluir diagnóstico). '+
+    'REGLA ESTRICTA Y PRIORITARIA: agitación nueva o de inicio agudo = descartar causa médica/delirium ANTES de atribuirla a un trastorno psiquiátrico — nunca concluyas etiología psiquiátrica primaria sin señalar esto. Si hay alteración de conciencia, atención u orientación (especialmente fluctuante), destaca con máxima prioridad la sospecha de delirium y la necesidad de valoración médica urgente. Si hay riesgo de autolesión, heteroagresión o fuga, destácalo con prioridad absoluta, antes que cualquier otra consideración. No confundas hostilidad verbal con agitación — la agitación requiere también aumento significativo de actividad motora, no solo enojo verbal. No asumas que la agitación se debe únicamente al "estrés de la hospitalización" sin haber descartado causas médicas, neurológicas, tóxicas o farmacológicas. '):'')+
+    (_retardoDat?('\n\nADEMÁS, los datos incluyen la caracterización de RETARDO PSICOMOTOR / enlentecimiento. '+
+    'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — RETARDO PSICOMOTOR: " y describa en prosa: la comparación con el funcionamiento basal, el estado cognitivo (conciencia/atención/orientación/cambio respecto al basal — CRÍTICO para descartar delirium hipoactivo), los componentes motor/cognitivo/verbal presentes, el afecto asociado (registrado aparte, sin asumir depresión), la respuesta a "¿no quiere o no puede?" y "¿triste o solo lento?", intensidad, curso, contexto clínico probable, y posibles factores médicos/farmacológicos a revisar. Termina con qué hipótesis clínicas o pasos deben considerarse (sin concluir diagnóstico). '+
+    'REGLA ESTRICTA Y PRIORITARIA: retardo psicomotor nuevo o marcado = comparar con funcionamiento basal y descartar delirium hipoactivo, sedación, causa médica, farmacológica o neurológica ANTES de atribuirlo a depresión. "Paciente tranquilo y lento" NO equivale a "paciente estable" — puede ser delirium hipoactivo, la presentación más fácil de pasar por alto porque no genera problemas conductuales. Si hay alteración de conciencia, atención u orientación (especialmente fluctuante), destaca con máxima prioridad la necesidad de valoración médica urgente. Nunca uses "bradicinesia" salvo que el patrón motor sea compatible con ese fenómeno neurológico específico. Nunca coloques estupor como "retardo grave" — el estupor requiere valoración médica urgente aparte. No interpretes la lentitud como falta de voluntad o falta de colaboración. '):'')+
+    (_agresividadDat?('\n\nADEMÁS, los datos incluyen la caracterización de AGRESIVIDAD. '+
+    'Al final de tu respuesta (después de los párrafos anteriores si también existen), agrega OTRO PÁRRAFO APARTE (nueva línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — AGRESIVIDAD: " y describa en prosa, EVITANDO la etiqueta "paciente agresivo": qué conducta específica ocurrió (verbal/física/contra objetos/autoagresión), contra quién estuvo dirigida, si hubo amenaza textual o lesión, el desencadenante identificado, la experiencia subjetiva referida, intencionalidad y control percibido, antecedentes relevantes, relación con sustancias, el estado cognitivo (crítico para descartar delirium), causas médicas a descartar, gravedad, y el desescalamiento aplicado. Termina con el riesgo de repetición/escalamiento y qué hipótesis clínicas o pasos deben considerarse (sin concluir diagnóstico). '+
+    'REGLA ESTRICTA Y PRIORITARIA: agresividad ≠ enfermedad mental — nunca infieras un diagnóstico psiquiátrico solo por la presencia de conducta agresiva. Agresividad nueva o intensa = describir la conducta + evaluar riesgo + identificar desencadenante + descartar causa médica/neurológica/farmacológica antes de asumir causa psiquiátrica. Si hay alteración de conciencia, atención u orientación (especialmente de inicio agudo o fluctuante), destaca con máxima prioridad la sospecha de delirium. Nunca clasifiques como agresión conductas de oposición legítima (negarse a un procedimiento, cuestionar una indicación, pedir el alta, presentar una queja) — eso no es agresividad por sí solo. Si hay riesgo de autoagresión o contenido suicida, destácalo con prioridad absoluta y aclara que este módulo no reemplaza la evaluación de riesgo suicida independiente. No atribuyas responsabilidad causal al personal o al entorno sin evidencia suficiente — distingue entre desencadenante y responsabilidad causal. '):'')+
     'Datos:\n'+dResp;
 
   var promptTrat = estiloBase +
@@ -12969,6 +13980,9 @@ async function generarSegConGemini(apiKey){
   var _depresionSeg=(typeof recolectarAnimoDepresivo==='function')?recolectarAnimoDepresivo():'';
   var _labilidadSeg=(typeof recolectarLabilidad==='function')?recolectarLabilidad():'';
   var _apatiaSeg=(typeof recolectarApatia==='function')?recolectarApatia():'';
+  var _agitacionSeg=(typeof recolectarAgitacion==='function')?recolectarAgitacion():'';
+  var _retardoSeg=(typeof recolectarRetardo==='function')?recolectarRetardo():'';
+  var _agresividadSeg=(typeof recolectarAgresividad==='function')?recolectarAgresividad():'';
 
   var datos=`
 TIPO DE NOTA: Seguimiento psicológico hospitalario
@@ -13042,6 +14056,9 @@ ${_ansiedadSeg?'\n'+_ansiedadSeg:''}
 ${_depresionSeg?'\n'+_depresionSeg:''}
 ${_labilidadSeg?'\n'+_labilidadSeg:''}
 ${_apatiaSeg?'\n'+_apatiaSeg:''}
+${_agitacionSeg?'\n'+_agitacionSeg:''}
+${_retardoSeg?'\n'+_retardoSeg:''}
+${_agresividadSeg?'\n'+_agresividadSeg:''}
 `.trim();
 
   var prompt='Eres psicóloga clínica hospitalaria de la ESE Hospital La María. Redacta una NOTA DE EVOLUCIÓN (SEGUIMIENTO) para el sistema DGW, jurídicamente sólida, clínicamente rigurosa y útil para el equipo tratante. '+
@@ -13061,6 +14078,9 @@ ${_apatiaSeg?'\n'+_apatiaSeg:''}
     (_depresionSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (6): los datos incluyen la caracterización de ÁNIMO DEPRESIVO / síntomas depresivos. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — ÁNIMO DEPRESIVO: " y describa en prosa: manifestaciones afectivas, cognitivas, físicas y conductuales presentes, si hay pensamientos de muerte (indicar explícitamente si los hay o no), gravedad y curso, contexto clínico probable, interferencia funcional, y posibles factores médicos/farmacológicos asociados. Termina con qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: la tristeza hospitalaria no equivale automáticamente a trastorno depresivo — diferénciala de una respuesta emocional esperable. No atribuyas automáticamente síntomas somáticos a depresión sin considerar la enfermedad médica o los medicamentos. Si aparecen pensamientos de muerte o ideación suicida, destácalo con máxima prioridad y aclara que este módulo no reemplaza la evaluación de riesgo suicida independiente. Si hay elementos psicóticos congruentes con el ánimo (culpa delirante, ruina, nihilismo), recomienda activar la caracterización de ideas delirantes por separado.'):'')+
     (_labilidadSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (7): los datos incluyen la caracterización de LABILIDAD EMOCIONAL/AFECTIVA. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — LABILIDAD EMOCIONAL: " y describa en prosa: qué emoción(es) aparecen, velocidad del cambio, duración de cada episodio, desencadenante, control percibido y recuperación al estado basal, congruencia con el contenido emocional, y antecedente neurológico reciente. Termina con qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: no confundas un cambio de ánimo simple con labilidad — lo distintivo es rapidez, intensidad y dificultad para modular. Nunca concluyas automáticamente "labilidad = TLP" ni "cambia de ánimo = bipolaridad". Si el llanto es congruente con tristeza sostenida sin cambios rápidos, descríbelo como posible ánimo depresivo, no labilidad. Si hay incongruencia marcada entre expresión emocional y experiencia subjetiva (especialmente con antecedente neurológico), recomienda descartar afecto pseudobulbar. Si hay alteración de conciencia/atención/orientación fluctuante, recomienda descartar delirium primero. Si hay riesgo asociado, destácalo con prioridad.'):'')+
     (_apatiaSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (8): los datos incluyen la caracterización de APATÍA / disminución de iniciativa. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — APATÍA: " y describa en prosa: iniciativa propia vs. requiere indicación, interés vs. dificultad para iniciar, placer al realizar la actividad, estado emocional (indiferencia vs. tristeza), capacidad física real, manifestaciones motivacionales/cognitivas/emocionales, intensidad, curso, contexto clínico e interferencia funcional. Termina con qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA: "sin ganas de hacer nada" no equivale automáticamente a apatía — diferénciala de anhedonia (inicia pero no disfruta), depresión (predomina tristeza/desesperanza), fatiga (falta de energía, no de motivación), somnolencia (alteración de alerta), y limitación física real (quiere pero no puede). Si aparece de forma aguda con alteración de atención/conciencia/orientación, recomienda descartar delirium primero. Si hay antecedente neurológico reciente o medicación nueva, señálalo como posible factor causal. No caracterices como apatía una conducta explicada por restricción médica indicada.'):'')+
+    (_agitacionSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (9): los datos incluyen la caracterización de AGITACIÓN PSICOMOTORA. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — AGITACIÓN PSICOMOTORA: " y describa en prosa: hallazgos de seguridad inmediata, inicio y control percibido, emoción predominante, manifestaciones motoras/verbales/cognitivas, estado cognitivo (conciencia/atención/orientación/cambio basal — CRÍTICO), contexto clínico probable, causas médicas a descartar, intensidad, y manejo no farmacológico aplicado. Termina con qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA Y PRIORITARIA: agitación nueva o de inicio agudo = descartar causa médica/delirium ANTES de atribuirla a un trastorno psiquiátrico. Si hay alteración de conciencia/atención/orientación (especialmente fluctuante), destaca con máxima prioridad la sospecha de delirium y la necesidad de valoración médica urgente. Si hay riesgo de autolesión, heteroagresión o fuga, destácalo con prioridad absoluta. No confundas hostilidad verbal con agitación — requiere también aumento de actividad motora. No atribuyas la agitación solo al "estrés de hospitalización" sin descartar causas médicas, neurológicas, tóxicas o farmacológicas.'):'')+
+    (_retardoSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (10): los datos incluyen la caracterización de RETARDO PSICOMOTOR / enlentecimiento. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — RETARDO PSICOMOTOR: " y describa en prosa: comparación con funcionamiento basal, estado cognitivo (conciencia/atención/orientación/cambio basal — CRÍTICO para delirium hipoactivo), componentes motor/cognitivo/verbal, afecto asociado (aparte, sin asumir depresión), respuesta a "¿no quiere o no puede?" y "¿triste o solo lento?", intensidad, curso, contexto clínico probable, y factores médicos/farmacológicos a revisar. Termina con qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA Y PRIORITARIA: retardo nuevo o marcado = comparar con basal y descartar delirium hipoactivo, sedación, causa médica, farmacológica o neurológica ANTES de atribuirlo a depresión. "Paciente tranquilo y lento" NO equivale a "paciente estable". Nunca uses "bradicinesia" salvo patrón neurológico compatible. Nunca coloques estupor como "retardo grave" — requiere valoración médica urgente aparte. No interpretes la lentitud como falta de voluntad.'):'')+
+    (_agresividadSeg?('\n\nEXCEPCIÓN AL FORMATO DE PÁRRAFO ÚNICO (11): los datos incluyen la caracterización de AGRESIVIDAD. Después de los párrafos anteriores si también existen, agrega OTRO PÁRRAFO APARTE (con una línea en blanco antes) que empiece EXACTAMENTE con "FORMULACIÓN CLÍNICA — AGRESIVIDAD: " y describa en prosa, evitando la etiqueta "paciente agresivo": qué conducta específica ocurrió, contra quién, amenaza textual o lesión si las hay, desencadenante, experiencia subjetiva, intencionalidad y control percibido, antecedentes, relación con sustancias, estado cognitivo (crítico para delirium), causas médicas a descartar, gravedad, y desescalamiento aplicado. Termina con riesgo de repetición/escalamiento y qué hipótesis clínicas deben considerarse (sin concluir diagnóstico). REGLA ESTRICTA Y PRIORITARIA: agresividad ≠ enfermedad mental — nunca infieras diagnóstico psiquiátrico solo por conducta agresiva. Describir conducta + evaluar riesgo + identificar desencadenante + descartar causa médica/neurológica/farmacológica antes de asumir causa psiquiátrica. Si hay alteración cognitiva de inicio agudo o fluctuante, sospecha delirium con máxima prioridad. Nunca clasifiques como agresión la oposición legítima (negarse a procedimiento, cuestionar indicación, pedir alta, quejarse). Si hay riesgo de autoagresión o contenido suicida, prioridad absoluta y aclara que este módulo no reemplaza la evaluación de riesgo suicida independiente. No atribuyas responsabilidad causal al personal sin evidencia suficiente.'):'')+
     '\n\nDETECCIÓN DE INCONGRUENCIAS (OBLIGATORIO): analiza la ficha buscando contradicciones entre lo que dice el paciente y lo observado, entre lo que refiere el familiar y lo observado, datos médicos que contradicen el reporte, información crítica faltante (ej. ideación suicida no explorada pese a expresiones de deseo de muerte) o riesgo legal (afirmar algo no evaluado). Redacta la nota de forma conservadora, sin afirmar lo no evaluado.'+
     '\n\nFORMATO EXACTO DE TU RESPUESTA: primero escribe en una línea sola ===NOTA=== y a continuación el párrafo completo de la nota. DESPUÉS, si detectaste incongruencias, escribe en una línea sola ===INCONGRUENCIAS=== seguido de máximo 5 hallazgos, UNA línea breve por hallazgo (qué contradice qué y qué verificar), estilo telegráfico. Si no hay incongruencias, termina después de la nota sin esa sección.'+
     '\n\nFICHA DE RONDA (POST-SESIÓN) — usa solo estos datos reales:\n\n'+datos
@@ -13719,6 +14739,39 @@ window.limpiarFormIC=function(confirm_=true){
   var _apaSug=document.getElementById('ic-apa-sugerencia');
   if(_apaSug)_apaSug.style.display='none';
   if(typeof _apatiaSugerenciaDescartada!=='undefined')_apatiaSugerenciaDescartada=false;
+  // Resetear módulo de agitación psicomotora — mismo motivo
+  ['ic-agi-distancia','ic-agi-instrucciones','ic-agi-inicio','ic-agi-control','ic-agi-conciencia','ic-agi-atencion','ic-agi-orientacion','ic-agi-cambiobasal','ic-agi-contexto','ic-agi-intensidad'].forEach(function(id){
+    var h=document.getElementById(id);if(h)h.value='';
+  });
+  var _agiBody=document.getElementById('ic-agi-body');
+  var _agiChev=document.getElementById('ic-agi-chev');
+  if(_agiBody)_agiBody.style.display='none';
+  if(_agiChev)_agiChev.style.transform='';
+  var _agiSug=document.getElementById('ic-agi-sugerencia');
+  if(_agiSug)_agiSug.style.display='none';
+  if(typeof _agitacionSugerenciaDescartada!=='undefined')_agitacionSugerenciaDescartada=false;
+  // Resetear módulo de retardo psicomotor — mismo motivo
+  ['ic-ret-conciencia','ic-ret-atencion','ic-ret-orientacion','ic-ret-cambiobasal','ic-ret-quiere-puede','ic-ret-tristeza','ic-ret-intensidad','ic-ret-curso','ic-ret-contexto'].forEach(function(id){
+    var h=document.getElementById(id);if(h)h.value='';
+  });
+  var _retBody=document.getElementById('ic-ret-body');
+  var _retChev=document.getElementById('ic-ret-chev');
+  if(_retBody)_retBody.style.display='none';
+  if(_retChev)_retChev.style.transform='';
+  var _retSug=document.getElementById('ic-ret-sugerencia');
+  if(_retSug)_retSug.style.display='none';
+  if(typeof _retardoSugerenciaDescartada!=='undefined')_retardoSugerenciaDescartada=false;
+  // Resetear módulo de agresividad — mismo motivo
+  ['ic-agr-retirar','ic-agr-apoyo','ic-agr-destinatario','ic-agr-lesion','ic-agr-intencion','ic-agr-control','ic-agr-sustancias','ic-agr-conciencia','ic-agr-atencion','ic-agr-cambiobasal','ic-agr-gravedad','ic-agr-curso','ic-agr-riesgo-repeticion'].forEach(function(id){
+    var h=document.getElementById(id);if(h)h.value='';
+  });
+  var _agrBody=document.getElementById('ic-agr-body');
+  var _agrChev=document.getElementById('ic-agr-chev');
+  if(_agrBody)_agrBody.style.display='none';
+  if(_agrChev)_agrChev.style.transform='';
+  var _agrSug=document.getElementById('ic-agr-sugerencia');
+  if(_agrSug)_agrSug.style.display='none';
+  if(typeof _agresividadSugerenciaDescartada!=='undefined')_agresividadSugerenciaDescartada=false;
   // Resetear notas generadas
   var wrap=document.getElementById('ic-output-wrap');if(wrap)wrap.style.display='none';
   // Resetear transcripción de sesión — nunca dejar pegado el texto de un paciente anterior
