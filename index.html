@@ -1209,10 +1209,90 @@ input.toggle-cb{display:none}
               <div class="ic-g2">
                 <div><div class="ic-sublabel">Ideación autolítica actual</div><div class="ic-chips"><span class="ic-chip" onclick="icTog(this)">Ninguna</span><span class="ic-chip" onclick="icTogRiesgo(this)">Pasiva — deseo de que termine</span><span class="ic-chip" onclick="icTogRiesgo(this)">Activa</span><span class="ic-chip" onclick="icTogRiesgo(this)">Con plan estructurado</span></div></div>
                 <div>
-                  <div class="ic-sublabel">Autolesión no suicida (sin intención de morir)</div>
+                  <div class="ic-sublabel">Autolesión / conducta autolesiva</div>
                   <div class="ic-chips">
-                    <span class="ic-chip" onclick="icTog(this)">Ninguna referida</span>
-                    <span class="ic-chip" onclick="icTogA(this)">Presente — regulación emocional/otra función</span>
+                    <span class="ic-chip" onclick="icTog(this);toggleAutolesionDetalle()">Ninguna referida</span>
+                    <span class="ic-chip" onclick="icTogA(this);toggleAutolesionDetalle()">Presente — caracterizar</span>
+                  </div>
+                </div>
+              </div>
+              <div id="ic-autolesion-detalle" class="ic-field" style="display:none;background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 12px">
+                <div class="ic-sublabel" style="color:#991b1b">La ausencia de intención suicida NO elimina el riesgo clínico</div>
+                <div style="margin-top:8px">
+                  <div class="ic-sublabel">Intención (la pregunta central — no clasificar automáticamente)</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTogSingle(this,'ic-autolesion-intencion')">Sin intención de morir</span>
+                    <span class="ic-chip" onclick="icTogRiesgo(this);icTogSingle(this,'ic-autolesion-intencion')">Con intención de morir</span>
+                    <span class="ic-chip" onclick="icTogRiesgo(this);icTogSingle(this,'ic-autolesion-intencion')">Ambivalente / incierta</span>
+                  </div>
+                  <input type="hidden" id="ic-autolesion-intencion" value="">
+                </div>
+                <div style="margin-top:8px">
+                  <div class="ic-sublabel">Función de la conducta</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Regulación emocional</span>
+                    <span class="ic-chip" onclick="icTog(this)">Autocastigo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Interrupción de estado disociativo</span>
+                    <span class="ic-chip" onclick="icTog(this)">Generación de sensación (vacío/desconexión)</span>
+                    <span class="ic-chip" onclick="icTog(this)">Comunicación del sufrimiento</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sensación de control</span>
+                    <span class="ic-chip" onclick="icTog(this)">No determinada</span>
+                  </div>
+                </div>
+                <div class="ic-g2" style="margin-top:8px">
+                  <div>
+                    <div class="ic-sublabel">Número</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-autolesion-numero')">Única</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-autolesion-numero')">Múltiples</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-autolesion-numero')">Recurrentes</span>
+                    </div>
+                    <input type="hidden" id="ic-autolesion-numero" value="">
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Gravedad física (≠ riesgo psicológico)</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-autolesion-gravedad-fisica')">Sin complicación significativa</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-autolesion-gravedad-fisica')">Con complicación médica</span>
+                      <span class="ic-chip" onclick="icTogSingle(this,'ic-autolesion-gravedad-fisica')">Severa</span>
+                      <span class="ic-chip" onclick="icTogRiesgo(this);icTogSingle(this,'ic-autolesion-gravedad-fisica')">Emergencia médica</span>
+                    </div>
+                    <input type="hidden" id="ic-autolesion-gravedad-fisica" value="">
+                  </div>
+                </div>
+                <div style="margin-top:8px">
+                  <div class="ic-sublabel">Consecuencia médica</div>
+                  <div class="ic-chips">
+                    <span class="ic-chip" onclick="icTog(this)">Ninguna relevante</span>
+                    <span class="ic-chip" onclick="icTog(this)">Dolor</span>
+                    <span class="ic-chip" onclick="icTog(this)">Sangrado</span>
+                    <span class="ic-chip" onclick="icTog(this)">Necesidad de sutura/curación</span>
+                    <span class="ic-chip" onclick="icTog(this)">Infección</span>
+                  </div>
+                </div>
+                <div class="ic-g2" style="margin-top:8px">
+                  <div>
+                    <div class="ic-sublabel">Desencadenante (antes)</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTog(this)">Conflicto</span>
+                      <span class="ic-chip" onclick="icTog(this)">Rechazo</span>
+                      <span class="ic-chip" onclick="icTog(this)">Pérdida</span>
+                      <span class="ic-chip" onclick="icTog(this)">Dolor</span>
+                      <span class="ic-chip" onclick="icTog(this)">Recuerdo traumático</span>
+                      <span class="ic-chip" onclick="icTog(this)">Sensación de abandono</span>
+                      <span class="ic-chip" onclick="icTog(this)">Sin desencadenante claro</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="ic-sublabel">Después</div>
+                    <div class="ic-chips">
+                      <span class="ic-chip" onclick="icTog(this)">Alivio</span>
+                      <span class="ic-chip" onclick="icTog(this)">Culpa</span>
+                      <span class="ic-chip" onclick="icTog(this)">Vergüenza</span>
+                      <span class="ic-chip" onclick="icTog(this)">Arrepentimiento</span>
+                      <span class="ic-chip" onclick="icTog(this)">Mayor angustia</span>
+                      <span class="ic-chip" onclick="icTog(this)">Búsqueda de ayuda</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -8366,6 +8446,17 @@ window.goTo = function(page){
   // Si ENTRAMOS a interconsultas, siempre empezar con la transcripción en blanco.
   // Evita que quede pegado el texto de un paciente anterior (grabado o pegado a mano).
   if(page==='interconsultas'){
+    // Campos de la sección de riesgo que no cubre el barrido genérico —
+    // se limpian aquí también por si se llega sin pasar por el selector de paciente
+    var _riesgoInmediatoNav=document.getElementById('ic-riesgo-inmediato');
+    if(_riesgoInmediatoNav)_riesgoInmediatoNav.value='';
+    var _intentosDetalleNav=document.getElementById('ic-intentos-previos-detalle');
+    if(_intentosDetalleNav)_intentosDetalleNav.style.display='none';
+    ['ic-autolesion-intencion','ic-autolesion-numero','ic-autolesion-gravedad-fisica'].forEach(function(id){
+      var h=document.getElementById(id);if(h)h.value='';
+    });
+    var _autolesionDetalleNav=document.getElementById('ic-autolesion-detalle');
+    if(_autolesionDetalleNav)_autolesionDetalleNav.style.display='none';
     var _tt=document.getElementById('transc-texto'); if(_tt)_tt.value='';
     var _tw=document.getElementById('transcripcion-wrap'); if(_tw)_tw.style.display='none';
     var _ta=document.getElementById('ic-anexo-transcripcion'); if(_ta)_ta.style.display='none';
@@ -13285,6 +13376,19 @@ window.icTogSingle=function(el,hiddenId){
 // Auto-show riesgo notes when ideación activa selected
 // Muestra/oculta el detalle de intentos previos (número/fecha/circunstancias)
 // según si el chip "Sí — relevantes" está marcado.
+// Muestra/oculta el detalle de autolesión (intención, función, lesión, desencadenante)
+// según si el chip "Presente — caracterizar" está marcado.
+window.toggleAutolesionDetalle=function(){
+  var det=document.getElementById('ic-autolesion-detalle');
+  if(!det)return;
+  var chips=document.querySelectorAll('[onclick*="toggleAutolesionDetalle"]');
+  var presente=false;
+  chips.forEach(function(c){
+    if(c.textContent.trim().indexOf('Presente')===0&&c.classList.contains('on-a'))presente=true;
+  });
+  det.style.display=presente?'':'none';
+};
+
 window.toggleIntentosPreviosDetalle=function(){
   var det=document.getElementById('ic-intentos-previos-detalle');
   if(!det)return;
@@ -13670,7 +13774,13 @@ async function generarNotaIcConGemini(apiKey){
   var _ideacionChips = icChipsBySubLabel('Ideación autolítica actual');
   if(!_ideacionChips.length)_ideacionChips = icChipsBySubLabel('Ideación actual');
   var _ideacionActual = _ideacionChips.length ? _ideacionChips.join(', ') : 'niega';
-  var _autolesionNSIA = icChipsBySubLabel('Autolesión no suicida (sin intención de morir)').join(', ')||'ninguna referida';
+  var _autolesionNSIA = icChipsBySubLabel('Autolesión / conducta autolesiva').join(', ')||'ninguna referida';
+  var _autolesionIntencionIA = icv('ic-autolesion-intencion')||'';
+  var _autolesionFuncionIA = icChipsBySubLabel('Función de la conducta').join(', ')||'';
+  var _autolesionDetalleIA = icv('ic-autolesion-numero')||'';
+  var _autolesionGravFisicaIA = icv('ic-autolesion-gravedad-fisica')||'';
+  var _autolesionDesencIA = icChipsBySubLabel('Desencadenante (antes)').join(', ')||'';
+  var _autolesionDespuesIA = icChipsBySubLabel('Después').join(', ')||'';
   var _riesgoInmediatoIA = icv('ic-riesgo-inmediato')||'no especificado';
   var _riesgoInstrumentoIA = icv('ic-riesgo-instrumento')||'';
   var _riesgoRutaIA = icChipsBySubLabel('Ruta activada').join(', ')||'';
@@ -13702,7 +13812,7 @@ async function generarNotaIcConGemini(apiKey){
   if(_capTextoIC)ctx+='\n\n'+_capTextoIC;
 
   // Datos por sección
-  var dSub=`Estado emocional: ${chips('Estado emocional referido')||'no especificado'}. Pensamientos automáticos: ${chips('Pensamientos automáticos sobre enfermedad/internación/procedimiento')||chips('Pensamientos automáticos (CC)')||'no identificados'}${_tccPensamientos?' — '+_tccPensamientos:''}. Conductas de evitación: ${chips('Conductas de evitación / seguridad')||'no exploradas'}${_tccEvitacion?' — '+_tccEvitacion:''}. Activación conductual: ${chips('Activación conductual — nivel de actividad en hospital')||chips('Activación conductual')||'no evaluada'}${_tccActivacion?' — '+_tccActivacion:''}. Adherencia: ${chips('Adherencia al tratamiento médico')||'no evaluada'}${_tccAdherencia?' — '+_tccAdherencia:''}. Intensidad malestar: ${intensidad||'no cuantificada'}. Cita textual: ${cita||'ninguna'}. Ideación autolítica actual: ${_ideacionActual||'niega'}. Autolesión no suicida: ${_autolesionNSIA}. ¿Riesgo inmediato?: ${_riesgoInmediatoIA}. Riesgo previo: ${chips('Intentos previos')||'ninguno'}.${(document.getElementById('ic-intentos-numero')&&document.getElementById('ic-intentos-numero').value)?' Detalle intentos: N° '+document.getElementById('ic-intentos-numero').value+(document.getElementById('ic-intentos-fecha').value?', fecha aprox. '+document.getElementById('ic-intentos-fecha').value:'')+(document.getElementById('ic-intentos-circunstancias').value?'. '+document.getElementById('ic-intentos-circunstancias').value:'')+'.':''} Clasificación riesgo: ${_clasifRiesgo||sev}.${(_riesgoInstrumentoIA||_riesgoRutaIA)?' Tamizaje: '+(_riesgoInstrumentoIA||'no especificado')+(_riesgoRutaIA?' | Ruta activada: '+_riesgoRutaIA:'')+'.':''} Red de apoyo: ${chips('Red de apoyo funcional')||'no explorada'}${_redApoyoDetalle?' — '+_redApoyoDetalle:''}.${sustNotas?' Notas sustancias: '+sustNotas:''}.`;
+  var dSub=`Estado emocional: ${chips('Estado emocional referido')||'no especificado'}. Pensamientos automáticos: ${chips('Pensamientos automáticos sobre enfermedad/internación/procedimiento')||chips('Pensamientos automáticos (CC)')||'no identificados'}${_tccPensamientos?' — '+_tccPensamientos:''}. Conductas de evitación: ${chips('Conductas de evitación / seguridad')||'no exploradas'}${_tccEvitacion?' — '+_tccEvitacion:''}. Activación conductual: ${chips('Activación conductual — nivel de actividad en hospital')||chips('Activación conductual')||'no evaluada'}${_tccActivacion?' — '+_tccActivacion:''}. Adherencia: ${chips('Adherencia al tratamiento médico')||'no evaluada'}${_tccAdherencia?' — '+_tccAdherencia:''}. Intensidad malestar: ${intensidad||'no cuantificada'}. Cita textual: ${cita||'ninguna'}. Ideación autolítica actual: ${_ideacionActual||'niega'}. Autolesión/conducta autolesiva: ${_autolesionNSIA}.${_autolesionIntencionIA?' Intención: '+_autolesionIntencionIA+'.':''}${_autolesionFuncionIA?' Función: '+_autolesionFuncionIA+'.':''}${(_autolesionDetalleIA||_autolesionGravFisicaIA)?' Lesión — número: '+(_autolesionDetalleIA||'no especificado')+', gravedad física: '+(_autolesionGravFisicaIA||'no especificada')+'.':''}${(_autolesionDesencIA||_autolesionDespuesIA)?' Desencadenante: '+(_autolesionDesencIA||'no especificado')+' | Después: '+(_autolesionDespuesIA||'no especificado')+'.':''} ¿Riesgo inmediato?: ${_riesgoInmediatoIA}. Riesgo previo: ${chips('Intentos previos')||'ninguno'}.${(document.getElementById('ic-intentos-numero')&&document.getElementById('ic-intentos-numero').value)?' Detalle intentos: N° '+document.getElementById('ic-intentos-numero').value+(document.getElementById('ic-intentos-fecha').value?', fecha aprox. '+document.getElementById('ic-intentos-fecha').value:'')+(document.getElementById('ic-intentos-circunstancias').value?'. '+document.getElementById('ic-intentos-circunstancias').value:'')+'.':''} Clasificación riesgo: ${_clasifRiesgo||sev}.${(_riesgoInstrumentoIA||_riesgoRutaIA)?' Tamizaje: '+(_riesgoInstrumentoIA||'no especificado')+(_riesgoRutaIA?' | Ruta activada: '+_riesgoRutaIA:'')+'.':''} Red de apoyo: ${chips('Red de apoyo funcional')||'no explorada'}${_redApoyoDetalle?' — '+_redApoyoDetalle:''}.${sustNotas?' Notas sustancias: '+sustNotas:''}.`;
 
   var dObj=`Orientación: ${chips('Orientación')||'conservada'}. Conciencia: ${chips('Conciencia / Colaboración')||'consciente'}. Conducta: ${chips('Conducta')||'adecuada'}. Afecto: ${chips('Afecto')||'observable'}. Pensamiento: ${chips('Pensamiento')||'organizado'}. Insight: ${chips('Insight')||chips('Lenguaje / Insight')||'conservado'}. Regulación emocional: ${chips('Regulación emocional')||'no explorada'}. Comprensión Dx: ${chips('Comprensión del Dx')||chips('Comprensión del Dx / pronóstico')||'no evaluada'}. Ideación: ${_ideacionActual||'niega ideación'}. Riesgo suicida: ${_clasifRiesgo||sev}. Factores protectores: ${chips('Factores protectores')||'no explorados'}. Análisis CC: ${analisisLibre||_respObs||'no registrado'}.${riesgoNotas?' Notas riesgo: '+riesgoNotas:''}.`;
 
@@ -14027,7 +14137,13 @@ async function generarSegConGemini(apiKey){
   var protectores=icChipsBySubLabel('Factores protectores');
   var sev=icvl('ic-riesgo-nivel')||'No clasificado';
   var riesgoNotas=icvl('ic-riesgo-notas');
-  var _autolesionNSSegIA=icChipsBySubLabel('Autolesión no suicida (sin intención de morir)').join(', ')||'ninguna referida';
+  var _autolesionNSSegIA=icChipsBySubLabel('Autolesión / conducta autolesiva').join(', ')||'ninguna referida';
+  var _autolesionIntencionSegIA=icvl('ic-autolesion-intencion')||'';
+  var _autolesionFuncionSegIA=icChipsBySubLabel('Función de la conducta').join(', ')||'';
+  var _autolesionNumeroSegIA=icvl('ic-autolesion-numero')||'';
+  var _autolesionGravFisicaSegIA=icvl('ic-autolesion-gravedad-fisica')||'';
+  var _autolesionDesencSegIA=icChipsBySubLabel('Desencadenante (antes)').join(', ')||'';
+  var _autolesionDespuesSegIA=icChipsBySubLabel('Después').join(', ')||'';
   var _riesgoInmediatoSegIA=icvl('ic-riesgo-inmediato')||'no especificado';
   var _riesgoInstrumentoSegIA=icvl('ic-riesgo-instrumento')||'';
   var _riesgoRutaSegIA=icChipsBySubLabel('Ruta activada').join(', ')||'';
@@ -14114,7 +14230,11 @@ EXAMEN MENTAL (OBJETIVO):
 
 EVALUACIÓN DE RIESGO:
 - Ideación suicida/autolesiva: ${ideacion.join(', ')||'No evaluada'}
-- Autolesión no suicida: ${_autolesionNSSegIA}
+- Autolesión/conducta autolesiva: ${_autolesionNSSegIA}
+${_autolesionIntencionSegIA?'- Intención: '+_autolesionIntencionSegIA:''}
+${_autolesionFuncionSegIA?'- Función: '+_autolesionFuncionSegIA:''}
+${(_autolesionNumeroSegIA||_autolesionGravFisicaSegIA)?'- Lesión — número: '+(_autolesionNumeroSegIA||'no especificado')+', gravedad física: '+(_autolesionGravFisicaSegIA||'no especificada'):''}
+${(_autolesionDesencSegIA||_autolesionDespuesSegIA)?'- Desencadenante: '+(_autolesionDesencSegIA||'no especificado')+' | Después: '+(_autolesionDespuesSegIA||'no especificado'):''}
 - ¿Riesgo inmediato?: ${_riesgoInmediatoSegIA}
 - Intentos previos: ${intentosPrevios.length?intentosPrevios.join(', '):'No registrados'}
 - Nivel de riesgo: ${sev}
@@ -14353,7 +14473,14 @@ function generarNotaIcNuevaLocal(){
   var _ideacionChips=icChipsBySubLabel('Ideación autolítica actual');
   if(!_ideacionChips.length)_ideacionChips=icChipsBySubLabel('Ideación actual');
   var _ideacion=_ideacionChips.length?_ideacionChips.join(', '):'niega ideación autolítica';
-  var _autolesionNS=icChipsBySubLabel('Autolesión no suicida (sin intención de morir)').join(', ')||'ninguna referida';
+  var _autolesionNS=icChipsBySubLabel('Autolesión / conducta autolesiva').join(', ')||'ninguna referida';
+  var _autolesionIntencion=icvl('ic-autolesion-intencion')||'';
+  var _autolesionFuncion=icChipsBySubLabel('Función de la conducta').join(', ')||'';
+  var _autolesionNumero=icvl('ic-autolesion-numero')||'';
+  var _autolesionGravFisica=icvl('ic-autolesion-gravedad-fisica')||'';
+  var _autolesionConsecuencia=icChipsBySubLabel('Consecuencia médica').join(', ')||'';
+  var _autolesionDesenc=icChipsBySubLabel('Desencadenante (antes)').join(', ')||'';
+  var _autolesionDespues=icChipsBySubLabel('Después').join(', ')||'';
   var _riesgoInmediato=icvl('ic-riesgo-inmediato')||'no especificado';
   var _intentosNum=icvl('ic-intentos-numero')||'';
   var _intentosFecha=icvl('ic-intentos-fecha')||'';
@@ -14412,7 +14539,12 @@ function generarNotaIcNuevaLocal(){
     +(_inicioEvol?'Inicio y evolución del malestar: '+_inicioEvol+'. ':'')
     +'Intensidad malestar: '+(intensidad||'no cuantificada')+'.'+(cita?' Cita textual: "'+cita+'"':'')+'. '
     +'Ideación autolítica: '+_ideacion+'. '
-    +'Autolesión no suicida: '+_autolesionNS+'. '
+    +'Autolesión/conducta autolesiva: '+_autolesionNS+'. '
+    +(_autolesionIntencion?'Intención: '+_autolesionIntencion+'. ':'')
+    +(_autolesionFuncion?'Función: '+_autolesionFuncion+'. ':'')
+    +(_autolesionNumero||_autolesionGravFisica?'Lesión — número: '+(_autolesionNumero||'no especificado')+', gravedad física: '+(_autolesionGravFisica||'no especificada')+'. ':'')
+    +(_autolesionConsecuencia?'Consecuencia médica: '+_autolesionConsecuencia+'. ':'')
+    +(_autolesionDesenc||_autolesionDespues?'Desencadenante: '+(_autolesionDesenc||'no especificado')+' | Después: '+(_autolesionDespues||'no especificado')+'. ':'')
     +'¿Riesgo inmediato?: '+_riesgoInmediato+'. '
     +(_intentosNum||_intentosFecha||_intentosCirc?'Detalle intentos previos: '+(_intentosNum?'N° '+_intentosNum+'. ':'')+(_intentosFecha?'Fecha aprox.: '+_intentosFecha+'. ':'')+(_intentosCirc?_intentosCirc+'. ':''):'')
     +(_riesgoInstrumento||_riesgoRuta?'Tamizaje: '+(_riesgoInstrumento||'no especificado')+(_riesgoRuta?' | Ruta activada: '+_riesgoRuta:'')+'. ':'')
@@ -14487,7 +14619,13 @@ function generarNotaIcSegLocal(){
   var analisisCC=icvl('ic-resp-analisis');
   var ideacion=chips('Ideación autolítica actual')||chips('Ideación actual')||'niega ideación autolítica';
   var sev=icvl('ic-riesgo-nivel')||'No clasificado';
-  var _autolesionNSSeg=chips('Autolesión no suicida (sin intención de morir)')||'ninguna referida';
+  var _autolesionNSSeg=chips('Autolesión / conducta autolesiva')||'ninguna referida';
+  var _autolesionIntencionSeg=icvl('ic-autolesion-intencion')||'';
+  var _autolesionFuncionSeg=chips('Función de la conducta')||'';
+  var _autolesionNumeroSeg=icvl('ic-autolesion-numero')||'';
+  var _autolesionGravFisicaSeg=icvl('ic-autolesion-gravedad-fisica')||'';
+  var _autolesionDesencSeg=chips('Desencadenante (antes)')||'';
+  var _autolesionDespuesSeg=chips('Después')||'';
   var _riesgoInmediatoSeg=icvl('ic-riesgo-inmediato')||'no especificado';
   var _riesgoInstrumentoSeg=icvl('ic-riesgo-instrumento')||'';
   var _riesgoRutaSeg=chips('Ruta activada')||'';
@@ -14522,7 +14660,11 @@ function generarNotaIcSegLocal(){
     +', regulación emocional '+regulacion+', comprensión del Dx '+comprension+'. '
     +(analisisCC?'Análisis clínico: '+analisisCC+'. ':'')
     +'Ideación suicida/autolesiva: '+ideacion+'. Nivel de riesgo: '+sev+(_segRiesgoOtro?' ('+_segRiesgoOtro+')':'')+'. '
-    +'Autolesión no suicida: '+_autolesionNSSeg+'. ¿Riesgo inmediato?: '+_riesgoInmediatoSeg+'. '
+    +'Autolesión/conducta autolesiva: '+_autolesionNSSeg+'. ¿Riesgo inmediato?: '+_riesgoInmediatoSeg+'. '
+    +(_autolesionIntencionSeg?'Intención: '+_autolesionIntencionSeg+'. ':'')
+    +(_autolesionFuncionSeg?'Función: '+_autolesionFuncionSeg+'. ':'')
+    +(_autolesionNumeroSeg||_autolesionGravFisicaSeg?'Lesión — número: '+(_autolesionNumeroSeg||'no especificado')+', gravedad física: '+(_autolesionGravFisicaSeg||'no especificada')+'. ':'')
+    +(_autolesionDesencSeg||_autolesionDespuesSeg?'Desencadenante: '+(_autolesionDesencSeg||'no especificado')+' | Después: '+(_autolesionDespuesSeg||'no especificado')+'. ':'')
     +(_riesgoInstrumentoSeg||_riesgoRutaSeg?'Tamizaje: '+(_riesgoInstrumentoSeg||'no especificado')+(_riesgoRutaSeg?' | Ruta activada: '+_riesgoRutaSeg:'')+'. ':'')
     +'Factores protectores: '+protectores+'. Red de apoyo: '+red+'. '
     +(riesgoNotas?'Notas riesgo: '+riesgoNotas+'. ':'')
@@ -14733,6 +14875,12 @@ window.limpiarFormIC=function(confirm_=true){
   if(_riesgoInmediatoClr)_riesgoInmediatoClr.value='';
   var _intentosDetalleClr=document.getElementById('ic-intentos-previos-detalle');
   if(_intentosDetalleClr)_intentosDetalleClr.style.display='none';
+  // Hidden inputs del detalle de autolesión — mismo motivo
+  ['ic-autolesion-intencion','ic-autolesion-numero','ic-autolesion-gravedad-fisica'].forEach(function(id){
+    var h=document.getElementById(id);if(h)h.value='';
+  });
+  var _autolesionDetalleClr=document.getElementById('ic-autolesion-detalle');
+  if(_autolesionDetalleClr)_autolesionDetalleClr.style.display='none';
   // Limpiar chips de interconsulta
   document.querySelectorAll('#ic-form-view .ic-chip').forEach(function(c){c.classList.remove('on','on-r','on-g','on-a');});
   // Limpiar checkboxes (formulario de seguimiento y otros)
