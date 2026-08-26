@@ -317,7 +317,6 @@ input.toggle-cb{display:none}
 .hpac-campo{margin-bottom:12px}.hpac-campo:last-child{margin-bottom:0}
 .hpac-campo-label{font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--text3);margin-bottom:5px}
 .hpac-campo-text{font-size:0.82rem;line-height:1.6;color:var(--text);white-space:pre-wrap}
-@media(max-width:600px){#mhic-body [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}}
 
 /* RONDA DEL DÍA */
 .piso-group{margin-bottom:18px}
@@ -5370,7 +5369,10 @@ input.toggle-cb{display:none}
               <span id="ps-ultima-nota-meta" style="font-size:0.65rem;color:var(--text3)"></span>
             </div>
             <div id="ps-ultima-nota-contenido" style="font-size:0.82rem;color:var(--text2);line-height:1.7;white-space:pre-wrap"></div>
-            <button id="ps-ultima-nota-btn-copiar" onclick="psUltimaNotaCopiar()" style="display:none;margin-top:8px;font-size:0.72rem;padding:3px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;font-weight:600">📋 Copiar nota</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+              <button id="ps-ultima-nota-btn-copiar" onclick="psUltimaNotaCopiar()" style="display:none;font-size:0.72rem;padding:3px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;font-weight:600">📋 Copiar nota</button>
+              <button id="ps-ultima-nota-btn-reabrir" onclick="psUltimaNotaReabrir()" title="Vuelve a abrir el formulario tal como lo dejaste, para agregar información y regenerar" style="display:none;font-size:0.72rem;padding:3px 10px;border:1px solid #93c5fd;border-radius:6px;background:#eff6ff;color:#1d4ed8;cursor:pointer;font-weight:600">📂 Reabrir y completar</button>
+            </div>
             <div id="ps-ultima-nota-anexo" style="display:none;margin-top:10px;background:#faf5ff;border:1.5px dashed #c4b5fd;border-radius:8px;padding:10px 12px">
               <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">
                 <span style="font-size:0.68rem;font-weight:700;color:#6d28d9">📎 ANEXO — Transcripción de la sesión</span>
@@ -5925,7 +5927,6 @@ onSnapshot(query(collection(db,'interconsultas'),orderBy('creado','desc')),snap=
   if(document.getElementById('page-dashboard').classList.contains('active'))(window.renderDashboard&&window.renderDashboard)();
   // Refrescar historial de paciente si está abierto (página o modal)
   if(document.getElementById('page-historial-pac').classList.contains('active')){(window.hpacRenderLista&&window.hpacRenderLista)();if(window._hpacPacId&&typeof hpacRenderNotas==='function')hpacRenderNotas();}
-  if(document.getElementById('modal-historial-ic').style.display==='flex'&&typeof mhicRender==='function')mhicRender();
 });
 onSnapshot(query(collection(db,'anamnesis'),orderBy('creado','desc')),snap=>{
   anamnesisList=snap.docs.map(d=>({id:d.id,...d.data()}));window.anamnesisList=anamnesisList;
@@ -5939,7 +5940,6 @@ onSnapshot(query(collection(db,'anamnesis'),orderBy('creado','desc')),snap=>{
   }
   // Refrescar historial de paciente si está abierto (página o modal)
   if(document.getElementById('page-historial-pac').classList.contains('active')){(window.hpacRenderLista&&window.hpacRenderLista)();if(window._hpacPacId&&typeof hpacRenderNotas==='function')hpacRenderNotas();}
-  if(document.getElementById('modal-historial-ic').style.display==='flex'&&typeof mhicRender==='function')mhicRender();
 });
 onSnapshot(query(collection(db,'test_resultados'),orderBy('creado','desc')),snap=>{
   testHistory=snap.docs.map(d=>({id:d.id,...d.data()}));window.testHistory=testHistory;
@@ -7063,7 +7063,6 @@ window.guardarICFirebase=async()=>{
       setTimeout(()=>{
         if(window._hPacId&&typeof _hpacPacId!=='undefined'&&!_hpacPacId){_hpacPacId=window._hPacId;window._hpacPacId=window._hPacId;}
         if(typeof hpacRenderNotas==='function')hpacRenderNotas();
-        if(typeof mhicRender==='function')mhicRender();
       },600);
     }
   }catch(e){console.error('[FIREBASE SAVE ERROR]',e);setSyncStatus('offline');toast('❌ '+e.message);}
@@ -7498,7 +7497,6 @@ window.mneGuardar=async()=>{
     window.mneCerrar();
     if(window._hPacId&&typeof _hpacPacId!=='undefined'){_hpacPacId=window._hPacId;window._hpacPacId=window._hPacId;}
     if(typeof hpacRenderNotas==='function')hpacRenderNotas();
-    if(typeof mhicRender==='function')mhicRender();
     const cb=window._mneOnSave;window._mneOnSave=null;
     if(cb)cb();
   }catch(ex){setSyncStatus('offline');toast('❌ '+ex.message);}
@@ -10891,7 +10889,6 @@ window.quitarAnexoDeNota=async function(id,col){
   try{
     await window._updateDoc(window._doc(window.db,col,id),{transcripcionSesion:''});
     toast('✅ Anexo eliminado de esta nota');
-    if(typeof mhicRender==='function')mhicRender();
     if(typeof hpacRenderNotas==='function')hpacRenderNotas();
     if(window._psPacId&&typeof psCargarUltimaNota==='function')psCargarUltimaNota(window._psPacId);
   }catch(e){
@@ -11458,133 +11455,7 @@ window._hPacId=null;window._hPacNombre='';
 const _hMap={};window._hMap=_hMap;
 const _hFormMap={};window._hFormMap=_hFormMap;
 
-window.verHistorialIC=(pacId,pacNombre)=>{
-  const p=(window.pacientes||[]).find(x=>x.id===pacId)||{nombre:pacNombre||''};
-  _hPacId=pacId;window._hPacId=pacId;
-  _hPacNombre=p.nombre;window._hPacNombre=p.nombre;
-  document.getElementById('mhic-title').textContent='Historial — '+p.nombre;
-  document.getElementById('mhic-sub').textContent=(p.cedula?'CC: '+p.cedula+' · ':'')+'Hab. '+(p.hab||'—');
-  mhicRender();
-  document.getElementById('modal-historial-ic').style.display='flex';
-};
-window.mhicCerrar=()=>{document.getElementById('modal-historial-ic').style.display='none';};
-window.mhicNuevaNota=()=>{
-  const pacId=_hPacId||window._hPacId;
-  if(!pacId)return;
-  // Cerrar modal historial
-  document.getElementById('modal-historial-ic').style.display='none';
-  // Ir al formulario IC con el paciente ya seleccionado en modo Seguimiento
-  goTo('interconsultas');
-  setTimeout(()=>{
-    const sel=document.getElementById('ic-paciente-sel');
-    if(sel){sel.value=pacId;selectICPaciente(pacId);}
-    setICMode('seg');
-    window.scrollTo({top:0,behavior:'smooth'});
-    const top=document.getElementById('page-interconsultas');
-    if(top)top.scrollIntoView({behavior:'smooth',block:'start'});
-    toast('📝 Formulario listo — Modo Seguimiento');
-  },200);
-};
-
 function _pf(s){if(!s)return 0;s=String(s).trim();var p;if(s.length>=10&&s[4]==="-"){p=s.slice(0,10).split("-");return new Date(+p[0],+p[1]-1,+p[2]).getTime()||0;}if(s.indexOf("/")>-1){p=s.split("/");if(p.length===3){var y=p[2].length<=2?"20"+p[2]:p[2];return new Date(+y,+p[1]-1,+p[0]).getTime()||0;}}return 0;}function _pt(v){if(!v)return 0;if(v.toMillis)return v.toMillis();if(v.seconds)return v.seconds*1000;if(v.toDate)return v.toDate().getTime();return 0;}function _sk(x){return _pf(x.fecha)||_pt(x.creado)||0;}
-function mhicRender(){
-  const body=document.getElementById('mhic-body');if(!body)return;
-  const pacientes=window.pacientes||[];const interconsultas=window.interconsultas||[];const anamnesisList=window.anamnesisList||[];
-  const p=pacientes.find(x=>x.id===_hPacId);const nombre=p?p.nombre:_hPacNombre;
-  const ics=interconsultas.filter(ic=>ic.pacienteId===_hPacId||ic.pacienteNombre===nombre);
-  const anas=anamnesisList.filter(a=>a.pacienteId===_hPacId||a.pacienteNombre===nombre);
-  const all=[...ics.map(x=>Object.assign({},x,{_col:'interconsultas'})),...anas.map(x=>Object.assign({},x,{_col:'anamnesis',modo:x.modo||'Anamnesis'}))].sort((a,b)=>_sk(b)-_sk(a));
-  for(const k in _hMap)delete _hMap[k];
-  if(!all.length){body.innerHTML='<div class="empty" style="padding:30px"><p>Sin notas. Usa "Nuevo seguimiento" para agregar.</p></div>';return;}
-  const tc={'IC Nueva':'var(--accent2)','Seguimiento':'#1a56db','Anamnesis':'#7b1fa2','Nota especial':'var(--warning)'};
-  const partes=[];
-  for(let ni=0;ni<all.length;ni++){
-    const e=all[ni];
-    _hMap[ni]={id:e.id,col:e._col};
-    const col=tc[e.modo]||'var(--accent)';
-    const riesgo=e.riesgo||'';
-    const rColor=riesgo==='ALTO'?'var(--danger)':riesgo==='MEDIO'?'var(--warning)':'var(--success)';
-    const rBadgeHtml=(riesgo&&riesgo!=='No clasificado'&&riesgo!=='SIN RIESGO')?'<span style="background:'+rColor+'22;color:'+rColor+';padding:2px 7px;border-radius:20px;font-size:0.68rem;font-weight:600">'+riesgo+'</span>':'';
-    const respondidaBtn=(e.estado||'respondida')==='pendiente'?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="hpacResponder('+ni+')">Respondida</button>':'';
-    const esModoConIA2=(e.modo==='IC Nueva'||e.modo==='Seguimiento'||e.modo==='Anamnesis');
-    const regenBtn=esModoConIA2?'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem;opacity:0.85" onclick="hpacGenerarNotaIA(\'' + e.id + '\','+ni+')" title="Regenerar con IA">✨ IA</button>':'';
-    const editarBtn='<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="mhicEditar('+ni+')">Editar</button>';
-    const reabrirBtn=(e._col==='interconsultas'&&e.formularioCompleto)?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;background:#eff6ff;border-color:#93c5fd;color:#1d4ed8" onclick="reabrirNotaParaCompletar(\'' + e.id + '\',\''+e._col+'\')" title="Vuelve a abrir el formulario tal como lo dejaste">📂 Reabrir</button>':'';
-    const hasForm=!!(e._aiFormSnap||e.formulario||e.nota||e.sub);
-    const formBtn=hasForm?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="descargarFormIC(\'' + e.id + '\')" title="Descargar formulario diligenciado">📥 Formulario</button>':'';
-    const subInfo=(e.hab||e.dx)?'<div style="font-size:0.72rem;color:var(--text3);margin-top:2px">'+(e.hab?'Hab. '+e.hab+' - ':'')+( e.dx||'')+'</div>':'';
-    let camposHtml='<div style="font-size:0.78rem;color:var(--text3);font-style:italic;margin-top:8px">Sin texto guardado</div>';
-    const cv=[];
-    const _noNA=v=>v&&v.trim()&&!v.startsWith('N/A')&&!v.startsWith('Genera')&&!v.startsWith('⏳')&&!v.startsWith('[Nota no generada');
-    if(_noNA(e.sub))cv.push({l:'Subjetivo',v:e.sub});
-    if(_noNA(e.obj))cv.push({l:'Objetivo',v:e.obj});
-    if(_noNA(e.resp))cv.push({l:'Respuesta',v:e.resp});
-    if(_noNA(e.trat))cv.push({l:'Tratamiento',v:e.trat});
-    // Mostrar nota si tiene contenido real — si no hay campos SOAP, es el contenido principal
-    if(_noNA(e.nota)){
-      if(!cv.length)cv.push({l:'Nota clínica',v:e.nota});
-      else if(e.nota.length>80&&!e.sub&&!e.obj&&!e.resp&&!e.trat)cv.push({l:'Nota clínica',v:e.nota});
-    }
-    if(!cv.length){const any=e.nota||e.trat||e.obj||e.sub||e.resp||'';if(any&&!any.startsWith('[Nota no generada'))cv.push({l:'Nota clínica',v:any});}
-    if(cv.length){
-      let cHtml='';
-      for(let j=0;j<cv.length;j++){
-        cHtml+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px">'
-          +'<div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:5px">'+cv[j].l+'</div>'
-          +'<div style="font-size:0.78rem;line-height:1.55;white-space:pre-wrap">'+cv[j].v+'</div></div>';
-      }
-      camposHtml='<div style="margin-top:10px">'+cHtml+'</div>';
-    }
-    // Anexo: transcripción de la sesión guardada junto a esta nota (si existe)
-    var transcHtml='';
-    if(e.transcripcionSesion){
-      transcHtml='<div style="margin-top:8px;background:#faf5ff;border:1.5px dashed #c4b5fd;border-radius:8px;padding:10px 12px">'
-        +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">'
-        +'<span style="font-size:0.68rem;font-weight:700;color:#6d28d9">📎 ANEXO — Transcripción de la sesión</span>'
-        +'<span style="display:flex;gap:6px">'
-        +'<button class="btn btn-sm btn-secondary" style="padding:2px 8px;font-size:0.68rem" onclick="navigator.clipboard.writeText(this.closest(\'div\').parentElement.querySelector(\'.mhic-transc-texto\').textContent);if(typeof toast===\'function\')toast(\'✅ Transcripción copiada\')">📋 Copiar</button>'
-        +'<button class="btn btn-sm btn-secondary" style="padding:2px 8px;font-size:0.68rem;color:#dc2626;border-color:#dc2626" onclick="quitarAnexoDeNota(\''+e.id+'\',\''+e._col+'\')">🗑️ Quitar</button>'
-        +'</span>'
-        +'</div>'
-        +'<div class="mhic-transc-texto" style="font-size:0.74rem;line-height:1.55;color:var(--text2);white-space:pre-wrap;max-height:200px;overflow-y:auto;background:#fff;border:1px solid #e9d5ff;border-radius:6px;padding:8px">'+e.transcripcionSesion+'</div>'
-        +'</div>';
-    }
-    partes.push('<div style="background:var(--surface2);border:1px solid var(--border);border-left:4px solid '+col+';border-radius:10px;padding:14px 16px;margin-bottom:12px">'
-      +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">'
-      +'<div><div style="font-weight:700;font-size:0.88rem">'+(e.modo||'Nota')+' - '+'<span style="color:'+col+'">'+(e.fecha||'Sin fecha')+'</span>'+(e.fechaGuardado?'<span style="font-size:0.68rem;color:var(--text3);margin-left:6px">· guardado '+e.fechaGuardado+'</span>':'')+(e.fechaEditado?'<span style="font-size:0.68rem;color:var(--warning);margin-left:6px">· editado '+e.fechaEditado+'</span>':'')+'</div>'+subInfo+'</div>'
-      +'<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">'+rBadgeHtml+respondidaBtn+regenBtn+formBtn+editarBtn+reabrirBtn+'</div>'
-      +'</div>'+camposHtml+transcHtml+'</div>');
-  }
-  body.innerHTML=partes.join('');
-}
-window.mhicEditar=(ni)=>{
-  const m=_hMap[ni];if(!m)return;
-  const interconsultas=window.interconsultas||[];const anamnesisList=window.anamnesisList||[];
-  const e=m.col==='interconsultas'?interconsultas.find(x=>x.id===m.id):anamnesisList.find(x=>x.id===m.id);
-  if(!e)return;
-  document.getElementById('mne-title').textContent='Editar nota';
-  document.getElementById('mne-fecha').value=e.fecha||'';
-  document.getElementById('mne-tipo').value=e.modo||'IC Nueva';
-  document.getElementById('mne-riesgo').value=e.riesgo||'';
-  document.getElementById('mne-estado').value=e.estado||'respondida';
-  window._mneOrig={sub:e.sub||'',obj:e.obj||'',resp:e.resp||'',trat:e.trat||'',nota:e.nota||''};
-  const _esSeg1=(e.modo||'').toLowerCase().includes('seguimiento');
-  document.getElementById('mne-campos-4').style.display=_esSeg1?'none':'';
-  document.getElementById('mne-campos-seg').style.display=_esSeg1?'':'none';
-  if(_esSeg1){
-    document.getElementById('mne-seg-texto').value=e.obj||e.nota||'';
-  } else {
-    document.getElementById('mne-sub').value=e.sub||'';
-    document.getElementById('mne-obj').value=e.obj||'';
-    document.getElementById('mne-resp').value=e.resp||'';
-    document.getElementById('mne-trat').value=e.trat||'';
-  }
-  // mne-nota removed
-  document.getElementById('mne-del-btn').style.display='';
-  window._mneId=m.id;window._mneCol=m.col;
-  window._mneOnSave=()=>setTimeout(mhicRender,500);
-  document.getElementById('modal-nota-edit').style.display='flex';
-};
 
 // ── HISTORIAL PACIENTES (página) ──────────────────────────────
 let _hpacPacId=null;window._hpacPacId=null;
@@ -17022,25 +16893,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 
-<!-- MODAL HISTORIAL PACIENTE -->
-<div id="modal-historial-ic" style="display:none;position:fixed;inset:0;background:rgba(26,23,20,0.5);z-index:300;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
-  <div style="background:var(--surface);border-radius:16px;width:100%;max-width:740px;margin:auto;box-shadow:0 8px 40px rgba(26,23,20,0.18)">
-    <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:0;background:var(--surface);border-radius:16px 16px 0 0;z-index:1">
-      <div>
-        <div style="font-family:'DM Serif Display',serif;font-size:1.1rem" id="mhic-title">Historial del Paciente</div>
-        <div style="font-size:0.73rem;color:var(--text3);margin-top:3px" id="mhic-sub"></div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
-        <button class="btn btn-primary btn-sm" onclick="mhicNuevaNota()">📝 Nuevo seguimiento</button>
-        <button style="background:var(--surface2);border:none;border-radius:7px;padding:5px;cursor:pointer;display:flex" onclick="mhicCerrar()">
-          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-    </div>
-    <div id="mhic-body" style="padding:18px 22px;max-height:72vh;overflow-y:auto"></div>
-  </div>
-</div>
-
 <!-- MODAL EDITAR/NUEVA NOTA -->
 <div id="modal-nota-edit" style="display:none;position:fixed;inset:0;background:rgba(26,23,20,0.5);z-index:400;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
   <div style="background:var(--surface);border-radius:16px;width:100%;max-width:660px;margin:auto;box-shadow:0 8px 40px rgba(26,23,20,0.18)">
@@ -20719,6 +20571,8 @@ window.psCargarUltimaNota = async function(pacId){
     window._psUltimaNotaTranscripcion=nota.transcripcionSesion||'';
     window._psUltimaNotaId=nota.id||'';
     window._psUltimaNotaCol=nota._col||'';
+    var btnReabrir=document.getElementById('ps-ultima-nota-btn-reabrir');
+    if(btnReabrir)btnReabrir.style.display=(nota._col==='interconsultas'&&nota.formularioCompleto)?'':'none';
     if(anexoDiv&&anexoTexto){
       if(nota.transcripcionSesion){
         anexoTexto.textContent=nota.transcripcionSesion;
@@ -20756,6 +20610,15 @@ window.psUltimaNotaCopiar = function(){
   }).catch(function(){
     if(typeof toast==='function') toast('❌ No se pudo copiar');
   });
+};
+
+window.psUltimaNotaReabrir = function(){
+  if(!window._psUltimaNotaId||!window._psUltimaNotaCol){
+    if(typeof toast==='function') toast('⚠️ No se pudo identificar la nota');
+    return;
+  }
+  if(typeof closePacSheet==='function') closePacSheet();
+  if(typeof reabrirNotaParaCompletar==='function') reabrirNotaParaCompletar(window._psUltimaNotaId,window._psUltimaNotaCol);
 };
 
 // ── MARCAR / DESMARCAR RECHAZADA ────────────────────────────────────
