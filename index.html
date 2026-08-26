@@ -6996,7 +6996,7 @@ window.guardarICFirebase=async()=>{
   }
   try{
     if(!db)throw new Error('Base de datos no inicializada — recarga la página');
-    await addDoc(collection(db,'interconsultas'),{
+    const _payloadIC={
       pacienteId:pacIdFinal||null,
       pacienteNombre:nombre,
       pacienteCedula:pacObj?.cedula||'',
@@ -7008,10 +7008,20 @@ window.guardarICFirebase=async()=>{
       needsAI:needsAI||false,
       ...(_aiFormSnap?{_aiFormSnap}:{}),
       ...(formulario?{formulario}:{}),
+      ...(window.capturarSnapshotFormularioIC?{formularioCompleto:window.capturarSnapshotFormularioIC()}:{}),
       ...(getCapInlineData('ic')||{}),
       ...(getTranscripcionActualParaGuardar()?{transcripcionSesion:getTranscripcionActualParaGuardar()}:{}),
-      creado:serverTimestamp()
-    });
+    };
+    // Si se reabrió una nota existente para completarla, REEMPLAZAR ese mismo
+    // registro (updateDoc) en vez de crear uno nuevo. updateDoc solo toca los
+    // campos que se le pasan — la transcripción u otros campos no incluidos
+    // aquí (porque no cambiaron) quedan intactos tal como estaban.
+    if(window._reabriendoNotaId&&window._reabriendoNotaCol==='interconsultas'){
+      await updateDoc(doc(db,'interconsultas',window._reabriendoNotaId),{..._payloadIC,fechaEditado:new Date().toISOString().split('T')[0],editado:serverTimestamp()});
+      window._reabriendoNotaId=null;window._reabriendoNotaCol=null;
+    }else{
+      await addDoc(collection(db,'interconsultas'),{..._payloadIC,creado:serverTimestamp()});
+    }
     if(!navigator.onLine){
       toast('💾 Guardado sin conexión — la nota IA se generará al reconectar');
       setSyncStatus('offline','Sin conexión — guardado local');
@@ -7716,6 +7726,92 @@ function getCaracterizacionesInlineTexto(){
   return 'CARACTERIZACIÓN CLÍNICA ADICIONAL\n\n'+partes.join('\n\n');
 }
 window.getCaracterizacionesInlineTexto=getCaracterizacionesInlineTexto;
+
+// Reabre una nota guardada (IC Nueva/Seguimiento/Familiar/Especial) con TODO
+// el formulario tal como quedó, para completarla y volver a guardar
+// REEMPLAZANDO la nota original (no crea una nueva, no borra la transcripción).
+window.reabrirNotaParaCompletar=function(id,col){
+  if(col!=='interconsultas'){
+    toast('⚠️ Esta función todavía no está disponible para este tipo de nota');
+    return;
+  }
+  var nota=(window.interconsultas||[]).find(function(x){return x.id===id;});
+  if(!nota){toast('⚠️ No se encontró la nota');return;}
+  if(!nota.formularioCompleto){
+    toast('⚠️ Esta nota es de antes de esta función y no guardó el detalle completo — usa "Editar" para el texto');
+    return;
+  }
+  var modoDestino=(nota.modo==='IC Nueva')?'nueva':(nota.modo==='Seguimiento')?'seg':(nota.modo==='Intervención Familiar')?'fam':'esp';
+  goTo('interconsultas'); // limpia el formulario primero, como siempre
+  setTimeout(function(){
+    if(typeof setICMode==='function')setICMode(modoDestino);
+    setTimeout(function(){
+      window.restaurarSnapshotFormularioIC(nota.formularioCompleto);
+      window._reabriendoNotaId=id;
+      window._reabriendoNotaCol=col;
+      toast('📂 Nota reabierta — al guardar, reemplazará esta misma nota');
+    },50);
+  },50);
+};
+
+// ── REABRIR Y COMPLETAR: captura y restauración completa del formulario ──
+// Guarda la posición exacta de cada chip marcado (no el texto, que se repite
+// en muchos campos) — como el formulario siempre tiene la misma estructura,
+// esa posición siempre apunta al mismo chip exacto.
+window.capturarSnapshotFormularioIC=function(){
+  var snapshot={inputs:{},chips:[]};
+  document.querySelectorAll('#ic-form-view input[type=text], #ic-form-view input[type=number], #ic-form-view input[type=hidden], #ic-form-view textarea, #ic-form-view select').forEach(function(el){
+    if(el.id)snapshot.inputs[el.id]=el.value;
+  });
+  var todos=document.querySelectorAll('#ic-form-view .ic-chip');
+  todos.forEach(function(chip,idx){
+    var clase=null;
+    if(chip.classList.contains('on'))clase='on';
+    else if(chip.classList.contains('on-r'))clase='on-r';
+    else if(chip.classList.contains('on-a'))clase='on-a';
+    else if(chip.classList.contains('on-g'))clase='on-g';
+    if(clase)snapshot.chips.push({idx:idx,clase:clase,texto:chip.textContent.trim()});
+  });
+  return snapshot;
+};
+
+// Restaura un snapshot capturado previamente en el formulario ya limpio.
+// Debe llamarse DESPUÉS de limpiarFormIC/goTo (para partir de un formulario
+// vacío) y después de fijar el modo correcto (nueva/seg/fam/esp).
+window.restaurarSnapshotFormularioIC=function(snapshot){
+  if(!snapshot)return;
+  Object.keys(snapshot.inputs||{}).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.value=snapshot.inputs[id];
+  });
+  var todos=document.querySelectorAll('#ic-form-view .ic-chip');
+  (snapshot.chips||[]).forEach(function(item){
+    var chip=todos[item.idx];
+    // Verificación de seguridad: el texto debe coincidir con lo capturado.
+    // Si no coincide (ej. la app cambió desde que se guardó esa nota), se
+    // omite ese chip puntual en vez de marcar el equivocado.
+    if(chip&&chip.textContent.trim()===item.texto){
+      chip.classList.add(item.clase);
+    }
+  });
+  // Recalcular/mostrar todo lo que depende de los hidden inputs restaurados
+  if(typeof calcular4AT==='function')calcular4AT();
+  if(typeof actualizarSubtipoDelirio==='function')actualizarSubtipoDelirio();
+  if(typeof toggleSubfichaPanico==='function')toggleSubfichaPanico();
+  if(typeof toggleIntentosPreviosDetalle==='function')toggleIntentosPreviosDetalle();
+  if(typeof toggleAutolesionDetalle==='function')toggleAutolesionDetalle();
+  var mandoVal=(document.getElementById('ic-al-mando')||{}).value;
+  if(typeof toggleMandoDetalle==='function')toggleMandoDetalle(mandoVal==='Sí — hay contenido de mando');
+  // Abrir (expandir) los módulos opcionales que hayan quedado con datos, para que se vean
+  ['ic-episodio','ic-aluc','ic-il','ic-del','ic-ans','ic-dep','ic-lab','ic-apa','ic-agi','ic-ret','ic-agr'].forEach(function(prefix){
+    var body=document.getElementById(prefix+'-body');
+    if(body&&body.querySelector('.ic-chip.on,.ic-chip.on-r,.ic-chip.on-a,.ic-chip.on-g')){
+      body.style.display='';
+      var chev=document.getElementById(prefix+'-chev');
+      if(chev)chev.style.transform='rotate(90deg)';
+    }
+  });
+};
 
 function getCapInlineTexto(prefix){
   var d=getCapInlineData(prefix);
@@ -8446,6 +8542,13 @@ window.goTo = function(page){
   // Si ENTRAMOS a interconsultas, siempre empezar con la transcripción en blanco.
   // Evita que quede pegado el texto de un paciente anterior (grabado o pegado a mano).
   if(page==='interconsultas'){
+    // Si se navega a Interconsultas sin pasar por "Reabrir y completar",
+    // las banderas de edición no deben quedar pegadas de una vez anterior —
+    // eso podría hacer que un guardado normal sobreescriba una nota vieja
+    // sin querer. reabrirNotaParaCompletar las vuelve a fijar DESPUÉS de
+    // este punto, así que esto no rompe esa función.
+    window._reabriendoNotaId=null;
+    window._reabriendoNotaCol=null;
     // Campos de la sección de riesgo que no cubre el barrido genérico —
     // se limpian aquí también por si se llega sin pasar por el selector de paciente
     var _riesgoInmediatoNav=document.getElementById('ic-riesgo-inmediato');
@@ -11406,6 +11509,7 @@ function mhicRender(){
     const esModoConIA2=(e.modo==='IC Nueva'||e.modo==='Seguimiento'||e.modo==='Anamnesis');
     const regenBtn=esModoConIA2?'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem;opacity:0.85" onclick="hpacGenerarNotaIA(\'' + e.id + '\','+ni+')" title="Regenerar con IA">✨ IA</button>':'';
     const editarBtn='<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="mhicEditar('+ni+')">Editar</button>';
+    const reabrirBtn=(e._col==='interconsultas'&&e.formularioCompleto)?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;background:#eff6ff;border-color:#93c5fd;color:#1d4ed8" onclick="reabrirNotaParaCompletar(\'' + e.id + '\',\''+e._col+'\')" title="Vuelve a abrir el formulario tal como lo dejaste">📂 Reabrir</button>':'';
     const hasForm=!!(e._aiFormSnap||e.formulario||e.nota||e.sub);
     const formBtn=hasForm?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="descargarFormIC(\'' + e.id + '\')" title="Descargar formulario diligenciado">📥 Formulario</button>':'';
     const subInfo=(e.hab||e.dx)?'<div style="font-size:0.72rem;color:var(--text3);margin-top:2px">'+(e.hab?'Hab. '+e.hab+' - ':'')+( e.dx||'')+'</div>':'';
@@ -11448,7 +11552,7 @@ function mhicRender(){
     partes.push('<div style="background:var(--surface2);border:1px solid var(--border);border-left:4px solid '+col+';border-radius:10px;padding:14px 16px;margin-bottom:12px">'
       +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">'
       +'<div><div style="font-weight:700;font-size:0.88rem">'+(e.modo||'Nota')+' - '+'<span style="color:'+col+'">'+(e.fecha||'Sin fecha')+'</span>'+(e.fechaGuardado?'<span style="font-size:0.68rem;color:var(--text3);margin-left:6px">· guardado '+e.fechaGuardado+'</span>':'')+(e.fechaEditado?'<span style="font-size:0.68rem;color:var(--warning);margin-left:6px">· editado '+e.fechaEditado+'</span>':'')+'</div>'+subInfo+'</div>'
-      +'<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">'+rBadgeHtml+respondidaBtn+regenBtn+formBtn+editarBtn+'</div>'
+      +'<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">'+rBadgeHtml+respondidaBtn+regenBtn+formBtn+editarBtn+reabrirBtn+'</div>'
       +'</div>'+camposHtml+transcHtml+'</div>');
   }
   body.innerHTML=partes.join('');
@@ -11902,6 +12006,7 @@ window.hpacRenderNotas=()=>{
         +(esModoConIA?'<button class="btn btn-sm btn-primary" style="padding:3px 9px;font-size:0.72rem;opacity:0.85" onclick="hpacGenerarNotaIA(\'' + e.id + '\','+ni+')" title="Regenerar con IA">✨ IA</button>':'')
         +((e._aiFormSnap||e.formulario||e.nota||e.sub)?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="descargarFormIC(\'' + e.id + '\')">📥 Formulario</button>':'')
         +(e._col==='notas_pacientes'?'':'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem" onclick="event.stopPropagation();hpacEditarPorId(\''+e.id+'\',\''+e._col+'\')"  >Editar</button>')
+        +(e._col==='interconsultas'&&e.formularioCompleto?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;background:#eff6ff;border-color:#93c5fd;color:#1d4ed8" onclick="event.stopPropagation();reabrirNotaParaCompletar(\''+e.id+'\',\''+e._col+'\')" title="Vuelve a abrir el formulario tal como lo dejaste, para agregar información y regenerar">📂 Reabrir y completar</button>':'')
         +'<button class="btn btn-sm" style="padding:6px 14px;font-size:0.78rem;font-weight:700;background:#2563eb;color:#fff;border:none;border-radius:7px;cursor:pointer" onclick="event.stopPropagation();hpacCopiar('+ni+')">📋 Copiar nota</button>'
         +'<button class="btn btn-sm" style="padding:6px 14px;font-size:0.78rem;font-weight:700;background:#7c3aed;color:#fff;border:none;border-radius:7px;cursor:pointer" onclick="event.stopPropagation();hpacVerNota('+ni+')">↗️ Ver/Seleccionar</button>'
         +(e._col==='notas_pacientes'?'<button class="btn btn-sm btn-secondary" style="padding:3px 9px;font-size:0.72rem;color:#dc2626;border-color:#dc2626" onclick="hpacEliminarNotaPac(\'' + e.id + '\')" title="Eliminar revaloración">🗑 Eliminar</button>':'')
@@ -14870,6 +14975,11 @@ window.limpiarFormIC=function(confirm_=true){
   });
   var _capBadge=document.getElementById('ic-cap-conclusion-badge');
   if(_capBadge){_capBadge.style.display='none';_capBadge.textContent='';}
+  // Si se limpia el formulario (ej. se cambió de paciente) a mitad de una
+  // reapertura sin guardar, las banderas no deben quedar activas — evita
+  // que un guardado posterior no relacionado sobreescriba la nota vieja.
+  window._reabriendoNotaId=null;
+  window._reabriendoNotaCol=null;
   // El hidden input ic-riesgo-inmediato tampoco lo toca el barrido genérico
   var _riesgoInmediatoClr=document.getElementById('ic-riesgo-inmediato');
   if(_riesgoInmediatoClr)_riesgoInmediatoClr.value='';
